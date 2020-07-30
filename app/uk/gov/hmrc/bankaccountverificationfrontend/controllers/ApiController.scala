@@ -14,21 +14,31 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountverificationfrontend.api
+package uk.gov.hmrc.bankaccountverificationfrontend.controllers
+
+import java.util.UUID
 
 import javax.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent, BaseController}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
 @Singleton
-class ApiController @Inject()(appConfig: AppConfig) extends BaseController() {
+class ApiController @Inject() (appConfig: AppConfig, mcc: MessagesControllerComponents)
+    extends FrontendController(mcc) {
 
   implicit val config: AppConfig = appConfig
 
   val init: Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok())
+    val journeyId = UUID.randomUUID().toString
+
+    Future.successful(Ok(journeyId))
   }
 
+  def complete(journeyId: String): Action[AnyContent] =
+    Action.async { implicit request =>
+      Future.successful(Ok)
+    }
 }

@@ -25,14 +25,13 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.Future
 
 @Singleton
-class BankAccountVerificationController @Inject()(appConfig: AppConfig, mcc: MessagesControllerComponents,
-                                                  helloWorldPage: HelloWorldPage)
-  extends FrontendController(mcc) {
+class BankAccountVerificationController @Inject() (appConfig: AppConfig, mcc: MessagesControllerComponents)
+    extends FrontendController(mcc) {
 
   implicit val config: AppConfig = appConfig
 
-  val helloWorld: Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok(helloWorldPage()))
-  }
-
+  def start(journeyId: String): Action[AnyContent] =
+    Action.async { implicit request =>
+      Future.successful(Redirect(appConfig.mtdContinueUrl))
+    }
 }
