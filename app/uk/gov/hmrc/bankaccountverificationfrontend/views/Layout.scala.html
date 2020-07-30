@@ -1,0 +1,20 @@
+@import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
+@import uk.gov.hmrc.bankaccountverificationfrontend.views.FooterLinks
+@import uk.gov.hmrc.govukfrontend.views.Layouts
+
+@this(
+        govukLayout: GovukLayout,
+        head: Head
+)
+@(pageTitle: Option[String] = None,
+        headBlock: Option[Html] = None,
+        scriptsBlock: Option[Html] = None
+)(contentBlock: Html)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+
+@govukLayout(
+    pageTitle = pageTitle,
+    headBlock = Some(head(headBlock)),
+    scriptsBlock = scriptsBlock,
+    beforeContentBlock = None,
+    footerItems = FooterLinks()
+)(contentBlock)
