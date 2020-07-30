@@ -1,5 +1,6 @@
 # Add all the application routes to the app.routes file
-->         /bank-account-verification-frontend              app.Routes
-->         /                          health.Routes
+->         /bank-account-verification                       app.Routes
+->         /api/init                                        uk.gov.hmrc.bankaccountverificationfrontend.api.ApiController.init
+->         /                                                health.Routes
 
-GET        /admin/metrics             com.kenshoo.play.metrics.MetricsController.metrics
+GET        /admin/metrics                                   com.kenshoo.play.metrics.MetricsController.metrics

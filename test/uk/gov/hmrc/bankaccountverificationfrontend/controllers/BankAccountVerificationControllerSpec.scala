@@ -12,7 +12,7 @@ import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
 import uk.gov.hmrc.bankaccountverificationfrontend.views.html.HelloWorldPage
 
-class HelloWorldControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
+class BankAccountVerificationControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
   private val fakeRequest = FakeRequest("GET", "/")
 
   private val env           = Environment.simple()
@@ -23,7 +23,7 @@ class HelloWorldControllerSpec extends AnyWordSpec with Matchers with GuiceOneAp
 
   val helloWorldPage: HelloWorldPage = app.injector.instanceOf[HelloWorldPage]
 
-  private val controller = new HelloWorldController(appConfig, stubMessagesControllerComponents(), helloWorldPage)
+  private val controller = new BankAccountVerificationController(appConfig, stubMessagesControllerComponents(), helloWorldPage)
 
   "GET /" should {
     "return 200" in {
