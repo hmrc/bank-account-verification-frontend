@@ -31,7 +31,7 @@ class MongoSessionRepo @Inject() (component: ReactiveMongoComponent, logger: Sim
     extends ReactiveRepository[MongoSessionData, BSONObjectID](
       "bank-account-verification-session-store",
       component.mongoConnector.db,
-      MongoSessionData.mongoSessionDataFormats
+      MongoSessionData.format
     ) {
 
   val expireAfterSeconds: Long = 0

@@ -18,6 +18,7 @@ package uk.gov.hmrc.bankaccountverificationfrontend.model
 
 import java.time.{Instant, ZoneOffset, ZonedDateTime}
 
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -28,7 +29,7 @@ object MongoSessionData {
   def createExpiring(id: BSONObjectID): MongoSessionData =
     MongoSessionData(id, ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60))
 
-  implicit val format = ReactiveMongoFormats.objectIdFormats
+  implicit val objectIdFormats = ReactiveMongoFormats.objectIdFormats
 
   implicit val localDateTimeRead: Reads[ZonedDateTime] =
     (__ \ "$date").read[Long].map { dateTime =>
@@ -43,7 +44,17 @@ object MongoSessionData {
   }
   implicit val datetimeFormat: Format[ZonedDateTime] = Format(localDateTimeRead, localDateTimeWrite)
 
-  val mongoSessionDataReads: Reads[MongoSessionData]             = Json.reads[MongoSessionData]
-  val mongoSessionDataWrites: Writes[MongoSessionData]           = Json.writes[MongoSessionData]
-  implicit val mongoSessionDataFormats: Format[MongoSessionData] = Format(mongoSessionDataReads, mongoSessionDataWrites)
+  def defaultReads: Reads[MongoSessionData] =
+    (__ \ "_id")
+      .read[BSONObjectID]
+      .and((__ \ "expiryDate").read[ZonedDateTime])(MongoSessionData.apply(_, _))
+
+  def defaultWrites: OWrites[MongoSessionData] =
+    (__ \ "_id")
+      .write[BSONObjectID]
+      .and((__ \ "expiryDate").write[ZonedDateTime])(unlift(MongoSessionData.unapply))
+  implicit val format: Format[MongoSessionData] = Format(defaultReads, defaultWrites)
+
+  val mongoSessionDataReads: Reads[MongoSessionData]   = Json.reads[MongoSessionData]
+  val mongoSessionDataWrites: Writes[MongoSessionData] = Json.writes[MongoSessionData]
 }

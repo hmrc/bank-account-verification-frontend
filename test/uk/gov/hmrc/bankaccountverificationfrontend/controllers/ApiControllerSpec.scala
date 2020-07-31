@@ -55,14 +55,27 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSui
   private val controller =
     new ApiController(appConfig, stubMessagesControllerComponents(), sessionStore)
 
-  "GET /start" should {
+  "POST /init" should {
     "return 200" in {
-      val fakeRequest = FakeRequest("GET", "/api/init").withMethod("POST")
+      val fakeRequest = FakeRequest("POST", "/api/init")
       val result      = controller.init().apply(fakeRequest)
       status(result) shouldBe Status.OK
       val journeyIdMaybe = contentAsString(result)
       journeyIdMaybe                                should not be ""
       BSONObjectID.parse(journeyIdMaybe).toOption shouldBe defined
+    }
+  }
+
+  "GET /complete" should {
+    "return 200" in {
+      val fakeInitRequest = FakeRequest("POST", "/api/init")
+      val initResult      = controller.init().apply(fakeInitRequest)
+      status(initResult) shouldBe Status.OK
+      val journeyId = contentAsString(initResult)
+
+      val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$journeyId")
+      val completeResult      = controller.complete(journeyId).apply(fakeCompleteRequest)
+      status(completeResult) shouldBe Status.OK
     }
   }
 }
