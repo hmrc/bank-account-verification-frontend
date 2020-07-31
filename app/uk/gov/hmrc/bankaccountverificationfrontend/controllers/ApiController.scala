@@ -16,29 +16,46 @@
 
 package uk.gov.hmrc.bankaccountverificationfrontend.controllers
 
+import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.UUID
 
 import javax.inject.{Inject, Singleton}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
+import uk.gov.hmrc.bankaccountverificationfrontend.model.MongoSessionData
+import uk.gov.hmrc.bankaccountverificationfrontend.store.MongoSessionRepo
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 @Singleton
-class ApiController @Inject() (appConfig: AppConfig, mcc: MessagesControllerComponents)
+class ApiController @Inject() (appConfig: AppConfig, mcc: MessagesControllerComponents, sessionRepo: MongoSessionRepo)
     extends FrontendController(mcc) {
 
   implicit val config: AppConfig = appConfig
 
-  val init: Action[AnyContent] = Action.async { implicit request =>
-    val journeyId = UUID.randomUUID().toString
-
-    Future.successful(Ok(journeyId))
-  }
+  def init: Action[AnyContent] =
+    Action.async { implicit request =>
+      val journeyId   = BSONObjectID.generate()
+      val sessionData = MongoSessionData(journeyId)
+      sessionRepo.insert(sessionData).map(_ => Ok(journeyId.toString()))
+    }
 
   def complete(journeyId: String): Action[AnyContent] =
     Action.async { implicit request =>
-      Future.successful(Ok)
+      import MongoSessionData._
+
+      BSONObjectID.parse(journeyId) match {
+        case Success(id) =>
+          sessionRepo.findById(id).map {
+            case Some(x) => Ok(Json.toJson(x))
+            case None    => NotFound
+          }
+        case Failure(e) => Future.successful(BadRequest)
+      }
     }
 }

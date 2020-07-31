@@ -11,6 +11,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
+import uk.gov.hmrc.bankaccountverificationfrontend.store.MongoSessionRepo
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
@@ -24,9 +25,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSui
 
   private val serviceConfig = new ServicesConfig(configuration)
   private val appConfig     = new AppConfig(configuration, serviceConfig)
+  private val sessionStore  = fakeApplication().injector.instanceOf[MongoSessionRepo]
 
   private val controller =
-    new ApiController(appConfig, stubMessagesControllerComponents())
+    new ApiController(appConfig, stubMessagesControllerComponents(), sessionStore)
 
   "GET /start" should {
     "return 200" in {
