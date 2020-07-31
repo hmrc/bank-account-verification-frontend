@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.bankaccountverificationfrontend.controllers
 
-import java.util.UUID
-
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
@@ -28,13 +26,13 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import reactivemongo.bson.BSONObjectID
+import uk.gov.hmrc.bankaccountverificationfrontend.{LoggerFacade, SimpleLogger}
 import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
 import uk.gov.hmrc.bankaccountverificationfrontend.store.MongoSessionRepo
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.duration._
-import scala.util.Success
 
 class ApiControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite with OptionValues {
   implicit private val timeout: FiniteDuration = 1 second
@@ -51,9 +49,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSui
   }
 
   private lazy val sessionStore = app.injector.instanceOf[MongoSessionRepo]
+  private lazy val logger       = app.injector.instanceOf[SimpleLogger]
 
   private val controller =
-    new ApiController(appConfig, stubMessagesControllerComponents(), sessionStore)
+    new ApiController(appConfig, stubMessagesControllerComponents(), sessionStore, logger)
 
   "POST /init" should {
     "return 200" in {
@@ -67,15 +66,35 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSui
   }
 
   "GET /complete" should {
-    "return 200" in {
-      val fakeInitRequest = FakeRequest("POST", "/api/init")
-      val initResult      = controller.init().apply(fakeInitRequest)
-      status(initResult) shouldBe Status.OK
-      val journeyId = contentAsString(initResult)
+    "return 200" when {
+      "a valid journeyId is provided" in {
+        val fakeInitRequest = FakeRequest("POST", "/api/init")
+        val initResult      = controller.init().apply(fakeInitRequest)
+        status(initResult) shouldBe Status.OK
+        val journeyId = contentAsString(initResult)
 
-      val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$journeyId")
-      val completeResult      = controller.complete(journeyId).apply(fakeCompleteRequest)
-      status(completeResult) shouldBe Status.OK
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$journeyId")
+        val completeResult      = controller.complete(journeyId).apply(fakeCompleteRequest)
+        status(completeResult) shouldBe Status.OK
+      }
+    }
+  }
+
+  "return NotFound" when {
+    "a non-existent journeyId is provided" in {
+      val nonExistentJourneyId = BSONObjectID.generate().stringify
+      val fakeCompleteRequest  = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
+      val completeResult       = controller.complete(nonExistentJourneyId).apply(fakeCompleteRequest)
+      status(completeResult) shouldBe Status.NOT_FOUND
+    }
+  }
+
+  "return BadRequest" when {
+    "an invalid journeyId is provided" in {
+      val nonExistentJourneyId = "invalid-journey-id"
+      val fakeCompleteRequest  = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
+      val completeResult       = controller.complete(nonExistentJourneyId).apply(fakeCompleteRequest)
+      status(completeResult) shouldBe Status.BAD_REQUEST
     }
   }
 }

@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import reactivemongo.bson.BSONObjectID
+import uk.gov.hmrc.bankaccountverificationfrontend.SimpleLogger
 import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
 import uk.gov.hmrc.bankaccountverificationfrontend.model.MongoSessionData
 import uk.gov.hmrc.bankaccountverificationfrontend.store.MongoSessionRepo
@@ -30,8 +31,12 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 @Singleton
-class ApiController @Inject() (appConfig: AppConfig, mcc: MessagesControllerComponents, sessionRepo: MongoSessionRepo)
-    extends FrontendController(mcc) {
+class ApiController @Inject() (
+  appConfig: AppConfig,
+  mcc: MessagesControllerComponents,
+  sessionRepo: MongoSessionRepo,
+  logger: SimpleLogger
+) extends FrontendController(mcc) {
 
   implicit val config: AppConfig = appConfig
 
@@ -48,10 +53,17 @@ class ApiController @Inject() (appConfig: AppConfig, mcc: MessagesControllerComp
 
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
-          sessionRepo.findById(id).map {
-            case Some(x) => Ok(Json.toJson(x))
-            case None    => NotFound
-          }
+          sessionRepo
+            .findById(id)
+            .map {
+              case Some(x) => Ok(Json.toJson(x))
+              case None    => NotFound
+            }
+            .recoverWith {
+              case x =>
+                logger.warn(s"Something bad happened: ${x.getMessage}", x)
+                Future.successful(InternalServerError)
+            }
         case Failure(e) => Future.successful(BadRequest)
       }
     }
