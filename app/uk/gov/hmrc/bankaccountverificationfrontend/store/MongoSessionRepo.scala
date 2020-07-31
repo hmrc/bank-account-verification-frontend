@@ -1,21 +1,35 @@
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.bankaccountverificationfrontend.store
 
-import java.time.{ZoneOffset, ZonedDateTime}
-
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
+import uk.gov.hmrc.bankaccountverificationfrontend.SimpleLogger
 import uk.gov.hmrc.bankaccountverificationfrontend.model.MongoSessionData
 import uk.gov.hmrc.mongo.ReactiveRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MongoSessionRepo @Inject() (component: ReactiveMongoComponent, collectionName: String)
+class MongoSessionRepo @Inject() (component: ReactiveMongoComponent, logger: SimpleLogger)
     extends ReactiveRepository[MongoSessionData, BSONObjectID](
-      collectionName,
+      "bank-account-verification-session-store",
       component.mongoConnector.db,
       MongoSessionData.mongoSessionDataFormats
     ) {
@@ -40,7 +54,7 @@ class MongoSessionRepo @Inject() (component: ReactiveMongoComponent, collectionN
   }
 
   private def ensureExpiryDateIndex(existingIndex: Option[Index])(implicit ec: ExecutionContext) = {
-    Logger.info(s"Creating time to live for entries in ${collection.name} to $expireAfterSeconds seconds")
+    logger.info(s"Creating time to live for entries in ${collection.name} to $expireAfterSeconds seconds")
 
     existingIndex
       .fold(Future.successful(0))(idx => collection.indexesManager.drop(idx.eventualName))

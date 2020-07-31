@@ -19,7 +19,6 @@ package uk.gov.hmrc.bankaccountverificationfrontend.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.mvc._
 import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
-import uk.gov.hmrc.bankaccountverificationfrontend.views.html.HelloWorldPage
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.Future
@@ -31,7 +30,7 @@ class BankAccountVerificationController @Inject() (appConfig: AppConfig, mcc: Me
   implicit val config: AppConfig = appConfig
 
   def start(journeyId: String): Action[AnyContent] =
-    Action.async { implicit request =>
+    Action.async {
       Future.successful(Redirect(appConfig.mtdContinueUrl))
     }
 }

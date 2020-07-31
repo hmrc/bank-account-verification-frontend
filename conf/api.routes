@@ -1,4 +1,4 @@
 # microservice specific routes
 
-POST        /init            uk.gov.hmrc.bankaccountverificationfrontend.controllers.ApiController.init
+POST        /init                       uk.gov.hmrc.bankaccountverificationfrontend.controllers.ApiController.init
 POST        /complete/:journeyId        uk.gov.hmrc.bankaccountverificationfrontend.controllers.ApiController.complete(journeyId)

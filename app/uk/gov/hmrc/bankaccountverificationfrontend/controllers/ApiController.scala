@@ -16,11 +16,8 @@
 
 package uk.gov.hmrc.bankaccountverificationfrontend.controllers
 
-import java.time.{ZoneOffset, ZonedDateTime}
-import java.util.UUID
-
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
@@ -39,14 +36,14 @@ class ApiController @Inject() (appConfig: AppConfig, mcc: MessagesControllerComp
   implicit val config: AppConfig = appConfig
 
   def init: Action[AnyContent] =
-    Action.async { implicit request =>
+    Action.async {
       val journeyId   = BSONObjectID.generate()
-      val sessionData = MongoSessionData(journeyId)
-      sessionRepo.insert(sessionData).map(_ => Ok(journeyId.toString()))
+      val sessionData = MongoSessionData.createExpiring(journeyId)
+      sessionRepo.insert(sessionData).map(_ => Ok(journeyId.stringify))
     }
 
   def complete(journeyId: String): Action[AnyContent] =
-    Action.async { implicit request =>
+    Action.async {
       import MongoSessionData._
 
       BSONObjectID.parse(journeyId) match {
