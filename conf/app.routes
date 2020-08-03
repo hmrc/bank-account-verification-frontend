@@ -3,7 +3,7 @@
 ->          /govuk-frontend                           govuk.Routes
 ->          /hmrc-frontend                            hmrcfrontend.Routes
 
-GET         /start/:journeyId                         uk.gov.hmrc.bankaccountverificationfrontend.controllers.BankAccountVerificationController.start(journeyId)
-POST        /bankAccountDetailsForm/:journeyId        uk.gov.hmrc.bankaccountverificationfrontend.controllers.BankAccountVerificationController.verifyDetails(journeyId)
+GET         /start/:journeyId                         uk.gov.hmrc.bankaccountverificationfrontend.web.BankAccountVerificationController.start(journeyId)
+POST        /bankAccountDetailsForm/:journeyId        uk.gov.hmrc.bankaccountverificationfrontend.web.BankAccountVerificationController.verifyDetails(journeyId)
 
 GET         /assets/*file                             controllers.Assets.versioned(path = "/public", file: Asset)

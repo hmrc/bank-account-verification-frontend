@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountverificationfrontend.controllers
+package uk.gov.hmrc.bankaccountverificationfrontend.api
 
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, BaseController, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.bankaccountverificationfrontend.SimpleLogger
 import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig

@@ -15,12 +15,11 @@
  *@
 
 @import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
-@import uk.gov.hmrc.bankaccountverificationfrontend.views.FooterLinks
-@import uk.gov.hmrc.govukfrontend.views.Layouts
+@import uk.gov.hmrc.bankaccountverificationfrontend.web.FooterLinks
 
 @this(
-        govukLayout: GovukLayout,
-        head: Head
+govukLayout: GovukLayout,
+head: Head
 )
 @(pageTitle: Option[String] = None,
         headBlock: Option[Html] = None,

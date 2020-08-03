@@ -14,9 +14,8 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
-@import uk.gov.hmrc.bankaccountverificationfrontend.views.html.Layout
 @import uk.gov.hmrc.bankaccountverificationfrontend.model.BankAccountDetails
+@import uk.gov.hmrc.bankaccountverificationfrontend.web.html.Layout
 
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton)
 @(journeyId: String, detailsForm: Form[BankAccountDetails])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
@@ -25,7 +24,7 @@
     <h1 class="govuk-heading-xl">Bank Account Verification</h1>
     <p class="govuk-body">@{messages("service.text")}</p>
 
-  @form(uk.gov.hmrc.bankaccountverificationfrontend.controllers.routes.BankAccountVerificationController.verifyDetails(journeyId)) {
+@form(uk.gov.hmrc.bankaccountverificationfrontend.web.routes.BankAccountVerificationController.verifyDetails(journeyId)) {
       @input(Input(value = detailsForm("accountName").value,
           label = Label(content = HtmlContent(messages("label.account.name"))),
           formGroupClasses = "form-field-group", autocomplete = Some("account-name"),

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountverificationfrontend.controllers
+package uk.gov.hmrc.bankaccountverificationfrontend.web
 
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.data.Forms.{default, ignored, mapping, optional, text}
+import play.api.data.Forms.{mapping, text}
 import play.api.mvc._
 import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
 import uk.gov.hmrc.bankaccountverificationfrontend.model.BankAccountDetails
-import uk.gov.hmrc.bankaccountverificationfrontend.views.html.JourneyStart
+import uk.gov.hmrc.bankaccountverificationfrontend.web.html.JourneyStart
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.Future
