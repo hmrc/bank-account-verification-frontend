@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountverificationfrontend.controllers
+package bankaccountverification.api
 
+import bankaccountverification.{AppConfig, MongoSessionData, SessionDataRepository}
 import javax.inject.{Inject, Singleton}
+import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import reactivemongo.bson.BSONObjectID
-import uk.gov.hmrc.bankaccountverificationfrontend.SimpleLogger
-import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
-import uk.gov.hmrc.bankaccountverificationfrontend.model.MongoSessionData
-import uk.gov.hmrc.bankaccountverificationfrontend.store.MongoSessionRepo
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
 @Singleton
 class ApiController @Inject() (
   appConfig: AppConfig,
   mcc: MessagesControllerComponents,
-  sessionRepo: MongoSessionRepo,
-  logger: SimpleLogger
+  sessionRepo: SessionDataRepository
 ) extends FrontendController(mcc) {
 
   implicit val config: AppConfig = appConfig
+
+  private val logger = Logger(this.getClass.getSimpleName)
 
   def init: Action[AnyContent] =
     Action.async {
@@ -49,14 +48,14 @@ class ApiController @Inject() (
 
   def complete(journeyId: String): Action[AnyContent] =
     Action.async {
-      import MongoSessionData._
-
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
+          import bankaccountverification.MongoSessionData._
+
           sessionRepo
             .findById(id)
             .map {
-              case Some(x) => Ok(Json.toJson(x))
+              case Some(x) => Ok(Json.toJson(x.data))
               case None    => NotFound
             }
             .recoverWith {

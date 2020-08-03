@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountverificationfrontend.views
+package bankaccountverification.web
 
+import bankaccountverification.AppConfig
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.footer.FooterItem
-import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
 
 object FooterLinks {
   def apply()(implicit messages: Messages, appConfig: AppConfig): Seq[FooterItem] =

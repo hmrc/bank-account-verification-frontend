@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountverificationfrontend.controllers
+package bankaccountverification
 
+import bankaccountverification.web.html.ErrorTemplate
 import javax.inject.{Inject, Singleton}
-import play.api.mvc._
-import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-
-import scala.concurrent.Future
+import play.api.i18n.MessagesApi
+import play.api.mvc.Request
+import play.twirl.api.Html
+import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
 
 @Singleton
-class BankAccountVerificationController @Inject() (appConfig: AppConfig, mcc: MessagesControllerComponents)
-    extends FrontendController(mcc) {
+class ErrorHandler @Inject() (errorTemplate: ErrorTemplate, val messagesApi: MessagesApi)(implicit
+  appConfig: AppConfig
+) extends FrontendErrorHandler {
 
-  implicit val config: AppConfig = appConfig
-
-  def start(journeyId: String): Action[AnyContent] =
-    Action.async {
-      Future.successful(Redirect(appConfig.mtdContinueUrl))
-    }
+  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit
+    request: Request[_]
+  ): Html =
+    errorTemplate(pageTitle, heading, message)
 }

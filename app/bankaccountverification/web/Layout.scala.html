@@ -14,13 +14,19 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
-@import uk.gov.hmrc.bankaccountverificationfrontend.views.html.Layout
+@import bankaccountverification.AppConfig
+@import bankaccountverification.web.FooterLinks
 
-@this(layout: Layout)
+@this(govukLayout: GovukLayout, head: Head)
+@(pageTitle: Option[String] = None,
+        headBlock: Option[Html] = None,
+        scriptsBlock: Option[Html] = None
+)(contentBlock: Html)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
-@layout(pageTitle = Some(pageTitle)) {
-    <h1 class="govuk-heading-xl">@{Text(heading).asHtml}</h1>
-    <p class="govuk-body">@{Text(message).asHtml}</p>
-}
+@govukLayout(
+    pageTitle = pageTitle,
+    headBlock = Some(head(headBlock)),
+    scriptsBlock = scriptsBlock,
+    beforeContentBlock = None,
+    footerItems = FooterLinks()
+)(contentBlock)

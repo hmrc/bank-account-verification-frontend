@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountverificationfrontend
-
-import com.google.inject.{AbstractModule, Provides}
-import javax.inject.Singleton
-import play.api.{Configuration, Environment}
+import bankaccountverification.{AppConfig, SessionDataRepository}
+import com.google.inject.AbstractModule
 import play.api.libs.concurrent.AkkaGuiceSupport
-import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
-import uk.gov.hmrc.bankaccountverificationfrontend.store.MongoSessionRepo
+import play.api.{Configuration, Environment}
 
 class Module(environment: Environment, playConfig: Configuration) extends AbstractModule with AkkaGuiceSupport {
   override def configure(): Unit = {
     super.configure()
     bind(classOf[AppConfig])
-    bind(classOf[MongoSessionRepo])
-
-    @Provides
-    @Singleton
-    def provideLogger: SimpleLogger = new LoggerFacade(play.api.Logger.logger)
-
+    bind(classOf[SessionDataRepository])
   }
 }
