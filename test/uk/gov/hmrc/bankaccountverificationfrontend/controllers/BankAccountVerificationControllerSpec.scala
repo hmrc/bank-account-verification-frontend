@@ -32,14 +32,13 @@ import scala.concurrent.duration._
 class BankAccountVerificationControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
   implicit val timeout = 1 second
 
-  private val env           = Environment.simple()
-  private val configuration = Configuration.load(env)
+  private val injector   = app.injector
+  private val controller = injector.instanceOf[BankAccountVerificationController]
 
-  private val serviceConfig = new ServicesConfig(configuration)
-  private val appConfig     = new AppConfig(configuration, serviceConfig)
-
-  private val controller =
-    new BankAccountVerificationController(appConfig, stubMessagesControllerComponents())
+//  private val env           = Environment.simple()
+//  private val configuration = Configuration.load(env)
+//
+//  private val serviceConfig = new ServicesConfig(configuration)
 
   "GET /start" should {
     "return 303" in {

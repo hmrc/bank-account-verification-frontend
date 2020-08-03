@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
-@import uk.gov.hmrc.bankaccountverificationfrontend.views.html.Layout
+package uk.gov.hmrc.bankaccountverificationfrontend.model
 
-@this(layout: Layout)
-
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
-
-@layout(pageTitle = Some("bank-account-verification-frontend")) {
-    <h1 class="govuk-heading-xl">bank-account-verification-frontend</h1>
-    <p class="govuk-body">@{messages("service.text")}</p>
-}
+case class BankAccountDetails(name: String, sortCode: String, accountNumber: String)

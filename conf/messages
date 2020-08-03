@@ -1,6 +1,12 @@
-service.name = bank-account-verification-frontend
+service.name = Bank Account Verification Frontend
 service.homePageUrl = /bank-account-verification-frontend
-service.text = This is your new service
+service.text = Enter Bank Account Details
+
+label.account.name = Account Name
+label.account.sortCode = Account Sortcode
+label.account.number = Account Number
+
+label.submitLabel = Continue
 
 footer.cookies.text = Cookies
 footer.cookies.url = /help/cookies

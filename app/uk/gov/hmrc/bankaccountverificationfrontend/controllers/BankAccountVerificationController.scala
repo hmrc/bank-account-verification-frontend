@@ -17,20 +17,39 @@
 package uk.gov.hmrc.bankaccountverificationfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
+import play.api.data.Form
+import play.api.data.Forms.{default, ignored, mapping, optional, text}
 import play.api.mvc._
 import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
+import uk.gov.hmrc.bankaccountverificationfrontend.model.BankAccountDetails
+import uk.gov.hmrc.bankaccountverificationfrontend.views.html.JourneyStart
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
 @Singleton
-class BankAccountVerificationController @Inject() (appConfig: AppConfig, mcc: MessagesControllerComponents)
-    extends FrontendController(mcc) {
+class BankAccountVerificationController @Inject() (
+  appConfig: AppConfig,
+  mcc: MessagesControllerComponents,
+  startView: JourneyStart
+) extends FrontendController(mcc) {
 
   implicit val config: AppConfig = appConfig
 
   def start(journeyId: String): Action[AnyContent] =
-    Action.async {
-      Future.successful(Redirect(appConfig.mtdContinueUrl))
+    Action.async { implicit request =>
+      Future.successful(Ok(startView(journeyId, bankAccountDetailsForm)))
     }
+
+  def verifyDetails(journeyId: String) =
+    Action.async { implicit request =>
+      Future.successful(Ok)
+    }
+
+  def bankAccountDetailsForm: Form[BankAccountDetails] =
+    Form(
+      mapping("name" -> text, "sortCode" -> text, "accountNumber" -> text)(BankAccountDetails.apply)(
+        BankAccountDetails.unapply
+      )
+    )
 }

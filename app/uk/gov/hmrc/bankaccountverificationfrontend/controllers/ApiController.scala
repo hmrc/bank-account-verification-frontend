@@ -18,7 +18,7 @@ package uk.gov.hmrc.bankaccountverificationfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, BaseController, MessagesControllerComponents}
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.bankaccountverificationfrontend.SimpleLogger
 import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
