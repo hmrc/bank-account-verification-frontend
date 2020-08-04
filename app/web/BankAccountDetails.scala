@@ -19,7 +19,6 @@ package web
 import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
-import play.api.i18n.Messages
 import play.api.libs.json.{Format, Json}
 
 import scala.util.{Failure, Success, Try}
@@ -32,26 +31,30 @@ object BankAccountDetails {
     implicit val bankAccountDetailsFormats = Format(bankAccountDetailsReads, bankAccountDetailsWrites)
   }
 
-  def bankAccountDetailsForm(implicit messages: Messages): Form[BankAccountDetails] =
+  def bankAccountDetailsForm(): Form[BankAccountDetails] =
     Form(
       mapping("name" -> text, "sortCode" -> text.verifying(sortcodeConstraint), "accountNumber" -> text)(
         BankAccountDetails.apply
       )(BankAccountDetails.unapply)
     )
 
-  def sortcodeConstraint(implicit messages: Messages): Constraint[String] =
-    Constraint[String](Some("constraints.sortcode"), Seq.empty)(input =>
-      input.replaceAll("""[ \-]""", "") match {
-        case empty if empty.isEmpty =>
-          Invalid(Seq(ValidationError(messages("sortcode.emptyError"))))
-        case chars if chars.length != 6 =>
-          Invalid(Seq(ValidationError(messages("sortcode.invalidLengthError"))))
-        case chars if sortcodeHasInvalidChars(chars) =>
-          Invalid(Seq(ValidationError(messages("sortcode.invalidCharsError"))))
-        case _ =>
-          Valid
+  def sortcodeConstraint(): Constraint[String] =
+    Constraint[String](Some("constraints.sortcode"), Seq.empty) { input =>
+      val strippedInput = input.replaceAll("""[ \-]""", "")
+
+      val errors =
+        if (strippedInput.isEmpty) Seq("sortcode.emptyError")
+        else
+          Seq(
+            if (strippedInput.length != 6) Some("sortcode.invalidLengthError") else None,
+            if (sortcodeHasInvalidChars(strippedInput)) Some("sortcode.invalidCharsError") else None
+          ).flatten
+
+      errors match {
+        case Seq() => Valid
+        case errs  => Invalid(ValidationError(errs))
       }
-    )
+    }
 
   private def sortcodeHasInvalidChars(sortcode: String): Boolean =
     Try(sortcode.toInt) match {
