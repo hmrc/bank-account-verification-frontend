@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountverificationfrontend.api
+package api
 
+import config.AppConfig
 import javax.inject.{Inject, Singleton}
+import model.MongoSessionData
+import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import reactivemongo.bson.BSONObjectID
-import uk.gov.hmrc.bankaccountverificationfrontend.SimpleLogger
-import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
-import uk.gov.hmrc.bankaccountverificationfrontend.model.MongoSessionData
-import uk.gov.hmrc.bankaccountverificationfrontend.store.MongoSessionRepo
+import store.MongoSessionRepo
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,11 +34,12 @@ import scala.util.{Failure, Success}
 class ApiController @Inject() (
   appConfig: AppConfig,
   mcc: MessagesControllerComponents,
-  sessionRepo: MongoSessionRepo,
-  logger: SimpleLogger
+  sessionRepo: MongoSessionRepo
 ) extends FrontendController(mcc) {
 
   implicit val config: AppConfig = appConfig
+
+  private val logger = Logger(this.getClass.getSimpleName)
 
   def init: Action[AnyContent] =
     Action.async {
@@ -49,7 +50,6 @@ class ApiController @Inject() (
 
   def complete(journeyId: String): Action[AnyContent] =
     Action.async {
-      import MongoSessionData._
 
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>

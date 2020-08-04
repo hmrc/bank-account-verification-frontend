@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountverificationfrontend.config
+package model
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
-@Singleton
-class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
-  val footerLinkItems: Seq[String] = config.getOptional[Seq[String]]("footerLinkItems").getOrElse(Seq())
-  val mtdContinueUrl: String       = config.get[String]("consumers.mtd.continueUrl")
-}
+case class BankAccountDetails(name: String, sortCode: String, accountNumber: String)

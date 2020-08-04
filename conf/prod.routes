@@ -1,6 +1,6 @@
 # Add all the application routes to the app.routes file
-POST       /init                             uk.gov.hmrc.bankaccountverificationfrontend.api.ApiController.init
-POST       /complete/:journeyId              uk.gov.hmrc.bankaccountverificationfrontend.api.ApiController.complete(journeyId)
+POST       /init                             api.ApiController.init
+POST       /complete/:journeyId              api.ApiController.complete(journeyId)
 
 ->         /bank-account-verification        app.Routes
 ->         /                                 health.Routes

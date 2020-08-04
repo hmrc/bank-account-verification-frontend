@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountverificationfrontend.web
+package web
 
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
 import play.api.mvc._
-import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
-import uk.gov.hmrc.bankaccountverificationfrontend.model.BankAccountDetails
-import uk.gov.hmrc.bankaccountverificationfrontend.web.html.JourneyStart
+import config.AppConfig
+import model.BankAccountDetails
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import web.html.JourneyStart
 
 import scala.concurrent.Future
 
@@ -41,7 +41,7 @@ class BankAccountVerificationController @Inject() (
       Future.successful(Ok(startView(journeyId, bankAccountDetailsForm)))
     }
 
-  def verifyDetails(journeyId: String) =
+  def verifyDetails(journeyId: String): Action[AnyContent] =
     Action.async { implicit request =>
       Future.successful(Ok)
     }

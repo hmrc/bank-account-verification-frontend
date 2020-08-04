@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountverificationfrontend.controllers
+package controllers
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -22,24 +22,21 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.bankaccountverificationfrontend.web.BankAccountVerificationController
+import web.BankAccountVerificationController
 
 import scala.concurrent.duration._
 
-class BankAccountVerificationControllerSpec
-    extends AnyWordSpec
-    with Matchers
-    with GuiceOneAppPerSuite {
+class BankAccountVerificationControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
   implicit val timeout = 1 second
 
-  private val injector = app.injector
+  private val injector   = app.injector
   private val controller = injector.instanceOf[BankAccountVerificationController]
 
   "GET /start" should {
     "return 200" in {
       val fakeRequest = FakeRequest("GET", "/start/some_journey_id").withMethod("GET")
-      val result = controller.start("some_journey_id").apply(fakeRequest)
-      status(result) shouldBe Status.OK
+      val result      = controller.start("some_journey_id").apply(fakeRequest)
+      status(result)           shouldBe Status.OK
       redirectLocation(result) shouldBe None
     }
   }

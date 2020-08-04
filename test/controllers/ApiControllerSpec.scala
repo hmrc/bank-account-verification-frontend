@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountverificationfrontend.controllers
+package controllers
 
+import api.ApiController
 import com.codahale.metrics.SharedMetricRegistries
+import config.AppConfig
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -26,10 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import reactivemongo.bson.BSONObjectID
-import uk.gov.hmrc.bankaccountverificationfrontend.SimpleLogger
-import uk.gov.hmrc.bankaccountverificationfrontend.api.ApiController
-import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
-import uk.gov.hmrc.bankaccountverificationfrontend.store.MongoSessionRepo
+import store.MongoSessionRepo
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
@@ -50,10 +49,9 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSui
   }
 
   private lazy val sessionStore = app.injector.instanceOf[MongoSessionRepo]
-  private lazy val logger       = app.injector.instanceOf[SimpleLogger]
 
   private val controller =
-    new ApiController(appConfig, stubMessagesControllerComponents(), sessionStore, logger)
+    new ApiController(appConfig, stubMessagesControllerComponents(), sessionStore)
 
   "POST /init" should {
     "return 200" in {

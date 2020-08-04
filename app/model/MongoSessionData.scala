@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.bankaccountverificationfrontend.model
+package model
 
 import java.time.{Instant, ZoneOffset, ZonedDateTime}
 
