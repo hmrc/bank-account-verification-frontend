@@ -30,19 +30,19 @@
           label = Label(content = HtmlContent(messages("label.account.name"))),
           formGroupClasses = "form-field-group", autocomplete = Some("account-name"),
           name = detailsForm("accountName").name, id = detailsForm("accountName").name, classes = "govuk-input--width-20",
-          errorMessage = detailsForm("accountName").error.map(fe ⇒ ErrorMessage(content = HtmlContent(fe.message)))))
+          errorMessage = detailsForm("accountName").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
       @input(Input(value = detailsForm("sortCode").value,
           label = Label(content = HtmlContent(messages("label.account.sortCode"))),
           formGroupClasses = "form-field-group", autocomplete = Some("account.sortCode"),
           name = detailsForm("sortCode").name, id = detailsForm("sortCode").name, classes = "govuk-input--width-20",
-          errorMessage = detailsForm("sortCode").error.map(fe ⇒ ErrorMessage(content = HtmlContent(fe.message)))))
+          errorMessage = detailsForm("sortCode").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
       @input(Input(value = detailsForm("accountNumber").value,
           label = Label(content = HtmlContent(messages("label.account.number"))),
           formGroupClasses = "form-field-group", autocomplete = Some("accountNumber"),
           name = detailsForm("accountNumber").name, id = detailsForm("accountNumber").name, classes = "govuk-input--width-20",
-          errorMessage = detailsForm("accountNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(fe.message)))))
+          errorMessage = detailsForm("accountNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
       @button(Button(content = HtmlContent(messages("label.submitLabel")),
           name = Some("continue"),

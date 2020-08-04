@@ -17,13 +17,13 @@
 package web
 
 import play.api.data.Form
-import play.api.data.Forms.{mapping, text}
-import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
+import play.api.data.Forms._
+import play.api.data.validation._
 import play.api.libs.json.{Format, Json}
 
 import scala.util.{Failure, Success, Try}
 
-case class BankAccountDetails(name: String, sortCode: String, accountNumber: String)
+case class BankAccountDetails(accountName: String, sortCode: String, accountNumber: String)
 object BankAccountDetails {
   object formats {
     implicit val bankAccountDetailsReads   = Json.reads[BankAccountDetails]
@@ -33,22 +33,36 @@ object BankAccountDetails {
 
   def bankAccountDetailsForm(): Form[BankAccountDetails] =
     Form(
-      mapping("name" -> text, "sortCode" -> text.verifying(sortcodeConstraint), "accountNumber" -> text)(
+      mapping("accountName" -> accountName, "sortCode" -> sortcode, "accountNumber" -> accountNumber)(
         BankAccountDetails.apply
       )(BankAccountDetails.unapply)
     )
 
+  def accountName = text.verifying(Constraints.nonEmpty(errorMessage = "error.accountName.required"))
+
+  def accountNumber =
+    text.verifying(
+      Constraints.nonEmpty("error.accountNumber.required"),
+      Constraints.pattern("[0-9]+".r, "constraint.accountNumber.digitsOnly", "error.accountNumber.digitsOnly"),
+      Constraints.minLength(6, "error.accountNumber.minLength"),
+      Constraints.maxLength(8, "error.accountNumber.maxLength")
+    )
+
+  def sortcode =
+    text.verifying(
+      Constraints.nonEmpty(errorMessage = "error.sortcode.required"),
+      sortcodeConstraint()
+    )
+
   def sortcodeConstraint(): Constraint[String] =
-    Constraint[String](Some("constraints.sortcode"), Seq.empty) { input =>
+    Constraint[String](Some("constraints.sortcode.format"), Seq.empty) { input =>
       val strippedInput = input.replaceAll("""[ \-]""", "")
 
       val errors =
-        if (strippedInput.isEmpty) Seq("sortcode.emptyError")
-        else
-          Seq(
-            if (strippedInput.length != 6) Some("sortcode.invalidLengthError") else None,
-            if (sortcodeHasInvalidChars(strippedInput)) Some("sortcode.invalidCharsError") else None
-          ).flatten
+        Seq(
+          if (strippedInput.length != 6) Some("error.sortcode.invalidLengthError") else None,
+          if (sortcodeHasInvalidChars(strippedInput)) Some("error.sortcode.invalidCharsError") else None
+        ).flatten
 
       errors match {
         case Seq() => Valid

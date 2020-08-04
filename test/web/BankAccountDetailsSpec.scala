@@ -3,8 +3,7 @@ package web
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.data.{Form, FormError}
-import play.api.i18n.{Messages, MessagesApi}
+import play.api.i18n.MessagesApi
 
 class BankAccountDetailsSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
   "BankAccountDetails form" should {
@@ -34,6 +33,70 @@ class BankAccountDetailsSpec extends AnyWordSpec with Matchers with GuiceOneAppP
       }
     }
 
+    "flag account name validation errors" when {
+      "account name is empty" in {
+        val bankAccountDetails     = BankAccountDetails("", "123456", "12345678")
+        val bankAccountDetailsForm = BankAccountDetails.bankAccountDetailsForm.fillAndValidate(bankAccountDetails)
+        bankAccountDetailsForm.hasErrors shouldBe true
+
+        val error = bankAccountDetailsForm.errors.find(e => e.key == "accountName")
+        error shouldNot be(None)
+        error.get.message shouldBe "error.accountName.required"
+      }
+    }
+
+    "flag account number validation errors" when {
+      "account number is empty" in {
+        val bankAccountDetails     = BankAccountDetails("Joe Blogs", "123456", "")
+        val bankAccountDetailsForm = BankAccountDetails.bankAccountDetailsForm.fillAndValidate(bankAccountDetails)
+        bankAccountDetailsForm.hasErrors shouldBe true
+
+        val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
+        error shouldNot be(None)
+        error.get.message shouldBe "error.accountNumber.required"
+      }
+
+      "account number is less than 6 digits" in {
+        val bankAccountDetails     = BankAccountDetails("Joe Blogs", "123456", "12345")
+        val bankAccountDetailsForm = BankAccountDetails.bankAccountDetailsForm.fillAndValidate(bankAccountDetails)
+        bankAccountDetailsForm.hasErrors shouldBe true
+
+        val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
+        error shouldNot be(None)
+        error.get.message shouldBe "error.accountNumber.minLength"
+      }
+
+      "account number is more than 8 digits" in {
+        val bankAccountDetails     = BankAccountDetails("Joe Blogs", "123456", "123456789")
+        val bankAccountDetailsForm = BankAccountDetails.bankAccountDetailsForm.fillAndValidate(bankAccountDetails)
+        bankAccountDetailsForm.hasErrors shouldBe true
+
+        val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
+        error shouldNot be(None)
+        error.get.message shouldBe "error.accountNumber.maxLength"
+      }
+
+      "account number is not numeric" in {
+        val bankAccountDetails     = BankAccountDetails("Joe Blogs", "123456", "123FOO78")
+        val bankAccountDetailsForm = BankAccountDetails.bankAccountDetailsForm.fillAndValidate(bankAccountDetails)
+        bankAccountDetailsForm.hasErrors shouldBe true
+
+        val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
+        error shouldNot be(None)
+        error.get.message shouldBe "error.accountNumber.digitsOnly"
+      }
+
+      "account number is too long and not numeric" in {
+        val bankAccountDetails     = BankAccountDetails("Joe Blogs", "123456", "123FOOO78")
+        val bankAccountDetailsForm = BankAccountDetails.bankAccountDetailsForm.fillAndValidate(bankAccountDetails)
+        bankAccountDetailsForm.hasErrors shouldBe true
+
+        val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
+        error shouldNot be(None)
+        error.get.message shouldBe "error.accountNumber.digitsOnly"
+      }
+    }
+
     "flag sortcode validation errors" when {
       "sortcode is empty" in {
         val bankAccountDetails     = BankAccountDetails("Joe Blogs", "", "12345678")
@@ -42,7 +105,7 @@ class BankAccountDetailsSpec extends AnyWordSpec with Matchers with GuiceOneAppP
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "sortCode")
         error shouldNot be(None)
-        error.get.message shouldBe "sortcode.emptyError"
+        error.get.message shouldBe "error.sortcode.required"
       }
 
       "sortcode is less than 6 digits" in {
@@ -52,7 +115,7 @@ class BankAccountDetailsSpec extends AnyWordSpec with Matchers with GuiceOneAppP
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "sortCode")
         error shouldNot be(None)
-        error.get.message shouldBe "sortcode.invalidLengthError"
+        error.get.message shouldBe "error.sortcode.invalidLengthError"
       }
 
       "sortcode is longer than 6 digits" in {
@@ -62,7 +125,7 @@ class BankAccountDetailsSpec extends AnyWordSpec with Matchers with GuiceOneAppP
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "sortCode")
         error shouldNot be(None)
-        error.get.message shouldBe "sortcode.invalidLengthError"
+        error.get.message shouldBe "error.sortcode.invalidLengthError"
       }
 
       "sortcode contains invalid characters" in {
@@ -72,7 +135,7 @@ class BankAccountDetailsSpec extends AnyWordSpec with Matchers with GuiceOneAppP
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "sortCode")
         error shouldNot be(None)
-        error.get.message shouldBe "sortcode.invalidCharsError"
+        error.get.message shouldBe "error.sortcode.invalidCharsError"
       }
 
       "sortcode contains too many invalid characters" in {
@@ -82,7 +145,10 @@ class BankAccountDetailsSpec extends AnyWordSpec with Matchers with GuiceOneAppP
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "sortCode")
         error shouldNot be(None)
-        error.get.messages should contain theSameElementsAs Seq("sortcode.invalidLengthError", "sortcode.invalidCharsError")
+        error.get.messages should contain theSameElementsAs Seq(
+          "error.sortcode.invalidLengthError",
+          "error.sortcode.invalidCharsError"
+        )
 
       }
 
