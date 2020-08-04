@@ -149,9 +149,39 @@ class BankAccountDetailsSpec extends AnyWordSpec with Matchers with GuiceOneAppP
           "error.sortcode.invalidLengthError",
           "error.sortcode.invalidCharsError"
         )
+      }
+    }
 
+    "flag roll number validation errors" when {
+      "roll number contains more than 18 characters" in {
+        val bankAccountDetails     = BankAccountDetails("Joe Blogs", "1010", "12345678", Some("1234567890123456789"))
+        val bankAccountDetailsForm = BankAccountDetails.bankAccountDetailsForm.fillAndValidate(bankAccountDetails)
+        bankAccountDetailsForm.hasErrors shouldBe true
+
+        val error = bankAccountDetailsForm.errors.find(e => e.key == "rollNumber")
+        error shouldNot be(None)
+        error.get.message shouldBe "error.rollNumber.maxLength"
       }
 
+      "roll number contains invalid characters" in {
+        val bankAccountDetails     = BankAccountDetails("Joe Blogs", "1010", "12345678", Some("1234*$£@!"))
+        val bankAccountDetailsForm = BankAccountDetails.bankAccountDetailsForm.fillAndValidate(bankAccountDetails)
+        bankAccountDetailsForm.hasErrors shouldBe true
+
+        val error = bankAccountDetailsForm.errors.find(e => e.key == "rollNumber")
+        error shouldNot be(None)
+        error.get.message shouldBe "error.rollNumber.format"
+      }
+
+      "roll number is too long and contains invalid characters" in {
+        val bankAccountDetails     = BankAccountDetails("Joe Blogs", "1010", "12345678", Some("1234*$£@!%1234*$£@!%"))
+        val bankAccountDetailsForm = BankAccountDetails.bankAccountDetailsForm.fillAndValidate(bankAccountDetails)
+        bankAccountDetailsForm.hasErrors shouldBe true
+
+        val error = bankAccountDetailsForm.errors.find(e => e.key == "rollNumber")
+        error shouldNot be(None)
+        error.get.message shouldBe "error.rollNumber.format"
+      }
     }
   }
 }

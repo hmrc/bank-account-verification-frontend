@@ -47,7 +47,14 @@ class BankAccountVerificationController @Inject() (
 
   def verifyDetails(journeyId: String): Action[AnyContent] =
     Action.async { implicit request =>
-      Future.successful(Ok)
+      bankAccountDetailsForm
+        .bindFromRequest()
+        .fold(
+          formWithErrors =>
+            Future.successful(
+              BadRequest(startView(journeyId, formWithErrors))
+            ),
+          form => Future.successful(Ok)
+        )
     }
-
 }

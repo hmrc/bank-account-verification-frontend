@@ -1,10 +1,10 @@
 # Add all the application routes to the app.routes file
 + nocsrf
-POST       /init                             api.ApiController.init
+POST        /api/init                       api.ApiController.init
 + nocsrf
-POST       /complete/:journeyId              api.ApiController.complete(journeyId)
+POST        /api/complete/:journeyId        api.ApiController.complete(journeyId)
 
-->         /bank-account-verification        app.Routes
-->         /                                 health.Routes
+->          /bank-account-verification      app.Routes
+->          /                               health.Routes
 
-GET        /admin/metrics                    com.kenshoo.play.metrics.MetricsController.metrics
+GET        /admin/metrics                   com.kenshoo.play.metrics.MetricsController.metrics

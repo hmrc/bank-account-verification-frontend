@@ -23,7 +23,13 @@ import play.api.libs.json.{Format, Json}
 
 import scala.util.{Failure, Success, Try}
 
-case class BankAccountDetails(accountName: String, sortCode: String, accountNumber: String)
+case class BankAccountDetails(
+  accountName: String,
+  sortCode: String,
+  accountNumber: String,
+  rollNumber: Option[String] = None
+)
+
 object BankAccountDetails {
   object formats {
     implicit val bankAccountDetailsReads   = Json.reads[BankAccountDetails]
@@ -33,9 +39,12 @@ object BankAccountDetails {
 
   def bankAccountDetailsForm(): Form[BankAccountDetails] =
     Form(
-      mapping("accountName" -> accountName, "sortCode" -> sortcode, "accountNumber" -> accountNumber)(
-        BankAccountDetails.apply
-      )(BankAccountDetails.unapply)
+      mapping(
+        "accountName"   -> accountName,
+        "sortCode"      -> sortcode,
+        "accountNumber" -> accountNumber,
+        "rollNumber"    -> optional(rollNumber)
+      )(BankAccountDetails.apply)(BankAccountDetails.unapply)
     )
 
   def accountName = text.verifying(Constraints.nonEmpty(errorMessage = "error.accountName.required"))
@@ -52,6 +61,13 @@ object BankAccountDetails {
     text.verifying(
       Constraints.nonEmpty(errorMessage = "error.sortcode.required"),
       sortcodeConstraint()
+    )
+
+  def rollNumber =
+    text.verifying(
+      Constraints.pattern("""[A-Z0-9/.\-]+""".r, "constraint.rollNumber.format", "error.rollNumber.format"),
+      Constraints.minLength(1, "error.rollNumber.minLength"),
+      Constraints.maxLength(18, "error.rollNumber.maxLength")
     )
 
   def sortcodeConstraint(): Constraint[String] =
