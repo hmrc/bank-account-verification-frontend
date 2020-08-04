@@ -23,7 +23,7 @@ import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import reactivemongo.bson.BSONObjectID
-import store.MongoSessionRepo
+import store.MongoSessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,7 +34,7 @@ import scala.util.{Failure, Success}
 class ApiController @Inject() (
   appConfig: AppConfig,
   mcc: MessagesControllerComponents,
-  sessionRepo: MongoSessionRepo
+  sessionRepo: MongoSessionRepository
 ) extends FrontendController(mcc) {
 
   implicit val config: AppConfig = appConfig

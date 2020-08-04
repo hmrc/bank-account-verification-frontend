@@ -23,11 +23,11 @@ import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
-case class MongoSessionData(id: BSONObjectID, expiryDate: ZonedDateTime)
+case class MongoSessionData(id: BSONObjectID, accountName: Option[String] = None, expiryDate: Option[ZonedDateTime] = None)
 
 object MongoSessionData {
   def createExpiring(id: BSONObjectID): MongoSessionData =
-    MongoSessionData(id, ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60))
+    MongoSessionData(id, expiryDate = Some(ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)))
 
   implicit val objectIdFormats = ReactiveMongoFormats.objectIdFormats
 
@@ -47,12 +47,12 @@ object MongoSessionData {
   def defaultReads: Reads[MongoSessionData] =
     (__ \ "_id")
       .read[BSONObjectID]
-      .and((__ \ "expiryDate").read[ZonedDateTime])(MongoSessionData.apply(_, _))
+      .and((__ \ "expiryDate").read[ZonedDateTime])((id: BSONObjectID, expiryDate: ZonedDateTime) => MongoSessionData.apply(id, expiryDate = expiryDate))
 
   def defaultWrites: OWrites[MongoSessionData] =
     (__ \ "_id")
       .write[BSONObjectID]
-      .and((__ \ "expiryDate").write[ZonedDateTime])(unlift(MongoSessionData.unapply))
+      .and((__ \ "expiryDate").write[ZonedDateTime])(unlift((id, expiryDate, accountName) => MongoSessionData.unapply()))
   implicit val format: Format[MongoSessionData] = Format(defaultReads, defaultWrites)
 
   val mongoSessionDataReads: Reads[MongoSessionData]   = Json.reads[MongoSessionData]

@@ -17,26 +17,34 @@
 package store
 
 import javax.inject.{Inject, Singleton}
+import model.MongoSessionData
+import play.api.libs.json.{Json, OWrites}
 import play.modules.reactivemongo.ReactiveMongoComponent
+import reactivemongo.api.commands.FindAndModifyCommand
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
-import model.MongoSessionData
-import play.api.Logger
 import uk.gov.hmrc.mongo.ReactiveRepository
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MongoSessionRepo @Inject() (component: ReactiveMongoComponent)
+class MongoSessionRepository @Inject() (component: ReactiveMongoComponent)
     extends ReactiveRepository[MongoSessionData, BSONObjectID](
       "bank-account-verification-session-store",
       component.mongoConnector.db,
       MongoSessionData.format
     ) {
+
   val expireAfterSeconds: Long = 0
 
   private lazy val ExpiryDateIndex       = "expiryDateIndex"
   private lazy val OptExpireAfterSeconds = "expireAfterSeconds"
+
+  def findAndUpdateById[A](id: BSONObjectID, data: A)(implicit
+    formats: OWrites[A]
+  ): Future[Option[MongoSessionData]] =
+    findAndUpdate(_id(id), Json.toJsObject(data)).map(r => r.result)
 
   override def ensureIndexes(implicit ec: ExecutionContext): Future[Seq[Boolean]] = {
     import reactivemongo.bson.DefaultBSONHandlers._

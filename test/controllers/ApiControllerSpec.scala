@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import reactivemongo.bson.BSONObjectID
-import store.MongoSessionRepo
+import store.MongoSessionRepository
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
@@ -48,7 +48,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSui
     fakeApplication()
   }
 
-  private lazy val sessionStore = app.injector.instanceOf[MongoSessionRepo]
+  private lazy val sessionStore = app.injector.instanceOf[MongoSessionRepository]
 
   private val controller =
     new ApiController(appConfig, stubMessagesControllerComponents(), sessionStore)

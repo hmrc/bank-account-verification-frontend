@@ -16,28 +16,124 @@
 
 package controllers
 
+import java.time.{ZoneOffset, ZonedDateTime}
+
+import akka.stream.Materializer
+import model.MongoSessionData
+import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
 import play.api.http.Status
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import web.BankAccountVerificationController
+import reactivemongo.bson.BSONObjectID
+import store.MongoSessionRepository
+import web.{BankAccountDetails, BankAccountVerificationController}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class BankAccountVerificationControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
+class BankAccountVerificationControllerSpec
+    extends AnyWordSpec
+    with Matchers
+    with MockitoSugar
+    with GuiceOneAppPerSuite {
   implicit val timeout = 1 second
 
-  private val injector   = app.injector
-  private val controller = injector.instanceOf[BankAccountVerificationController]
+  val mockRepository = mock[MongoSessionRepository]
+  val continueUrl = "https://continue.url"
 
-  "GET /start" should {
-    "return 200" in {
-      val fakeRequest = FakeRequest("GET", "/start/some_journey_id").withMethod("GET")
-      val result      = controller.start("some_journey_id").apply(fakeRequest)
-      status(result)           shouldBe Status.OK
-      redirectLocation(result) shouldBe None
+  override implicit lazy val app: Application = new GuiceApplicationBuilder()
+    .overrides(bind[MongoSessionRepository].toInstance(mockRepository))
+    .configure("consumers.mtd.continueUrl" -> continueUrl)
+    .build()
+
+  private val injector           = app.injector
+  private val controller         = injector.instanceOf[BankAccountVerificationController]
+  implicit val mat: Materializer = injector.instanceOf[Materializer]
+
+  "GET /start" when {
+    "There is a valid journey" should {
+      val id     = BSONObjectID.generate()
+      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+      when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id))))
+
+      "return 200" in {
+        val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
+        val result      = controller.start(id.stringify).apply(fakeRequest)
+        status(result)           shouldBe Status.OK
+        redirectLocation(result) shouldBe None
+      }
+    }
+
+    "There is no valid journey" should {
+      val id = BSONObjectID.generate()
+      when(mockRepository.findById(id)).thenReturn(Future.successful(None))
+
+      "return 404" in {
+        val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
+        val result      = controller.start(id.stringify).apply(fakeRequest)
+        status(result) shouldBe Status.NOT_FOUND
+      }
+    }
+  }
+
+  "POST /verify" when {
+    "There is no valid journey" should {
+      val id = BSONObjectID.generate()
+      when(mockRepository.findById(id)).thenReturn(Future.successful(None))
+
+      "return 404" in {
+        val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
+        val result      = controller.start(id.stringify).apply(fakeRequest)
+        status(result) shouldBe Status.NOT_FOUND
+      }
+    }
+
+    "There are form errors" should {
+      val id     = BSONObjectID.generate()
+      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+      when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id))))
+      val data = BankAccountDetails("", "", "")
+
+      "return 400" in {
+        val fakeRequest = FakeRequest("POST", s"/verify/${id.stringify}")
+          .withBody(data)
+
+        val result = controller.verifyDetails(id.stringify).apply(fakeRequest)
+        status(result)           shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "A valid form is posted" should {
+      val id     = BSONObjectID.generate()
+      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+      val data = BankAccountDetails("Bob", "123456", "12345678")
+
+      when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id))))
+      when(mockRepository.findAndUpdateById(id, any())(any())).thenReturn(
+        Future.successful(Some(MongoSessionData(id)))
+      )
+
+      "Persist the data to mongo and redirect to the continueUrl" in {
+        val fakeRequest = FakeRequest("POST", s"/verify/${id.stringify}")
+          .withBody(data)
+
+        val result = controller.verifyDetails(id.stringify).apply(fakeRequest)
+
+        val expectedData = MongoSessionData(id, accountName = Some("Bob"))
+        verify(mockRepository.findAndUpdateById(id, expectedData)(any()))
+
+        status(result)           shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe continueUrl
+      }
     }
   }
 }

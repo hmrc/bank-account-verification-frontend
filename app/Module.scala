@@ -18,12 +18,12 @@ import com.google.inject.AbstractModule
 import config.AppConfig
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.{Configuration, Environment}
-import store.MongoSessionRepo
+import store.MongoSessionRepository
 
 class Module(environment: Environment, playConfig: Configuration) extends AbstractModule with AkkaGuiceSupport {
   override def configure(): Unit = {
     super.configure()
     bind(classOf[AppConfig])
-    bind(classOf[MongoSessionRepo])
+    bind(classOf[MongoSessionRepository])
   }
 }

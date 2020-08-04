@@ -23,18 +23,22 @@ import play.api.mvc._
 import config.AppConfig
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.i18n.{I18nSupport, Messages}
+import reactivemongo.bson.BSONObjectID
+import store.MongoSessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import web.BankAccountDetails.bankAccountDetailsForm
 import web.html.JourneyStart
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class BankAccountVerificationController @Inject() (
   appConfig: AppConfig,
   mcc: MessagesControllerComponents,
-  startView: JourneyStart
+  startView: JourneyStart,
+  sessionRepository: MongoSessionRepository
 ) extends FrontendController(mcc)
     with I18nSupport {
 
@@ -42,7 +46,17 @@ class BankAccountVerificationController @Inject() (
 
   def start(journeyId: String): Action[AnyContent] =
     Action.async { implicit request =>
-      Future.successful(Ok(startView(journeyId, bankAccountDetailsForm)))
+      BSONObjectID.parse(journeyId) match {
+        case Success(id) =>
+          sessionRepository.findById(id).map {
+            case Some(data) =>
+              Ok(startView(journeyId, bankAccountDetailsForm()))
+            case None =>
+              NotFound
+          }
+        case Failure(exception) =>
+          Future.successful(BadRequest)
+      }
     }
 
   def verifyDetails(journeyId: String): Action[AnyContent] =
