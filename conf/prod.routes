@@ -1,5 +1,7 @@
 # Add all the application routes to the app.routes file
++ nocsrf
 POST       /init                             api.ApiController.init
++ nocsrf
 POST       /complete/:journeyId              api.ApiController.complete(journeyId)
 
 ->         /bank-account-verification        app.Routes

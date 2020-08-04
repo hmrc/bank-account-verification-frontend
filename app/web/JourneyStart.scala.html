@@ -14,9 +14,9 @@
  * limitations under the License.
  *@
 
-@import model.BankAccountDetails
 @import web.html.Layout
 @import config.AppConfig
+@import web.BankAccountDetails
 
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton)
 @(journeyId: String, detailsForm: Form[BankAccountDetails])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)

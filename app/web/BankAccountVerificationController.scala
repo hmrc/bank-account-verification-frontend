@@ -21,18 +21,22 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
 import play.api.mvc._
 import config.AppConfig
-import model.BankAccountDetails
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
+import play.api.i18n.{I18nSupport, Messages}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import web.BankAccountDetails.bankAccountDetailsForm
 import web.html.JourneyStart
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class BankAccountVerificationController @Inject() (
   appConfig: AppConfig,
   mcc: MessagesControllerComponents,
   startView: JourneyStart
-) extends FrontendController(mcc) {
+) extends FrontendController(mcc)
+    with I18nSupport {
 
   implicit val config: AppConfig = appConfig
 
@@ -46,10 +50,4 @@ class BankAccountVerificationController @Inject() (
       Future.successful(Ok)
     }
 
-  def bankAccountDetailsForm: Form[BankAccountDetails] =
-    Form(
-      mapping("name" -> text, "sortCode" -> text, "accountNumber" -> text)(BankAccountDetails.apply)(
-        BankAccountDetails.unapply
-      )
-    )
 }
