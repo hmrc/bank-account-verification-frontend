@@ -22,31 +22,25 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.{Configuration, Environment}
-import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
 import uk.gov.hmrc.bankaccountverificationfrontend.web.BankAccountVerificationController
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.duration._
 
-class BankAccountVerificationControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
+class BankAccountVerificationControllerSpec
+    extends AnyWordSpec
+    with Matchers
+    with GuiceOneAppPerSuite {
   implicit val timeout = 1 second
 
-  private val injector   = app.injector
+  private val injector = app.injector
   private val controller = injector.instanceOf[BankAccountVerificationController]
 
-//  private val env           = Environment.simple()
-//  private val configuration = Configuration.load(env)
-//
-//  private val serviceConfig = new ServicesConfig(configuration)
-
   "GET /start" should {
-    "return 303" in {
+    "return 200" in {
       val fakeRequest = FakeRequest("GET", "/start/some_journey_id").withMethod("GET")
-      val result      = controller.start("some_journey_id").apply(fakeRequest)
-      status(result)           shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("http://consumer-service/continue")
+      val result = controller.start("some_journey_id").apply(fakeRequest)
+      status(result) shouldBe Status.OK
+      redirectLocation(result) shouldBe None
     }
   }
 }

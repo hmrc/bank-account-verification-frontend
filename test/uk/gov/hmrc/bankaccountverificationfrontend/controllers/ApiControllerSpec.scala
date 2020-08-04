@@ -26,8 +26,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import reactivemongo.bson.BSONObjectID
+import uk.gov.hmrc.bankaccountverificationfrontend.SimpleLogger
 import uk.gov.hmrc.bankaccountverificationfrontend.api.ApiController
-import uk.gov.hmrc.bankaccountverificationfrontend.{LoggerFacade, SimpleLogger}
 import uk.gov.hmrc.bankaccountverificationfrontend.config.AppConfig
 import uk.gov.hmrc.bankaccountverificationfrontend.store.MongoSessionRepo
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
