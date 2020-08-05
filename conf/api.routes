@@ -1,4 +1,6 @@
 # microservice specific routes
 
++ nocsrf
 POST        /init                       uk.gov.hmrc.bankaccountverificationfrontend.controllers.ApiController.init
++ nocsrf
 POST        /complete/:journeyId        uk.gov.hmrc.bankaccountverificationfrontend.controllers.ApiController.complete(journeyId)
