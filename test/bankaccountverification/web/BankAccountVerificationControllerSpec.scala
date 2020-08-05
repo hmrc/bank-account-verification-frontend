@@ -19,8 +19,9 @@ package bankaccountverification.web
 import java.time.{ZoneOffset, ZonedDateTime}
 
 import akka.stream.Materializer
-import bankaccountverification.{MongoSessionData, SessionDataRepository}
+import bankaccountverification.{MongoSessionData, SessionData, SessionDataRepository}
 import com.codahale.metrics.SharedMetricRegistries
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.matchers.should.Matchers
@@ -131,8 +132,8 @@ class BankAccountVerificationControllerSpec
 
         val result = controller.verifyDetails(id.stringify).apply(fakeRequest)
 
-//        val expectedData = MongoSessionData(id,)
-//        verify(mockRepository.findAndUpdateById(id, expectedData)(any()))
+        val expectedSessionData = SessionData(Some("Bob"))
+        verify(mockRepository).findAndUpdateById(meq(id), meq(expectedSessionData))(any(), any())
 
         status(result)           shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(continueUrl)

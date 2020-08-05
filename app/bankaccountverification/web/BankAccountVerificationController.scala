@@ -16,21 +16,18 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.{AppConfig, SessionDataRepository}
-import javax.inject.{Inject, Singleton}
-import play.api.data.Form
-import play.api.data.Forms.{mapping, text}
-import play.api.mvc._
-import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
-import play.api.i18n.{I18nSupport, Messages}
-import reactivemongo.bson.BSONObjectID
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import bankaccountverification.web.BankAccountDetails.bankAccountDetailsForm
 import bankaccountverification.web.html.JourneyStart
+import bankaccountverification.{AppConfig, SessionData, SessionDataRepository}
+import javax.inject.{Inject, Singleton}
+import play.api.i18n.I18nSupport
+import play.api.mvc._
+import reactivemongo.bson.BSONObjectID
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 @Singleton
 class BankAccountVerificationController @Inject() (
@@ -60,14 +57,27 @@ class BankAccountVerificationController @Inject() (
 
   def verifyDetails(journeyId: String): Action[AnyContent] =
     Action.async { implicit request =>
-      bankAccountDetailsForm
-        .bindFromRequest()
-        .fold(
-          formWithErrors =>
-            Future.successful(
-              BadRequest(startView(journeyId, formWithErrors))
-            ),
-          form => Future.successful(Redirect(config.mtdContinueUrl))
-        )
+      BSONObjectID.parse(journeyId) match {
+        case Success(id) =>
+          bankAccountDetailsForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                Future.successful(
+                  BadRequest(startView(journeyId, formWithErrors))
+                ),
+              form => {
+                import bankaccountverification.MongoSessionData._
+
+                val sessionData = SessionData(Some(form.accountName))
+                sessionRepository.findAndUpdateById(id, sessionData).map { success =>
+                  Redirect(config.mtdContinueUrl)
+                }
+              }
+            )
+        case Failure(exception) =>
+          Future.successful(BadRequest)
+      }
+
     }
 }

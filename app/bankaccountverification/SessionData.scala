@@ -74,7 +74,7 @@ object MongoSessionData {
           MongoSessionData.apply(id, expiryDate, data)
       )
 
-  def defaultWrites: OWrites[MongoSessionData] =
+  implicit def defaultWrites: OWrites[MongoSessionData] =
     (__ \ "_id")
       .write[BSONObjectID]
       .and((__ \ "expiryDate").write[ZonedDateTime])
@@ -82,8 +82,8 @@ object MongoSessionData {
         unlift(MongoSessionData.unapply)
       )
 
-  implicit val format: Format[MongoSessionData] = Format(defaultReads, defaultWrites)
-
-  val mongoSessionDataReads: Reads[MongoSessionData]   = Json.reads[MongoSessionData]
-  val mongoSessionDataWrites: Writes[MongoSessionData] = Json.writes[MongoSessionData]
+  val format: Format[MongoSessionData] = Format(defaultReads, defaultWrites)
+//
+//  val mongoSessionDataReads: Reads[MongoSessionData]   = Json.reads[MongoSessionData]
+//  val mongoSessionDataWrites: Writes[MongoSessionData] = Json.writes[MongoSessionData]
 }
