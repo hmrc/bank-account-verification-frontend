@@ -14,7 +14,23 @@
  * limitations under the License.
  */
 
-package model
+package bankaccountverification
+
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 import java.time.{Instant, ZoneOffset, ZonedDateTime}
 
@@ -23,13 +39,17 @@ import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
-case class MongoSessionData(id: BSONObjectID, accountName: Option[String] = None, expiryDate: Option[ZonedDateTime] = None)
+case class SessionData(accountName: Option[String] = None)
+
+case class MongoSessionData(id: BSONObjectID, expiryDate: ZonedDateTime, data: Option[SessionData] = None)
 
 object MongoSessionData {
-  def createExpiring(id: BSONObjectID): MongoSessionData =
-    MongoSessionData(id, expiryDate = Some(ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)))
+  def createExpiring(id: BSONObjectID, data: Option[SessionData] = None): MongoSessionData =
+    MongoSessionData(id, expiryDate = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60), data)
 
-  implicit val objectIdFormats = ReactiveMongoFormats.objectIdFormats
+  implicit val objectIdFormats                        = ReactiveMongoFormats.objectIdFormats
+  implicit val sessionDataReads: Reads[SessionData]   = Json.reads[SessionData]
+  implicit val sessionDataWrites: Writes[SessionData] = Json.writes[SessionData]
 
   implicit val localDateTimeRead: Reads[ZonedDateTime] =
     (__ \ "$date").read[Long].map { dateTime =>
@@ -42,17 +62,26 @@ object MongoSessionData {
         "$date" -> dateTime.toInstant.toEpochMilli
       )
   }
+
   implicit val datetimeFormat: Format[ZonedDateTime] = Format(localDateTimeRead, localDateTimeWrite)
 
   def defaultReads: Reads[MongoSessionData] =
     (__ \ "_id")
       .read[BSONObjectID]
-      .and((__ \ "expiryDate").read[ZonedDateTime])((id: BSONObjectID, expiryDate: ZonedDateTime) => MongoSessionData.apply(id, expiryDate = expiryDate))
+      .and((__ \ "expiryDate").read[ZonedDateTime])
+      .and((__ \ "data").readNullable[SessionData])(
+        (id: BSONObjectID, expiryDate: ZonedDateTime, data: Option[SessionData]) =>
+          MongoSessionData.apply(id, expiryDate, data)
+      )
 
   def defaultWrites: OWrites[MongoSessionData] =
     (__ \ "_id")
       .write[BSONObjectID]
-      .and((__ \ "expiryDate").write[ZonedDateTime])(unlift((id, expiryDate, accountName) => MongoSessionData.unapply()))
+      .and((__ \ "expiryDate").write[ZonedDateTime])
+      .and((__ \ "data").writeNullable[SessionData])(
+        unlift(MongoSessionData.unapply)
+      )
+
   implicit val format: Format[MongoSessionData] = Format(defaultReads, defaultWrites)
 
   val mongoSessionDataReads: Reads[MongoSessionData]   = Json.reads[MongoSessionData]

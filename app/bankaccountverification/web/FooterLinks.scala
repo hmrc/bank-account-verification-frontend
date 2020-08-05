@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package web
+package bankaccountverification.web
 
+import bankaccountverification.AppConfig
 import play.api.i18n.Messages
-import config.AppConfig
 import uk.gov.hmrc.govukfrontend.views.viewmodels.footer.FooterItem
 
 object FooterLinks {

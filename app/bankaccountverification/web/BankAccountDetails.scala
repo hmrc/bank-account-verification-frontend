@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package web
+package bankaccountverification.web
 
 import play.api.data.Form
 import play.api.data.Forms._

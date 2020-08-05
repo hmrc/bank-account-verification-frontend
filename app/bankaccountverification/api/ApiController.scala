@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-package api
+package bankaccountverification.api
 
-import config.AppConfig
+import bankaccountverification.{AppConfig, MongoSessionData, SessionDataRepository}
 import javax.inject.{Inject, Singleton}
-import model.MongoSessionData
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import reactivemongo.bson.BSONObjectID
-import store.MongoSessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
 @Singleton
 class ApiController @Inject() (
   appConfig: AppConfig,
   mcc: MessagesControllerComponents,
-  sessionRepo: MongoSessionRepository
+  sessionRepo: SessionDataRepository
 ) extends FrontendController(mcc) {
 
   implicit val config: AppConfig = appConfig
@@ -50,7 +48,6 @@ class ApiController @Inject() (
 
   def complete(journeyId: String): Action[AnyContent] =
     Action.async {
-
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
           sessionRepo

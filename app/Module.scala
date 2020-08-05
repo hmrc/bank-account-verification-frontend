@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
+import bankaccountverification.{AppConfig, SessionDataRepository}
 import com.google.inject.AbstractModule
-import config.AppConfig
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.{Configuration, Environment}
-import store.MongoSessionRepository
 
 class Module(environment: Environment, playConfig: Configuration) extends AbstractModule with AkkaGuiceSupport {
   override def configure(): Unit = {
     super.configure()
     bind(classOf[AppConfig])
-    bind(classOf[MongoSessionRepository])
+    bind(classOf[SessionDataRepository])
   }
 }

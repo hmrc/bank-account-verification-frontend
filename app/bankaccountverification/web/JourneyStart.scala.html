@@ -14,9 +14,9 @@
  * limitations under the License.
  *@
 
-@import web.html.Layout
-@import config.AppConfig
-@import web.BankAccountDetails
+@import bankaccountverification.AppConfig
+@import bankaccountverification.web.html.Layout
+@import bankaccountverification.web.BankAccountDetails
 
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, errorSummary: GovukErrorSummary)
 @(journeyId: String, detailsForm: Form[BankAccountDetails])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
@@ -32,7 +32,7 @@
             content = HtmlContent(messages(error.message)))}))
 }
 
-@form(web.routes.BankAccountVerificationController.verifyDetails(journeyId)) {
+@form(bankaccountverification.web.routes.BankAccountVerificationController.verifyDetails(journeyId)) {
       @input(Input(value = detailsForm("accountName").value,
           label = Label(content = HtmlContent(messages("label.account.name"))),
           formGroupClasses = "form-field-group", autocomplete = Some("account-name"),

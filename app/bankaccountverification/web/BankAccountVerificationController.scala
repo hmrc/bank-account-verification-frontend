@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package web
+package bankaccountverification.web
 
+import bankaccountverification.{AppConfig, SessionDataRepository}
 import javax.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
 import play.api.mvc._
-import config.AppConfig
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.i18n.{I18nSupport, Messages}
 import reactivemongo.bson.BSONObjectID
-import store.MongoSessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import web.BankAccountDetails.bankAccountDetailsForm
-import web.html.JourneyStart
+import bankaccountverification.web.BankAccountDetails.bankAccountDetailsForm
+import bankaccountverification.web.html.JourneyStart
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
@@ -38,7 +37,7 @@ class BankAccountVerificationController @Inject() (
   appConfig: AppConfig,
   mcc: MessagesControllerComponents,
   startView: JourneyStart,
-  sessionRepository: MongoSessionRepository
+  sessionRepository: SessionDataRepository
 ) extends FrontendController(mcc)
     with I18nSupport {
 
@@ -68,7 +67,7 @@ class BankAccountVerificationController @Inject() (
             Future.successful(
               BadRequest(startView(journeyId, formWithErrors))
             ),
-          form => Future.successful(Ok)
+          form => Future.successful(Redirect(config.mtdContinueUrl))
         )
     }
 }
