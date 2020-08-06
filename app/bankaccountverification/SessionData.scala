@@ -39,12 +39,32 @@ import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
+case class CompleteResponse(
+  accountName: String,
+  sortCode: String,
+  accountNumber: String,
+  rollNumber: Option[String] = None
+)
+
+object CompleteResponse {
+  implicit val completeResponseWrites = Json.writes[CompleteResponse]
+}
+
 case class SessionData(
   accountName: Option[String],
   sortCode: Option[String],
   accountNumber: Option[String],
   rollNumber: Option[String] = None
 )
+
+object SessionData {
+  def toCompleteResponse(sessionData: SessionData): Option[CompleteResponse] =
+    sessionData match {
+      case SessionData(Some(accountName), Some(sortCode), Some(accountNumber), rollNumber) =>
+        Some(CompleteResponse(accountName, sortCode, accountNumber, rollNumber))
+      case _ => None
+    }
+}
 
 case class MongoSessionData(id: BSONObjectID, expiryDate: ZonedDateTime, data: Option[SessionData] = None)
 

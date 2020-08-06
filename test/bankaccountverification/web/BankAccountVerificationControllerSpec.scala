@@ -106,7 +106,7 @@ class BankAccountVerificationControllerSpec
       val id     = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
       when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id, expiry))))
-      val data = BankAccountDetails("", "", "")
+      val data = VerificationRequest("", "", "")
 
       "return 400" in {
         val fakeRequest = FakeRequest("POST", s"/verify/${id.stringify}")
@@ -120,13 +120,13 @@ class BankAccountVerificationControllerSpec
     "A valid form is posted" should {
       val id     = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
-      val data   = BankAccountDetails("Bob", "123456", "12345678")
+      val data   = VerificationRequest("Bob", "123456", "12345678")
 
       when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id, expiry))))
       when(mockRepository.findAndUpdateById(meq(id), any())(any(), any())).thenReturn(Future.successful(true))
 
       "Persist the data to mongo and redirect to the continueUrl" in {
-        import BankAccountDetails.formats.bankAccountDetailsWrites
+        import VerificationRequest.formats.bankAccountDetailsWrites
         val fakeRequest = FakeRequest("POST", s"/verify/${id.stringify}")
           .withJsonBody(Json.toJson(data))
 

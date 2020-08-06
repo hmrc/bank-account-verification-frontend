@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import bankaccountverification.connector.BankAccountReputationConnector
 import bankaccountverification.{AppConfig, SessionDataRepository}
 import com.google.inject.AbstractModule
 import play.api.libs.concurrent.AkkaGuiceSupport
@@ -24,5 +25,6 @@ class Module(environment: Environment, playConfig: Configuration) extends Abstra
     super.configure()
     bind(classOf[AppConfig])
     bind(classOf[SessionDataRepository])
+    bind(classOf[BankAccountReputationConnector])
   }
 }

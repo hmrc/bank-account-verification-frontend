@@ -14,15 +14,18 @@ error.accountName.required = Account Name is required
 error.accountNumber.required = Account Number is required
 error.accountNumber.digitsOnly = Account Number can only contain digits
 error.accountNumber.minLength = Account Number must be at least 6 digits long
-error.accountNumber.maxLength =  = Account Number must be at most 8 digits long
+error.accountNumber.maxLength =  Account Number must be at most 8 digits long
+error.accountNumber.eiscdInvalid = EISCD Validation failed
 
 error.sortcode.required = Sort Code is required
 error.sortcode.invalidLengthError = Sort Code must be 6 digits long
 error.sortcode.invalidCharsError = Sort Code must only contain digits, spaces or hyphens
+error.sortcode.eiscdInvalid = EISCD Validation failed
 
 error.rollNumber.format = Roll Number can only contain uppercase characters, digits, dots or hyphens
 error.rollNumber.minLength = Roll Number must be at least 1 character long
 error.rollNumber.maxLength = Roll Number must be at most 18 characters long
+error.rollNumber.required = Roll Number is required
 
 error.journeyId.pageTitle = Error
 error.journeyId.heading = Invalid JourneyId
