@@ -1,7 +1,7 @@
 package bankaccountverification
 
 import bankaccountverification.api.ApiController
-import bankaccountverification.web.{BankAccountDetails, BankAccountVerificationController}
+import bankaccountverification.web.{BankAccountVerificationController, VerificationRequest}
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest._
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
@@ -42,7 +42,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     initResponse.status shouldBe 200
     val journeyId = initResponse.body
 
-    val bankAccountDetails = BankAccountDetails("some-account-name", "12-12-12", "12349876")
+    val bankAccountDetails = VerificationRequest("some-account-name", "12-12-12", "12349876")
     val formData           = getCCParams(bankAccountDetails) ++ Map("rollNumber" -> Seq())
     val verifyUrl          = s"$baseUrl/bank-account-verification/verify/$journeyId"
 

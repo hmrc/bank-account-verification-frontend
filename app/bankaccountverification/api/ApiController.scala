@@ -16,7 +16,7 @@
 
 package bankaccountverification.api
 
-import bankaccountverification.{AppConfig, MongoSessionData, SessionDataRepository}
+import bankaccountverification.{AppConfig, MongoSessionData, SessionData, SessionDataRepository}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
@@ -55,7 +55,7 @@ class ApiController @Inject() (
           sessionRepo
             .findById(id)
             .map {
-              case Some(x) => Ok(Json.toJson(x.data))
+              case Some(x) => Ok(Json.toJson(x.data.flatMap(SessionData.toCompleteResponse)))
               case None    => NotFound
             }
             .recoverWith {

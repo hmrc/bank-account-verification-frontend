@@ -16,10 +16,13 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.web.BankAccountDetails.bankAccountDetailsForm
+import bankaccountverification.connector.ReputationResponseEnum.Yes
+import bankaccountverification.connector.{BankAccountReputationConnector, ValidateBankDetailsModel}
+import bankaccountverification.web.VerificationRequest.verificationForm
 import bankaccountverification.web.html.{ErrorTemplate, JourneyStart}
 import bankaccountverification.{AppConfig, SessionData, SessionDataRepository}
 import javax.inject.{Inject, Singleton}
+import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import reactivemongo.bson.BSONObjectID
@@ -35,7 +38,8 @@ class BankAccountVerificationController @Inject() (
   mcc: MessagesControllerComponents,
   startView: JourneyStart,
   errorTemplate: ErrorTemplate,
-  sessionRepository: SessionDataRepository
+  sessionRepository: SessionDataRepository,
+  bankAccountReputationConnector: BankAccountReputationConnector
 ) extends FrontendController(mcc)
     with I18nSupport {
 
@@ -49,7 +53,7 @@ class BankAccountVerificationController @Inject() (
         case Success(id) =>
           sessionRepository.findById(id).map {
             case Some(data) =>
-              Ok(startView(journeyId, bankAccountDetailsForm()))
+              Ok(startView(journeyId, verificationForm()))
             case None =>
               NotFound(
                 errorTemplate(
@@ -68,25 +72,43 @@ class BankAccountVerificationController @Inject() (
     Action.async { implicit request =>
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
-          bankAccountDetailsForm
+          verificationForm
             .bindFromRequest()
             .fold(
               formWithErrors =>
                 Future.successful(
                   BadRequest(startView(journeyId, formWithErrors))
                 ),
-              form => {
+              verificationRequest => {
                 import bankaccountverification.MongoSessionData._
 
-                val sessionData = SessionData(
-                  Some(form.accountName),
-                  Some(form.sortCode),
-                  Some(form.accountNumber),
-                  form.rollNumber
-                )
-                sessionRepository.findAndUpdateById(id, sessionData).map { success =>
-                  Redirect(config.mtdContinueUrl)
+                bankAccountReputationConnector.validateBankDetails(verificationRequest).map {
+                  case Success(value) =>
+                    if (value.accountNumberWithSortCodeIsValid != Yes) {
+                      val formWithError = verificationForm
+                        .fill(verificationRequest)
+                        .withError("sortCode", "error.sortcode.eiscdInvalid")
+                        .withError("accountNumber", "error.accountNumber.eiscdInvalid")
+                      BadRequest(startView(journeyId, formWithError))
+                    } else if (value.nonStandardAccountDetailsRequiredForBacs == Yes) {
+                      val formWithError = verificationForm
+                        .fill(verificationRequest)
+                        .withError("rollNumber", "error.rollNumber.required")
+                      BadRequest(startView(journeyId, formWithError))
+                    }
                 }
+
+                val sessionData = SessionData(
+                  Some(verificationRequest.accountName),
+                  Some(verificationRequest.sortCode),
+                  Some(verificationRequest.accountNumber),
+                  verificationRequest.rollNumber
+                )
+                sessionRepository
+                  .findAndUpdateById(id, sessionData)
+                  .map { success =>
+                    Redirect(config.mtdContinueUrl)
+                  }
               }
             )
         case Failure(exception) =>
@@ -94,4 +116,6 @@ class BankAccountVerificationController @Inject() (
       }
 
     }
+
+  private def interpretResults(validateBankDetailsResponse: ValidateBankDetailsModel) = ???
 }

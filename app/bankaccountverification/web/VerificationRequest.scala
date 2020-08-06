@@ -23,33 +23,32 @@ import play.api.libs.json.{Format, Json}
 
 import scala.util.{Failure, Success, Try}
 
-case class BankAccountDetails(
+case class VerificationRequest(
   accountName: String,
   sortCode: String,
   accountNumber: String,
   rollNumber: Option[String] = None
 )
 
-object BankAccountDetails {
+object VerificationRequest {
   object formats {
-    implicit val bankAccountDetailsReads   = Json.reads[BankAccountDetails]
-    implicit val bankAccountDetailsWrites  = Json.writes[BankAccountDetails]
-    implicit val bankAccountDetailsFormats = Format(bankAccountDetailsReads, bankAccountDetailsWrites)
+    implicit val bankAccountDetailsReads  = Json.reads[VerificationRequest]
+    implicit val bankAccountDetailsWrites = Json.writes[VerificationRequest]
   }
 
-  def bankAccountDetailsForm(): Form[BankAccountDetails] =
+  def verificationForm(): Form[VerificationRequest] =
     Form(
       mapping(
-        "accountName"   -> accountName,
-        "sortCode"      -> sortcode,
-        "accountNumber" -> accountNumber,
-        "rollNumber"    -> optional(rollNumber)
-      )(BankAccountDetails.apply)(BankAccountDetails.unapply)
+        "accountName"   -> accountNameMapping,
+        "sortCode"      -> sortCodeMapping,
+        "accountNumber" -> accountNumberMapping,
+        "rollNumber"    -> optional(rollNumberMapping)
+      )(VerificationRequest.apply)(VerificationRequest.unapply)
     )
 
-  def accountName = text.verifying(Constraints.nonEmpty(errorMessage = "error.accountName.required"))
+  def accountNameMapping = text.verifying(Constraints.nonEmpty(errorMessage = "error.accountName.required"))
 
-  def accountNumber =
+  def accountNumberMapping =
     text.verifying(
       Constraints.nonEmpty("error.accountNumber.required"),
       Constraints.pattern("[0-9]+".r, "constraint.accountNumber.digitsOnly", "error.accountNumber.digitsOnly"),
@@ -57,13 +56,13 @@ object BankAccountDetails {
       Constraints.maxLength(8, "error.accountNumber.maxLength")
     )
 
-  def sortcode =
+  def sortCodeMapping =
     text.verifying(
       Constraints.nonEmpty(errorMessage = "error.sortcode.required"),
       sortcodeConstraint()
     )
 
-  def rollNumber =
+  def rollNumberMapping =
     text.verifying(
       Constraints.pattern("""[A-Z0-9/.\-]+""".r, "constraint.rollNumber.format", "error.rollNumber.format"),
       Constraints.minLength(1, "error.rollNumber.minLength"),
