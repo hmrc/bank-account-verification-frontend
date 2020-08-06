@@ -50,10 +50,12 @@ class ApiController @Inject() (
     Action.async {
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
+          import bankaccountverification.MongoSessionData._
+
           sessionRepo
             .findById(id)
             .map {
-              case Some(x) => Ok(Json.toJson(x))
+              case Some(x) => Ok(Json.toJson(x.data))
               case None    => NotFound
             }
             .recoverWith {
