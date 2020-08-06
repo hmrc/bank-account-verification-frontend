@@ -16,13 +16,11 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.connector.ReputationResponseEnum.Yes
-import bankaccountverification.connector.{BankAccountReputationConnector, ValidateBankDetailsModel}
+import bankaccountverification.connector.{BankAccountReputationConnector, BankAccountReputationValidationResponse}
 import bankaccountverification.web.VerificationRequest.verificationForm
 import bankaccountverification.web.html.{ErrorTemplate, JourneyStart}
 import bankaccountverification.{AppConfig, SessionData, SessionDataRepository}
 import javax.inject.{Inject, Singleton}
-import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import reactivemongo.bson.BSONObjectID
@@ -53,7 +51,7 @@ class BankAccountVerificationController @Inject() (
         case Success(id) =>
           sessionRepository.findById(id).map {
             case Some(data) =>
-              Ok(startView(journeyId, verificationForm()))
+              Ok(startView(journeyId, verificationForm))
             case None =>
               NotFound(
                 errorTemplate(
@@ -70,33 +68,22 @@ class BankAccountVerificationController @Inject() (
 
   def verifyDetails(journeyId: String): Action[AnyContent] =
     Action.async { implicit request =>
+      import bankaccountverification.Helpers._
+
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
-          verificationForm
-            .bindFromRequest()
-            .fold(
-              formWithErrors =>
-                Future.successful(
-                  BadRequest(startView(journeyId, formWithErrors))
-                ),
+          (verificationForm.bindFromRequest() match {
+            case form if form.hasErrors => Future.successful(form)
+            case form =>
+              bankAccountReputationConnector.validateBankDetails(form.get).map {
+                case Success(response) => form.validateBarsResponse(response)
+                case Failure(e)        => form
+              }
+          }) flatMap { form =>
+            form.fold(
+              formWithErrors => Future.successful(BadRequest(startView(journeyId, formWithErrors))),
               verificationRequest => {
                 import bankaccountverification.MongoSessionData._
-
-                bankAccountReputationConnector.validateBankDetails(verificationRequest).map {
-                  case Success(value) =>
-                    if (value.accountNumberWithSortCodeIsValid != Yes) {
-                      val formWithError = verificationForm
-                        .fill(verificationRequest)
-                        .withError("sortCode", "error.sortcode.eiscdInvalid")
-                        .withError("accountNumber", "error.accountNumber.eiscdInvalid")
-                      BadRequest(startView(journeyId, formWithError))
-                    } else if (value.nonStandardAccountDetailsRequiredForBacs == Yes) {
-                      val formWithError = verificationForm
-                        .fill(verificationRequest)
-                        .withError("rollNumber", "error.rollNumber.required")
-                      BadRequest(startView(journeyId, formWithError))
-                    }
-                }
 
                 val sessionData = SessionData(
                   Some(verificationRequest.accountName),
@@ -104,18 +91,19 @@ class BankAccountVerificationController @Inject() (
                   Some(verificationRequest.accountNumber),
                   verificationRequest.rollNumber
                 )
+
                 sessionRepository
                   .findAndUpdateById(id, sessionData)
-                  .map { success =>
-                    Redirect(config.mtdContinueUrl)
-                  }
+                  .map(success => Redirect(config.mtdContinueUrl))
               }
             )
+          }
+
         case Failure(exception) =>
           Future.successful(BadRequest)
       }
 
     }
 
-  private def interpretResults(validateBankDetailsResponse: ValidateBankDetailsModel) = ???
+  private def interpretResults(validateBankDetailsResponse: BankAccountReputationValidationResponse) = ???
 }

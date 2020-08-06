@@ -34,8 +34,8 @@ class BankAccountReputationConnector @Inject() (httpClient: HttpClient, appConfi
 
   def validateBankDetails(
     bankDetailsModel: VerificationRequest
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[Try[ValidateBankDetailsModel]] = {
-    import ValidateBankDetailsModel._
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[Try[BankAccountReputationValidationResponse]] = {
+    import BankAccountReputationValidationResponse._
 
     httpClient
       .POST[VerificationRequest, HttpResponse](
@@ -44,7 +44,7 @@ class BankAccountReputationConnector @Inject() (httpClient: HttpClient, appConfi
       )
       .map {
         case httpResponse if httpResponse.status == 200 =>
-          Json.fromJson[ValidateBankDetailsModel](httpResponse.json) match {
+          Json.fromJson[BankAccountReputationValidationResponse](httpResponse.json) match {
             case JsSuccess(result, _) =>
               Success(result)
             case JsError(errors) =>
