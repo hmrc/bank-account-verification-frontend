@@ -36,7 +36,7 @@ object VerificationRequest {
     implicit val bankAccountDetailsWrites = Json.writes[VerificationRequest]
   }
 
-  def verificationForm(): Form[VerificationRequest] =
+  val verificationForm: Form[VerificationRequest] =
     Form(
       mapping(
         "accountName"   -> accountNameMapping,
