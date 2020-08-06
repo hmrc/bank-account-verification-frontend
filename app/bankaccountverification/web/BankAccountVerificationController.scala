@@ -69,7 +69,12 @@ class BankAccountVerificationController @Inject() (
               form => {
                 import bankaccountverification.MongoSessionData._
 
-                val sessionData = SessionData(Some(form.accountName))
+                val sessionData = SessionData(
+                  Some(form.accountName),
+                  Some(form.sortCode),
+                  Some(form.accountNumber),
+                  form.rollNumber
+                )
                 sessionRepository.findAndUpdateById(id, sessionData).map { success =>
                   Redirect(config.mtdContinueUrl)
                 }

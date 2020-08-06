@@ -132,7 +132,7 @@ class BankAccountVerificationControllerSpec
 
         val result = controller.verifyDetails(id.stringify).apply(fakeRequest)
 
-        val expectedSessionData = SessionData(Some("Bob"))
+        val expectedSessionData = SessionData(Some("Bob"), Some("123456"), Some("12345678"))
         verify(mockRepository).findAndUpdateById(meq(id), meq(expectedSessionData))(any(), any())
 
         status(result)           shouldBe Status.SEE_OTHER
