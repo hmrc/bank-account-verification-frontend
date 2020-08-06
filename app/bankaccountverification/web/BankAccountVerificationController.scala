@@ -17,7 +17,7 @@
 package bankaccountverification.web
 
 import bankaccountverification.web.BankAccountDetails.bankAccountDetailsForm
-import bankaccountverification.web.html.JourneyStart
+import bankaccountverification.web.html.{ErrorTemplate, JourneyStart}
 import bankaccountverification.{AppConfig, SessionData, SessionDataRepository}
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
@@ -34,6 +34,7 @@ class BankAccountVerificationController @Inject() (
   appConfig: AppConfig,
   mcc: MessagesControllerComponents,
   startView: JourneyStart,
+  errorTemplate: ErrorTemplate,
   sessionRepository: SessionDataRepository
 ) extends FrontendController(mcc)
     with I18nSupport {
@@ -48,7 +49,7 @@ class BankAccountVerificationController @Inject() (
             case Some(data) =>
               Ok(startView(journeyId, bankAccountDetailsForm()))
             case None =>
-              NotFound
+              NotFound(errorTemplate("Error", "Invalid JourneyId", "Please try again with a valid journeyId"))
           }
         case Failure(exception) =>
           Future.successful(BadRequest)
