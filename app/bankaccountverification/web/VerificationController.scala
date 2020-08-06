@@ -16,11 +16,11 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.web.BankAccountDetails.bankAccountDetailsForm
 import bankaccountverification.web.html.{ErrorTemplate, JourneyStart}
-import bankaccountverification.{AppConfig, SessionData, SessionDataRepository}
+import bankaccountverification.{AppConfig, SessionDataRepository}
 import javax.inject.{Inject, Singleton}
-import play.api.i18n.I18nSupport
+import play.api.Logger
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -30,34 +30,26 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 @Singleton
-class BankAccountVerificationController @Inject() (
+class VerificationController @Inject() (
   appConfig: AppConfig,
   mcc: MessagesControllerComponents,
   startView: JourneyStart,
   errorTemplate: ErrorTemplate,
-  sessionRepository: SessionDataRepository
+  sessionRepository: SessionDataRepository,
+  verificationService: VerificationService
 ) extends FrontendController(mcc)
     with I18nSupport {
+  private val logger = Logger(this.getClass)
 
   implicit val config: AppConfig = appConfig
 
   def start(journeyId: String): Action[AnyContent] =
     Action.async { implicit request =>
-      val messages = messagesApi.preferred(request)
-
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
           sessionRepository.findById(id).map {
-            case Some(data) =>
-              Ok(startView(journeyId, bankAccountDetailsForm()))
-            case None =>
-              NotFound(
-                errorTemplate(
-                  messages("error.journeyId.pageTitle"),
-                  messages("error.journeyId.heading"),
-                  messages("error.journeyId.message")
-                )
-              )
+            case Some(_) => Ok(startView(journeyId, VerificationRequest.form))
+            case None    => NotFound(journeyIdError)
           }
         case Failure(exception) =>
           Future.successful(BadRequest)
@@ -68,30 +60,26 @@ class BankAccountVerificationController @Inject() (
     Action.async { implicit request =>
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
-          bankAccountDetailsForm
-            .bindFromRequest()
-            .fold(
-              formWithErrors =>
-                Future.successful(
-                  BadRequest(startView(journeyId, formWithErrors))
-                ),
-              form => {
-                import bankaccountverification.MongoSessionData._
-
-                val sessionData = SessionData(
-                  Some(form.accountName),
-                  Some(form.sortCode),
-                  Some(form.accountNumber),
-                  form.rollNumber
-                )
-                sessionRepository.findAndUpdateById(id, sessionData).map { success =>
-                  Redirect(config.mtdContinueUrl)
-                }
+          sessionRepository.findById(id).flatMap {
+            case Some(_) =>
+              val form = VerificationRequest.form.bindFromRequest()
+              (if (!form.hasErrors) verificationService.verify(id, form)
+               else Future.successful(form)) map {
+                case form if form.hasErrors => BadRequest(startView(journeyId, form))
+                case _                      => SeeOther(config.mtdContinueUrl)
               }
-            )
-        case Failure(exception) =>
+
+            case None => Future.successful(NotFound(journeyIdError))
+          }
+        case Failure(_) =>
           Future.successful(BadRequest)
       }
-
     }
+
+  private def journeyIdError(implicit request: Request[_], messages: Messages) =
+    errorTemplate(
+      messages("error.journeyId.pageTitle"),
+      messages("error.journeyId.heading"),
+      messages("error.journeyId.message")
+    )(request, messages, appConfig)
 }

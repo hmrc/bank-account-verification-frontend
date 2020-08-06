@@ -16,7 +16,7 @@
 
 package bankaccountverification.api
 
-import bankaccountverification.{AppConfig, MongoSessionData, SessionDataRepository}
+import bankaccountverification.{AppConfig, MongoSessionData, SessionData, SessionDataRepository}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
@@ -41,9 +41,7 @@ class ApiController @Inject() (
 
   def init: Action[AnyContent] =
     Action.async {
-      val journeyId   = BSONObjectID.generate()
-      val sessionData = MongoSessionData.createExpiring(journeyId)
-      sessionRepo.insert(sessionData).map(_ => Ok(journeyId.stringify))
+      sessionRepo.createJourney().map(journeyId => Ok(journeyId.stringify))
     }
 
   def complete(journeyId: String): Action[AnyContent] =
@@ -55,7 +53,7 @@ class ApiController @Inject() (
           sessionRepo
             .findById(id)
             .map {
-              case Some(x) => Ok(Json.toJson(x.data))
+              case Some(x) => Ok(Json.toJson(x.data.flatMap(SessionData.toCompleteResponse)))
               case None    => NotFound
             }
             .recoverWith {

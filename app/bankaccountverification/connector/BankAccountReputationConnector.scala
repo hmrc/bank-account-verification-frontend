@@ -17,22 +17,44 @@
 package bankaccountverification.connector
 
 import bankaccountverification.AppConfig
-import bankaccountverification.web.BankAccountDetails
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.Json
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import play.api.libs.json.{JsError, JsSuccess, Json}
+import uk.gov.hmrc.http._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class BankAccountReputationConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig) {
-  import bankaccountverification.MongoSessionData._
 
   private val bankAccountReputationConfig = appConfig.bankAccountReputationConfig
 
   def validateBankDetails(
-    bankAccountDetails: BankAccountDetails
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[String] =
-//    httpClient.POST(bankAccountReputationConfig.validateBankDetailsUrl, Json.toJson(bankAccountDetails))
-    ???
+    bankDetailsModel: BarsValidationRequest
+  )(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[Try[BarsValidationResponse]] = {
+    import BarsValidationResponse._
+    import HttpReads.Implicits.readRaw
+
+    httpClient
+      .POST[BarsValidationRequest, HttpResponse](
+        url = bankAccountReputationConfig.validateBankDetailsUrl,
+        body = bankDetailsModel
+      )
+      .map {
+        case httpResponse if httpResponse.status == 200 =>
+          Json.fromJson[BarsValidationResponse](httpResponse.json) match {
+            case JsSuccess(result, _) =>
+              Success(result)
+            case JsError(errors) =>
+              Failure(new HttpException("Could not parse Json response from BARs", httpResponse.status))
+          }
+        case httpResponse => Failure(new HttpException(httpResponse.body, httpResponse.status))
+      }
+      .recoverWith {
+        case t: Throwable => Future.successful(Failure(t))
+      }
+  }
 }

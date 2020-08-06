@@ -16,10 +16,10 @@
 
 @import bankaccountverification.AppConfig
 @import bankaccountverification.web.html.Layout
-@import bankaccountverification.web.BankAccountDetails
+@import bankaccountverification.web.VerificationRequest
 
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, errorSummary: GovukErrorSummary)
-@(journeyId: String, detailsForm: Form[BankAccountDetails])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(journeyId: String, detailsForm: Form[VerificationRequest])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @layout(pageTitle = Some("Bank Account Verification")) {
     <h1 class="govuk-heading-xl">Bank Account Verification</h1>
@@ -32,7 +32,7 @@
             content = HtmlContent(messages(error.message)))}))
 }
 
-@form(bankaccountverification.web.routes.BankAccountVerificationController.verifyDetails(journeyId)) {
+@form(bankaccountverification.web.routes.VerificationController.verifyDetails(journeyId)) {
       @input(Input(value = detailsForm("accountName").value,
           label = Label(content = HtmlContent(messages("label.account.name"))),
           formGroupClasses = "form-field-group", autocomplete = Some("account-name"),

@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-import bankaccountverification.connector.BankAccountReputationConnector
-import bankaccountverification.{AppConfig, SessionDataRepository}
-import com.google.inject.AbstractModule
-import play.api.libs.concurrent.AkkaGuiceSupport
-import play.api.{Configuration, Environment}
+package bankaccountverification.connector
 
-class Module(environment: Environment, playConfig: Configuration) extends AbstractModule with AkkaGuiceSupport {
-  override def configure(): Unit = {
-    super.configure()
-    bind(classOf[AppConfig])
-    bind(classOf[SessionDataRepository])
-    bind(classOf[BankAccountReputationConnector])
-  }
+class WithName(string: String) {
+  override val toString: String = string
 }

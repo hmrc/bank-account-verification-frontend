@@ -16,40 +16,57 @@
 
 package bankaccountverification.web
 
+import bankaccountverification.connector.BarsValidationResponse
+import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation._
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.Json
 
 import scala.util.{Failure, Success, Try}
 
-case class BankAccountDetails(
+case class VerificationRequest(
   accountName: String,
   sortCode: String,
   accountNumber: String,
   rollNumber: Option[String] = None
 )
 
-object BankAccountDetails {
+object VerificationRequest {
   object formats {
-    implicit val bankAccountDetailsReads   = Json.reads[BankAccountDetails]
-    implicit val bankAccountDetailsWrites  = Json.writes[BankAccountDetails]
-    implicit val bankAccountDetailsFormats = Format(bankAccountDetailsReads, bankAccountDetailsWrites)
+    implicit val bankAccountDetailsReads  = Json.reads[VerificationRequest]
+    implicit val bankAccountDetailsWrites = Json.writes[VerificationRequest]
   }
 
-  def bankAccountDetailsForm(): Form[BankAccountDetails] =
+  implicit class ValidationFormWrapper(form: Form[VerificationRequest]) {
+
+    def validateUsingBarsResponse(response: BarsValidationResponse): Form[VerificationRequest] =
+      if (response.accountNumberWithSortCodeIsValid == No)
+        form
+          .fill(form.get)
+          .withError("sortCode", "error.sortcode.eiscdInvalid")
+          .withError("accountNumber", "error.accountNumber.eiscdInvalid")
+      else if (response.nonStandardAccountDetailsRequiredForBacs == Yes)
+        form
+          .fill(form.get)
+          .withError("rollNumber", "error.rollNumber.required")
+      else form
+
+  }
+
+  val form: Form[VerificationRequest] =
     Form(
       mapping(
-        "accountName"   -> accountName,
-        "sortCode"      -> sortcode,
-        "accountNumber" -> accountNumber,
-        "rollNumber"    -> optional(rollNumber)
-      )(BankAccountDetails.apply)(BankAccountDetails.unapply)
+        "accountName"   -> accountNameMapping,
+        "sortCode"      -> sortCodeMapping,
+        "accountNumber" -> accountNumberMapping,
+        "rollNumber"    -> optional(rollNumberMapping)
+      )(VerificationRequest.apply)(VerificationRequest.unapply)
     )
 
-  def accountName = text.verifying(Constraints.nonEmpty(errorMessage = "error.accountName.required"))
+  def accountNameMapping = text.verifying(Constraints.nonEmpty(errorMessage = "error.accountName.required"))
 
-  def accountNumber =
+  def accountNumberMapping =
     text.verifying(
       Constraints.nonEmpty("error.accountNumber.required"),
       Constraints.pattern("[0-9]+".r, "constraint.accountNumber.digitsOnly", "error.accountNumber.digitsOnly"),
@@ -57,13 +74,13 @@ object BankAccountDetails {
       Constraints.maxLength(8, "error.accountNumber.maxLength")
     )
 
-  def sortcode =
+  def sortCodeMapping =
     text.verifying(
       Constraints.nonEmpty(errorMessage = "error.sortcode.required"),
       sortcodeConstraint()
     )
 
-  def rollNumber =
+  def rollNumberMapping =
     text.verifying(
       Constraints.pattern("""[A-Z0-9/.\-]+""".r, "constraint.rollNumber.format", "error.rollNumber.format"),
       Constraints.minLength(1, "error.rollNumber.minLength"),
@@ -72,8 +89,7 @@ object BankAccountDetails {
 
   def sortcodeConstraint(): Constraint[String] =
     Constraint[String](Some("constraints.sortcode.format"), Seq.empty) { input =>
-      val strippedInput = input.replaceAll("""[ \-]""", "")
-
+      val strippedInput = stripSortCode(input)
       val errors =
         Seq(
           if (strippedInput.length != 6) Some("error.sortcode.invalidLengthError") else None,
@@ -85,6 +101,8 @@ object BankAccountDetails {
         case errs  => Invalid(ValidationError(errs))
       }
     }
+
+  def stripSortCode(sortCode: String) = sortCode.replaceAll("""[ \-]""", "")
 
   private def sortcodeHasInvalidChars(sortcode: String): Boolean =
     Try(sortcode.toInt) match {

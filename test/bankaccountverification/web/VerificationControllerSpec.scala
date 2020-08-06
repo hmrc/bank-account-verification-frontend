@@ -19,9 +19,8 @@ package bankaccountverification.web
 import java.time.{ZoneOffset, ZonedDateTime}
 
 import akka.stream.Materializer
-import bankaccountverification.{MongoSessionData, SessionData, SessionDataRepository}
+import bankaccountverification.{MongoSessionData, SessionDataRepository}
 import com.codahale.metrics.SharedMetricRegistries
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.matchers.should.Matchers
@@ -41,14 +40,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class BankAccountVerificationControllerSpec
-    extends AnyWordSpec
-    with Matchers
-    with MockitoSugar
-    with GuiceOneAppPerSuite {
+class VerificationControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite {
   implicit val timeout = 1 second
 
   val mockRepository = mock[SessionDataRepository]
+  val mockService    = mock[VerificationService]
   val continueUrl    = "https://continue.url"
 
   override implicit lazy val app: Application = {
@@ -56,16 +52,28 @@ class BankAccountVerificationControllerSpec
 
     new GuiceApplicationBuilder()
       .overrides(bind[SessionDataRepository].toInstance(mockRepository))
+      .overrides(bind[VerificationService].toInstance(mockService))
       .configure("consumers.mtd.continueUrl" -> continueUrl)
       .build()
   }
 
   private val injector           = app.injector
-  private val controller         = injector.instanceOf[BankAccountVerificationController]
+  private val controller         = injector.instanceOf[VerificationController]
   implicit val mat: Materializer = injector.instanceOf[Materializer]
 
   "GET /start" when {
-    "There is a valid journey" should {
+    "there is no valid journey" should {
+      val id = BSONObjectID.generate()
+      when(mockRepository.findById(id)).thenReturn(Future.successful(None))
+
+      "return 404" in {
+        val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
+        val result      = controller.start(id.stringify).apply(fakeRequest)
+        status(result) shouldBe Status.NOT_FOUND
+      }
+    }
+
+    "there is a valid journey" should {
       val id     = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
       when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id, expiry))))
@@ -77,21 +85,10 @@ class BankAccountVerificationControllerSpec
         redirectLocation(result) shouldBe None
       }
     }
-
-    "There is no valid journey" should {
-      val id = BSONObjectID.generate()
-      when(mockRepository.findById(id)).thenReturn(Future.successful(None))
-
-      "return 404" in {
-        val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
-        val result      = controller.start(id.stringify).apply(fakeRequest)
-        status(result) shouldBe Status.NOT_FOUND
-      }
-    }
   }
 
   "POST /verify" when {
-    "There is no valid journey" should {
+    "there is no valid journey" should {
       val id = BSONObjectID.generate()
       when(mockRepository.findById(id)).thenReturn(Future.successful(None))
 
@@ -102,11 +99,11 @@ class BankAccountVerificationControllerSpec
       }
     }
 
-    "There are form errors" should {
+    "the journey is valid but there are form errors" should {
       val id     = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
       when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id, expiry))))
-      val data = BankAccountDetails("", "", "")
+      val data = VerificationRequest("", "", "")
 
       "return 400" in {
         val fakeRequest = FakeRequest("POST", s"/verify/${id.stringify}")
@@ -117,23 +114,44 @@ class BankAccountVerificationControllerSpec
       }
     }
 
-    "A valid form is posted" should {
+    "the journey is valid, a valid form is posted and the bars checks indicate an issue" should {
       val id     = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
-      val data   = BankAccountDetails("Bob", "123456", "12345678")
+      val data   = VerificationRequest("Bob", "123456", "12345678")
+
+      val formWithErrors = VerificationRequest.form
+        .fillAndValidate(data)
+        .withError("Error", "a.specific.error")
 
       when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id, expiry))))
-      when(mockRepository.findAndUpdateById(meq(id), any())(any(), any())).thenReturn(Future.successful(true))
+      when(mockService.verify(meq(id), any())(any(), any())).thenReturn(Future.successful(formWithErrors))
 
-      "Persist the data to mongo and redirect to the continueUrl" in {
-        import BankAccountDetails.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/${id.stringify}")
-          .withJsonBody(Json.toJson(data))
+      "Render the view and display the errors" in {
+        import VerificationRequest.formats.bankAccountDetailsWrites
+        val fakeRequest = FakeRequest("POST", s"/verify/${id.stringify}").withJsonBody(Json.toJson(data))
 
         val result = controller.verifyDetails(id.stringify).apply(fakeRequest)
 
-        val expectedSessionData = SessionData(Some("Bob"), Some("123456"), Some("12345678"))
-        verify(mockRepository).findAndUpdateById(meq(id), meq(expectedSessionData))(any(), any())
+        status(result)        shouldBe Status.BAD_REQUEST
+        contentAsString(result) should include("a.specific.error")
+      }
+    }
+
+    "the journey is valid, a valid form is posted but the bars checks pass" should {
+      val id     = BSONObjectID.generate()
+      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+      val data   = VerificationRequest("Bob", "123456", "12345678")
+
+      val form = VerificationRequest.form.fillAndValidate(data)
+
+      when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id, expiry))))
+      when(mockService.verify(meq(id), any())(any(), any())).thenReturn(Future.successful(form))
+
+      "Redirect to the continueUrl" in {
+        import VerificationRequest.formats.bankAccountDetailsWrites
+        val fakeRequest = FakeRequest("POST", s"/verify/${id.stringify}").withJsonBody(Json.toJson(data))
+
+        val result = controller.verifyDetails(id.stringify).apply(fakeRequest)
 
         status(result)           shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(continueUrl)
