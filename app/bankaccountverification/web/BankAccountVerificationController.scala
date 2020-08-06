@@ -43,13 +43,21 @@ class BankAccountVerificationController @Inject() (
 
   def start(journeyId: String): Action[AnyContent] =
     Action.async { implicit request =>
+      val messages = messagesApi.preferred(request)
+
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
           sessionRepository.findById(id).map {
             case Some(data) =>
               Ok(startView(journeyId, bankAccountDetailsForm()))
             case None =>
-              NotFound(errorTemplate("Error", "Invalid JourneyId", "Please try again with a valid journeyId"))
+              NotFound(
+                errorTemplate(
+                  messages("error.journeyId.pageTitle"),
+                  messages("error.journeyId.heading"),
+                  messages("error.journeyId.message")
+                )
+              )
           }
         case Failure(exception) =>
           Future.successful(BadRequest)

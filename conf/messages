@@ -24,6 +24,11 @@ error.rollNumber.format = Roll Number can only contain uppercase characters, dig
 error.rollNumber.minLength = Roll Number must be at least 1 character long
 error.rollNumber.maxLength = Roll Number must be at most 18 characters long
 
+error.journeyId.pageTitle = Error
+error.journeyId.heading = Invalid JourneyId
+error.journeyId.message = The journeyId could not be found.
+
+
 footer.cookies.text = Cookies
 footer.cookies.url = /help/cookies
 footer.privacy.text = Privacy policy
