@@ -1,15 +1,16 @@
 package bankaccountverification
 
-import bankaccountverification.api.ApiController
-import bankaccountverification.web.{BankAccountVerificationController, VerificationRequest}
+import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
+import bankaccountverification.connector.{BankAccountReputationConnector, BankAccountReputationValidationResponse}
+import bankaccountverification.web.VerificationRequest
 import com.codahale.metrics.SharedMetricRegistries
-import org.scalatest._
+import org.mockito.ArgumentMatchers.any
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.play._
-import org.scalatestplus.play.guice.{GuiceOneAppPerSuite, GuiceOneServerPerSuite}
-import play.api.Application
-import play.api.http.MimeTypes
+import org.mockito.Mockito._
+import org.scalatestplus.mockito._
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsSuccess, Json}
 import play.api.libs.ws.WSClient
@@ -17,10 +18,16 @@ import play.api.test.CSRFTokenHelper.CSRFRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import play.api.test._
 
-class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPerSuite {
+import scala.concurrent.Future
+import scala.util.Success
+
+class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPerSuite with MockitoSugar {
+  private val mockBankAccountReputationConnector = mock[BankAccountReputationConnector]
   override lazy val app = {
     SharedMetricRegistries.clear()
-    fakeApplication()
+    new GuiceApplicationBuilder()
+      .overrides(bind[BankAccountReputationConnector].toInstance(mockBankAccountReputationConnector))
+      .build()
   }
 
   private def getCCParams(cc: AnyRef) =
@@ -30,6 +37,9 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     }
 
   "BankAccountVerification" in {
+    when(mockBankAccountReputationConnector.validateBankDetails(any())(any(), any(), any())).thenReturn(
+      Future.successful(Success(BankAccountReputationValidationResponse(Yes, No, None)))
+    )
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl  = s"http://localhost:$port"
@@ -64,7 +74,12 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     val sessionDataMaybe = Json.fromJson[SessionData](completeResponse.json)
 
     sessionDataMaybe shouldBe JsSuccess[SessionData](
-      SessionData(Some("some-account-name"), Some("12-12-12"), Some("12349876"))
+      SessionData(
+        Some("some-account-name"),
+        Some("12-12-12"),
+        Some("12349876"),
+        accountNumberWithSortCodeIsValid = Some(Yes)
+      )
     )
   }
 }

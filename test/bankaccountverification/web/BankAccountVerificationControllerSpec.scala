@@ -19,6 +19,8 @@ package bankaccountverification.web
 import java.time.{ZoneOffset, ZonedDateTime}
 
 import akka.stream.Materializer
+import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
+import bankaccountverification.connector.{BankAccountReputationConnector, BankAccountReputationValidationResponse}
 import bankaccountverification.{MongoSessionData, SessionData, SessionDataRepository}
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentCaptor
@@ -40,6 +42,7 @@ import reactivemongo.bson.BSONObjectID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.Success
 
 class BankAccountVerificationControllerSpec
     extends AnyWordSpec
@@ -48,14 +51,16 @@ class BankAccountVerificationControllerSpec
     with GuiceOneAppPerSuite {
   implicit val timeout = 1 second
 
-  val mockRepository = mock[SessionDataRepository]
-  val continueUrl    = "https://continue.url"
+  val mockRepository   = mock[SessionDataRepository]
+  val mockBARConnector = mock[BankAccountReputationConnector]
+  val continueUrl      = "https://continue.url"
 
   override implicit lazy val app: Application = {
     SharedMetricRegistries.clear()
 
     new GuiceApplicationBuilder()
       .overrides(bind[SessionDataRepository].toInstance(mockRepository))
+      .overrides(bind[BankAccountReputationConnector].toInstance(mockBARConnector))
       .configure("consumers.mtd.continueUrl" -> continueUrl)
       .build()
   }
@@ -124,6 +129,13 @@ class BankAccountVerificationControllerSpec
 
       when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id, expiry))))
       when(mockRepository.findAndUpdateById(meq(id), any())(any(), any())).thenReturn(Future.successful(true))
+      when(mockBARConnector.validateBankDetails(any())(any(), any(), any())).thenReturn(
+        Future.successful(
+          Success(
+            BankAccountReputationValidationResponse(Yes, No, None)
+          )
+        )
+      )
 
       "Persist the data to mongo and redirect to the continueUrl" in {
         import VerificationRequest.formats.bankAccountDetailsWrites
@@ -132,7 +144,8 @@ class BankAccountVerificationControllerSpec
 
         val result = controller.verifyDetails(id.stringify).apply(fakeRequest)
 
-        val expectedSessionData = SessionData(Some("Bob"), Some("123456"), Some("12345678"))
+        val expectedSessionData =
+          SessionData(Some("Bob"), Some("123456"), Some("12345678"), accountNumberWithSortCodeIsValid = Some(Yes))
         verify(mockRepository).findAndUpdateById(meq(id), meq(expectedSessionData))(any(), any())
 
         status(result)           shouldBe Status.SEE_OTHER

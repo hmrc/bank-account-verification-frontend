@@ -16,11 +16,13 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.connector.{BankAccountReputationConnector, BankAccountReputationValidationResponse}
+import bankaccountverification.connector.{BankAccountReputationConnector, BankAccountReputationValidationRequest, BankAccountReputationValidationRequestAccount, BankAccountReputationValidationResponse}
 import bankaccountverification.web.VerificationRequest.verificationForm
 import bankaccountverification.web.html.{ErrorTemplate, JourneyStart}
 import bankaccountverification.{AppConfig, SessionData, SessionDataRepository}
 import javax.inject.{Inject, Singleton}
+import play.api.Logger
+import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import reactivemongo.bson.BSONObjectID
@@ -40,6 +42,7 @@ class BankAccountVerificationController @Inject() (
   bankAccountReputationConnector: BankAccountReputationConnector
 ) extends FrontendController(mcc)
     with I18nSupport {
+  private val logger = Logger(this.getClass)
 
   implicit val config: AppConfig = appConfig
 
@@ -73,30 +76,36 @@ class BankAccountVerificationController @Inject() (
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
           (verificationForm.bindFromRequest() match {
-            case form if form.hasErrors => Future.successful(form)
+            case form if form.hasErrors =>
+              Future.successful((form, None))
             case form =>
-              bankAccountReputationConnector.validateBankDetails(form.get).map {
-                case Success(response) => form.validateBarsResponse(response)
-                case Failure(e)        => form
+              bankAccountReputationConnector.validateBankDetails(toBankAccountReputationRequest(form.get)).map {
+                case Success(response) =>
+                  (form.validateBarsResponse(response), Some(response))
+                case Failure(e) =>
+                  logger.warn("Received error response from bank-account-reputation.validateBankDetails")
+                  (form, None)
               }
-          }) flatMap { form =>
-            form.fold(
-              formWithErrors => Future.successful(BadRequest(startView(journeyId, formWithErrors))),
-              verificationRequest => {
-                import bankaccountverification.MongoSessionData._
+          }) flatMap {
+            case (form, validationResponse) =>
+              form.fold(
+                formWithErrors => Future.successful(BadRequest(startView(journeyId, formWithErrors))),
+                verificationRequest => {
+                  import bankaccountverification.MongoSessionData._
 
-                val sessionData = SessionData(
-                  Some(verificationRequest.accountName),
-                  Some(verificationRequest.sortCode),
-                  Some(verificationRequest.accountNumber),
-                  verificationRequest.rollNumber
-                )
+                  val sessionData = SessionData(
+                    Some(verificationRequest.accountName),
+                    Some(verificationRequest.sortCode),
+                    Some(verificationRequest.accountNumber),
+                    verificationRequest.rollNumber,
+                    validationResponse.map(_.accountNumberWithSortCodeIsValid)
+                  )
 
-                sessionRepository
-                  .findAndUpdateById(id, sessionData)
-                  .map(success => Redirect(config.mtdContinueUrl))
-              }
-            )
+                  sessionRepository
+                    .findAndUpdateById(id, sessionData)
+                    .map(success => Redirect(config.mtdContinueUrl))
+                }
+              )
           }
 
         case Failure(exception) =>
@@ -105,5 +114,6 @@ class BankAccountVerificationController @Inject() (
 
     }
 
-  private def interpretResults(validateBankDetailsResponse: BankAccountReputationValidationResponse) = ???
+  private def toBankAccountReputationRequest(vr: VerificationRequest): BankAccountReputationValidationRequest =
+    BankAccountReputationValidationRequest(BankAccountReputationValidationRequestAccount(vr.sortCode, vr.accountNumber))
 }

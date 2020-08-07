@@ -16,6 +16,7 @@
 
 package bankaccountverification.connector
 
+import bankaccountverification.web.VerificationRequest
 import play.api.libs.json.{Json, OFormat}
 
 sealed trait ReputationResponseEnum
@@ -41,5 +42,22 @@ case class BankAccountReputationValidationResponse(
 )
 
 object BankAccountReputationValidationResponse {
-  implicit val format: OFormat[BankAccountReputationValidationResponse] = Json.format[BankAccountReputationValidationResponse]
+  implicit val format: OFormat[BankAccountReputationValidationResponse] =
+    Json.format[BankAccountReputationValidationResponse]
+}
+
+case class BankAccountReputationValidationRequestAccount(sortCode: String, accountNumber: String)
+object BankAccountReputationValidationRequestAccount {
+  implicit val bankAccountReputationValidationRequestAccountReads =
+    Json.reads[BankAccountReputationValidationRequestAccount]
+  implicit val bankAccountReputationValidationRequestAccountWrites =
+    Json.writes[BankAccountReputationValidationRequestAccount]
+}
+
+case class BankAccountReputationValidationRequest(account: BankAccountReputationValidationRequestAccount)
+object BankAccountReputationValidationRequest {
+  import BankAccountReputationValidationRequestAccount._
+
+  implicit val bankAccountReputationValidationRequestReads  = Json.reads[BankAccountReputationValidationRequest]
+  implicit val bankAccountReputationValidationRequestWrites = Json.writes[BankAccountReputationValidationRequest]
 }

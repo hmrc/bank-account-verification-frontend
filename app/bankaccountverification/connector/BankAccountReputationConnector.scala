@@ -33,12 +33,16 @@ class BankAccountReputationConnector @Inject() (httpClient: HttpClient, appConfi
   private val bankAccountReputationConfig = appConfig.bankAccountReputationConfig
 
   def validateBankDetails(
-    bankDetailsModel: VerificationRequest
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Future[Try[BankAccountReputationValidationResponse]] = {
+    bankDetailsModel: BankAccountReputationValidationRequest
+  )(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext,
+    request: Request[_]
+  ): Future[Try[BankAccountReputationValidationResponse]] = {
     import BankAccountReputationValidationResponse._
 
     httpClient
-      .POST[VerificationRequest, HttpResponse](
+      .POST[BankAccountReputationValidationRequest, HttpResponse](
         url = bankAccountReputationConfig.validateBankDetailsUrl,
         body = bankDetailsModel
       )
