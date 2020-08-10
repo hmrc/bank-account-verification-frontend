@@ -16,10 +16,13 @@
 
 package bankaccountverification.web
 
+import bankaccountverification.connector.{BarsValidationResponse, ReputationResponseEnum}
+import bankaccountverification.connector.ReputationResponseEnum.No
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.data.FormError
 import play.api.i18n.MessagesApi
 
 class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
@@ -36,22 +39,22 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
     "validate sortcode successfully" when {
       "sortcode is hyphenated" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "10-10-10", "12345678")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe false
       }
       "sortcode is hyphenated with spaces" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "10 10 10", "12345678")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe false
       }
       "sortcode contains just 6 digits" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "101010", "12345678")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe false
       }
       "sortcode contains just 6 digits and leading & trailing spaces" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", " 10-10 10   ", "12345678")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe false
       }
     }
@@ -59,7 +62,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
     "flag account name validation errors" when {
       "account name is empty" in {
         val bankAccountDetails     = VerificationRequest("", "123456", "12345678")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountName")
@@ -71,7 +74,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
     "flag account number validation errors" when {
       "account number is empty" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "123456", "")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
@@ -81,7 +84,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
 
       "account number is less than 6 digits" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "123456", "12345")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
@@ -91,7 +94,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
 
       "account number is more than 8 digits" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "123456", "123456789")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
@@ -101,7 +104,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
 
       "account number is not numeric" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "123456", "123FOO78")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
@@ -111,7 +114,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
 
       "account number is too long and not numeric" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "123456", "123FOOO78")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
@@ -123,7 +126,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
     "flag sortcode validation errors" when {
       "sortcode is empty" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "", "12345678")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "sortCode")
@@ -133,7 +136,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
 
       "sortcode is less than 6 digits" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "1010", "12345678")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "sortCode")
@@ -143,7 +146,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
 
       "sortcode is longer than 6 digits" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "1010101", "12345678")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "sortCode")
@@ -153,7 +156,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
 
       "sortcode contains invalid characters" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "SRTCDE", "12345678")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "sortCode")
@@ -163,7 +166,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
 
       "sortcode contains too many invalid characters" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "SORTCODE", "12345678")
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "sortCode")
@@ -178,7 +181,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
     "flag roll number validation errors" when {
       "roll number contains more than 18 characters" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "1010", "12345678", Some("1234567890123456789"))
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "rollNumber")
@@ -188,7 +191,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
 
       "roll number contains invalid characters" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "1010", "12345678", Some("1234*$£@!"))
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "rollNumber")
@@ -198,7 +201,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
 
       "roll number is too long and contains invalid characters" in {
         val bankAccountDetails     = VerificationRequest("Joe Blogs", "1010", "12345678", Some("1234*$£@!%1234*$£@!%"))
-        val bankAccountDetailsForm = VerificationRequest.verificationForm.fillAndValidate(bankAccountDetails)
+        val bankAccountDetailsForm = VerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "rollNumber")
@@ -206,5 +209,31 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
         error.get.message shouldBe "error.rollNumber.format"
       }
     }
+  }
+
+  "Validation using the bars response" when {
+    val request = VerificationRequest("Joe Blogs", "10-10-10", "12345678")
+    val form    = VerificationRequest.form.fillAndValidate(request)
+
+    "the response indicates the sort code and account number combination is not valid" should {
+      val response = BarsValidationResponse(No, No, None)
+      val updatedForm = form.validateUsingBarsResponse(response)
+
+      "flag an error against both the sort code and account number fields" in {
+        updatedForm.error("sortCode") shouldBe Some(FormError("sortCode", "error.sortcode.eiscdInvalid"))
+        updatedForm.error("accountNumber") shouldBe Some(FormError("accountNumber", "error.accountNumber.eiscdInvalid"))
+      }
+    }
+
+    "the response indicates an error occurred" should {
+      val response = BarsValidationResponse(ReputationResponseEnum.Error, ReputationResponseEnum.Error, Some(ReputationResponseEnum.Error))
+      val updatedForm = form.validateUsingBarsResponse(response)
+
+      "flag no errors so that the journey is not impacted" in {
+        updatedForm.hasErrors shouldBe false
+      }
+    }
+
+
   }
 }

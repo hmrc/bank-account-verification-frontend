@@ -1,7 +1,7 @@
 package bankaccountverification
 
 import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
-import bankaccountverification.connector.{BankAccountReputationConnector, BankAccountReputationValidationResponse}
+import bankaccountverification.connector.{BankAccountReputationConnector, BarsValidationResponse}
 import bankaccountverification.web.VerificationRequest
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentMatchers.any
@@ -37,8 +37,8 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     }
 
   "BankAccountVerification" in {
-    when(mockBankAccountReputationConnector.validateBankDetails(any())(any(), any(), any())).thenReturn(
-      Future.successful(Success(BankAccountReputationValidationResponse(Yes, No, None)))
+    when(mockBankAccountReputationConnector.validateBankDetails(any())(any(), any())).thenReturn(
+      Future.successful(Success(BarsValidationResponse(Yes, No, None)))
     )
 
     val wsClient = app.injector.instanceOf[WSClient]

@@ -35,6 +35,7 @@ package bankaccountverification
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{Json, OWrites}
 import play.modules.reactivemongo.ReactiveMongoComponent
+import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
 import uk.gov.hmrc.mongo.ReactiveRepository
@@ -53,6 +54,9 @@ class SessionDataRepository @Inject() (component: ReactiveMongoComponent)
 
   private lazy val ExpiryDateIndex       = "expiryDateIndex"
   private lazy val OptExpireAfterSeconds = "expireAfterSeconds"
+
+  def insertOne(entity: MongoSessionData)(implicit ec: ExecutionContext): Future[Boolean] =
+    insert(entity).map(wc => wc.ok)
 
   def findAndUpdateById(id: BSONObjectID, data: SessionData)(implicit
     formats: OWrites[MongoSessionData],

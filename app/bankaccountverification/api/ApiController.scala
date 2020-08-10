@@ -43,7 +43,7 @@ class ApiController @Inject() (
     Action.async {
       val journeyId   = BSONObjectID.generate()
       val sessionData = MongoSessionData.createExpiring(journeyId)
-      sessionRepo.insert(sessionData).map(_ => Ok(journeyId.stringify))
+      sessionRepo.insertOne(sessionData).map(_ => Ok(journeyId.stringify))
     }
 
   def complete(journeyId: String): Action[AnyContent] =

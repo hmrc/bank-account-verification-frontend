@@ -35,29 +35,31 @@ object ReputationResponseEnum extends Enumerable.Implicits {
     Enumerable(values.map(v => v.toString -> v): _*)
 }
 
-case class BankAccountReputationValidationResponse(
+case class BarsValidationResponse(
   accountNumberWithSortCodeIsValid: ReputationResponseEnum,
   nonStandardAccountDetailsRequiredForBacs: ReputationResponseEnum,
   supportsBACS: Option[ReputationResponseEnum]
 )
 
-object BankAccountReputationValidationResponse {
-  implicit val format: OFormat[BankAccountReputationValidationResponse] =
-    Json.format[BankAccountReputationValidationResponse]
+object BarsValidationResponse {
+  implicit val format: OFormat[BarsValidationResponse] =
+    Json.format[BarsValidationResponse]
 }
 
-case class BankAccountReputationValidationRequestAccount(sortCode: String, accountNumber: String)
-object BankAccountReputationValidationRequestAccount {
+case class BarsValidationRequestAccount(sortCode: String, accountNumber: String)
+object BarsValidationRequestAccount {
   implicit val bankAccountReputationValidationRequestAccountReads =
-    Json.reads[BankAccountReputationValidationRequestAccount]
+    Json.reads[BarsValidationRequestAccount]
   implicit val bankAccountReputationValidationRequestAccountWrites =
-    Json.writes[BankAccountReputationValidationRequestAccount]
+    Json.writes[BarsValidationRequestAccount]
 }
 
-case class BankAccountReputationValidationRequest(account: BankAccountReputationValidationRequestAccount)
-object BankAccountReputationValidationRequest {
-  import BankAccountReputationValidationRequestAccount._
+case class BarsValidationRequest(account: BarsValidationRequestAccount)
+object BarsValidationRequest {
+  import BarsValidationRequestAccount._
 
-  implicit val bankAccountReputationValidationRequestReads  = Json.reads[BankAccountReputationValidationRequest]
-  implicit val bankAccountReputationValidationRequestWrites = Json.writes[BankAccountReputationValidationRequest]
+  def apply(sortCode: String, accountNumber: String): BarsValidationRequest = BarsValidationRequest(BarsValidationRequestAccount(sortCode, accountNumber))
+
+  implicit val bankAccountReputationValidationRequestReads  = Json.reads[BarsValidationRequest]
+  implicit val bankAccountReputationValidationRequestWrites = Json.writes[BarsValidationRequest]
 }

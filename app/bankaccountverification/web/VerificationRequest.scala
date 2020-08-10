@@ -16,10 +16,12 @@
 
 package bankaccountverification.web
 
+import bankaccountverification.connector.BarsValidationResponse
+import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation._
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.Json
 
 import scala.util.{Failure, Success, Try}
 
@@ -36,7 +38,23 @@ object VerificationRequest {
     implicit val bankAccountDetailsWrites = Json.writes[VerificationRequest]
   }
 
-  val verificationForm: Form[VerificationRequest] =
+  implicit class ValidationFormWrapper(form: Form[VerificationRequest]) {
+
+    def validateUsingBarsResponse(response: BarsValidationResponse): Form[VerificationRequest] =
+      if (response.accountNumberWithSortCodeIsValid == No)
+        form
+          .fill(form.get)
+          .withError("sortCode", "error.sortcode.eiscdInvalid")
+          .withError("accountNumber", "error.accountNumber.eiscdInvalid")
+      else if (response.nonStandardAccountDetailsRequiredForBacs == Yes)
+        form
+          .fill(form.get)
+          .withError("rollNumber", "error.rollNumber.required")
+      else form
+
+  }
+
+  val form: Form[VerificationRequest] =
     Form(
       mapping(
         "accountName"   -> accountNameMapping,
@@ -71,8 +89,7 @@ object VerificationRequest {
 
   def sortcodeConstraint(): Constraint[String] =
     Constraint[String](Some("constraints.sortcode.format"), Seq.empty) { input =>
-      val strippedInput = input.replaceAll("""[ \-]""", "")
-
+      val strippedInput = stripSortCode(input)
       val errors =
         Seq(
           if (strippedInput.length != 6) Some("error.sortcode.invalidLengthError") else None,
@@ -84,6 +101,8 @@ object VerificationRequest {
         case errs  => Invalid(ValidationError(errs))
       }
     }
+
+  def stripSortCode(sortCode: String) = sortCode.replaceAll("""[ \-]""", "")
 
   private def sortcodeHasInvalidChars(sortcode: String): Boolean =
     Try(sortcode.toInt) match {

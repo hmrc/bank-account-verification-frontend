@@ -16,11 +16,16 @@
 
 package bankaccountverification.api
 
-import bankaccountverification.{AppConfig, SessionDataRepository}
+import java.time.ZonedDateTime
+
+import bankaccountverification.{AppConfig, MongoSessionData, SessionData, SessionDataRepository}
 import com.codahale.metrics.SharedMetricRegistries
+import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito._
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.test.FakeRequest
@@ -30,9 +35,10 @@ import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class ApiControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite with OptionValues {
+class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite with OptionValues {
   implicit private val timeout: FiniteDuration = 1 second
 
   private val env           = Environment.simple()
@@ -46,14 +52,16 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSui
     fakeApplication()
   }
 
-  private lazy val sessionStore = app.injector.instanceOf[SessionDataRepository]
+  private lazy val sessionStore = mock[SessionDataRepository]
 
   private val controller =
     new ApiController(appConfig, stubMessagesControllerComponents(), sessionStore)
 
   "POST /init" should {
     "return 200" in {
-      val fakeRequest = FakeRequest("POST", "/bankaccountverification.api/init")
+      when(sessionStore.insertOne(any())(any())).thenReturn(Future.successful(true))
+
+      val fakeRequest = FakeRequest("POST", "/api/init")
       val result      = controller.init().apply(fakeRequest)
       status(result) shouldBe Status.OK
       val journeyIdMaybe = contentAsString(result)
@@ -65,13 +73,14 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSui
   "GET /complete" should {
     "return 200" when {
       "a valid journeyId is provided" in {
-        val fakeInitRequest = FakeRequest("POST", "/bankaccountverification.api/init")
-        val initResult      = controller.init().apply(fakeInitRequest)
-        status(initResult) shouldBe Status.OK
-        val journeyId = contentAsString(initResult)
 
-        val fakeCompleteRequest = FakeRequest("GET", s"/bankaccountverification.api/complete/$journeyId")
-        val completeResult      = controller.complete(journeyId).apply(fakeCompleteRequest)
+        val journeyId  = BSONObjectID.generate()
+        val returnData = MongoSessionData(journeyId, ZonedDateTime.now(), Some(SessionData(None, None, None, None)))
+
+        when(sessionStore.findById(any(), any())(any())).thenReturn(Future.successful(Some(returnData)))
+
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/${journeyId.stringify}")
+        val completeResult      = controller.complete(journeyId.stringify).apply(fakeCompleteRequest)
         status(completeResult) shouldBe Status.OK
       }
     }
@@ -79,8 +88,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSui
 
   "return NotFound" when {
     "a non-existent journeyId is provided" in {
+      when(sessionStore.findById(any(), any())(any())).thenReturn(Future.successful(None))
+
       val nonExistentJourneyId = BSONObjectID.generate().stringify
-      val fakeCompleteRequest  = FakeRequest("GET", s"/bankaccountverification.api/complete/$nonExistentJourneyId")
+      val fakeCompleteRequest  = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
       val completeResult       = controller.complete(nonExistentJourneyId).apply(fakeCompleteRequest)
       status(completeResult) shouldBe Status.NOT_FOUND
     }
@@ -89,7 +100,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSui
   "return BadRequest" when {
     "an invalid journeyId is provided" in {
       val nonExistentJourneyId = "invalid-journey-id"
-      val fakeCompleteRequest  = FakeRequest("GET", s"/bankaccountverification.api/complete/$nonExistentJourneyId")
+      val fakeCompleteRequest  = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
       val completeResult       = controller.complete(nonExistentJourneyId).apply(fakeCompleteRequest)
       status(completeResult) shouldBe Status.BAD_REQUEST
     }
