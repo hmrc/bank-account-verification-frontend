@@ -34,6 +34,8 @@ package bankaccountverification
 
 import java.time.{Instant, ZoneOffset, ZonedDateTime}
 
+import bankaccountverification.api.CompleteResponse
+import bankaccountverification.connector.ReputationResponseEnum
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
@@ -43,8 +45,24 @@ case class SessionData(
   accountName: Option[String],
   sortCode: Option[String],
   accountNumber: Option[String],
-  rollNumber: Option[String] = None
+  rollNumber: Option[String] = None,
+  accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None
 )
+
+object SessionData {
+  def toCompleteResponse(sessionData: SessionData): Option[CompleteResponse] =
+    sessionData match {
+      case SessionData(
+            Some(accountName),
+            Some(sortCode),
+            Some(accountNumber),
+            rollNumber,
+            Some(accountNumberWithSortCodeIsValid)
+          ) =>
+        Some(api.CompleteResponse(accountName, sortCode, accountNumber, accountNumberWithSortCodeIsValid, rollNumber))
+      case _ => None
+    }
+}
 
 case class MongoSessionData(id: BSONObjectID, expiryDate: ZonedDateTime, data: Option[SessionData] = None)
 

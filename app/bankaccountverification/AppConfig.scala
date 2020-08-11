@@ -28,6 +28,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val bankAccountReputationConfig = BankAccountReputationConfig(
     validateBankDetailsUrl = config.get[String]("bankaccountreputation.validateBankDetails.url")
   )
+
+  val contactFormServiceIdentifier = "bank-account-verification"
 }
 
 case class BankAccountReputationConfig(validateBankDetailsUrl: String)

@@ -1,33 +1,35 @@
-service.name = Bank Account Verification Frontend
-service.homePageUrl = /bank-account-verification-frontend
-service.text = Enter Bank Account Details
+service.name = Bank Account Verification
+service.homePageUrl =
+service.text = Enter bank account details
 
-label.account.name = Account Name
-label.account.sortCode = Account Sortcode
-label.account.number = Account Number
-label.rollNumber = Roll Number (optional)
+label.account.name = Account name
+label.account.sortCode = Account sortcode
+label.account.number = Account number
+label.rollNumber = Roll number (optional)
 label.submitLabel = Continue
 
 error.summaryText = There is an error
-error.accountName.required = Account Name is required
+error.accountName.required = Account name is required
 
-error.accountNumber.required = Account Number is required
-error.accountNumber.digitsOnly = Account Number can only contain digits
-error.accountNumber.minLength = Account Number must be at least 6 digits long
-error.accountNumber.maxLength =  = Account Number must be at most 8 digits long
+error.accountNumber.required = Account number is required
+error.accountNumber.digitsOnly = Account number can only contain digits
+error.accountNumber.minLength = Account number must be at least 6 digits long
+error.accountNumber.maxLength = Account number must be at most 8 digits long
+error.accountNumber.eiscdInvalid = Sort code and account number combination was not valid
 
-error.sortcode.required = Sort Code is required
-error.sortcode.invalidLengthError = Sort Code must be 6 digits long
-error.sortcode.invalidCharsError = Sort Code must only contain digits, spaces or hyphens
+error.sortcode.required = Sort code is required
+error.sortcode.invalidLengthError = Sort code must be 6 digits long
+error.sortcode.invalidCharsError = Sort code must only contain digits, spaces or hyphens
+error.sortcode.eiscdInvalid = Sort code and account number combination was not valid
 
-error.rollNumber.format = Roll Number can only contain uppercase characters, digits, dots or hyphens
-error.rollNumber.minLength = Roll Number must be at least 1 character long
-error.rollNumber.maxLength = Roll Number must be at most 18 characters long
+error.rollNumber.format = Roll number can only contain uppercase characters, digits, dots or hyphens
+error.rollNumber.minLength = Roll number must be at least 1 character long
+error.rollNumber.maxLength = Roll number must be at most 18 characters long
+error.rollNumber.required = Roll number is required
 
 error.journeyId.pageTitle = Error
 error.journeyId.heading = There was a problem
-error.journeyId.message = The journey could not be found.
-
+error.journeyId.message = The journey could not be found
 
 footer.cookies.text = Cookies
 footer.cookies.url = /help/cookies

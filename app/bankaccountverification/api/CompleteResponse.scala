@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import bankaccountverification.connector.BankAccountReputationConnector
-import bankaccountverification.{AppConfig, SessionDataRepository}
-import com.google.inject.AbstractModule
-import play.api.libs.concurrent.AkkaGuiceSupport
-import play.api.{Configuration, Environment}
+package bankaccountverification.api
 
-class Module(environment: Environment, playConfig: Configuration) extends AbstractModule with AkkaGuiceSupport {
-  override def configure(): Unit = {
-    super.configure()
-    bind(classOf[AppConfig])
-    bind(classOf[SessionDataRepository])
-    bind(classOf[BankAccountReputationConnector])
-  }
+import bankaccountverification.connector.ReputationResponseEnum
+import play.api.libs.json.Json
+
+case class CompleteResponse(
+  accountName: String,
+  sortCode: String,
+  accountNumber: String,
+  accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+  rollNumber: Option[String] = None
+)
+
+object CompleteResponse {
+  implicit val completeResponseWrites = Json.writes[CompleteResponse]
 }

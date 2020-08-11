@@ -54,7 +54,12 @@ class SessionDataRepository @Inject() (component: ReactiveMongoComponent)
   private lazy val ExpiryDateIndex       = "expiryDateIndex"
   private lazy val OptExpireAfterSeconds = "expireAfterSeconds"
 
-  def findAndUpdateById(id: BSONObjectID, data: SessionData)(implicit
+  def createJourney()(implicit ec: ExecutionContext): Future[BSONObjectID] = {
+    val journeyId = BSONObjectID.generate()
+    insert(MongoSessionData.createExpiring(journeyId)).map(_ => journeyId)
+  }
+
+  def updateJourney(id: BSONObjectID, data: SessionData)(implicit
     formats: OWrites[MongoSessionData],
     ec: ExecutionContext
   ): Future[Boolean] =
