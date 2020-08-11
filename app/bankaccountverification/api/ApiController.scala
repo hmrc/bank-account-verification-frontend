@@ -16,7 +16,7 @@
 
 package bankaccountverification.api
 
-import bankaccountverification.{AppConfig, MongoSessionData, SessionData, SessionDataRepository}
+import bankaccountverification.{AppConfig, SessionData, SessionDataRepository}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
@@ -24,8 +24,8 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 @Singleton
@@ -48,8 +48,6 @@ class ApiController @Inject() (
     Action.async {
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
-          import bankaccountverification.MongoSessionData._
-
           sessionRepo
             .findById(id)
             .map {
