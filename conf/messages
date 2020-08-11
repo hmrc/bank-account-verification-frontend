@@ -1,5 +1,5 @@
-service.name = Bank Account Verification Frontend
-service.homePageUrl = /bank-account-verification-frontend
+service.name = Bank Account Verification
+service.homePageUrl =
 service.text = Enter bank account details
 
 label.account.name = Account name
@@ -14,13 +14,13 @@ error.accountName.required = Account name is required
 error.accountNumber.required = Account number is required
 error.accountNumber.digitsOnly = Account number can only contain digits
 error.accountNumber.minLength = Account number must be at least 6 digits long
-error.accountNumber.maxLength =  Account number must be at most 8 digits long
-error.accountNumber.eiscdInvalid = EISCD validation failed
+error.accountNumber.maxLength = Account number must be at most 8 digits long
+error.accountNumber.eiscdInvalid = Sort code and account number combination was not valid
 
 error.sortcode.required = Sort code is required
 error.sortcode.invalidLengthError = Sort code must be 6 digits long
 error.sortcode.invalidCharsError = Sort code must only contain digits, spaces or hyphens
-error.sortcode.eiscdInvalid = EISCD validation failed
+error.sortcode.eiscdInvalid = Sort code and account number combination was not valid
 
 error.rollNumber.format = Roll number can only contain uppercase characters, digits, dots or hyphens
 error.rollNumber.minLength = Roll number must be at least 1 character long
@@ -29,7 +29,7 @@ error.rollNumber.required = Roll number is required
 
 error.journeyId.pageTitle = Error
 error.journeyId.heading = There was a problem
-error.journeyId.message = The journey could not be found.
+error.journeyId.message = The journey could not be found
 
 footer.cookies.text = Cookies
 footer.cookies.url = /help/cookies
