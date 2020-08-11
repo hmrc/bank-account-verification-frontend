@@ -41,7 +41,7 @@ class ApiController @Inject() (
 
   def init: Action[AnyContent] =
     Action.async {
-      sessionRepo.createJourney().map(journeyId => Ok(journeyId.stringify))
+      sessionRepo.createJourney().map(journeyId => Ok(Json.toJson(journeyId.stringify)))
     }
 
   def complete(journeyId: String): Action[AnyContent] =

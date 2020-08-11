@@ -34,23 +34,12 @@ package bankaccountverification
 
 import java.time.{Instant, ZoneOffset, ZonedDateTime}
 
+import bankaccountverification.api.CompleteResponse
 import bankaccountverification.connector.ReputationResponseEnum
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
-
-case class CompleteResponse(
-  accountName: String,
-  sortCode: String,
-  accountNumber: String,
-  accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-  rollNumber: Option[String] = None
-)
-
-object CompleteResponse {
-  implicit val completeResponseWrites = Json.writes[CompleteResponse]
-}
 
 case class SessionData(
   accountName: Option[String],
@@ -70,7 +59,7 @@ object SessionData {
             rollNumber,
             Some(accountNumberWithSortCodeIsValid)
           ) =>
-        Some(CompleteResponse(accountName, sortCode, accountNumber, accountNumberWithSortCodeIsValid, rollNumber))
+        Some(api.CompleteResponse(accountName, sortCode, accountNumber, accountNumberWithSortCodeIsValid, rollNumber))
       case _ => None
     }
 }
