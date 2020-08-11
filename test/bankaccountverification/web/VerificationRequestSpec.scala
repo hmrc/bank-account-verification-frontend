@@ -17,7 +17,7 @@
 package bankaccountverification.web
 
 import bankaccountverification.connector.{BarsValidationResponse, ReputationResponseEnum}
-import bankaccountverification.connector.ReputationResponseEnum.No
+import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -222,6 +222,27 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
       "flag an error against both the sort code and account number fields" in {
         updatedForm.error("sortCode")      shouldBe Some(FormError("sortCode", "error.sortcode.eiscdInvalid"))
         updatedForm.error("accountNumber") shouldBe Some(FormError("accountNumber", "error.accountNumber.eiscdInvalid"))
+      }
+    }
+
+    "the response indicates that a roll number is required but none was provided" should {
+      val response    = BarsValidationResponse(Yes, Yes, None)
+      val updatedForm = form.validateUsingBarsResponse(response)
+
+      "flag an error against the roll number field" in {
+        updatedForm.error("rollNumber") shouldBe Some(FormError("rollNumber", "error.rollNumber.required"))
+      }
+    }
+
+    "the response indicates that a roll number is required and a valid roll number was provided" should {
+      val requestWithRollNumber = VerificationRequest("Joe Blogs", "10-10-10", "12345678", Some("ROLL1"))
+      val formWithRollNumber    = VerificationRequest.form.fillAndValidate(requestWithRollNumber)
+
+      val response    = BarsValidationResponse(Yes, Yes, None)
+      val updatedForm = formWithRollNumber.validateUsingBarsResponse(response)
+
+      "flag no errors" in {
+        updatedForm.hasErrors shouldBe false
       }
     }
 

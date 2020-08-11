@@ -46,7 +46,7 @@ object VerificationRequest {
           .fill(form.get)
           .withError("sortCode", "error.sortcode.eiscdInvalid")
           .withError("accountNumber", "error.accountNumber.eiscdInvalid")
-      else if (response.nonStandardAccountDetailsRequiredForBacs == Yes)
+      else if (response.nonStandardAccountDetailsRequiredForBacs == Yes && form.get.rollNumber.isEmpty)
         form
           .fill(form.get)
           .withError("rollNumber", "error.rollNumber.required")
