@@ -32,7 +32,7 @@
             content = HtmlContent(messages(error.message)))}))
 }
 
-@form(bankaccountverification.web.routes.BankAccountVerificationController.verifyDetails(journeyId)) {
+@form(bankaccountverification.web.routes.VerificationController.verifyDetails(journeyId)) {
       @input(Input(value = detailsForm("accountName").value,
           label = Label(content = HtmlContent(messages("label.account.name"))),
           formGroupClasses = "form-field-group", autocomplete = Some("account-name"),

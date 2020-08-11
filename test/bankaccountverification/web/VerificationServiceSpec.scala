@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package bankaccountverification.web
 
 import bankaccountverification.{SessionData, SessionDataRepository}
@@ -20,22 +36,22 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 
 class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite {
   implicit val timeout = 1 second
-  implicit val hc = HeaderCarrier()
+  implicit val hc      = HeaderCarrier()
 
   "Verifying bank account details provided by the user" when {
     val journeyId = BSONObjectID.generate()
 
     "the remote bars check fails" should {
-      val mockConnector = mock[BankAccountReputationConnector]
+      val mockConnector  = mock[BankAccountReputationConnector]
       val mockRepository = mock[SessionDataRepository]
-      val service = new VerificationService(mockConnector, mockRepository)
+      val service        = new VerificationService(mockConnector, mockRepository)
 
       val userInput = VerificationRequest("Bob", "20-30-40", "12345678")
-      val form = VerificationRequest.form.fillAndValidate(userInput)
+      val form      = VerificationRequest.form.fillAndValidate(userInput)
 
       val validationResult = Future.successful(Failure(new HttpException("FIRE IN SERVER ROOM", 500)))
       when(mockConnector.validateBankDetails(any())(any(), any())).thenReturn(validationResult)
-      when(mockRepository.findAndUpdateById(any(), any())(any(), any())).thenReturn(Future.successful(true))
+      when(mockRepository.updateJourney(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
       val updatedForm = service.verify(journeyId, form)
 
@@ -44,8 +60,8 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       }
 
       "persist the details to mongo" in {
-        val expectedSessionData  = SessionData(Some("Bob"), Some("20-30-40"), Some("12345678"), None, None)
-        verify(mockRepository).findAndUpdateById(meq(journeyId), meq(expectedSessionData))(any(), any())
+        val expectedSessionData = SessionData(Some("Bob"), Some("20-30-40"), Some("12345678"), None, None)
+        verify(mockRepository).updateJourney(meq(journeyId), meq(expectedSessionData))(any(), any())
       }
 
       "return a valid form" in {
@@ -54,16 +70,16 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     }
 
     "the details provided pass the remote bars checks" should {
-      val mockConnector = mock[BankAccountReputationConnector]
+      val mockConnector  = mock[BankAccountReputationConnector]
       val mockRepository = mock[SessionDataRepository]
-      val service = new VerificationService(mockConnector, mockRepository)
+      val service        = new VerificationService(mockConnector, mockRepository)
 
       val userInput = VerificationRequest("Bob", "20-30-40", "12345678")
-      val form = VerificationRequest.form.fillAndValidate(userInput)
+      val form      = VerificationRequest.form.fillAndValidate(userInput)
 
       val validationResult = Future.successful(Success(BarsValidationResponse(Yes, No, None)))
       when(mockConnector.validateBankDetails(any())(any(), any())).thenReturn(validationResult)
-      when(mockRepository.findAndUpdateById(any(), any())(any(), any())).thenReturn(Future.successful(true))
+      when(mockRepository.updateJourney(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
       val updatedForm = service.verify(journeyId, form)
 
@@ -72,8 +88,8 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       }
 
       "persist the details to mongo" in {
-        val expectedSessionData  = SessionData(Some("Bob"), Some("20-30-40"), Some("12345678"), None, Some(Yes))
-        verify(mockRepository).findAndUpdateById(meq(journeyId), meq(expectedSessionData))(any(), any())
+        val expectedSessionData = SessionData(Some("Bob"), Some("20-30-40"), Some("12345678"), None, Some(Yes))
+        verify(mockRepository).updateJourney(meq(journeyId), meq(expectedSessionData))(any(), any())
       }
 
       "return a valid form" in {
@@ -82,16 +98,16 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     }
 
     "the details provided do not pass the remote bars checks" should {
-      val mockConnector = mock[BankAccountReputationConnector]
+      val mockConnector  = mock[BankAccountReputationConnector]
       val mockRepository = mock[SessionDataRepository]
-      val service = new VerificationService(mockConnector, mockRepository)
+      val service        = new VerificationService(mockConnector, mockRepository)
 
       val userInput = VerificationRequest("Bob", "20-30-40", "00000000")
-      val form = VerificationRequest.form.fillAndValidate(userInput)
+      val form      = VerificationRequest.form.fillAndValidate(userInput)
 
       val validationResult = Future.successful(Success(BarsValidationResponse(No, No, None)))
       when(mockConnector.validateBankDetails(any())(any(), any())).thenReturn(validationResult)
-      when(mockRepository.findAndUpdateById(any(), any())(any(), any())).thenReturn(Future.successful(true))
+      when(mockRepository.updateJourney(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
       val updatedForm = service.verify(journeyId, form)
 
@@ -100,7 +116,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       }
 
       "not persist the details to mongo" in {
-        verify(mockRepository, never()).findAndUpdateById(meq(journeyId), any())(any(), any())
+        verify(mockRepository, never()).updateJourney(meq(journeyId), any())(any(), any())
       }
 
       "return a form with errors" in {

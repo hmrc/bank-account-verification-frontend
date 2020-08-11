@@ -40,11 +40,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class VerificationControllerSpec
-    extends AnyWordSpec
-    with Matchers
-    with MockitoSugar
-    with GuiceOneAppPerSuite {
+class VerificationControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite {
   implicit val timeout = 1 second
 
   val mockRepository = mock[SessionDataRepository]
@@ -136,8 +132,8 @@ class VerificationControllerSpec
 
         val result = controller.verifyDetails(id.stringify).apply(fakeRequest)
 
-        status(result)           shouldBe Status.BAD_REQUEST
-        contentAsString(result)  should include("a.specific.error")
+        status(result)        shouldBe Status.BAD_REQUEST
+        contentAsString(result) should include("a.specific.error")
       }
     }
 

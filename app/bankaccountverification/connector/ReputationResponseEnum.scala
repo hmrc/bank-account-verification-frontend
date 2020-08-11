@@ -58,7 +58,8 @@ case class BarsValidationRequest(account: BarsValidationRequestAccount)
 object BarsValidationRequest {
   import BarsValidationRequestAccount._
 
-  def apply(sortCode: String, accountNumber: String): BarsValidationRequest = BarsValidationRequest(BarsValidationRequestAccount(sortCode, accountNumber))
+  def apply(sortCode: String, accountNumber: String): BarsValidationRequest =
+    BarsValidationRequest(BarsValidationRequestAccount(sortCode, accountNumber))
 
   implicit val bankAccountReputationValidationRequestReads  = Json.reads[BarsValidationRequest]
   implicit val bankAccountReputationValidationRequestWrites = Json.writes[BarsValidationRequest]

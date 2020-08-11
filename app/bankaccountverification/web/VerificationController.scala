@@ -30,7 +30,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 @Singleton
-class VerificationController @Inject()(
+class VerificationController @Inject() (
   appConfig: AppConfig,
   mcc: MessagesControllerComponents,
   startView: JourneyStart,
@@ -49,7 +49,7 @@ class VerificationController @Inject()(
         case Success(id) =>
           sessionRepository.findById(id).map {
             case Some(_) => Ok(startView(journeyId, VerificationRequest.form))
-            case None => NotFound(journeyIdError)
+            case None    => NotFound(journeyIdError)
           }
         case Failure(exception) =>
           Future.successful(BadRequest)
@@ -58,16 +58,15 @@ class VerificationController @Inject()(
 
   def verifyDetails(journeyId: String): Action[AnyContent] =
     Action.async { implicit request =>
-
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
           sessionRepository.findById(id).flatMap {
             case Some(_) =>
               val form = VerificationRequest.form.bindFromRequest()
               (if (!form.hasErrors) verificationService.verify(id, form)
-              else Future.successful(form)) map {
+               else Future.successful(form)) map {
                 case form if form.hasErrors => BadRequest(startView(journeyId, form))
-                case _ => SeeOther(config.mtdContinueUrl)
+                case _                      => SeeOther(config.mtdContinueUrl)
               }
 
             case None => Future.successful(NotFound(journeyIdError))
@@ -77,11 +76,10 @@ class VerificationController @Inject()(
       }
     }
 
-  private def journeyIdError(implicit request: Request[_], messages: Messages) = {
+  private def journeyIdError(implicit request: Request[_], messages: Messages) =
     errorTemplate(
       messages("error.journeyId.pageTitle"),
       messages("error.journeyId.heading"),
       messages("error.journeyId.message")
     )(request, messages, appConfig)
-  }
 }

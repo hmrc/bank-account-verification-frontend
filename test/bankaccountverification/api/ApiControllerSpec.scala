@@ -18,6 +18,7 @@ package bankaccountverification.api
 
 import java.time.ZonedDateTime
 
+import bankaccountverification.connector.ReputationResponseEnum.Yes
 import bankaccountverification.{AppConfig, MongoSessionData, SessionData, SessionDataRepository}
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentMatchers._
@@ -34,6 +35,7 @@ import play.api.{Configuration, Environment}
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
+import org.mockito.ArgumentMatchers.{eq => meq, _}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -59,40 +61,52 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
 
   "POST /init" should {
     "return 200" in {
-      when(sessionStore.insertOne(any())(any())).thenReturn(Future.successful(true))
+      val newJourneyId = BSONObjectID.generate()
+      when(sessionStore.createJourney()(any())).thenReturn(Future.successful(newJourneyId))
 
       val fakeRequest = FakeRequest("POST", "/api/init")
       val result      = controller.init().apply(fakeRequest)
       status(result) shouldBe Status.OK
       val journeyIdMaybe = contentAsString(result)
       journeyIdMaybe                                should not be ""
-      BSONObjectID.parse(journeyIdMaybe).toOption shouldBe defined
+      BSONObjectID.parse(journeyIdMaybe).toOption shouldBe Some(newJourneyId)
     }
   }
 
   "GET /complete" should {
     "return 200" when {
       "a valid journeyId is provided" in {
+        val journeyId = BSONObjectID.generate()
+        val returnData = MongoSessionData(
+          journeyId,
+          ZonedDateTime.now(),
+          Some(SessionData(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes)))
+        )
 
-        val journeyId  = BSONObjectID.generate()
-        val returnData = MongoSessionData(journeyId, ZonedDateTime.now(), Some(SessionData(None, None, None, None)))
-
-        when(sessionStore.findById(any(), any())(any())).thenReturn(Future.successful(Some(returnData)))
+        when(sessionStore.findById(meq(journeyId), any())(any())).thenReturn(Future.successful(Some(returnData)))
 
         val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/${journeyId.stringify}")
         val completeResult      = controller.complete(journeyId.stringify).apply(fakeCompleteRequest)
+
         status(completeResult) shouldBe Status.OK
+        val json = contentAsJson(completeResult)
+
+        (json \ "accountName").as[String]                      shouldBe "Bob"
+        (json \ "sortCode").as[String]                         shouldBe "203040"
+        (json \ "accountNumber").as[String]                    shouldBe "12345678"
+        (json \ "accountNumberWithSortCodeIsValid").as[String] shouldBe "yes"
+        (json \ "rollNumber").as[String]                       shouldBe "roll1"
       }
     }
   }
 
   "return NotFound" when {
     "a non-existent journeyId is provided" in {
-      when(sessionStore.findById(any(), any())(any())).thenReturn(Future.successful(None))
+      val nonExistentJourneyId = BSONObjectID.generate()
+      when(sessionStore.findById(meq(nonExistentJourneyId), any())(any())).thenReturn(Future.successful(None))
 
-      val nonExistentJourneyId = BSONObjectID.generate().stringify
-      val fakeCompleteRequest  = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
-      val completeResult       = controller.complete(nonExistentJourneyId).apply(fakeCompleteRequest)
+      val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
+      val completeResult      = controller.complete(nonExistentJourneyId.stringify).apply(fakeCompleteRequest)
       status(completeResult) shouldBe Status.NOT_FOUND
     }
   }

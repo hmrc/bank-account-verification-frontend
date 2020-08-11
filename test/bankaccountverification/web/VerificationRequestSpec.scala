@@ -216,24 +216,27 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
     val form    = VerificationRequest.form.fillAndValidate(request)
 
     "the response indicates the sort code and account number combination is not valid" should {
-      val response = BarsValidationResponse(No, No, None)
+      val response    = BarsValidationResponse(No, No, None)
       val updatedForm = form.validateUsingBarsResponse(response)
 
       "flag an error against both the sort code and account number fields" in {
-        updatedForm.error("sortCode") shouldBe Some(FormError("sortCode", "error.sortcode.eiscdInvalid"))
+        updatedForm.error("sortCode")      shouldBe Some(FormError("sortCode", "error.sortcode.eiscdInvalid"))
         updatedForm.error("accountNumber") shouldBe Some(FormError("accountNumber", "error.accountNumber.eiscdInvalid"))
       }
     }
 
     "the response indicates an error occurred" should {
-      val response = BarsValidationResponse(ReputationResponseEnum.Error, ReputationResponseEnum.Error, Some(ReputationResponseEnum.Error))
+      val response = BarsValidationResponse(
+        ReputationResponseEnum.Error,
+        ReputationResponseEnum.Error,
+        Some(ReputationResponseEnum.Error)
+      )
       val updatedForm = form.validateUsingBarsResponse(response)
 
       "flag no errors so that the journey is not impacted" in {
         updatedForm.hasErrors shouldBe false
       }
     }
-
 
   }
 }
