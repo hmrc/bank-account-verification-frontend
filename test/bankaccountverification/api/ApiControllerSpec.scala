@@ -67,7 +67,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
       val fakeRequest = FakeRequest("POST", "/api/init")
       val result      = controller.init().apply(fakeRequest)
       status(result) shouldBe Status.OK
-      val journeyIdMaybe = contentAsString(result)
+      val journeyIdMaybe = contentAsJson(result).as[String]
       journeyIdMaybe                                should not be ""
       BSONObjectID.parse(journeyIdMaybe).toOption shouldBe Some(newJourneyId)
     }
