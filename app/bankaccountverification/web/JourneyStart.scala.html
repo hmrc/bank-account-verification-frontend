@@ -13,52 +13,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *@
-
-@import bankaccountverification.AppConfig
-@import bankaccountverification.web.html.Layout
 @import bankaccountverification.web.VerificationRequest
 
-@this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, errorSummary: GovukErrorSummary)
+@this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, errorSummary: GovukErrorSummary, help: HmrcReportTechnicalIssue)
 @(journeyId: String, detailsForm: Form[VerificationRequest])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @layout(pageTitle = Some("Bank Account Verification")) {
     <h1 class="govuk-heading-xl">Bank Account Verification</h1>
-    <p class="govuk-body">@{messages("service.text")}</p>
+    <p class="govuk-body">@{
+        messages("service.text")
+    }</p>
 
 
-@if(detailsForm.hasErrors) {
-    @errorSummary(ErrorSummary(title = HtmlContent(messages("error.summaryText")),
-        errorList = detailsForm.errors.map{error ⇒ ErrorLink(href=Some(s"#${error.key}"),
-            content = HtmlContent(messages(error.message)))}))
-}
+    @if(detailsForm.hasErrors) {
+        @errorSummary(ErrorSummary(title = HtmlContent(messages("error.summaryText")),
+            errorList = detailsForm.errors.map { error ⇒
+                ErrorLink(href = Some(s"#${error.key}"),
+                    content = HtmlContent(messages(error.message)))
+            }))
+    }
 
-@form(bankaccountverification.web.routes.VerificationController.verifyDetails(journeyId)) {
-      @input(Input(value = detailsForm("accountName").value,
-          label = Label(content = HtmlContent(messages("label.account.name"))),
-          formGroupClasses = "form-field-group", autocomplete = Some("account-name"),
-          name = detailsForm("accountName").name, id = detailsForm("accountName").name, classes = "govuk-input--width-20",
-          errorMessage = detailsForm("accountName").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
+    @form(bankaccountverification.web.routes.VerificationController.verifyDetails(journeyId)) {
+        @input(Input(value = detailsForm("accountName").value,
+            label = Label(content = HtmlContent(messages("label.account.name"))),
+            formGroupClasses = "form-field-group", autocomplete = Some("account-name"),
+            name = detailsForm("accountName").name, id = detailsForm("accountName").name, classes = "govuk-input--width-20",
+            errorMessage = detailsForm("accountName").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
-      @input(Input(value = detailsForm("sortCode").value,
-          label = Label(content = HtmlContent(messages("label.account.sortCode"))),
-          formGroupClasses = "form-field-group", autocomplete = Some("account.sortCode"),
-          name = detailsForm("sortCode").name, id = detailsForm("sortCode").name, classes = "govuk-input--width-20",
-          errorMessage = detailsForm("sortCode").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
+        @input(Input(value = detailsForm("sortCode").value,
+            label = Label(content = HtmlContent(messages("label.account.sortCode"))),
+            formGroupClasses = "form-field-group", autocomplete = Some("account.sortCode"),
+            name = detailsForm("sortCode").name, id = detailsForm("sortCode").name, classes = "govuk-input--width-20",
+            errorMessage = detailsForm("sortCode").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
-      @input(Input(value = detailsForm("accountNumber").value,
-          label = Label(content = HtmlContent(messages("label.account.number"))),
-          formGroupClasses = "form-field-group", autocomplete = Some("accountNumber"),
-          name = detailsForm("accountNumber").name, id = detailsForm("accountNumber").name, classes = "govuk-input--width-20",
-          errorMessage = detailsForm("accountNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
+        @input(Input(value = detailsForm("accountNumber").value,
+            label = Label(content = HtmlContent(messages("label.account.number"))),
+            formGroupClasses = "form-field-group", autocomplete = Some("accountNumber"),
+            name = detailsForm("accountNumber").name, id = detailsForm("accountNumber").name, classes = "govuk-input--width-20",
+            errorMessage = detailsForm("accountNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
-    @input(Input(value = detailsForm("rollNumber").value,
-          label = Label(content = HtmlContent(messages("label.rollNumber"))),
-          formGroupClasses = "form-field-group", autocomplete = Some("rollNumber"),
-          name = detailsForm("rollNumber").name, id = detailsForm("rollNumber").name, classes = "govuk-input--width-20",
-          errorMessage = detailsForm("rollNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
+        @input(Input(value = detailsForm("rollNumber").value,
+            label = Label(content = HtmlContent(messages("label.rollNumber"))),
+            formGroupClasses = "form-field-group", autocomplete = Some("rollNumber"),
+            name = detailsForm("rollNumber").name, id = detailsForm("rollNumber").name, classes = "govuk-input--width-20",
+            errorMessage = detailsForm("rollNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
-      @button(Button(content = HtmlContent(messages("label.submitLabel")),
-          name = Some("continue"),
-          inputType = Some("submit"), attributes = Map("id" → "continue")))
-  }
+        @button(Button(content = HtmlContent(messages("label.submitLabel")),
+            name = Some("continue"),
+            inputType = Some("submit"), attributes = Map("id" → "continue")))
+    }
+
+    @help(ReportTechnicalIssue(
+        serviceCode = appConfig.contactFormServiceIdentifier,
+        language = Some(messages.lang.language)
+    ))
 }
