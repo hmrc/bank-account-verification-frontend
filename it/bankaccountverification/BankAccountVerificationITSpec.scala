@@ -50,7 +50,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
       await(wsClient.url(initUrl).post(""))
 
     initResponse.status shouldBe 200
-    val journeyId = initResponse.body
+    val journeyId = initResponse.json.as[String]
 
     val bankAccountDetails = VerificationRequest("some-account-name", "12-12-12", "12349876")
     val formData           = getCCParams(bankAccountDetails) ++ Map("rollNumber" -> Seq())
