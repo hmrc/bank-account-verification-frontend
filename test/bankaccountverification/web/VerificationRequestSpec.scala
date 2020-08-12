@@ -219,9 +219,10 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
       val response    = BarsValidationResponse(No, No, None)
       val updatedForm = form.validateUsingBarsResponse(response)
 
-      "flag an error against both the sort code and account number fields" in {
-        updatedForm.error("sortCode")      shouldBe Some(FormError("sortCode", "error.sortcode.eiscdInvalid"))
-        updatedForm.error("accountNumber") shouldBe Some(FormError("accountNumber", "error.accountNumber.eiscdInvalid"))
+      "flag an error against the account number" in {
+        updatedForm.error("accountNumber") shouldBe Some(
+          FormError("accountNumber", "error.accountNumber.modCheckFailed")
+        )
       }
     }
 

@@ -20,7 +20,7 @@
 @(journeyId: String, detailsForm: Form[VerificationRequest])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @layout(pageTitle = Some("Bank Account Verification")) {
-    <h1 class="govuk-heading-xl">Bank Account Verification</h1>
+    <h1 class="govuk-heading-xl">@messages("service.header")</h1>
     <p class="govuk-body">@{
         messages("service.text")
     }</p>
@@ -36,26 +36,26 @@
 
     @form(bankaccountverification.web.routes.VerificationController.verifyDetails(journeyId)) {
         @input(Input(value = detailsForm("accountName").value,
-            label = Label(content = HtmlContent(messages("label.account.name"))),
-            formGroupClasses = "form-field-group", autocomplete = Some("account-name"),
-            name = detailsForm("accountName").name, id = detailsForm("accountName").name, classes = "govuk-input--width-20",
+            label = Label(content = HtmlContent(messages("label.accountName"))),
+            formGroupClasses = "form-field-group",
+            name = detailsForm("accountName").name, id = detailsForm("accountName").name,
             errorMessage = detailsForm("accountName").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("sortCode").value,
-            label = Label(content = HtmlContent(messages("label.account.sortCode"))),
-            formGroupClasses = "form-field-group", autocomplete = Some("account.sortCode"),
-            name = detailsForm("sortCode").name, id = detailsForm("sortCode").name, classes = "govuk-input--width-20",
+            label = Label(content = HtmlContent(messages("label.sortCode"))),
+            formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(messages("hint.sortCode")))),
+            name = detailsForm("sortCode").name, id = detailsForm("sortCode").name, classes = "govuk-input--width-5",
             errorMessage = detailsForm("sortCode").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("accountNumber").value,
-            label = Label(content = HtmlContent(messages("label.account.number"))),
-            formGroupClasses = "form-field-group", autocomplete = Some("accountNumber"),
-            name = detailsForm("accountNumber").name, id = detailsForm("accountNumber").name, classes = "govuk-input--width-20",
+            label = Label(content = HtmlContent(messages("label.accountNumber"))),
+            formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(messages("hint.accountNumber")))),
+            name = detailsForm("accountNumber").name, id = detailsForm("accountNumber").name, classes = "govuk-input--width-10",
             errorMessage = detailsForm("accountNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("rollNumber").value,
             label = Label(content = HtmlContent(messages("label.rollNumber"))),
-            formGroupClasses = "form-field-group", autocomplete = Some("rollNumber"),
+            formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(messages("hint.rollNumber")))),
             name = detailsForm("rollNumber").name, id = detailsForm("rollNumber").name, classes = "govuk-input--width-20",
             errorMessage = detailsForm("rollNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 

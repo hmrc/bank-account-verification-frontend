@@ -44,8 +44,7 @@ object VerificationRequest {
       if (response.accountNumberWithSortCodeIsValid == No)
         form
           .fill(form.get)
-          .withError("sortCode", "error.sortcode.eiscdInvalid")
-          .withError("accountNumber", "error.accountNumber.eiscdInvalid")
+          .withError("accountNumber", "error.accountNumber.modCheckFailed")
       else if (response.nonStandardAccountDetailsRequiredForBacs == Yes && form.get.rollNumber.isEmpty)
         form
           .fill(form.get)
@@ -66,19 +65,9 @@ object VerificationRequest {
 
   def accountNameMapping = text.verifying(Constraints.nonEmpty(errorMessage = "error.accountName.required"))
 
-  def accountNumberMapping =
-    text.verifying(
-      Constraints.nonEmpty("error.accountNumber.required"),
-      Constraints.pattern("[0-9]+".r, "constraint.accountNumber.digitsOnly", "error.accountNumber.digitsOnly"),
-      Constraints.minLength(6, "error.accountNumber.minLength"),
-      Constraints.maxLength(8, "error.accountNumber.maxLength")
-    )
+  def accountNumberMapping = text.verifying(accountNumberConstraint())
 
-  def sortCodeMapping =
-    text.verifying(
-      Constraints.nonEmpty(errorMessage = "error.sortcode.required"),
-      sortcodeConstraint()
-    )
+  def sortCodeMapping = text.verifying(sortcodeConstraint())
 
   def rollNumberMapping =
     text.verifying(
@@ -87,18 +76,40 @@ object VerificationRequest {
       Constraints.maxLength(18, "error.rollNumber.maxLength")
     )
 
+  def accountNumberConstraint(): Constraint[String] =
+    Constraint[String](Some("constraints.accountNumber"), Seq.empty) { input =>
+      if (input.isEmpty) Invalid(ValidationError("error.accountNumber.required"))
+      else {
+        val strippedInput = stripSortCode(input)
+        val errors =
+          Seq(
+            if (strippedInput.length < 6) Some("error.accountNumber.minLength") else None,
+            if (strippedInput.length > 8) Some("error.accountNumber.maxLength") else None,
+            """[0-9]+""".r.unapplySeq(strippedInput).map(_ => None).getOrElse(Some("error.accountNumber.digitsOnly"))
+          ).flatten
+
+        errors match {
+          case Seq() => Valid
+          case errs  => Invalid(ValidationError(errs))
+        }
+      }
+    }
+
   def sortcodeConstraint(): Constraint[String] =
     Constraint[String](Some("constraints.sortcode.format"), Seq.empty) { input =>
-      val strippedInput = stripSortCode(input)
-      val errors =
-        Seq(
-          if (strippedInput.length != 6) Some("error.sortcode.invalidLengthError") else None,
-          if (sortcodeHasInvalidChars(strippedInput)) Some("error.sortcode.invalidCharsError") else None
-        ).flatten
+      if (input.isEmpty) Invalid(ValidationError("error.sortcode.required"))
+      else {
+        val strippedInput = stripSortCode(input)
+        val errors =
+          Seq(
+            if (strippedInput.length != 6) Some("error.sortcode.invalidLengthError") else None,
+            if (sortcodeHasInvalidChars(strippedInput)) Some("error.sortcode.invalidCharsError") else None
+          ).flatten
 
-      errors match {
-        case Seq() => Valid
-        case errs  => Invalid(ValidationError(errs))
+        errors match {
+          case Seq() => Valid
+          case errs  => Invalid(ValidationError(errs))
+        }
       }
     }
 

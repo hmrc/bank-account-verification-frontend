@@ -1,26 +1,30 @@
 service.name = Bank Account Verification
 service.homePageUrl =
-service.text = Enter bank account details
+service.header = Bank or building society account details
+service.text =
 
-label.account.name = Account name
-label.account.sortCode = Account sortcode
-label.account.number = Account number
-label.rollNumber = Roll number (optional)
+label.accountName = Name on the account
+label.sortCode = Sort code
+label.accountNumber = Account number
+label.rollNumber = Building society roll number (if you have one)
 label.submitLabel = Continue
 
+hint.sortCode = Must be 6 digits long
+hint.accountNumber = Must be between 6 and 8 digits long
+hint.rollNumber = You can find it on your card, statement or passbook
+
 error.summaryText = There is an error
-error.accountName.required = Account name is required
+error.accountName.required = Enter the name on the account
 
-error.accountNumber.required = Account number is required
-error.accountNumber.digitsOnly = Account number can only contain digits
-error.accountNumber.minLength = Account number must be at least 6 digits long
-error.accountNumber.maxLength = Account number must be at most 8 digits long
-error.accountNumber.eiscdInvalid = Sort code and account number combination was not valid
+error.accountNumber.required = Enter an account number
+error.accountNumber.digitsOnly = Enter a valid account number like 00733445
+error.accountNumber.minLength = Account number must be between 6 and 8 digits
+error.accountNumber.maxLength = Account number must be between 6 and 8 digits
+error.accountNumber.modCheckFailed = Account number must be valid for the given sort-code
 
-error.sortcode.required = Sort code is required
+error.sortcode.required = Enter a sort code
 error.sortcode.invalidLengthError = Sort code must be 6 digits long
-error.sortcode.invalidCharsError = Sort code must only contain digits, spaces or hyphens
-error.sortcode.eiscdInvalid = Sort code and account number combination was not valid
+error.sortcode.invalidCharsError = Enter a valid sort code like 309430
 
 error.rollNumber.format = Roll number can only contain uppercase characters, digits, dots or hyphens
 error.rollNumber.minLength = Roll number must be at least 1 character long
