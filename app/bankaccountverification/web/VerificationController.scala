@@ -16,6 +16,7 @@
 
 package bankaccountverification.web
 
+import bankaccountverification.connector.PartialsConnector
 import bankaccountverification.web.html.{ErrorTemplate, JourneyStart}
 import bankaccountverification.{AppConfig, SessionDataRepository}
 import javax.inject.{Inject, Singleton}
@@ -24,6 +25,7 @@ import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.partials.HtmlPartial
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -36,9 +38,9 @@ class VerificationController @Inject() (
   startView: JourneyStart,
   errorTemplate: ErrorTemplate,
   sessionRepository: SessionDataRepository,
-  verificationService: VerificationService
-) extends FrontendController(mcc)
-    with I18nSupport {
+  verificationService: VerificationService,
+  partialsConnector: PartialsConnector
+) extends FrontendController(mcc) {
   private val logger = Logger(this.getClass)
 
   implicit val config: AppConfig = appConfig
@@ -47,9 +49,29 @@ class VerificationController @Inject() (
     Action.async { implicit request =>
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
-          sessionRepository.findById(id).map {
-            case Some(_) => Ok(startView(journeyId, VerificationRequest.form))
-            case None    => NotFound(journeyIdError)
+          for {
+            header            <- partialsConnector.header()
+            footer            <- partialsConnector.footer()
+            remoteMessagesApi <- partialsConnector.messages()
+            session           <- sessionRepository.findById(id)
+          } yield {
+
+            val headerBlock = header match {
+              case HtmlPartial.Success(_, content) => Some(content)
+              case _                               => None
+            }
+
+            val footerBlock = footer match {
+              case HtmlPartial.Success(_, content) => Some(content)
+              case _                               => None
+            }
+
+            implicit val messages: Messages = remoteMessagesApi.preferred(request)
+
+            session match {
+              case Some(_) => Ok(startView(journeyId, VerificationRequest.form, headerBlock, footerBlock))
+              case None    => NotFound(journeyIdError)
+            }
           }
         case Failure(exception) =>
           Future.successful(BadRequest)
@@ -58,6 +80,8 @@ class VerificationController @Inject() (
 
   def verifyDetails(journeyId: String): Action[AnyContent] =
     Action.async { implicit request =>
+      implicit val messages: Messages = messagesApi.preferred(request)
+
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
           sessionRepository.findById(id).flatMap {
