@@ -17,8 +17,8 @@
 package bankaccountverification.web
 
 import bankaccountverification.{SessionData, SessionDataRepository}
-import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
 import bankaccountverification.connector.{BankAccountReputationConnector, BarsValidationRequest, BarsValidationResponse}
+import bankaccountverification.connector.ReputationResponseEnum._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
@@ -60,7 +60,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       }
 
       "persist the details to mongo" in {
-        val expectedSessionData = SessionData(Some("Bob"), Some("20-30-40"), Some("12345678"), None, None)
+        val expectedSessionData = SessionData(Some("Bob"), Some("20-30-40"), Some("12345678"), None, Some(Error))
         verify(mockRepository).updateJourney(meq(journeyId), meq(expectedSessionData))(any(), any())
       }
 

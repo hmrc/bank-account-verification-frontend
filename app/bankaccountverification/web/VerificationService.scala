@@ -16,13 +16,14 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.connector.{BankAccountReputationConnector, BarsValidationRequest, BarsValidationRequestAccount}
+import bankaccountverification.connector.{BankAccountReputationConnector, BarsValidationRequest, BarsValidationRequestAccount, BarsValidationResponse}
 import bankaccountverification.{SessionData, SessionDataRepository}
 import javax.inject.Inject
 import play.api.Logger
 import play.api.data.Form
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.http.HeaderCarrier
+import bankaccountverification.connector.ReputationResponseEnum._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -35,10 +36,10 @@ class VerificationService @Inject() (connector: BankAccountReputationConnector, 
     hc: HeaderCarrier
   ): Future[Form[VerificationRequest]] =
     connector.validateBankDetails(toBankAccountReputationRequest(form.get)).map {
-      case Success(response) => (form.validateUsingBarsResponse(response), Some(response))
+      case Success(response) => (form.validateUsingBarsResponse(response), response)
       case Failure(e) =>
         logger.warn("Received error response from bank-account-reputation.validateBankDetails")
-        (form, None)
+        (form, errorResponse)
     } flatMap {
       case (form, response) =>
         form.fold(
@@ -51,7 +52,7 @@ class VerificationService @Inject() (connector: BankAccountReputationConnector, 
               Some(verificationRequest.sortCode),
               Some(verificationRequest.accountNumber),
               verificationRequest.rollNumber,
-              response.map(_.accountNumberWithSortCodeIsValid)
+              Some(response.accountNumberWithSortCodeIsValid)
             )
 
             repository.updateJourney(journeyId, sessionData).map(_ => form)
@@ -63,4 +64,7 @@ class VerificationService @Inject() (connector: BankAccountReputationConnector, 
     BarsValidationRequest(
       BarsValidationRequestAccount(VerificationRequest.stripSortCode(vr.sortCode), vr.accountNumber)
     )
+
+  private def errorResponse: BarsValidationResponse =
+    BarsValidationResponse(Error, Error, None)
 }
