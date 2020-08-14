@@ -153,7 +153,7 @@ class VerificationControllerSpec extends AnyWordSpec with Matchers with MockitoS
         val result = controller.verifyDetails(id.stringify).apply(fakeRequest)
 
         status(result)           shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(continueUrl)
+        redirectLocation(result) shouldBe Some(s"$continueUrl/${id.stringify}")
       }
     }
   }
