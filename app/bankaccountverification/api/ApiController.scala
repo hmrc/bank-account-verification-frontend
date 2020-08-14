@@ -16,7 +16,7 @@
 
 package bankaccountverification.api
 
-import bankaccountverification.{AppConfig, SessionData, SessionDataRepository}
+import bankaccountverification.{AppConfig, JourneyRepository, Session}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
@@ -32,7 +32,7 @@ import scala.util.{Failure, Success}
 class ApiController @Inject() (
   appConfig: AppConfig,
   mcc: MessagesControllerComponents,
-  sessionRepo: SessionDataRepository
+  journeyRepository: JourneyRepository
 ) extends FrontendController(mcc) {
 
   implicit val config: AppConfig = appConfig
@@ -40,18 +40,35 @@ class ApiController @Inject() (
   private val logger = Logger(this.getClass.getSimpleName)
 
   def init: Action[AnyContent] =
-    Action.async {
-      sessionRepo.createJourney().map(journeyId => Ok(Json.toJson(journeyId.stringify)))
+    Action.async { implicit request =>
+      request.body.asJson match {
+        case Some(json) =>
+          json
+            .validate[InitRequest]
+            .fold(
+              err =>
+                Future.successful(BadRequest(Json.obj("errors" -> err.flatMap { case (_, e) => e.map(_.message) }))),
+              init =>
+                journeyRepository
+                  .create(
+                    init.continueUrl,
+                    init.customisationsUrl
+                  )
+                  .map(journeyId => Ok(Json.toJson(journeyId.stringify)))
+            )
+        case None =>
+          Future.successful(BadRequest(Json.obj("error" -> "No json")))
+      }
     }
 
   def complete(journeyId: String): Action[AnyContent] =
     Action.async {
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
-          sessionRepo
+          journeyRepository
             .findById(id)
             .map {
-              case Some(x) => Ok(Json.toJson(x.data.flatMap(SessionData.toCompleteResponse)))
+              case Some(x) => Ok(Json.toJson(x.data.flatMap(Session.toCompleteResponse)))
               case None    => NotFound
             }
             .recoverWith {

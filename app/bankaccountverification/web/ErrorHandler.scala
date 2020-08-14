@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package bankaccountverification
+package bankaccountverification.web
 
+import bankaccountverification.AppConfig
 import bankaccountverification.web.html.ErrorTemplate
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi

@@ -42,11 +42,11 @@ import uk.gov.hmrc.mongo.ReactiveRepository
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SessionDataRepository @Inject() (component: ReactiveMongoComponent)
-    extends ReactiveRepository[MongoSessionData, BSONObjectID](
+class JourneyRepository @Inject() (component: ReactiveMongoComponent)
+    extends ReactiveRepository[Journey, BSONObjectID](
       "bank-account-verification-session-store",
       component.mongoConnector.db,
-      MongoSessionData.format
+      Journey.format
     ) {
 
   val expireAfterSeconds: Long = 0
@@ -54,18 +54,21 @@ class SessionDataRepository @Inject() (component: ReactiveMongoComponent)
   private lazy val ExpiryDateIndex       = "expiryDateIndex"
   private lazy val OptExpireAfterSeconds = "expireAfterSeconds"
 
-  def createJourney()(implicit ec: ExecutionContext): Future[BSONObjectID] = {
+  def create(continueUrl: String, customisationsUrl: Option[String])(implicit
+    ec: ExecutionContext
+  ): Future[BSONObjectID] = {
     val journeyId = BSONObjectID.generate()
-    insert(MongoSessionData.createExpiring(journeyId)).map(_ => journeyId)
+    insert(Journey.createExpiring(journeyId, continueUrl, customisationsUrl)).map(_ => journeyId)
   }
 
-  def updateJourney(id: BSONObjectID, data: SessionData)(implicit
-    formats: OWrites[MongoSessionData],
+  def update(id: BSONObjectID, data: Session)(implicit
+    formats: OWrites[Journey],
     ec: ExecutionContext
-  ): Future[Boolean] =
-    findAndUpdate(_id(id), Json.toJsObject(MongoSessionData.createExpiring(id, Some(data)))).map(r =>
-      r.lastError.isDefined
-    )
+  ): Future[Boolean] = {
+    import Journey.updateWrites
+    val updateJson = Json.toJsObject(Journey.updateExpiring(data))
+    findAndUpdate(_id(id), updateJson).map(r => r.lastError.isDefined)
+  }
 
   override def ensureIndexes(implicit ec: ExecutionContext): Future[Seq[Boolean]] = {
     import reactivemongo.bson.DefaultBSONHandlers._

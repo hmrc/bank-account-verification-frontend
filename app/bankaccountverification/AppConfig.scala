@@ -23,7 +23,6 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 @Singleton
 class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
   val footerLinkItems: Seq[String] = config.getOptional[Seq[String]]("footerLinkItems").getOrElse(Seq())
-  val mtdContinueUrl: String       = config.get[String]("consumers.mtd.continueUrl")
 
   val bankAccountReputationConfig = BankAccountReputationConfig(
     validateBankDetailsUrl = config.get[String]("bankaccountreputation.validateBankDetails.url")

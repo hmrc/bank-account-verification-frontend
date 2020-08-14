@@ -18,7 +18,7 @@ package bankaccountverification.web
 
 import bankaccountverification.connector.PartialsConnector
 import bankaccountverification.web.html.{ErrorTemplate, JourneyStart}
-import bankaccountverification.{AppConfig, SessionDataRepository}
+import bankaccountverification.{AppConfig, JourneyRepository}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.i18n.{I18nSupport, Messages}
@@ -37,7 +37,7 @@ class VerificationController @Inject() (
   mcc: MessagesControllerComponents,
   startView: JourneyStart,
   errorTemplate: ErrorTemplate,
-  sessionRepository: SessionDataRepository,
+  journeyRepository: JourneyRepository,
   verificationService: VerificationService,
   partialsConnector: PartialsConnector
 ) extends FrontendController(mcc) {
@@ -50,10 +50,10 @@ class VerificationController @Inject() (
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
           for {
-            header            <- partialsConnector.header()
-            footer            <- partialsConnector.footer()
-            remoteMessagesApi <- partialsConnector.messages()
-            session           <- sessionRepository.findById(id)
+            session           <- journeyRepository.findById(id)
+            header            <- partialsConnector.header(session.flatMap(_.customisationsUrl))
+            footer            <- partialsConnector.footer(session.flatMap(_.customisationsUrl))
+            remoteMessagesApi <- partialsConnector.messages(session.flatMap(_.customisationsUrl))
           } yield {
 
             val headerBlock = header match {
@@ -84,13 +84,13 @@ class VerificationController @Inject() (
 
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
-          sessionRepository.findById(id).flatMap {
-            case Some(_) =>
+          journeyRepository.findById(id).flatMap {
+            case Some(j) =>
               val form = VerificationRequest.form.bindFromRequest()
               (if (!form.hasErrors) verificationService.verify(id, form)
                else Future.successful(form)) map {
                 case form if form.hasErrors => BadRequest(startView(journeyId, form))
-                case _                      => SeeOther(config.mtdContinueUrl)
+                case _                      => SeeOther(s"${j.continueUrl}/$journeyId")
               }
 
             case None => Future.successful(NotFound(journeyIdError))

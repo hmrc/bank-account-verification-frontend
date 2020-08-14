@@ -1,5 +1,6 @@
 package bankaccountverification
 
+import bankaccountverification.api.InitRequest
 import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
 import bankaccountverification.connector.{BankAccountReputationConnector, BarsValidationResponse}
 import bankaccountverification.web.VerificationRequest
@@ -12,7 +13,7 @@ import org.scalatestplus.mockito._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsSuccess, JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.test.CSRFTokenHelper.CSRFRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
@@ -46,8 +47,9 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     val initUrl = s"$baseUrl/api/init"
 
+    val initRequest = InitRequest("continueUrl")
     val initResponse =
-      await(wsClient.url(initUrl).post(""))
+      await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
 
     initResponse.status shouldBe 200
     val journeyId = initResponse.json.as[String]
@@ -66,15 +68,15 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
           .post(formData)
       )
 
-    import MongoSessionData._
+    import Journey._
     val completeUrl = s"$baseUrl/api/complete/$journeyId"
     val completeResponse =
       await(wsClient.url(completeUrl).get())
     completeResponse.status shouldBe 200
-    val sessionDataMaybe = Json.fromJson[SessionData](completeResponse.json)
+    val sessionDataMaybe = Json.fromJson[Session](completeResponse.json)
 
-    sessionDataMaybe shouldBe JsSuccess[SessionData](
-      SessionData(
+    sessionDataMaybe shouldBe JsSuccess[Session](
+      Session(
         Some("some-account-name"),
         Some("12-12-12"),
         Some("12349876"),

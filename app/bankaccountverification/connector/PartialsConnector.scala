@@ -27,23 +27,29 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class PartialsConnector @Inject() (
   httpClient: HttpClient,
-  appConfig: AppConfig,
   remoteMessagesApiProvider: RemoteMessagesApiProvider
 ) {
 
-  def header()(implicit ec: ExecutionContext, hc: HeaderCarrier) =
-    httpClient.GET[HtmlPartial]("http://localhost:9005/bank-account-verification/headera")
+  val failedPartial: HtmlPartial = HtmlPartial.Failure()
+  def header(baseUrl: Option[String])(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[HtmlPartial] =
+    baseUrl.fold(Future.successful(failedPartial)) { bUrl =>
+      httpClient.GET[HtmlPartial](s"$bUrl/header")
+    }
 
-  def footer()(implicit ec: ExecutionContext, hc: HeaderCarrier) =
-    httpClient.GET[HtmlPartial]("http://localhost:9005/bank-account-verification/footera")
+  def footer(baseUrl: Option[String])(implicit ec: ExecutionContext, hc: HeaderCarrier) =
+    baseUrl.fold(Future.successful(failedPartial)) { bUrl =>
+      httpClient.GET[HtmlPartial](s"$bUrl/footer")
+    }
 
-  def messages()(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[MessagesApi] = {
+  def messages(baseUrl: Option[String])(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[MessagesApi] = {
     import HttpReads.Implicits.readRaw
 
-    httpClient.GET[HttpResponse]("http://localhost:9005/bank-account-verification/messagesa") map {
-      case r if r.status == 200 =>
-        remoteMessagesApiProvider.getRemoteMessagesApi(r.body)
-      case _ => remoteMessagesApiProvider.get
+    baseUrl.fold(Future.successful(remoteMessagesApiProvider.get)) { bUrl =>
+      httpClient.GET[HttpResponse](s"$bUrl/messages") map {
+        case r if r.status == 200 =>
+          remoteMessagesApiProvider.getRemoteMessagesApi(r.body)
+        case _ => remoteMessagesApiProvider.get
+      }
     }
   }
 }

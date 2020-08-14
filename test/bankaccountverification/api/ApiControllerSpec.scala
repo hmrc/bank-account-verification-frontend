@@ -18,10 +18,11 @@ package bankaccountverification.api
 
 import java.time.ZonedDateTime
 
+import akka.stream.Materializer
 import bankaccountverification.connector.ReputationResponseEnum.Yes
-import bankaccountverification.{AppConfig, MongoSessionData, SessionData, SessionDataRepository}
+import bankaccountverification.{AppConfig, Journey, JourneyRepository, Session}
 import com.codahale.metrics.SharedMetricRegistries
-import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
@@ -29,13 +30,13 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
+import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
-import org.mockito.ArgumentMatchers.{eq => meq, _}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -54,22 +55,44 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
     fakeApplication()
   }
 
-  private lazy val sessionStore = mock[SessionDataRepository]
+  private lazy val sessionStore = mock[JourneyRepository]
 
   private val controller =
     new ApiController(appConfig, stubMessagesControllerComponents(), sessionStore)
 
-  "POST /init" should {
-    "return 200" in {
-      val newJourneyId = BSONObjectID.generate()
-      when(sessionStore.createJourney()(any())).thenReturn(Future.successful(newJourneyId))
+  implicit val mat = app.injector.instanceOf[Materializer]
 
-      val fakeRequest = FakeRequest("POST", "/api/init")
-      val result      = controller.init().apply(fakeRequest)
-      status(result) shouldBe Status.OK
-      val journeyIdMaybe = contentAsJson(result).as[String]
-      journeyIdMaybe                                should not be ""
-      BSONObjectID.parse(journeyIdMaybe).toOption shouldBe Some(newJourneyId)
+  "POST /init" should {
+    import InitRequest._
+
+    val newJourneyId = BSONObjectID.generate()
+
+    "return 200" when {
+      "A continueUrl is provided" in {
+        when(sessionStore.create(meq("https://continue/url"), meq(None))(any()))
+          .thenReturn(Future.successful(newJourneyId))
+
+        val json        = Json.toJson(InitRequest("https://continue/url"))
+        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
+
+        val result         = controller.init().apply(fakeRequest)
+        val journeyIdMaybe = contentAsJson(result).as[String]
+
+        status(result)                              shouldBe Status.OK
+        journeyIdMaybe                                should not be ""
+        BSONObjectID.parse(journeyIdMaybe).toOption shouldBe Some(newJourneyId)
+      }
+    }
+
+    "return 400" when {
+      "A continueUrl is not provided" in {
+        val json        = Json.parse("{}")
+        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
+
+        val result = controller.init().apply(fakeRequest)
+
+        status(result) shouldBe Status.BAD_REQUEST
+      }
     }
   }
 
@@ -77,10 +100,12 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
     "return 200" when {
       "a valid journeyId is provided" in {
         val journeyId = BSONObjectID.generate()
-        val returnData = MongoSessionData(
+        val returnData = Journey(
           journeyId,
           ZonedDateTime.now(),
-          Some(SessionData(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes)))
+          "continueUrl",
+          None,
+          Some(Session(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes)))
         )
 
         when(sessionStore.findById(meq(journeyId), any())(any())).thenReturn(Future.successful(Some(returnData)))

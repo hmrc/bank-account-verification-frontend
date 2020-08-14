@@ -19,7 +19,7 @@ package bankaccountverification.web
 import java.time.{ZoneOffset, ZonedDateTime}
 
 import akka.stream.Materializer
-import bankaccountverification.{MongoSessionData, SessionDataRepository}
+import bankaccountverification.{Journey, JourneyRepository}
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
@@ -43,7 +43,7 @@ import scala.concurrent.duration._
 class VerificationControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite {
   implicit val timeout = 1 second
 
-  val mockRepository = mock[SessionDataRepository]
+  val mockRepository = mock[JourneyRepository]
   val mockService    = mock[VerificationService]
   val continueUrl    = "https://continue.url"
 
@@ -51,9 +51,8 @@ class VerificationControllerSpec extends AnyWordSpec with Matchers with MockitoS
     SharedMetricRegistries.clear()
 
     new GuiceApplicationBuilder()
-      .overrides(bind[SessionDataRepository].toInstance(mockRepository))
+      .overrides(bind[JourneyRepository].toInstance(mockRepository))
       .overrides(bind[VerificationService].toInstance(mockService))
-      .configure("consumers.mtd.continueUrl" -> continueUrl)
       .build()
   }
 
@@ -76,7 +75,7 @@ class VerificationControllerSpec extends AnyWordSpec with Matchers with MockitoS
     "there is a valid journey" should {
       val id     = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
-      when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id, expiry))))
+      when(mockRepository.findById(id)).thenReturn(Future.successful(Some(Journey(id, expiry, continueUrl))))
 
       "return 200" in {
         val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
@@ -102,7 +101,7 @@ class VerificationControllerSpec extends AnyWordSpec with Matchers with MockitoS
     "the journey is valid but there are form errors" should {
       val id     = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
-      when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id, expiry))))
+      when(mockRepository.findById(id)).thenReturn(Future.successful(Some(Journey(id, expiry, continueUrl))))
       val data = VerificationRequest("", "", "")
 
       "return 400" in {
@@ -123,7 +122,7 @@ class VerificationControllerSpec extends AnyWordSpec with Matchers with MockitoS
         .fillAndValidate(data)
         .withError("Error", "a.specific.error")
 
-      when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id, expiry))))
+      when(mockRepository.findById(id)).thenReturn(Future.successful(Some(Journey(id, expiry, continueUrl))))
       when(mockService.verify(meq(id), any())(any(), any())).thenReturn(Future.successful(formWithErrors))
 
       "Render the view and display the errors" in {
@@ -144,7 +143,7 @@ class VerificationControllerSpec extends AnyWordSpec with Matchers with MockitoS
 
       val form = VerificationRequest.form.fillAndValidate(data)
 
-      when(mockRepository.findById(id)).thenReturn(Future.successful(Some(MongoSessionData(id, expiry))))
+      when(mockRepository.findById(id)).thenReturn(Future.successful(Some(Journey(id, expiry, continueUrl))))
       when(mockService.verify(meq(id), any())(any(), any())).thenReturn(Future.successful(form))
 
       "Redirect to the continueUrl" in {

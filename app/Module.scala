@@ -15,7 +15,7 @@
  */
 
 import bankaccountverification.connector.{BankAccountReputationConnector, PartialsConnector}
-import bankaccountverification.{AppConfig, RemoteMessagesApiProvider, SessionDataRepository}
+import bankaccountverification.{AppConfig, JourneyRepository, RemoteMessagesApiProvider}
 import com.google.inject.AbstractModule
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.{Configuration, Environment}
@@ -25,7 +25,7 @@ class Module(environment: Environment, playConfig: Configuration) extends Abstra
     super.configure()
     bind(classOf[AppConfig])
     bind(classOf[RemoteMessagesApiProvider])
-    bind(classOf[SessionDataRepository])
+    bind(classOf[JourneyRepository])
     bind(classOf[BankAccountReputationConnector])
     bind(classOf[PartialsConnector])
   }
