@@ -16,16 +16,15 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.connector.PartialsConnector
 import bankaccountverification.web.html.{ErrorTemplate, JourneyStart}
-import bankaccountverification.{AppConfig, JourneyRepository}
+import bankaccountverification.{AppConfig, JourneyRepository, RemoteMessagesApiProvider}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages}
+import play.api.i18n.Messages
 import play.api.mvc._
+import play.twirl.api.Html
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import uk.gov.hmrc.play.partials.HtmlPartial
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -35,11 +34,11 @@ import scala.util.{Failure, Success}
 class VerificationController @Inject() (
   appConfig: AppConfig,
   mcc: MessagesControllerComponents,
+  remoteMessagesApiProvider: RemoteMessagesApiProvider,
   startView: JourneyStart,
   errorTemplate: ErrorTemplate,
   journeyRepository: JourneyRepository,
-  verificationService: VerificationService,
-  partialsConnector: PartialsConnector
+  verificationService: VerificationService
 ) extends FrontendController(mcc) {
   private val logger = Logger(this.getClass)
 
@@ -50,28 +49,28 @@ class VerificationController @Inject() (
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
           for {
-            session           <- journeyRepository.findById(id)
-            header            <- partialsConnector.header(session.flatMap(_.customisationsUrl))
-            footer            <- partialsConnector.footer(session.flatMap(_.customisationsUrl))
-            remoteMessagesApi <- partialsConnector.messages(session.flatMap(_.customisationsUrl))
-          } yield {
+            journey <- journeyRepository.findById(id)
+          } yield journey match {
+            case Some(j) =>
+              val messageResponse             = j.messages.map(_("en").as[Map[String, String]]).getOrElse(Map())
+              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(messageResponse)
+              implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
-            val headerBlock = header match {
-              case HtmlPartial.Success(_, content) => Some(content)
-              case _                               => None
-            }
+              val headerBlock        = j.headerHtml.map(html => Html(html))
+              val beforeContentBlock = j.beforeContentHtml.map(html => Html(html))
+              val footerBlock        = j.footerHtml.map(html => Html(html))
 
-            val footerBlock = footer match {
-              case HtmlPartial.Success(_, content) => Some(content)
-              case _                               => None
-            }
-
-            implicit val messages: Messages = remoteMessagesApi.preferred(request)
-
-            session match {
-              case Some(_) => Ok(startView(journeyId, VerificationRequest.form, headerBlock, footerBlock))
-              case None    => NotFound(journeyIdError)
-            }
+              Ok(
+                startView(
+                  journeyId,
+                  j.serviceIdentifier,
+                  VerificationRequest.form,
+                  headerBlock,
+                  beforeContentBlock,
+                  footerBlock
+                )
+              )
+            case None => NotFound(journeyIdError)
           }
         case Failure(exception) =>
           Future.successful(BadRequest)
@@ -86,11 +85,22 @@ class VerificationController @Inject() (
         case Success(id) =>
           journeyRepository.findById(id).flatMap {
             case Some(j) =>
+              val messageResponse             = j.messages.map(_("en").as[Map[String, String]]).getOrElse(Map())
+              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(messageResponse)
+              implicit val messages: Messages = remoteMessagesApi.preferred(request)
+
+              val headerBlock        = j.headerHtml.map(html => Html(html))
+              val beforeContentBlock = j.beforeContentHtml.map(html => Html(html))
+              val footerBlock        = j.footerHtml.map(html => Html(html))
+
               val form = VerificationRequest.form.bindFromRequest()
               (if (!form.hasErrors) verificationService.verify(id, form)
                else Future.successful(form)) map {
-                case form if form.hasErrors => BadRequest(startView(journeyId, form))
-                case _                      => SeeOther(s"${j.continueUrl}/$journeyId")
+                case form if form.hasErrors =>
+                  BadRequest(
+                    startView(journeyId, j.serviceIdentifier, form, headerBlock, beforeContentBlock, footerBlock)
+                  )
+                case _ => SeeOther(s"${j.continueUrl}/$journeyId")
               }
 
             case None => Future.successful(NotFound(journeyIdError))

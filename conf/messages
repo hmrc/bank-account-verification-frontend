@@ -1,4 +1,4 @@
-service.name = Bank Account Verification
+service.name =
 service.homePageUrl =
 service.header = Bank or building society account details
 service.text =
@@ -8,6 +8,7 @@ label.sortCode = Sort code
 label.accountNumber = Account number
 label.rollNumber = Building society roll number (if you have one)
 label.submitLabel = Continue
+label.back = Back
 
 hint.sortCode = Must be 6 digits long
 hint.accountNumber = Must be between 6 and 8 digits long
@@ -43,3 +44,4 @@ footer.termsConditions.text = Terms and conditions
 footer.termsConditions.url = /help/terms-and-conditions
 footer.govukHelp.text = Help using GOV.UK
 footer.govukHelp.url = https://www.gov.uk/help
+footer.accessibility.text = Accessibility Statement

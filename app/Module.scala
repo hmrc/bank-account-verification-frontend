@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import bankaccountverification.connector.{BankAccountReputationConnector, PartialsConnector}
+import bankaccountverification.connector.BankAccountReputationConnector
 import bankaccountverification.{AppConfig, JourneyRepository, RemoteMessagesApiProvider}
 import com.google.inject.AbstractModule
 import play.api.libs.concurrent.AkkaGuiceSupport
@@ -27,6 +27,5 @@ class Module(environment: Environment, playConfig: Configuration) extends Abstra
     bind(classOf[RemoteMessagesApiProvider])
     bind(classOf[JourneyRepository])
     bind(classOf[BankAccountReputationConnector])
-    bind(classOf[PartialsConnector])
   }
 }

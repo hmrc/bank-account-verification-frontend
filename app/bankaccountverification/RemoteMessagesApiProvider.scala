@@ -16,10 +16,10 @@
 
 package bankaccountverification
 
-import bankaccountverification.connector.StringMessageSource
 import javax.inject.Inject
 import play.api.http.HttpConfiguration
-import play.api.i18n.{DefaultMessagesApi, DefaultMessagesApiProvider, Langs, Messages}
+import play.api.i18n.Messages.MessageSource
+import play.api.i18n.{DefaultMessagesApi, DefaultMessagesApiProvider, Langs}
 import play.api.{Configuration, Environment}
 
 class RemoteMessagesApiProvider @Inject() (
@@ -29,11 +29,7 @@ class RemoteMessagesApiProvider @Inject() (
   httpConfiguration: HttpConfiguration
 ) extends DefaultMessagesApiProvider(environment, config, langs, httpConfiguration) {
 
-  def getRemoteMessagesApi(response: String) = {
-    val remoteMessages = Messages
-      .parse(StringMessageSource(response), "remote")
-      .getOrElse(Map[String, String]())
-
+  def getRemoteMessagesApi(remoteMessages: Map[String, String]) = {
     val allMessages = loadAllMessages.map { case (s, m) => if (s == "default") s -> (m ++ remoteMessages) else s -> m }
 
     new DefaultMessagesApi(
@@ -46,4 +42,8 @@ class RemoteMessagesApiProvider @Inject() (
       httpConfiguration = httpConfiguration
     )
   }
+}
+
+case class StringMessageSource(source: String) extends MessageSource {
+  override def read: String = source
 }

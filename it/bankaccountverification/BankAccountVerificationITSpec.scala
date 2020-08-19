@@ -47,7 +47,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     val initUrl = s"$baseUrl/api/init"
 
-    val initRequest = InitRequest("continueUrl")
+    val initRequest = InitRequest("serviceIdentifier", "continueUrl")
     val initResponse =
       await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
 

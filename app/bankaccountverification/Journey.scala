@@ -26,8 +26,12 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 case class Journey(
   id: BSONObjectID,
   expiryDate: ZonedDateTime,
+  serviceIdentifier: String,
   continueUrl: String,
-  customisationsUrl: Option[String] = None,
+  messages: Option[JsObject] = None,
+  headerHtml: Option[String] = None,
+  beforeContentHtml: Option[String] = None,
+  footerHtml: Option[String] = None,
   data: Option[Session] = None
 )
 
@@ -36,11 +40,25 @@ object Journey {
 
   def createExpiring(
     id: BSONObjectID,
+    serviceIdentifier: String,
     continueUrl: String,
-    customisationsUrl: Option[String] = None,
+    messages: Option[JsObject] = None,
+    headerHtml: Option[String] = None,
+    beforeContentHtml: Option[String] = None,
+    footerHtml: Option[String] = None,
     data: Option[Session] = None
   ): Journey =
-    Journey(id, expiryDate, continueUrl, customisationsUrl, data)
+    Journey(
+      id,
+      expiryDate,
+      serviceIdentifier,
+      continueUrl,
+      messages,
+      headerHtml,
+      beforeContentHtml,
+      footerHtml,
+      data
+    )
 
   def updateExpiring(data: Session) = SessionUpdate(expiryDate, Some(data))
 
@@ -66,24 +84,47 @@ object Journey {
     (__ \ "_id")
       .read[BSONObjectID]
       .and((__ \ "expiryDate").read[ZonedDateTime])
+      .and((__ \ "serviceIdentifier").read[String])
       .and((__ \ "continueUrl").read[String])
-      .and((__ \ "customisationsUrl").readNullable[String])
+      .and((__ \ "messages").readNullable[JsObject])
+      .and((__ \ "headerHtml").readNullable[String])
+      .and((__ \ "beforeContentHtml").readNullable[String])
+      .and((__ \ "footerHtml").readNullable[String])
       .and((__ \ "data").readNullable[Session])(
         (
           id: BSONObjectID,
           expiryDate: ZonedDateTime,
+          serviceIdentifier: String,
           continueUrl: String,
-          customisationsUrl: Option[String],
+          messages: Option[JsObject],
+          headerHtml: Option[String],
+          beforeContentHtml: Option[String],
+          footerHtml: Option[String],
           data: Option[Session]
-        ) => Journey.apply(id, expiryDate, continueUrl, customisationsUrl, data)
+        ) =>
+          Journey.apply(
+            id,
+            expiryDate,
+            serviceIdentifier,
+            continueUrl,
+            messages,
+            headerHtml,
+            beforeContentHtml,
+            footerHtml,
+            data
+          )
       )
 
   implicit def defaultWrites: OWrites[Journey] =
     (__ \ "_id")
       .write[BSONObjectID]
       .and((__ \ "expiryDate").write[ZonedDateTime])
+      .and((__ \ "serviceIdentifier").write[String])
       .and((__ \ "continueUrl").write[String])
-      .and((__ \ "customisationsUrl").writeNullable[String])
+      .and((__ \ "messages").writeNullable[JsObject])
+      .and((__ \ "headerHtml").writeNullable[String])
+      .and((__ \ "beforeContentHtml").writeNullable[String])
+      .and((__ \ "footerHtml").writeNullable[String])
       .and((__ \ "data").writeNullable[Session])(
         unlift(Journey.unapply)
       )

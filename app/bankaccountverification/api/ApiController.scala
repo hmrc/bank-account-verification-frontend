@@ -41,6 +41,8 @@ class ApiController @Inject() (
 
   def init: Action[AnyContent] =
     Action.async { implicit request =>
+      import InitRequest._
+
       request.body.asJson match {
         case Some(json) =>
           json
@@ -51,8 +53,12 @@ class ApiController @Inject() (
               init =>
                 journeyRepository
                   .create(
+                    init.serviceIdentifier,
                     init.continueUrl,
-                    init.customisationsUrl
+                    init.messages.map(m => Json.toJsObject(m)),
+                    init.headerHtml,
+                    init.beforeContentHtml,
+                    init.footerHtml
                   )
                   .map(journeyId => Ok(Json.toJson(journeyId.stringify)))
             )

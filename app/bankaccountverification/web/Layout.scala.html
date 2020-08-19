@@ -33,13 +33,18 @@
 @import bankaccountverification.AppConfig
 @import bankaccountverification.web.FooterLinks
 
-@this(govukLayout: GovukLayout, head: Head)
+@this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, head: Head)
 @(pageTitle: Option[String] = None,
         headerBlock: Option[Html] = None,
+        beforeContentBlock: Option[Html] = None,
         footerBlock: Option[Html] = None,
         headBlock: Option[Html] = None,
         scriptsBlock: Option[Html] = None
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+
+@defaultBeforeContentBlock = {
+    @govukBackLink(BackLink(href="javascript:history.back()", content = HtmlContent(messages("label.back"))))
+}
 
 @govukLayout(
     pageTitle = pageTitle,
@@ -47,6 +52,6 @@
     headerBlock = headerBlock,
     footerBlock = footerBlock,
     scriptsBlock = scriptsBlock,
-    beforeContentBlock = None,
+    beforeContentBlock = beforeContentBlock.orElse(Some(defaultBeforeContentBlock)),
     footerItems = FooterLinks()
 )(contentBlock)

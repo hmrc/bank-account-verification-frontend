@@ -69,10 +69,18 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
 
     "return 200" when {
       "A continueUrl is provided" in {
-        when(sessionStore.create(meq("https://continue/url"), meq(None))(any()))
-          .thenReturn(Future.successful(newJourneyId))
+        when(
+          sessionStore.create(
+            meq("serviceIdentifier"),
+            meq("continueUrl"),
+            meq(None),
+            meq(None),
+            meq(None),
+            meq(None)
+          )(any())
+        ).thenReturn(Future.successful(newJourneyId))
 
-        val json        = Json.toJson(InitRequest("https://continue/url"))
+        val json        = Json.toJson(InitRequest("serviceIdentifier", "continueUrl"))
         val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
 
         val result         = controller.init().apply(fakeRequest)
@@ -103,7 +111,11 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         val returnData = Journey(
           journeyId,
           ZonedDateTime.now(),
+          "serviceIdentifier",
           "continueUrl",
+          None,
+          None,
+          None,
           None,
           Some(Session(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes)))
         )

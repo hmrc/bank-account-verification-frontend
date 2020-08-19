@@ -16,11 +16,23 @@
 
 package bankaccountverification.api
 
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json, OWrites}
 
-case class InitRequest(continueUrl: String, customisationsUrl: Option[String] = None)
+case class InitRequest(
+  serviceIdentifier: String,
+  continueUrl: String,
+  messages: Option[InitRequestMessages] = None,
+  headerHtml: Option[String] = None,
+  beforeContentHtml: Option[String] = None,
+  footerHtml: Option[String] = None
+)
+
+case class InitRequestMessages(en: JsObject, cy: Option[JsObject])
 
 object InitRequest {
+  implicit val messagesReads                                = Json.reads[InitRequestMessages]
+  implicit val messagesWrites: OWrites[InitRequestMessages] = Json.writes[InitRequestMessages]
+
   implicit val writes = Json.writes[InitRequest]
   implicit val reads  = Json.reads[InitRequest]
 }

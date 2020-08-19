@@ -33,7 +33,7 @@ package bankaccountverification
  */
 
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.{Json, OWrites}
+import play.api.libs.json.{JsObject, Json, OWrites}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
@@ -54,11 +54,28 @@ class JourneyRepository @Inject() (component: ReactiveMongoComponent)
   private lazy val ExpiryDateIndex       = "expiryDateIndex"
   private lazy val OptExpireAfterSeconds = "expireAfterSeconds"
 
-  def create(continueUrl: String, customisationsUrl: Option[String])(implicit
+  def create(
+    serviceIdentifier: String,
+    continueUrl: String,
+    messages: Option[JsObject] = None,
+    headerHtml: Option[String] = None,
+    beforeContentHtml: Option[String] = None,
+    footerHtml: Option[String] = None
+  )(implicit
     ec: ExecutionContext
   ): Future[BSONObjectID] = {
     val journeyId = BSONObjectID.generate()
-    insert(Journey.createExpiring(journeyId, continueUrl, customisationsUrl)).map(_ => journeyId)
+    insert(
+      Journey.createExpiring(
+        journeyId,
+        serviceIdentifier,
+        continueUrl,
+        messages,
+        headerHtml,
+        beforeContentHtml,
+        footerHtml
+      )
+    ).map(_ => journeyId)
   }
 
   def update(id: BSONObjectID, data: Session)(implicit
