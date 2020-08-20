@@ -22,9 +22,7 @@ case class InitRequest(
   serviceIdentifier: String,
   continueUrl: String,
   messages: Option[InitRequestMessages] = None,
-  headerHtml: Option[String] = None,
-  beforeContentHtml: Option[String] = None,
-  footerHtml: Option[String] = None
+  customisationsUrl: Option[String] = None
 )
 
 case class InitRequestMessages(en: JsObject, cy: Option[JsObject])

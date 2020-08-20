@@ -56,9 +56,7 @@ class ApiController @Inject() (
                     init.serviceIdentifier,
                     init.continueUrl,
                     init.messages.map(m => Json.toJsObject(m)),
-                    init.headerHtml,
-                    init.beforeContentHtml,
-                    init.footerHtml
+                    init.customisationsUrl
                   )
                   .map(journeyId => Ok(Json.toJson(journeyId.stringify)))
             )

@@ -16,8 +16,9 @@
 
 package bankaccountverification.web
 
+import bankaccountverification.connector.PartialsConnector
 import bankaccountverification.web.html.{ErrorTemplate, JourneyStart}
-import bankaccountverification.{AppConfig, JourneyRepository, RemoteMessagesApiProvider}
+import bankaccountverification.{AppConfig, Journey, JourneyRepository, RemoteMessagesApiProvider}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.i18n.Messages
@@ -25,6 +26,7 @@ import play.api.mvc._
 import play.twirl.api.Html
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.partials.HtmlPartial
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -38,7 +40,8 @@ class VerificationController @Inject() (
   startView: JourneyStart,
   errorTemplate: ErrorTemplate,
   journeyRepository: JourneyRepository,
-  verificationService: VerificationService
+  verificationService: VerificationService,
+  partialsConnector: PartialsConnector
 ) extends FrontendController(mcc) {
   private val logger = Logger(this.getClass)
 
@@ -48,29 +51,26 @@ class VerificationController @Inject() (
     Action.async { implicit request =>
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
-          for {
-            journey <- journeyRepository.findById(id)
-          } yield journey match {
-            case Some(j) =>
-              val messageResponse             = j.messages.map(_("en").as[Map[String, String]]).getOrElse(Map())
-              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(messageResponse)
+          journeyRepository.findById(id) flatMap {
+            case Some(journey) =>
+              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
               implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
-              val headerBlock        = j.headerHtml.map(html => Html(html))
-              val beforeContentBlock = j.beforeContentHtml.map(html => Html(html))
-              val footerBlock        = j.footerHtml.map(html => Html(html))
+              getCustomisations(journey) map {
+                case (headerBlock, beforeContentBlock, footerBlock) =>
+                  Ok(
+                    startView(
+                      journeyId,
+                      journey.serviceIdentifier,
+                      VerificationRequest.form,
+                      headerBlock,
+                      beforeContentBlock,
+                      footerBlock
+                    )
+                  )
 
-              Ok(
-                startView(
-                  journeyId,
-                  j.serviceIdentifier,
-                  VerificationRequest.form,
-                  headerBlock,
-                  beforeContentBlock,
-                  footerBlock
-                )
-              )
-            case None => NotFound(journeyIdError)
+              }
+            case None => Future.successful(NotFound(journeyIdError))
           }
         case Failure(exception) =>
           Future.successful(BadRequest)
@@ -79,35 +79,64 @@ class VerificationController @Inject() (
 
   def verifyDetails(journeyId: String): Action[AnyContent] =
     Action.async { implicit request =>
-      implicit val messages: Messages = messagesApi.preferred(request)
-
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
-          journeyRepository.findById(id).flatMap {
-            case Some(j) =>
-              val messageResponse             = j.messages.map(_("en").as[Map[String, String]]).getOrElse(Map())
-              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(messageResponse)
+          journeyRepository.findById(id) flatMap {
+            case Some(journey) =>
+              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
               implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
-              val headerBlock        = j.headerHtml.map(html => Html(html))
-              val beforeContentBlock = j.beforeContentHtml.map(html => Html(html))
-              val footerBlock        = j.footerHtml.map(html => Html(html))
-
-              val form = VerificationRequest.form.bindFromRequest()
-              (if (!form.hasErrors) verificationService.verify(id, form)
-               else Future.successful(form)) map {
-                case form if form.hasErrors =>
-                  BadRequest(
-                    startView(journeyId, j.serviceIdentifier, form, headerBlock, beforeContentBlock, footerBlock)
-                  )
-                case _ => SeeOther(s"${j.continueUrl}/$journeyId")
+              getCustomisations(journey) flatMap {
+                case (headerBlock, beforeContentBlock, footerBlock) =>
+                  val form = VerificationRequest.form.bindFromRequest()
+                  (if (!form.hasErrors) verificationService.verify(id, form)
+                   else Future.successful(form)) map {
+                    case form if form.hasErrors =>
+                      BadRequest(
+                        startView(
+                          journeyId,
+                          journey.serviceIdentifier,
+                          form,
+                          headerBlock,
+                          beforeContentBlock,
+                          footerBlock
+                        )
+                      )
+                    case _ => SeeOther(s"${journey.continueUrl}/$journeyId")
+                  }
               }
-
             case None => Future.successful(NotFound(journeyIdError))
           }
-        case Failure(_) =>
+        case Failure(exception) =>
           Future.successful(BadRequest)
       }
+    }
+
+  private def getCustomisations(
+    journey: Journey
+  )(implicit request: Request[_], messages: Messages): Future[(Option[Html], Option[Html], Option[Html])] =
+    for {
+      header        <- partialsConnector.header(journey.customisationsUrl)
+      beforeContent <- partialsConnector.beforeContent(journey.customisationsUrl)
+      footer        <- partialsConnector.footer(journey.customisationsUrl)
+    } yield {
+
+      val headerBlock = header match {
+        case HtmlPartial.Success(_, content) => Some(content)
+        case _                               => None
+      }
+
+      val beforeContentBlock = beforeContent match {
+        case HtmlPartial.Success(_, content) => Some(content)
+        case _                               => None
+      }
+
+      val footerBlock = footer match {
+        case HtmlPartial.Success(_, content) => Some(content)
+        case _                               => None
+      }
+
+      (headerBlock, beforeContentBlock, footerBlock)
     }
 
   private def journeyIdError(implicit request: Request[_], messages: Messages) =

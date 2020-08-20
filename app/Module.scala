@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
+import akka.actor.ActorSystem
 import bankaccountverification.connector.BankAccountReputationConnector
 import bankaccountverification.{AppConfig, JourneyRepository, RemoteMessagesApiProvider}
-import com.google.inject.AbstractModule
+import com.google.inject.{AbstractModule, Provides}
 import play.api.libs.concurrent.AkkaGuiceSupport
+import play.api.libs.ws
+import play.api.libs.ws.{DefaultWSCookie, WSClient}
 import play.api.{Configuration, Environment}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.play.audit.http.HttpAuditing
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 class Module(environment: Environment, playConfig: Configuration) extends AbstractModule with AkkaGuiceSupport {
   override def configure(): Unit = {

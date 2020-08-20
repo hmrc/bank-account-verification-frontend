@@ -20,6 +20,7 @@ import javax.inject.Inject
 import play.api.http.HttpConfiguration
 import play.api.i18n.Messages.MessageSource
 import play.api.i18n.{DefaultMessagesApi, DefaultMessagesApiProvider, Langs}
+import play.api.libs.json.{JsObject, JsSuccess}
 import play.api.{Configuration, Environment}
 
 class RemoteMessagesApiProvider @Inject() (
@@ -29,8 +30,15 @@ class RemoteMessagesApiProvider @Inject() (
   httpConfiguration: HttpConfiguration
 ) extends DefaultMessagesApiProvider(environment, config, langs, httpConfiguration) {
 
-  def getRemoteMessagesApi(remoteMessages: Map[String, String]) = {
-    val allMessages = loadAllMessages.map { case (s, m) => if (s == "default") s -> (m ++ remoteMessages) else s -> m }
+  def getRemoteMessagesApi(remoteMessages: Option[JsObject]) = {
+    val english = remoteMessages.map(_("en").as[Map[String, String]]).getOrElse(Map())
+    val welsh   = remoteMessages.flatMap(js => (js \ "cy").asOpt[Map[String, String]]).getOrElse(Map())
+
+    val allMessages = loadAllMessages.map {
+      case (s, m) if s == "en" => s -> (m ++ english)
+      case (s, m) if s == "cy" => s -> (m ++ welsh)
+      case (s, m)              => s -> m
+    }
 
     new DefaultMessagesApi(
       allMessages,

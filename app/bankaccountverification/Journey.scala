@@ -29,9 +29,7 @@ case class Journey(
   serviceIdentifier: String,
   continueUrl: String,
   messages: Option[JsObject] = None,
-  headerHtml: Option[String] = None,
-  beforeContentHtml: Option[String] = None,
-  footerHtml: Option[String] = None,
+  customisationsUrl: Option[String] = None,
   data: Option[Session] = None
 )
 
@@ -43,9 +41,7 @@ object Journey {
     serviceIdentifier: String,
     continueUrl: String,
     messages: Option[JsObject] = None,
-    headerHtml: Option[String] = None,
-    beforeContentHtml: Option[String] = None,
-    footerHtml: Option[String] = None,
+    customisationsUrl: Option[String] = None,
     data: Option[Session] = None
   ): Journey =
     Journey(
@@ -54,9 +50,7 @@ object Journey {
       serviceIdentifier,
       continueUrl,
       messages,
-      headerHtml,
-      beforeContentHtml,
-      footerHtml,
+      customisationsUrl,
       data
     )
 
@@ -87,9 +81,7 @@ object Journey {
       .and((__ \ "serviceIdentifier").read[String])
       .and((__ \ "continueUrl").read[String])
       .and((__ \ "messages").readNullable[JsObject])
-      .and((__ \ "headerHtml").readNullable[String])
-      .and((__ \ "beforeContentHtml").readNullable[String])
-      .and((__ \ "footerHtml").readNullable[String])
+      .and((__ \ "customisationsUrl").readNullable[String])
       .and((__ \ "data").readNullable[Session])(
         (
           id: BSONObjectID,
@@ -97,9 +89,7 @@ object Journey {
           serviceIdentifier: String,
           continueUrl: String,
           messages: Option[JsObject],
-          headerHtml: Option[String],
-          beforeContentHtml: Option[String],
-          footerHtml: Option[String],
+          customisationsUrl: Option[String],
           data: Option[Session]
         ) =>
           Journey.apply(
@@ -108,9 +98,7 @@ object Journey {
             serviceIdentifier,
             continueUrl,
             messages,
-            headerHtml,
-            beforeContentHtml,
-            footerHtml,
+            customisationsUrl,
             data
           )
       )
@@ -122,9 +110,7 @@ object Journey {
       .and((__ \ "serviceIdentifier").write[String])
       .and((__ \ "continueUrl").write[String])
       .and((__ \ "messages").writeNullable[JsObject])
-      .and((__ \ "headerHtml").writeNullable[String])
-      .and((__ \ "beforeContentHtml").writeNullable[String])
-      .and((__ \ "footerHtml").writeNullable[String])
+      .and((__ \ "customisationsUrl").writeNullable[String])
       .and((__ \ "data").writeNullable[Session])(
         unlift(Journey.unapply)
       )

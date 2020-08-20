@@ -58,9 +58,7 @@ class JourneyRepository @Inject() (component: ReactiveMongoComponent)
     serviceIdentifier: String,
     continueUrl: String,
     messages: Option[JsObject] = None,
-    headerHtml: Option[String] = None,
-    beforeContentHtml: Option[String] = None,
-    footerHtml: Option[String] = None
+    customisationsUrl: Option[String] = None
   )(implicit
     ec: ExecutionContext
   ): Future[BSONObjectID] = {
@@ -71,9 +69,7 @@ class JourneyRepository @Inject() (component: ReactiveMongoComponent)
         serviceIdentifier,
         continueUrl,
         messages,
-        headerHtml,
-        beforeContentHtml,
-        footerHtml
+        customisationsUrl
       )
     ).map(_ => journeyId)
   }

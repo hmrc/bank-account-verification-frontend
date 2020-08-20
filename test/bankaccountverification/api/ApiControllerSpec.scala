@@ -74,8 +74,6 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             meq("serviceIdentifier"),
             meq("continueUrl"),
             meq(None),
-            meq(None),
-            meq(None),
             meq(None)
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
@@ -113,8 +111,6 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           ZonedDateTime.now(),
           "serviceIdentifier",
           "continueUrl",
-          None,
-          None,
           None,
           None,
           Some(Session(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes)))

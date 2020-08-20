@@ -16,7 +16,7 @@
 
 package bankaccountverification.connector
 
-import bankaccountverification.connector.ReputationResponseEnum.{Error, No, Yes}
+import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
@@ -24,9 +24,9 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Results._
 import play.api.routing.sird.{POST => SPOST, _}
-import play.core.server.{Server, ServerConfig}
-import uk.gov.hmrc.http.{HeaderCarrier}
 import play.api.test.Helpers._
+import play.core.server.{Server, ServerConfig}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
