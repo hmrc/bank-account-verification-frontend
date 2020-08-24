@@ -74,12 +74,20 @@ class JourneyRepository @Inject() (component: ReactiveMongoComponent)
     ).map(_ => journeyId)
   }
 
-  def update(id: BSONObjectID, data: Session)(implicit
+  def updateAccountDetails(id: BSONObjectID, data: AccountDetails)(implicit
     formats: OWrites[Journey],
     ec: ExecutionContext
   ): Future[Boolean] = {
     import Journey.updateWrites
-    val updateJson = Json.toJsObject(Journey.updateExpiring(data))
+    val updateJson = Json.toJsObject(Journey.updateAccountDetailsExpiring(data))
+    findAndUpdate(_id(id), updateJson).map(r => r.lastError.isDefined)
+  }
+
+  def updateAccountType(id: BSONObjectID, accountType: String)(implicit
+    ec: ExecutionContext
+  ): Future[Boolean] = {
+    import Journey.accountTypeUpdateWrites
+    val updateJson = Json.toJsObject(Journey.updateAccountTypeExpiring(accountType))
     findAndUpdate(_id(id), updateJson).map(r => r.lastError.isDefined)
   }
 

@@ -1,9 +1,11 @@
 # microservice specific routes
 
-->          /govuk-frontend                           govuk.Routes
-->          /hmrc-frontend                            hmrcfrontend.Routes
+->          /govuk-frontend           govuk.Routes
+->          /hmrc-frontend            hmrcfrontend.Routes
 
-GET         /start/:journeyId                         bankaccountverification.web.VerificationController.start(journeyId)
-POST        /verify/:journeyId                        bankaccountverification.web.VerificationController.verifyDetails(journeyId)
+GET         /start/:journeyId         bankaccountverification.web.VerificationController.getAccountType(journeyId)
+POST        /start/:journeyId         bankaccountverification.web.VerificationController.postAccountType(journeyId)
+GET         /verify/:journeyId        bankaccountverification.web.VerificationController.getAccountDetails(journeyId)
+POST        /verify/:journeyId        bankaccountverification.web.VerificationController.postAccountDetails(journeyId)
 
-GET         /assets/*file                             controllers.Assets.versioned(path = "/public", file: Asset)
+GET         /assets/*file             controllers.Assets.versioned(path = "/public", file: Asset)

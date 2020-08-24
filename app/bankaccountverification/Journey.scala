@@ -18,6 +18,7 @@ package bankaccountverification
 
 import java.time.{Instant, ZoneOffset, ZonedDateTime}
 
+import bankaccountverification.connector.ReputationResponseEnum
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
@@ -54,11 +55,13 @@ object Journey {
       data
     )
 
-  def updateExpiring(data: Session) = SessionUpdate(expiryDate, Some(data))
+  def updateAccountDetailsExpiring(data: AccountDetails) = AccountDetailsUpdate(expiryDate, data)
+  def updateAccountTypeExpiring(accountType: String)     = AccountTypeUpdate(expiryDate, accountType)
 
   implicit val objectIdFormats: Format[BSONObjectID] = ReactiveMongoFormats.objectIdFormats
   implicit val sessionDataReads: Reads[Session]      = Json.reads[Session]
   implicit val sessionDataWrites: Writes[Session]    = Json.writes[Session]
+//  implicit val accountDetailsWrites: Writes[AccountDetails] = Json.writes[AccountDetails]
 
   implicit val localDateTimeRead: Reads[ZonedDateTime] =
     (__ \ "$date").read[Long].map { dateTime =>
@@ -115,11 +118,28 @@ object Journey {
         unlift(Journey.unapply)
       )
 
-  implicit def updateWrites: OWrites[SessionUpdate] =
+  implicit def accountDetailsWrites: OWrites[AccountDetails] =
+    (__ \ "data.accountName")
+      .writeNullable[String]
+      .and((__ \ "data.sortCode").writeNullable[String])
+      .and((__ \ "data.accountNumber").writeNullable[String])
+      .and((__ \ "data.rollNumber").writeNullable[String])
+      .and((__ \ "data.accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])(
+        unlift(AccountDetails.unapply)
+      )
+
+  implicit def updateWrites: OWrites[AccountDetailsUpdate] =
     (__ \ "$set" \ "expiryDate")
       .write[ZonedDateTime]
-      .and((__ \ "$set" \ "data").writeNullable[Session])(
-        unlift(SessionUpdate.unapply)
+      .and((__ \ "$set").write[AccountDetails])(
+        unlift(AccountDetailsUpdate.unapply)
+      )
+
+  implicit def accountTypeUpdateWrites: OWrites[AccountTypeUpdate] =
+    (__ \ "$set" \ "expiryDate")
+      .write[ZonedDateTime]
+      .and((__ \ "$set" \ "data" \ "accountType").write[String])(
+        unlift(AccountTypeUpdate.unapply)
       )
 
   val format: Format[Journey] = Format(defaultReads, defaultWrites)

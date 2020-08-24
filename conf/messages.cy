@@ -3,6 +3,10 @@ service.homePageUrl =
 service.header = W Bank or building society account details
 service.text =
 
+label.accountType.personal = Personol
+label.accountType.business = Busnes
+label.accountType.heading = A yw hwn yn gyfrif personol neu'n gyfrif busnes?
+
 label.accountName = W Name on the account
 label.sortCode = W Sort code
 label.accountNumber = W Account number
@@ -16,6 +20,8 @@ hint.rollNumber = W You can find it on your card, statement or passbook
 
 error.summaryText = W There is an error
 error.accountName.required = W Enter the name on the account
+
+error.accountType.required = Dewiswch fath o gyfrif
 
 error.accountNumber.required = W Enter an account number
 error.accountNumber.digitsOnly = W Enter a valid account number like 00733445

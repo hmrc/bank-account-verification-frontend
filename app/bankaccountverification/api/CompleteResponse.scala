@@ -20,6 +20,7 @@ import bankaccountverification.connector.ReputationResponseEnum
 import play.api.libs.json.Json
 
 case class CompleteResponse(
+  accountType: String,
   accountName: String,
   sortCode: String,
   accountNumber: String,
@@ -29,4 +30,5 @@ case class CompleteResponse(
 
 object CompleteResponse {
   implicit val completeResponseWrites = Json.writes[CompleteResponse]
+  implicit val completeResponseReads  = Json.reads[CompleteResponse]
 }

@@ -17,10 +17,12 @@
 package bankaccountverification.web
 
 import bankaccountverification.connector.PartialsConnector
-import bankaccountverification.web.html.{ErrorTemplate, JourneyStart}
+import bankaccountverification.web.html.{AccountDetailsView, AccountTypeView, ErrorTemplate}
 import bankaccountverification.{AppConfig, Journey, JourneyRepository, RemoteMessagesApiProvider}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
+import play.api.data.FormError
+import play.api.data.format.Formatter
 import play.api.i18n.Messages
 import play.api.mvc._
 import play.twirl.api.Html
@@ -37,7 +39,8 @@ class VerificationController @Inject() (
   appConfig: AppConfig,
   mcc: MessagesControllerComponents,
   remoteMessagesApiProvider: RemoteMessagesApiProvider,
-  startView: JourneyStart,
+  accountTypeView: AccountTypeView,
+  accountDetailsView: AccountDetailsView,
   errorTemplate: ErrorTemplate,
   journeyRepository: JourneyRepository,
   verificationService: VerificationService,
@@ -47,7 +50,7 @@ class VerificationController @Inject() (
 
   implicit val config: AppConfig = appConfig
 
-  def start(journeyId: String): Action[AnyContent] =
+  def getAccountType(journeyId: String): Action[AnyContent] =
     Action.async { implicit request =>
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
@@ -59,7 +62,71 @@ class VerificationController @Inject() (
               getCustomisations(journey) map {
                 case (headerBlock, beforeContentBlock, footerBlock) =>
                   Ok(
-                    startView(
+                    accountTypeView(
+                      journeyId,
+                      journey.serviceIdentifier,
+                      AccountTypeRequest.form,
+                      headerBlock,
+                      beforeContentBlock,
+                      footerBlock
+                    )
+                  )
+              }
+            case None => Future.successful(NotFound(journeyIdError))
+          }
+        case Failure(exception) =>
+          Future.successful(BadRequest)
+      }
+    }
+
+  def postAccountType(journeyId: String): Action[AnyContent] =
+    Action.async { implicit request =>
+      BSONObjectID.parse(journeyId) match {
+        case Success(id) =>
+          journeyRepository.findById(id) flatMap {
+            case Some(j) =>
+              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(j.messages)
+              implicit val messages: Messages = remoteMessagesApi.preferred(request)
+
+              val form = AccountTypeRequest.form.bindFromRequest()
+              if (!form.hasErrors)
+                verificationService.setAccountType(id, form.value.get.accountType) map { _ =>
+                  Redirect(routes.VerificationController.getAccountDetails(journeyId))
+                }
+              else
+                getCustomisations(j) map {
+                  case (headerBlock, beforeContentBlock, footerBlock) =>
+                    BadRequest(
+                      accountTypeView(
+                        journeyId,
+                        appConfig.contactFormServiceIdentifier,
+                        form,
+                        headerBlock,
+                        beforeContentBlock,
+                        footerBlock
+                      )
+                    )
+                }
+            case None => Future.successful(NotFound(journeyIdError))
+          }
+        case Failure(_) =>
+          Future.successful(BadRequest)
+      }
+    }
+
+  def getAccountDetails(journeyId: String): Action[AnyContent] =
+    Action.async { implicit request =>
+      BSONObjectID.parse(journeyId) match {
+        case Success(id) =>
+          journeyRepository.findById(id) flatMap {
+            case Some(journey) =>
+              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
+              implicit val messages: Messages = remoteMessagesApi.preferred(request)
+
+              getCustomisations(journey) map {
+                case (headerBlock, beforeContentBlock, footerBlock) =>
+                  Ok(
+                    accountDetailsView(
                       journeyId,
                       journey.serviceIdentifier,
                       VerificationRequest.form,
@@ -77,7 +144,7 @@ class VerificationController @Inject() (
       }
     }
 
-  def verifyDetails(journeyId: String): Action[AnyContent] =
+  def postAccountDetails(journeyId: String): Action[AnyContent] =
     Action.async { implicit request =>
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
@@ -93,7 +160,7 @@ class VerificationController @Inject() (
                    else Future.successful(form)) map {
                     case form if form.hasErrors =>
                       BadRequest(
-                        startView(
+                        accountDetailsView(
                           journeyId,
                           journey.serviceIdentifier,
                           form,

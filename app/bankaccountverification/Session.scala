@@ -42,6 +42,15 @@ case class Session(
   sortCode: Option[String],
   accountNumber: Option[String],
   rollNumber: Option[String] = None,
+  accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
+  accountType: Option[String] = None
+)
+
+case class AccountDetails(
+  accountName: Option[String],
+  sortCode: Option[String],
+  accountNumber: Option[String],
+  rollNumber: Option[String] = None,
   accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None
 )
 
@@ -53,11 +62,23 @@ object Session {
             Some(sortCode),
             Some(accountNumber),
             rollNumber,
-            Some(accountNumberWithSortCodeIsValid)
+            Some(accountNumberWithSortCodeIsValid),
+            Some(accountType)
           ) =>
-        Some(api.CompleteResponse(accountName, sortCode, accountNumber, accountNumberWithSortCodeIsValid, rollNumber))
+        Some(
+          api.CompleteResponse(
+            accountType,
+            accountName,
+            sortCode,
+            accountNumber,
+            accountNumberWithSortCodeIsValid,
+            rollNumber
+          )
+        )
       case _ => None
     }
 }
 
-case class SessionUpdate(expiryDate: ZonedDateTime, data: Option[Session])
+case class AccountDetailsUpdate(expiryDate: ZonedDateTime, data: AccountDetails)
+
+case class AccountTypeUpdate(expiryDate: ZonedDateTime, accountType: String)

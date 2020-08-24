@@ -20,6 +20,7 @@ import java.time.ZonedDateTime
 
 import akka.stream.Materializer
 import bankaccountverification.connector.ReputationResponseEnum.Yes
+import bankaccountverification.web.AccountTypeRequest.personalAccountType
 import bankaccountverification.{AppConfig, Journey, JourneyRepository, Session}
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentMatchers.{eq => meq, _}
@@ -113,7 +114,9 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           "continueUrl",
           None,
           None,
-          Some(Session(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes)))
+          Some(
+            Session(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), Some(personalAccountType))
+          )
         )
 
         when(sessionStore.findById(meq(journeyId), any())(any())).thenReturn(Future.successful(Some(returnData)))
@@ -124,6 +127,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         status(completeResult) shouldBe Status.OK
         val json = contentAsJson(completeResult)
 
+        (json \ "accountType").as[String]                      shouldBe "personal"
         (json \ "accountName").as[String]                      shouldBe "Bob"
         (json \ "sortCode").as[String]                         shouldBe "203040"
         (json \ "accountNumber").as[String]                    shouldBe "12345678"

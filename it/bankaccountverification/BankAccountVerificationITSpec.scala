@@ -1,9 +1,9 @@
 package bankaccountverification
 
-import bankaccountverification.api.InitRequest
+import bankaccountverification.api.{CompleteResponse, InitRequest}
 import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
 import bankaccountverification.connector.{BankAccountReputationConnector, BarsValidationResponse}
-import bankaccountverification.web.VerificationRequest
+import bankaccountverification.web.{AccountTypeRequest, VerificationRequest}
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentMatchers.any
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
@@ -54,6 +54,18 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     initResponse.status shouldBe 200
     val journeyId = initResponse.json.as[String]
 
+    val atformData        = Map("accountType" -> "personal")
+    val setAccountTypeUrl = s"$baseUrl/bank-account-verification/start/$journeyId"
+    val atrequest         = FakeRequest().withCSRFToken
+    val setAccountTypeResponse =
+      await(
+        wsClient
+          .url(setAccountTypeUrl)
+          .withFollowRedirects(false)
+          .withHttpHeaders(atrequest.headers.toSimpleMap.toSeq: _*)
+          .post(atformData)
+      )
+
     val bankAccountDetails = VerificationRequest("some-account-name", "12-12-12", "12349876")
     val formData           = getCCParams(bankAccountDetails) ++ Map("rollNumber" -> Seq())
     val verifyUrl          = s"$baseUrl/bank-account-verification/verify/$journeyId"
@@ -73,14 +85,16 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     val completeResponse =
       await(wsClient.url(completeUrl).get())
     completeResponse.status shouldBe 200
-    val sessionDataMaybe = Json.fromJson[Session](completeResponse.json)
+    import bankaccountverification.connector.ReputationResponseEnum._
+    val sessionDataMaybe = Json.fromJson[CompleteResponse](completeResponse.json)
 
-    sessionDataMaybe shouldBe JsSuccess[Session](
-      Session(
-        Some("some-account-name"),
-        Some("12-12-12"),
-        Some("12349876"),
-        accountNumberWithSortCodeIsValid = Some(Yes)
+    sessionDataMaybe shouldBe JsSuccess[CompleteResponse](
+      CompleteResponse(
+        "personal",
+        "some-account-name",
+        "12-12-12",
+        "12349876",
+        accountNumberWithSortCodeIsValid = Yes
       )
     )
   }

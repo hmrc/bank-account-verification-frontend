@@ -17,7 +17,7 @@
 package bankaccountverification.web
 
 import bankaccountverification.connector.{BankAccountReputationConnector, BarsValidationRequest, BarsValidationRequestAccount, BarsValidationResponse}
-import bankaccountverification.{JourneyRepository, Session}
+import bankaccountverification.{AccountDetails, JourneyRepository, Session}
 import javax.inject.Inject
 import play.api.Logger
 import play.api.data.Form
@@ -30,6 +30,12 @@ import scala.util.{Failure, Success}
 
 class VerificationService @Inject() (connector: BankAccountReputationConnector, repository: JourneyRepository) {
   private val logger = Logger(this.getClass)
+
+  def setAccountType(journeyId: BSONObjectID, accountType: String)(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): Future[Boolean] =
+    repository.updateAccountType(journeyId, accountType)
 
   def verify(journeyId: BSONObjectID, form: Form[VerificationRequest])(implicit
     ec: ExecutionContext,
@@ -47,7 +53,7 @@ class VerificationService @Inject() (connector: BankAccountReputationConnector, 
           verificationRequest => {
             import bankaccountverification.Journey._
 
-            val sessionData = Session(
+            val accountDetails = AccountDetails(
               Some(verificationRequest.accountName),
               Some(verificationRequest.sortCode),
               Some(verificationRequest.accountNumber),
@@ -55,7 +61,7 @@ class VerificationService @Inject() (connector: BankAccountReputationConnector, 
               Some(response.accountNumberWithSortCodeIsValid)
             )
 
-            repository.update(journeyId, sessionData).map(_ => form)
+            repository.updateAccountDetails(journeyId, accountDetails).map(_ => form)
           }
         )
     }

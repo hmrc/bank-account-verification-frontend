@@ -3,6 +3,10 @@ service.homePageUrl =
 service.header = Bank or building society account details
 service.text =
 
+label.accountType.personal = Personal
+label.accountType.business = Business
+label.accountType.heading = Is this a personal or a business account?
+
 label.accountName = Name on the account
 label.sortCode = Sort code
 label.accountNumber = Account number
@@ -16,6 +20,8 @@ hint.rollNumber = You can find it on your card, statement or passbook
 
 error.summaryText = There is an error
 error.accountName.required = Enter the name on the account
+
+error.accountType.required = Please select an account type
 
 error.accountNumber.required = Enter an account number
 error.accountNumber.digitsOnly = Enter a valid account number like 00733445

@@ -16,7 +16,7 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.{JourneyRepository, Session}
+import bankaccountverification.{AccountDetails, JourneyRepository, Session}
 import bankaccountverification.connector.{BankAccountReputationConnector, BarsValidationRequest, BarsValidationResponse}
 import bankaccountverification.connector.ReputationResponseEnum._
 import org.scalatest.matchers.should.Matchers
@@ -51,7 +51,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
 
       val validationResult = Future.successful(Failure(new HttpException("FIRE IN SERVER ROOM", 500)))
       when(mockConnector.validateBankDetails(any())(any(), any())).thenReturn(validationResult)
-      when(mockRepository.update(any(), any())(any(), any())).thenReturn(Future.successful(true))
+      when(mockRepository.updateAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
       val updatedForm = service.verify(journeyId, form)
 
@@ -60,8 +60,8 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       }
 
       "persist the details to mongo" in {
-        val expectedSessionData = Session(Some("Bob"), Some("20-30-40"), Some("12345678"), None, Some(Error))
-        verify(mockRepository).update(meq(journeyId), meq(expectedSessionData))(any(), any())
+        val expectedAccountDetails = AccountDetails(Some("Bob"), Some("20-30-40"), Some("12345678"), None, Some(Error))
+        verify(mockRepository).updateAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
       }
 
       "return a valid form" in {
@@ -79,7 +79,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
 
       val validationResult = Future.successful(Success(BarsValidationResponse(Yes, No, None)))
       when(mockConnector.validateBankDetails(any())(any(), any())).thenReturn(validationResult)
-      when(mockRepository.update(any(), any())(any(), any())).thenReturn(Future.successful(true))
+      when(mockRepository.updateAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
       val updatedForm = service.verify(journeyId, form)
 
@@ -88,8 +88,8 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       }
 
       "persist the details to mongo" in {
-        val expectedSessionData = Session(Some("Bob"), Some("20-30-40"), Some("12345678"), None, Some(Yes))
-        verify(mockRepository).update(meq(journeyId), meq(expectedSessionData))(any(), any())
+        val expectedAccountDetails = AccountDetails(Some("Bob"), Some("20-30-40"), Some("12345678"), None, Some(Yes))
+        verify(mockRepository).updateAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
       }
 
       "return a valid form" in {
@@ -107,7 +107,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
 
       val validationResult = Future.successful(Success(BarsValidationResponse(No, No, None)))
       when(mockConnector.validateBankDetails(any())(any(), any())).thenReturn(validationResult)
-      when(mockRepository.update(any(), any())(any(), any())).thenReturn(Future.successful(true))
+      when(mockRepository.updateAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
       val updatedForm = service.verify(journeyId, form)
 
@@ -116,7 +116,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       }
 
       "not persist the details to mongo" in {
-        verify(mockRepository, never()).update(meq(journeyId), any())(any(), any())
+        verify(mockRepository, never()).updateAccountDetails(meq(journeyId), any())(any(), any())
       }
 
       "return a form with errors" in {

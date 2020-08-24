@@ -30,7 +30,7 @@
             }))
     }
 
-    @form(bankaccountverification.web.routes.VerificationController.verifyDetails(journeyId)) {
+    @form(bankaccountverification.web.routes.VerificationController.postAccountDetails(journeyId)) {
         @input(Input(value = detailsForm("accountName").value,
             label = Label(content = HtmlContent(messages("label.accountName"))),
             formGroupClasses = "form-field-group",
