@@ -56,9 +56,9 @@ class VerificationController @Inject() (
         case Success(id) =>
           journeyRepository.findById(id) flatMap {
             case Some(journey) =>
-              val welshTranslationsAvailable  = journey.messages.map(_.keys.contains("cy")).getOrElse(false)
               val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
               implicit val messages: Messages = remoteMessagesApi.preferred(request)
+              val welshTranslationsAvailable  = journey.messages.exists(_.keys.contains("cy"))
 
               getCustomisations(journey) map {
                 case (headerBlock, beforeContentBlock, footerBlock) =>
@@ -66,6 +66,7 @@ class VerificationController @Inject() (
                     accountTypeView(
                       journeyId,
                       journey.serviceIdentifier,
+                      welshTranslationsAvailable,
                       AccountTypeRequest.form,
                       headerBlock,
                       beforeContentBlock,
@@ -85,9 +86,10 @@ class VerificationController @Inject() (
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
           journeyRepository.findById(id) flatMap {
-            case Some(j) =>
-              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(j.messages)
+            case Some(journey) =>
+              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
               implicit val messages: Messages = remoteMessagesApi.preferred(request)
+              val welshTranslationsAvailable  = journey.messages.exists(_.keys.contains("cy"))
 
               val form = AccountTypeRequest.form.bindFromRequest()
               if (!form.hasErrors)
@@ -95,12 +97,13 @@ class VerificationController @Inject() (
                   Redirect(routes.VerificationController.getAccountDetails(journeyId))
                 }
               else
-                getCustomisations(j) map {
+                getCustomisations(journey) map {
                   case (headerBlock, beforeContentBlock, footerBlock) =>
                     BadRequest(
                       accountTypeView(
                         journeyId,
                         appConfig.contactFormServiceIdentifier,
+                        welshTranslationsAvailable,
                         form,
                         headerBlock,
                         beforeContentBlock,
@@ -123,6 +126,7 @@ class VerificationController @Inject() (
             case Some(journey) =>
               val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
               implicit val messages: Messages = remoteMessagesApi.preferred(request)
+              val welshTranslationsAvailable  = journey.messages.exists(_.keys.contains("cy"))
 
               getCustomisations(journey) map {
                 case (headerBlock, beforeContentBlock, footerBlock) =>

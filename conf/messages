@@ -3,6 +3,8 @@ service.homePageUrl =
 service.header = Bank or building society account details
 service.text =
 
+phaseBanner.content = This is a new service – your <a href='/feedback'>feedback</a> will help us to improve it.
+
 label.accountType.personal = Personal
 label.accountType.business = Business
 label.accountType.heading = Is this a personal or a business account?

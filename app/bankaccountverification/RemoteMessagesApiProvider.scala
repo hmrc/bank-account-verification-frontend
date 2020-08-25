@@ -32,11 +32,11 @@ class RemoteMessagesApiProvider @Inject() (
 
   def getRemoteMessagesApi(remoteMessages: Option[JsObject]) = {
     val english = remoteMessages.map(_("en").as[Map[String, String]]).getOrElse(Map())
-    val welsh   = remoteMessages.flatMap(js => (js \ "cy").asOpt[Map[String, String]])
+    val welsh   = remoteMessages.flatMap(js => (js \ "cy").asOpt[Map[String, String]]).getOrElse(Map())
 
     val allMessages = loadAllMessages.map {
       case (s, m) if s == "en" => s -> (m ++ english)
-      case (s, m) if s == "cy" => s -> (if (welsh.isDefined) m ++ welsh else Map())
+      case (s, m) if s == "cy" => s -> (m ++ welsh)
       case (s, m)              => s -> m
     }
 

@@ -3,6 +3,8 @@ service.homePageUrl =
 service.header = W Bank or building society account details
 service.text =
 
+phaseBanner.content = W This is a new service – your <a href='/feedback'>feedback</a> will help us to improve it.
+
 label.accountType.personal = Personol
 label.accountType.business = Busnes
 label.accountType.heading = A yw hwn yn gyfrif personol neu'n gyfrif busnes?

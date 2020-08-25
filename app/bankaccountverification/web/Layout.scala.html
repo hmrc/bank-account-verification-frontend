@@ -33,7 +33,7 @@
 @import bankaccountverification.AppConfig
 @import bankaccountverification.web.FooterLinks
 
-@this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, languageSelect: HmrcLanguageSelect, head: Head)
+@this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, govukPhaseBanner: GovukPhaseBanner, languageSelect: HmrcLanguageSelect, head: Head)
 @(pageTitle: Option[String] = None,
         welshTranslationsAvailable: Boolean = false,
         headerBlock: Option[Html] = None,
@@ -44,6 +44,14 @@
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @defaultBeforeContentBlock = {
+    @{
+      if(messages.isDefinedAt("phaseBanner.tag")) {
+        govukPhaseBanner(PhaseBanner(
+            tag = Some(Tag(content = HtmlContent(messages("phaseBanner.tag")))),
+            content = HtmlContent(messages("phaseBanner.content"))))
+      }
+    }
+
     @govukBackLink(BackLink(href="javascript:history.back()", content = HtmlContent(messages("label.back"))))
 
     @{
