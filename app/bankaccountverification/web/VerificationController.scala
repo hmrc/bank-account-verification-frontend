@@ -56,6 +56,7 @@ class VerificationController @Inject() (
         case Success(id) =>
           journeyRepository.findById(id) flatMap {
             case Some(journey) =>
+              val welshTranslationsAvailable  = journey.messages.map(_.keys.contains("cy")).getOrElse(false)
               val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
               implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
@@ -129,6 +130,7 @@ class VerificationController @Inject() (
                     accountDetailsView(
                       journeyId,
                       journey.serviceIdentifier,
+                      welshTranslationsAvailable,
                       VerificationRequest.form,
                       headerBlock,
                       beforeContentBlock,
@@ -150,6 +152,7 @@ class VerificationController @Inject() (
         case Success(id) =>
           journeyRepository.findById(id) flatMap {
             case Some(journey) =>
+              val welshTranslationsAvailable  = journey.messages.exists(_.keys.contains("cy"))
               val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
               implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
@@ -163,6 +166,7 @@ class VerificationController @Inject() (
                         accountDetailsView(
                           journeyId,
                           journey.serviceIdentifier,
+                          welshTranslationsAvailable,
                           form,
                           headerBlock,
                           beforeContentBlock,

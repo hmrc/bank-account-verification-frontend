@@ -17,9 +17,9 @@
 @import bankaccountverification.web.VerificationRequest
 
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, errorSummary: GovukErrorSummary, help: HmrcReportTechnicalIssue)
-@(journeyId: String, serviceIdentifier: String, detailsForm: Form[VerificationRequest], headerBlock: Option[Html] = None, beforeContentBlock: Option[Html] = None, footerBlock: Option[Html] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, detailsForm: Form[VerificationRequest], headerBlock: Option[Html] = None, beforeContentBlock: Option[Html] = None, footerBlock: Option[Html] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@layout(pageTitle = Some("Bank Account Verification"), headerBlock, beforeContentBlock, footerBlock) {
+@layout(pageTitle = Some("Bank Account Verification"), welshTranslationsAvailable, headerBlock, beforeContentBlock, footerBlock) {
     <h1 class="govuk-heading-xl">@messages("service.header")</h1>
 
     @if(detailsForm.hasErrors) {

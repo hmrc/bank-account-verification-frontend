@@ -24,18 +24,21 @@ import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
+case class Foo(a: String)
+
+case class Bar(b: String)
+
 case class Journey(
-  id: BSONObjectID,
-  expiryDate: ZonedDateTime,
-  serviceIdentifier: String,
-  continueUrl: String,
-  messages: Option[JsObject] = None,
-  customisationsUrl: Option[String] = None,
-  data: Option[Session] = None
-)
+  selectPage: Foo,
+  lookupPage: Bar) {
+}
 
 object Journey {
   def expiryDate = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+
+  def floop(arg: Journey): Option[(String, String)] = {
+    Some((Json.toJsObject(arg.selectPage), Json.toJsObject(arg.lookupPage)))
+  }
 
   def createExpiring(
     id: BSONObjectID,
@@ -46,13 +49,8 @@ object Journey {
     data: Option[Session] = None
   ): Journey =
     Journey(
-      id,
-      expiryDate,
-      serviceIdentifier,
-      continueUrl,
-      messages,
-      customisationsUrl,
-      data
+      Foo(serviceIdentifier),
+      Bar(continueUrl)
     )
 
   def updateAccountDetailsExpiring(data: AccountDetails) = AccountDetailsUpdate(expiryDate, data)
@@ -96,26 +94,15 @@ object Journey {
           data: Option[Session]
         ) =>
           Journey.apply(
-            id,
-            expiryDate,
-            serviceIdentifier,
-            continueUrl,
-            messages,
-            customisationsUrl,
-            data
+            Foo(serviceIdentifier),
+            Bar(continueUrl)
           )
       )
 
   implicit def defaultWrites: OWrites[Journey] =
-    (__ \ "_id")
-      .write[BSONObjectID]
-      .and((__ \ "expiryDate").write[ZonedDateTime])
-      .and((__ \ "serviceIdentifier").write[String])
-      .and((__ \ "continueUrl").write[String])
-      .and((__ \ "messages").writeNullable[JsObject])
-      .and((__ \ "customisationsUrl").writeNullable[String])
-      .and((__ \ "data").writeNullable[Session])(
-        unlift(Journey.unapply)
+    (__ \ "selectPage.serviceIdentifier").write[String]
+      .and((__ \ "lookupPage.foo").write[String])(
+        unlift(Journey.floop)
       )
 
   implicit def accountDetailsWrites: OWrites[AccountDetails] =

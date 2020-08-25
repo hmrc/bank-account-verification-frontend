@@ -3,6 +3,7 @@
 ->          /govuk-frontend           govuk.Routes
 ->          /hmrc-frontend            hmrcfrontend.Routes
 
+GET         /language/:lang           bankaccountverification.web.CustomLanguageController.switchToLanguage(lang: String)
 GET         /start/:journeyId         bankaccountverification.web.VerificationController.getAccountType(journeyId)
 POST        /start/:journeyId         bankaccountverification.web.VerificationController.postAccountType(journeyId)
 GET         /verify/:journeyId        bankaccountverification.web.VerificationController.getAccountDetails(journeyId)

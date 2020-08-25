@@ -33,8 +33,9 @@
 @import bankaccountverification.AppConfig
 @import bankaccountverification.web.FooterLinks
 
-@this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, head: Head)
+@this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, languageSelect: HmrcLanguageSelect, head: Head)
 @(pageTitle: Option[String] = None,
+        welshTranslationsAvailable: Boolean = false,
         headerBlock: Option[Html] = None,
         beforeContentBlock: Option[Html] = None,
         footerBlock: Option[Html] = None,
@@ -44,6 +45,17 @@
 
 @defaultBeforeContentBlock = {
     @govukBackLink(BackLink(href="javascript:history.back()", content = HtmlContent(messages("label.back"))))
+
+    @{
+        if(welshTranslationsAvailable) {
+            languageSelect(LanguageSelect(messages.lang.code match {
+                case "en" ⇒ En
+                case "cy" ⇒ Cy
+            }, En -> s"${bankaccountverification.web.routes.CustomLanguageController.switchToLanguage("english")}",
+                Cy -> s"${bankaccountverification.web.routes.CustomLanguageController.switchToLanguage("cymraeg")}"
+            ))
+        }
+    }
 }
 
 @govukLayout(
