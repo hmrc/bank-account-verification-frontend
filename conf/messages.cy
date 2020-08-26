@@ -5,9 +5,9 @@ service.text =
 
 phaseBanner.content = W This is a new service – your <a href='/feedback'>feedback</a> will help us to improve it.
 
-label.accountType.personal = Personol
-label.accountType.business = Busnes
-label.accountType.heading = A yw hwn yn gyfrif personol neu'n gyfrif busnes?
+label.accountType.personal = W Personal
+label.accountType.business = W Business
+label.accountType.heading = W Is this a personal or a business account?
 
 label.accountName = W Name on the account
 label.sortCode = W Sort code
@@ -23,7 +23,7 @@ hint.rollNumber = W You can find it on your card, statement or passbook
 error.summaryText = W There is an error
 error.accountName.required = W Enter the name on the account
 
-error.accountType.required = Dewiswch fath o gyfrif
+error.accountType.required = W Please select an account type
 
 error.accountNumber.required = W Enter an account number
 error.accountNumber.digitsOnly = W Enter a valid account number like 00733445
