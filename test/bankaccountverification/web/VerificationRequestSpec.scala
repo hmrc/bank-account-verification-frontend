@@ -285,6 +285,26 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
       }
     }
 
+    "the response indicates the account does not exist" should {
+      val response = BarsPersonalAssessResponse(
+        Yes,
+        No,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Some(No)
+      )
+
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
+
+      "flag an error against the account number" in {
+        updatedForm.error("accountNumber") shouldBe Some(
+          FormError("accountNumber", "error.accountNumber.doesNotExist")
+        )
+      }
+    }
+
     "the response indicates that a roll number is required but none was provided" should {
       val response = BarsPersonalAssessResponse(
         Yes,

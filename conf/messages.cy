@@ -30,6 +30,7 @@ error.accountNumber.digitsOnly = W Enter a valid account number like 00733445
 error.accountNumber.minLength = W Account number must be between 6 and 8 digits
 error.accountNumber.maxLength = W Account number must be between 6 and 8 digits
 error.accountNumber.modCheckFailed = W Account number must be valid for the given sort-code
+error.accountNumber.doesNotExist = W Account number must belong to an active bank account
 
 error.sortcode.required = W Enter a sort code
 error.sortcode.invalidLengthError = W Sort code must be 6 digits long

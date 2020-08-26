@@ -46,17 +46,22 @@ object VerificationRequest {
     def validateUsingBarsPersonalAssessResponse(response: BarsPersonalAssessResponse): Form[VerificationRequest] =
       validate(
         response.accountNumberWithSortCodeIsValid,
-        response.nonStandardAccountDetailsRequiredForBacs.getOrElse(No)
-      )
+        response.nonStandardAccountDetailsRequiredForBacs.getOrElse(No),
+        Some(response.accountExists))
 
     private def validate(
       accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-      nonStandardAccountDetailsRequiredForBacs: ReputationResponseEnum
+      nonStandardAccountDetailsRequiredForBacs: ReputationResponseEnum,
+      accountExists: Option[ReputationResponseEnum] = None
     ): Form[VerificationRequest] =
       if (accountNumberWithSortCodeIsValid == No)
         form
           .fill(form.get)
           .withError("accountNumber", "error.accountNumber.modCheckFailed")
+      else if (accountExists.isDefined && accountExists.get == No)
+        form
+          .fill(form.get)
+          .withError("accountNumber", "error.accountNumber.doesNotExist")
       else if (nonStandardAccountDetailsRequiredForBacs == Yes && form.get.rollNumber.isEmpty)
         form
           .fill(form.get)
