@@ -16,8 +16,8 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.connector.{BarsValidationResponse, ReputationResponseEnum}
-import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
+import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
+import bankaccountverification.connector.{BarsPersonalAssessResponse, BarsValidationResponse, ReputationResponseEnum}
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -211,13 +211,13 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
     }
   }
 
-  "Validation using the bars response" when {
+  "Validation using the bars validate bank details response" when {
     val request = VerificationRequest("Joe Blogs", "10-10-10", "12345678")
     val form    = VerificationRequest.form.fillAndValidate(request)
 
     "the response indicates the sort code and account number combination is not valid" should {
       val response    = BarsValidationResponse(No, No, None)
-      val updatedForm = form.validateUsingBarsResponse(response)
+      val updatedForm = form.validateUsingBarsValidateResponse(response)
 
       "flag an error against the account number" in {
         updatedForm.error("accountNumber") shouldBe Some(
@@ -228,7 +228,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
 
     "the response indicates that a roll number is required but none was provided" should {
       val response    = BarsValidationResponse(Yes, Yes, None)
-      val updatedForm = form.validateUsingBarsResponse(response)
+      val updatedForm = form.validateUsingBarsValidateResponse(response)
 
       "flag an error against the roll number field" in {
         updatedForm.error("rollNumber") shouldBe Some(FormError("rollNumber", "error.rollNumber.required"))
@@ -240,7 +240,7 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
       val formWithRollNumber    = VerificationRequest.form.fillAndValidate(requestWithRollNumber)
 
       val response    = BarsValidationResponse(Yes, Yes, None)
-      val updatedForm = formWithRollNumber.validateUsingBarsResponse(response)
+      val updatedForm = formWithRollNumber.validateUsingBarsValidateResponse(response)
 
       "flag no errors" in {
         updatedForm.hasErrors shouldBe false
@@ -253,7 +253,87 @@ class VerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneApp
         ReputationResponseEnum.Error,
         Some(ReputationResponseEnum.Error)
       )
-      val updatedForm = form.validateUsingBarsResponse(response)
+      val updatedForm = form.validateUsingBarsValidateResponse(response)
+
+      "flag no errors so that the journey is not impacted" in {
+        updatedForm.hasErrors shouldBe false
+      }
+    }
+
+  }
+
+  "Validation using the bars personal assess response" when {
+    val request = VerificationRequest("Joe Blogs", "10-10-10", "12345678")
+    val form    = VerificationRequest.form.fillAndValidate(request)
+
+    "the response indicates the sort code and account number combination is not valid" should {
+      val response = BarsPersonalAssessResponse(
+        No,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Some(No)
+      )
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
+
+      "flag an error against the account number" in {
+        updatedForm.error("accountNumber") shouldBe Some(
+          FormError("accountNumber", "error.accountNumber.modCheckFailed")
+        )
+      }
+    }
+
+    "the response indicates that a roll number is required but none was provided" should {
+      val response = BarsPersonalAssessResponse(
+        Yes,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Some(Yes)
+      )
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
+
+      "flag an error against the roll number field" in {
+        updatedForm.error("rollNumber") shouldBe Some(FormError("rollNumber", "error.rollNumber.required"))
+      }
+    }
+
+    "the response indicates that a roll number is required and a valid roll number was provided" should {
+      val requestWithRollNumber = VerificationRequest("Joe Blogs", "10-10-10", "12345678", Some("ROLL1"))
+      val formWithRollNumber    = VerificationRequest.form.fillAndValidate(requestWithRollNumber)
+
+      val response = BarsPersonalAssessResponse(
+        Yes,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Some(Yes)
+      )
+      val updatedForm = formWithRollNumber.validateUsingBarsPersonalAssessResponse(response)
+
+      "flag no errors" in {
+        updatedForm.hasErrors shouldBe false
+      }
+    }
+
+    "the response indicates an error occurred" should {
+      val response = BarsPersonalAssessResponse(
+        ReputationResponseEnum.Error,
+        ReputationResponseEnum.Error,
+        ReputationResponseEnum.Error,
+        ReputationResponseEnum.Error,
+        ReputationResponseEnum.Error,
+        ReputationResponseEnum.Error,
+        Some(ReputationResponseEnum.Error)
+      )
+
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
 
       "flag no errors so that the journey is not impacted" in {
         updatedForm.hasErrors shouldBe false

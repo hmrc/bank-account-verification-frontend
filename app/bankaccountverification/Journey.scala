@@ -124,7 +124,12 @@ object Journey {
       .and((__ \ "data.sortCode").writeNullable[String])
       .and((__ \ "data.accountNumber").writeNullable[String])
       .and((__ \ "data.rollNumber").writeNullable[String])
-      .and((__ \ "data.accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])(
+      .and((__ \ "data.accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.accountExists").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.nameMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.nonConsented").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.subjectHasDeceased").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])(
         unlift(AccountDetails.unapply)
       )
 

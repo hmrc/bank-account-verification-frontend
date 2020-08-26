@@ -27,8 +27,6 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class BankAccountReputationConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig) {
 
-  private val bankAccountReputationConfig = appConfig.bankAccountReputationConfig
-
   def validateBankDetails(
     bankDetailsModel: BarsValidationRequest
   )(implicit
@@ -40,12 +38,44 @@ class BankAccountReputationConnector @Inject() (httpClient: HttpClient, appConfi
 
     httpClient
       .POST[BarsValidationRequest, HttpResponse](
-        url = bankAccountReputationConfig.validateBankDetailsUrl,
+        url = appConfig.barsValidateBankDetailsUrl,
         body = bankDetailsModel
       )
       .map {
         case httpResponse if httpResponse.status == 200 =>
           Json.fromJson[BarsValidationResponse](httpResponse.json) match {
+            case JsSuccess(result, _) =>
+              Success(result)
+            case JsError(errors) =>
+              Failure(new HttpException("Could not parse Json response from BARs", httpResponse.status))
+          }
+        case httpResponse => Failure(new HttpException(httpResponse.body, httpResponse.status))
+      }
+      .recoverWith {
+        case t: Throwable => Future.successful(Failure(t))
+      }
+  }
+
+  def assessPersonal(accountName: String, sortCode: String, accountNumber: String)(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[Try[BarsPersonalAssessResponse]] = {
+    import BarsPersonalAssessResponse._
+    import HttpReads.Implicits.readRaw
+
+    val request = BarsPersonalAssessRequest(
+      BarsAccount(sortCode, accountNumber),
+      BarsSubject(None, Some(accountName), None, None, None, BarsAddress(lines = List(" "), None, None))
+    )
+
+    httpClient
+      .POST[BarsPersonalAssessRequest, HttpResponse](
+        url = appConfig.barsPersonalAssessUrl,
+        body = request
+      )
+      .map {
+        case httpResponse if httpResponse.status == 200 =>
+          Json.fromJson[BarsPersonalAssessResponse](httpResponse.json) match {
             case JsSuccess(result, _) =>
               Success(result)
             case JsError(errors) =>

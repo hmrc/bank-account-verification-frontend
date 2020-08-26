@@ -51,7 +51,12 @@ case class AccountDetails(
   sortCode: Option[String],
   accountNumber: Option[String],
   rollNumber: Option[String] = None,
-  accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None
+  accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
+  accountExists: Option[ReputationResponseEnum] = None,
+  nameMatches: Option[ReputationResponseEnum] = None,
+  nonConsented: Option[ReputationResponseEnum] = None,
+  subjectHasDeceased: Option[ReputationResponseEnum] = None,
+  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None
 )
 
 object Session {

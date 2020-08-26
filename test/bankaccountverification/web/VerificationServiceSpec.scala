@@ -17,7 +17,7 @@
 package bankaccountverification.web
 
 import bankaccountverification.{AccountDetails, JourneyRepository, Session}
-import bankaccountverification.connector.{BankAccountReputationConnector, BarsValidationRequest, BarsValidationResponse}
+import bankaccountverification.connector.{BankAccountReputationConnector, BarsPersonalAssessResponse, BarsValidationRequest, BarsValidationResponse}
 import bankaccountverification.connector.ReputationResponseEnum._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -37,6 +37,90 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite {
   implicit val timeout = 1 second
   implicit val hc      = HeaderCarrier()
+
+  "Assessing personal bank account details provided by the user" when {
+    val journeyId = BSONObjectID.generate()
+
+    "the details provided pass the remote bars checks" should {
+      val mockConnector  = mock[BankAccountReputationConnector]
+      val mockRepository = mock[JourneyRepository]
+      val service        = new VerificationService(mockConnector, mockRepository)
+
+      val userInput = VerificationRequest("Bob", "20-30-40", "12345678")
+      val form      = VerificationRequest.form.fillAndValidate(userInput)
+
+      val assessResult = Future.successful(
+        Success(BarsPersonalAssessResponse(Yes, Yes, Yes, Yes, Indeterminate, Indeterminate, Some(No)))
+      )
+      when(mockConnector.assessPersonal(any(), any(), any())(any(), any())).thenReturn(assessResult)
+      when(mockRepository.updateAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
+
+      val updatedForm = service.assess(journeyId, form)
+
+      "strip the dashes from the sort code" in {
+        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"))(any(), any())
+      }
+
+      "persist the details to mongo" in {
+        val expectedAccountDetails = AccountDetails(
+          Some("Bob"),
+          Some("20-30-40"),
+          Some("12345678"),
+          None,
+          Some(Yes),
+          Some(Yes),
+          Some(Yes),
+          Some(Indeterminate),
+          Some(Indeterminate),
+          Some(No)
+        )
+        verify(mockRepository).updateAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
+      }
+
+      "return a valid form" in {
+        await(updatedForm).hasErrors shouldEqual false
+      }
+    }
+
+    "the remote bars check fails with an Internal Server Error" should {
+      val mockConnector  = mock[BankAccountReputationConnector]
+      val mockRepository = mock[JourneyRepository]
+      val service        = new VerificationService(mockConnector, mockRepository)
+
+      val userInput = VerificationRequest("Bob", "20-30-40", "12345678")
+      val form      = VerificationRequest.form.fillAndValidate(userInput)
+
+      val assessResult = Future.successful(Failure(new HttpException("FIRE IN SERVER ROOM", 500)))
+      when(mockConnector.assessPersonal(any(), any(), any())(any(), any())).thenReturn(assessResult)
+      when(mockRepository.updateAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
+
+      val updatedForm = service.assess(journeyId, form)
+
+      "strip the dashes from the sort code" in {
+        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"))(any(), any())
+      }
+
+      "persist the details to mongo" in {
+        val expectedAccountDetails = AccountDetails(
+          Some("Bob"),
+          Some("20-30-40"),
+          Some("12345678"),
+          None,
+          Some(Error),
+          Some(Error),
+          Some(Error),
+          Some(Error),
+          Some(Error),
+          Some(Error)
+        )
+        verify(mockRepository).updateAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
+      }
+
+      "return a valid form" in {
+        await(updatedForm).hasErrors shouldEqual false
+      }
+    }
+  }
 
   "Verifying bank account details provided by the user" when {
     val journeyId = BSONObjectID.generate()

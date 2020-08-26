@@ -163,7 +163,7 @@ class VerificationController @Inject() (
               getCustomisations(journey) flatMap {
                 case (headerBlock, beforeContentBlock, footerBlock) =>
                   val form = VerificationRequest.form.bindFromRequest()
-                  (if (!form.hasErrors) verificationService.verify(id, form)
+                  (if (!form.hasErrors) verificationService.assess(id, form)
                    else Future.successful(form)) map {
                     case form if form.hasErrors =>
                       BadRequest(
