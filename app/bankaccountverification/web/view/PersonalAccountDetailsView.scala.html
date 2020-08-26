@@ -14,12 +14,12 @@
  * limitations under the License.
  *@
 
-@import bankaccountverification.web.VerificationRequest
+@import bankaccountverification.web.PersonalVerificationRequest
 
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, errorSummary: GovukErrorSummary, help: HmrcReportTechnicalIssue)
-@(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, detailsForm: Form[VerificationRequest], headerBlock: Option[Html] = None, beforeContentBlock: Option[Html] = None, footerBlock: Option[Html] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, detailsForm: Form[PersonalVerificationRequest], headerBlock: Option[Html] = None, beforeContentBlock: Option[Html] = None, footerBlock: Option[Html] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@layout(pageTitle = Some(messages("pageTitle.accountDetails")), Some(detailsForm), welshTranslationsAvailable, headerBlock, beforeContentBlock, footerBlock) {
+@layout(pageTitle = Some(messages("pageTitle.personal.accountDetails")), Some(detailsForm), welshTranslationsAvailable, headerBlock, beforeContentBlock, footerBlock) {
     <h1 class="govuk-heading-xl">@messages("service.header")</h1>
 
     @if(detailsForm.hasErrors) {
@@ -30,7 +30,7 @@
             }))
     }
 
-    @form(bankaccountverification.web.routes.VerificationController.postAccountDetails(journeyId)) {
+    @form(bankaccountverification.web.controller.routes.PersonalVerificationController.postAccountDetails(journeyId)) {
         @input(Input(value = detailsForm("accountName").value,
             label = Label(content = HtmlContent(messages("label.accountName"))),
             formGroupClasses = "form-field-group",

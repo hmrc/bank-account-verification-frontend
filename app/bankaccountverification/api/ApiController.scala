@@ -16,7 +16,7 @@
 
 package bankaccountverification.api
 
-import bankaccountverification.{AppConfig, JourneyRepository, Session}
+import bankaccountverification.{AppConfig, JourneyRepository, PersonalSession}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
@@ -68,13 +68,20 @@ class ApiController @Inject() (
 
   def complete(journeyId: String): Action[AnyContent] =
     Action.async {
+      import bankaccountverification.Session
+      import bankaccountverification.Session._
       BSONObjectID.parse(journeyId) match {
         case Success(id) =>
           journeyRepository
             .findById(id)
             .map {
-              case Some(x) => Ok(Json.toJson(x.data.flatMap(Session.toCompleteResponse)))
-              case None    => NotFound
+              case x => x.flatMap(_.data.flatMap(Session.toCompleteResponseJson))
+            }
+            .map {
+              case Some(x) =>
+                Ok(x)
+              case None =>
+                NotFound
             }
             .recoverWith {
               case x =>

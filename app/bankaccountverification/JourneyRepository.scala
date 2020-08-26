@@ -32,6 +32,8 @@ package bankaccountverification
  * limitations under the License.
  */
 
+import bankaccountverification.Journey.businessUpdateWrites
+import bankaccountverification.web.AccountTypeRequestEnum
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsObject, Json, OWrites}
 import play.modules.reactivemongo.ReactiveMongoComponent
@@ -74,16 +76,25 @@ class JourneyRepository @Inject() (component: ReactiveMongoComponent)
     ).map(_ => journeyId)
   }
 
-  def updateAccountDetails(id: BSONObjectID, data: AccountDetails)(implicit
+  def updatePersonalAccountDetails(id: BSONObjectID, data: PersonalAccountDetails)(implicit
     formats: OWrites[Journey],
     ec: ExecutionContext
   ): Future[Boolean] = {
-    import Journey.updateWrites
-    val updateJson = Json.toJsObject(Journey.updateAccountDetailsExpiring(data))
+    import Journey.personalUpdateWrites
+    val updateJson = Json.toJsObject(Journey.updatePersonalAccountDetailsExpiring(data))
     findAndUpdate(_id(id), updateJson).map(r => r.lastError.isDefined)
   }
 
-  def updateAccountType(id: BSONObjectID, accountType: String)(implicit
+  def updateBusinessAccountDetails(id: BSONObjectID, data: BusinessAccountDetails)(implicit
+    formats: OWrites[Journey],
+    ec: ExecutionContext
+  ): Future[Boolean] = {
+    import Journey.businessUpdateWrites
+    val updateJson = Json.toJsObject(Journey.updateBusinessAccountDetailsExpiring(data))
+    findAndUpdate(_id(id), updateJson).map(r => r.lastError.isDefined)
+  }
+
+  def updateAccountType(id: BSONObjectID, accountType: AccountTypeRequestEnum)(implicit
     ec: ExecutionContext
   ): Future[Boolean] = {
     import Journey.accountTypeUpdateWrites

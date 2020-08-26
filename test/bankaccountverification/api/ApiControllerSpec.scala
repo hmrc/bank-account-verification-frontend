@@ -19,9 +19,9 @@ package bankaccountverification.api
 import java.time.ZonedDateTime
 
 import akka.stream.Materializer
-import bankaccountverification.connector.ReputationResponseEnum.Yes
-import bankaccountverification.web.AccountTypeRequest.personalAccountType
-import bankaccountverification.{AppConfig, Journey, JourneyRepository, Session}
+import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
+import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
+import bankaccountverification.{AppConfig, BusinessSession, Journey, JourneyRepository, PersonalSession, Session}
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
@@ -105,7 +105,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
 
   "GET /complete" should {
     "return 200" when {
-      "a valid journeyId is provided" in {
+      "a valid journeyId is provided with a personal response" in {
         val journeyId = BSONObjectID.generate()
         val returnData = Journey(
           journeyId,
@@ -115,7 +115,24 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           None,
           None,
           Some(
-            Session(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), Some(personalAccountType))
+            Session(
+              Some(Personal),
+              Some(
+                PersonalSession(
+                  Some("Bob"),
+                  Some("203040"),
+                  Some("12345678"),
+                  Some("roll1"),
+                  Some(Yes),
+                  Some(Yes),
+                  Some(Indeterminate),
+                  Some(Indeterminate),
+                  Some(Indeterminate),
+                  Some(No)
+                )
+              ),
+              None
+            )
           )
         )
 
@@ -127,33 +144,92 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         status(completeResult) shouldBe Status.OK
         val json = contentAsJson(completeResult)
 
-        (json \ "accountType").as[String]                      shouldBe "personal"
-        (json \ "accountName").as[String]                      shouldBe "Bob"
-        (json \ "sortCode").as[String]                         shouldBe "203040"
-        (json \ "accountNumber").as[String]                    shouldBe "12345678"
-        (json \ "accountNumberWithSortCodeIsValid").as[String] shouldBe "yes"
-        (json \ "rollNumber").as[String]                       shouldBe "roll1"
+        (json \ "accountType").as[String]                                           shouldBe "personal"
+        (json \ "personal" \ "accountName").as[String]                              shouldBe "Bob"
+        (json \ "personal" \ "sortCode").as[String]                                 shouldBe "203040"
+        (json \ "personal" \ "accountNumber").as[String]                            shouldBe "12345678"
+        (json \ "personal" \ "accountNumberWithSortCodeIsValid").as[String]         shouldBe "yes"
+        (json \ "personal" \ "accountExists").as[String]                            shouldBe "yes"
+        (json \ "personal" \ "rollNumber").as[String]                               shouldBe "roll1"
+        (json \ "personal" \ "nameMatches").as[String]                              shouldBe "indeterminate"
+        (json \ "personal" \ "nonConsented").as[String]                             shouldBe "indeterminate"
+        (json \ "personal" \ "subjectHasDeceased").as[String]                       shouldBe "indeterminate"
+        (json \ "personal" \ "nonStandardAccountDetailsRequiredForBacs").as[String] shouldBe "no"
+      }
+
+      "a valid journeyId is provided with a business response" in {
+        val journeyId = BSONObjectID.generate()
+        val returnData = Journey(
+          journeyId,
+          ZonedDateTime.now(),
+          "serviceIdentifier",
+          "continueUrl",
+          None,
+          None,
+          Some(
+            Session(
+              Some(Business),
+              None,
+              Some(
+                BusinessSession(
+                  Some("Bob Ltd"),
+                  Some("SC123123"),
+                  Some("203040"),
+                  Some("12345678"),
+                  Some("roll1"),
+                  Some(Yes),
+                  Some(No),
+                  Some(Indeterminate),
+                  Some(Indeterminate),
+                  Some(Indeterminate),
+                  None
+                )
+              )
+            )
+          )
+        )
+
+        when(sessionStore.findById(meq(journeyId), any())(any()))
+          .thenReturn(Future.successful(Some(returnData)))
+
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/${journeyId.stringify}")
+        val completeResult      = controller.complete(journeyId.stringify).apply(fakeCompleteRequest)
+
+        status(completeResult) shouldBe Status.OK
+        val json = contentAsJson(completeResult)
+
+        (json \ "accountType").as[String]                                   shouldBe "business"
+        (json \ "business" \ "companyName").as[String]                      shouldBe "Bob Ltd"
+        (json \ "business" \ "companyRegistrationNumber").as[String]        shouldBe "SC123123"
+        (json \ "business" \ "sortCode").as[String]                         shouldBe "203040"
+        (json \ "business" \ "accountNumber").as[String]                    shouldBe "12345678"
+        (json \ "business" \ "accountNumberWithSortCodeIsValid").as[String] shouldBe "yes"
+        (json \ "business" \ "accountExists").as[String]                    shouldBe "no"
+        (json \ "business" \ "rollNumber").as[String]                       shouldBe "roll1"
+        (json \ "business" \ "companyNameMatches").as[String]               shouldBe "indeterminate"
+        (json \ "business" \ "companyPostCodeMatches").as[String]           shouldBe "indeterminate"
+        (json \ "business" \ "companyRegistrationNumberMatches").as[String] shouldBe "indeterminate"
       }
     }
-  }
 
-  "return NotFound" when {
-    "a non-existent journeyId is provided" in {
-      val nonExistentJourneyId = BSONObjectID.generate()
-      when(sessionStore.findById(meq(nonExistentJourneyId), any())(any())).thenReturn(Future.successful(None))
+    "return NotFound" when {
+      "a non-existent journeyId is provided" in {
+        val nonExistentJourneyId = BSONObjectID.generate()
+        when(sessionStore.findById(meq(nonExistentJourneyId), any())(any())).thenReturn(Future.successful(None))
 
-      val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
-      val completeResult      = controller.complete(nonExistentJourneyId.stringify).apply(fakeCompleteRequest)
-      status(completeResult) shouldBe Status.NOT_FOUND
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
+        val completeResult      = controller.complete(nonExistentJourneyId.stringify).apply(fakeCompleteRequest)
+        status(completeResult) shouldBe Status.NOT_FOUND
+      }
     }
-  }
 
-  "return BadRequest" when {
-    "an invalid journeyId is provided" in {
-      val nonExistentJourneyId = "invalid-journey-id"
-      val fakeCompleteRequest  = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
-      val completeResult       = controller.complete(nonExistentJourneyId).apply(fakeCompleteRequest)
-      status(completeResult) shouldBe Status.BAD_REQUEST
+    "return BadRequest" when {
+      "an invalid journeyId is provided" in {
+        val nonExistentJourneyId = "invalid-journey-id"
+        val fakeCompleteRequest  = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
+        val completeResult       = controller.complete(nonExistentJourneyId).apply(fakeCompleteRequest)
+        status(completeResult) shouldBe Status.BAD_REQUEST
+      }
     }
   }
 }

@@ -19,6 +19,7 @@ package bankaccountverification
 import java.time.{Instant, ZoneOffset, ZonedDateTime}
 
 import bankaccountverification.connector.ReputationResponseEnum
+import bankaccountverification.web.AccountTypeRequestEnum
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
@@ -55,13 +56,19 @@ object Journey {
       data
     )
 
-  def updateAccountDetailsExpiring(data: AccountDetails) = AccountDetailsUpdate(expiryDate, data)
-  def updateAccountTypeExpiring(accountType: String)     = AccountTypeUpdate(expiryDate, accountType)
+  def updatePersonalAccountDetailsExpiring(data: PersonalAccountDetails) =
+    PersonalAccountDetailsUpdate(expiryDate, data)
+  def updateBusinessAccountDetailsExpiring(data: BusinessAccountDetails) =
+    BusinessAccountDetailsUpdate(expiryDate, data)
+  def updateAccountTypeExpiring(accountType: AccountTypeRequestEnum) = AccountTypeUpdate(expiryDate, accountType)
 
-  implicit val objectIdFormats: Format[BSONObjectID] = ReactiveMongoFormats.objectIdFormats
-  implicit val sessionDataReads: Reads[Session]      = Json.reads[Session]
-  implicit val sessionDataWrites: Writes[Session]    = Json.writes[Session]
-//  implicit val accountDetailsWrites: Writes[AccountDetails] = Json.writes[AccountDetails]
+  implicit val objectIdFormats: Format[BSONObjectID]              = ReactiveMongoFormats.objectIdFormats
+  implicit val personalSessionDataReads: Reads[PersonalSession]   = Json.reads[PersonalSession]
+  implicit val personalSessionDataWrites: Writes[PersonalSession] = Json.writes[PersonalSession]
+  implicit val businessSessionDataReads: Reads[BusinessSession]   = Json.reads[BusinessSession]
+  implicit val businessSessionDataWrites: Writes[BusinessSession] = Json.writes[BusinessSession]
+  implicit val sessionReads: Reads[Session]                       = Json.reads[Session]
+  implicit val sessionWrites: Writes[Session]                     = Json.writes[Session]
 
   implicit val localDateTimeRead: Reads[ZonedDateTime] =
     (__ \ "$date").read[Long].map { dateTime =>
@@ -118,32 +125,55 @@ object Journey {
         unlift(Journey.unapply)
       )
 
-  implicit def accountDetailsWrites: OWrites[AccountDetails] =
-    (__ \ "data.accountName")
+  implicit def personalAccountDetailsWrites: OWrites[PersonalAccountDetails] =
+    (__ \ "data.personal.accountName")
       .writeNullable[String]
-      .and((__ \ "data.sortCode").writeNullable[String])
-      .and((__ \ "data.accountNumber").writeNullable[String])
-      .and((__ \ "data.rollNumber").writeNullable[String])
-      .and((__ \ "data.accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.accountExists").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.nameMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.nonConsented").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.subjectHasDeceased").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])(
-        unlift(AccountDetails.unapply)
+      .and((__ \ "data.personal.sortCode").writeNullable[String])
+      .and((__ \ "data.personal.accountNumber").writeNullable[String])
+      .and((__ \ "data.personal.rollNumber").writeNullable[String])
+      .and((__ \ "data.personal.accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.personal.accountExists").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.personal.nameMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.personal.nonConsented").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.personal.subjectHasDeceased").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.personal.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])(
+        unlift(PersonalAccountDetails.unapply)
       )
 
-  implicit def updateWrites: OWrites[AccountDetailsUpdate] =
+  implicit def businessAccountDetailsWrites: OWrites[BusinessAccountDetails] =
+    (__ \ "data.business.companyName")
+      .writeNullable[String]
+      .and((__ \ "data.business.companyRegistrationNumber").writeNullable[String])
+      .and((__ \ "data.business.sortCode").writeNullable[String])
+      .and((__ \ "data.business.accountNumber").writeNullable[String])
+      .and((__ \ "data.business.rollNumber").writeNullable[String])
+      .and((__ \ "data.business.accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.business.accountExists").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.business.companyNameMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.business.companyPostCodeMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.business.companyRegistrationNumberMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.business.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])(
+        unlift(BusinessAccountDetails.unapply)
+      )
+
+  implicit def personalUpdateWrites: OWrites[PersonalAccountDetailsUpdate] =
     (__ \ "$set" \ "expiryDate")
       .write[ZonedDateTime]
-      .and((__ \ "$set").write[AccountDetails])(
-        unlift(AccountDetailsUpdate.unapply)
+      .and((__ \ "$set").write[PersonalAccountDetails])(
+        unlift(PersonalAccountDetailsUpdate.unapply)
+      )
+
+  implicit def businessUpdateWrites: OWrites[BusinessAccountDetailsUpdate] =
+    (__ \ "$set" \ "expiryDate")
+      .write[ZonedDateTime]
+      .and((__ \ "$set").write[BusinessAccountDetails])(
+        unlift(BusinessAccountDetailsUpdate.unapply)
       )
 
   implicit def accountTypeUpdateWrites: OWrites[AccountTypeUpdate] =
     (__ \ "$set" \ "expiryDate")
       .write[ZonedDateTime]
-      .and((__ \ "$set" \ "data" \ "accountType").write[String])(
+      .and((__ \ "$set" \ "data" \ "accountType").write[AccountTypeRequestEnum])(
         unlift(AccountTypeUpdate.unapply)
       )
 

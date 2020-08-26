@@ -24,6 +24,22 @@ object BarsPersonalAssessRequest {
   implicit val format: OFormat[BarsPersonalAssessRequest] = Json.format[BarsPersonalAssessRequest]
 }
 
+case class BarsBusinessAssessRequest(account: BarsAccount, business: Option[BarsBusiness])
+
+object BarsBusinessAssessRequest {
+  implicit val format: OFormat[BarsBusinessAssessRequest] = Json.format[BarsBusinessAssessRequest]
+}
+
+case class BarsBusiness(
+  companyName: String, // Must be between 1 and 70 characters long
+  companyRegistrationNumber: Option[String],
+  address: Option[BarsAddress]
+)
+
+object BarsBusiness {
+  implicit val format: OFormat[BarsBusiness] = Json.format[BarsBusiness]
+}
+
 case class BarsAccount(
   sortCode: String, // The bank sort code, 6 characters long (whitespace and/or dashes should be removed)
   accountNumber: String // The bank account number, 8 characters long

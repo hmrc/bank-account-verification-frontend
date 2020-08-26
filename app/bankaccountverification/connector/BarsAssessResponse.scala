@@ -16,7 +16,7 @@
 
 package bankaccountverification.connector
 
-import play.api.libs.json.{Json, Reads, Writes}
+import play.api.libs.json.{Json, OFormat, Reads, Writes}
 
 case class BarsPersonalAssessResponse(
   accountNumberWithSortCodeIsValid: ReputationResponseEnum,
@@ -31,4 +31,19 @@ case class BarsPersonalAssessResponse(
 object BarsPersonalAssessResponse {
   implicit val reads: Reads[BarsPersonalAssessResponse]   = Json.reads[BarsPersonalAssessResponse]
   implicit val writes: Writes[BarsPersonalAssessResponse] = Json.writes[BarsPersonalAssessResponse]
+}
+
+case class BarsBusinessAssessResponse(
+  accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+  sortCodeIsPresentOnEISCD: ReputationResponseEnum,
+  sortCodeBankName: Option[String],
+  accountExists: ReputationResponseEnum,
+  companyNameMatches: ReputationResponseEnum,
+  companyPostCodeMatches: ReputationResponseEnum,
+  companyRegistrationNumberMatches: ReputationResponseEnum,
+  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum]
+)
+
+object BarsBusinessAssessResponse {
+  implicit val format: OFormat[BarsBusinessAssessResponse] = Json.format[BarsBusinessAssessResponse]
 }

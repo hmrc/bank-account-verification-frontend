@@ -17,7 +17,7 @@
 package bankaccountverification.web
 
 import bankaccountverification.AppConfig
-import bankaccountverification.web.html.ErrorTemplate
+import bankaccountverification.web.view.html.ErrorTemplate
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.mvc.Request

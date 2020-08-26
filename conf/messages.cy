@@ -6,7 +6,8 @@ service.text =
 phaseBanner.content = W This is a new service – your <a href='/feedback'>feedback</a> will help us to improve it.
 
 pageTitle.accountType = W Account Type
-pageTitle.accountDetails = W Account Details
+pageTitle.personal.accountDetails = W Personal Account Details
+pageTitle.business.accountDetails = W Business Account Details
 
 label.accountType.personal = W Personal
 label.accountType.business = W Business
@@ -16,15 +17,24 @@ label.accountName = W Name on the account
 label.sortCode = W Sort code
 label.accountNumber = W Account number
 label.rollNumber = W Building society roll number (if you have one)
+
+label.companyName = W Company name
+label.companyRegistrationNumber = W Company registration number
+
 label.submitLabel = W Continue
 label.back = W Back
 
+hint.companyRegistrationNumber = W This should optionally begin with OC,LP,SC,SO,SL,NI,R,NC or NL followed by 6-8 digits
 hint.sortCode = W Must be 6 digits long
 hint.accountNumber = W Must be between 6 and 8 digits long
 hint.rollNumber = W You can find it on your card, statement or passbook
 
 error.summaryText = W There is an error
+
 error.accountName.required = W Enter the name on the account
+
+error.companyName.required = W Enter the name on the account
+error.companyRegistrationNumber.invalid = W Company registration number is invalid
 
 error.accountType.required = W Please select an account type
 

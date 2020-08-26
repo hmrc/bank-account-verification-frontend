@@ -17,7 +17,7 @@
 package bankaccountverification.web
 
 import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
-import bankaccountverification.connector.{BarsPersonalAssessResponse, BarsValidationResponse, ReputationResponseEnum}
+import bankaccountverification.connector.{BarsBusinessAssessResponse, BarsPersonalAssessResponse, BarsValidationResponse, ReputationResponseEnum}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation._
@@ -25,25 +25,27 @@ import play.api.libs.json.Json
 
 import scala.util.{Failure, Success, Try}
 
-case class VerificationRequest(
+case class PersonalVerificationRequest(
   accountName: String,
   sortCode: String,
   accountNumber: String,
   rollNumber: Option[String] = None
 )
 
-object VerificationRequest {
+object PersonalVerificationRequest extends VerificationRequestBase {
   object formats {
-    implicit val bankAccountDetailsReads  = Json.reads[VerificationRequest]
-    implicit val bankAccountDetailsWrites = Json.writes[VerificationRequest]
+    implicit val bankAccountDetailsReads  = Json.reads[PersonalVerificationRequest]
+    implicit val bankAccountDetailsWrites = Json.writes[PersonalVerificationRequest]
   }
 
-  implicit class ValidationFormWrapper(form: Form[VerificationRequest]) {
+  implicit class ValidationFormWrapper(form: Form[PersonalVerificationRequest]) {
 
-    def validateUsingBarsValidateResponse(response: BarsValidationResponse): Form[VerificationRequest] =
+    def validateUsingBarsValidateResponse(response: BarsValidationResponse): Form[PersonalVerificationRequest] =
       validate(response.accountNumberWithSortCodeIsValid, response.nonStandardAccountDetailsRequiredForBacs)
 
-    def validateUsingBarsPersonalAssessResponse(response: BarsPersonalAssessResponse): Form[VerificationRequest] =
+    def validateUsingBarsPersonalAssessResponse(
+      response: BarsPersonalAssessResponse
+    ): Form[PersonalVerificationRequest] =
       validate(
         response.accountNumberWithSortCodeIsValid,
         response.nonStandardAccountDetailsRequiredForBacs.getOrElse(No),
@@ -54,7 +56,88 @@ object VerificationRequest {
       accountNumberWithSortCodeIsValid: ReputationResponseEnum,
       nonStandardAccountDetailsRequiredForBacs: ReputationResponseEnum,
       accountExists: Option[ReputationResponseEnum] = None
-    ): Form[VerificationRequest] =
+    ): Form[PersonalVerificationRequest] =
+      if (accountNumberWithSortCodeIsValid == No)
+        form
+          .fill(form.get)
+          .withError("accountNumber", "error.accountNumber.modCheckFailed")
+      else if (accountExists.isDefined && accountExists.get == No)
+        form
+          .fill(form.get)
+          .withError("accountNumber", "error.accountNumber.doesNotExist")
+      else if (nonStandardAccountDetailsRequiredForBacs == Yes && form.get.rollNumber.isEmpty)
+        form
+          .fill(form.get)
+          .withError("rollNumber", "error.rollNumber.required")
+      else form
+
+  }
+
+  val form: Form[PersonalVerificationRequest] =
+    Form(
+      mapping(
+        "accountName"   -> accountNameMapping,
+        "sortCode"      -> sortCodeMapping,
+        "accountNumber" -> accountNumberMapping,
+        "rollNumber"    -> optional(rollNumberMapping)
+      )(PersonalVerificationRequest.apply)(PersonalVerificationRequest.unapply)
+    )
+
+  def accountNameMapping = text.verifying(Constraints.nonEmpty(errorMessage = "error.accountName.required"))
+}
+
+case class BusinessVerificationRequest(
+  companyName: String,
+  companyRegistrationNumber: Option[String],
+  sortCode: String,
+  accountNumber: String,
+  rollNumber: Option[String]
+)
+
+object BusinessVerificationRequest extends VerificationRequestBase {
+  object formats {
+    implicit val bankAccountDetailsReads  = Json.reads[BusinessVerificationRequest]
+    implicit val bankAccountDetailsWrites = Json.writes[BusinessVerificationRequest]
+  }
+
+  implicit class ValidationFormWrapper(form: Form[BusinessVerificationRequest]) {
+
+    def validateUsingBarsValidateResponse(response: BarsValidationResponse): Form[BusinessVerificationRequest] =
+      validate(response.accountNumberWithSortCodeIsValid, response.nonStandardAccountDetailsRequiredForBacs)
+
+    def validateUsingBarsBusinessAssessResponse(
+      response: BarsBusinessAssessResponse
+    ): Form[BusinessVerificationRequest] =
+      validateBusiness(
+        response.accountNumberWithSortCodeIsValid,
+        response.nonStandardAccountDetailsRequiredForBacs.getOrElse(No),
+        Some(response.accountExists)
+      )
+
+    private def validate(
+      accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+      nonStandardAccountDetailsRequiredForBacs: ReputationResponseEnum,
+      accountExists: Option[ReputationResponseEnum] = None
+    ): Form[BusinessVerificationRequest] =
+      if (accountNumberWithSortCodeIsValid == No)
+        form
+          .fill(form.get)
+          .withError("accountNumber", "error.accountNumber.modCheckFailed")
+      else if (accountExists.isDefined && accountExists.get == No)
+        form
+          .fill(form.get)
+          .withError("accountNumber", "error.accountNumber.doesNotExist")
+      else if (nonStandardAccountDetailsRequiredForBacs == Yes && form.get.rollNumber.isEmpty)
+        form
+          .fill(form.get)
+          .withError("rollNumber", "error.rollNumber.required")
+      else form
+
+    private def validateBusiness(
+      accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+      nonStandardAccountDetailsRequiredForBacs: ReputationResponseEnum,
+      accountExists: Option[ReputationResponseEnum] = None
+    ): Form[BusinessVerificationRequest] =
       if (accountNumberWithSortCodeIsValid == No)
         form
           .fill(form.get)
@@ -70,71 +153,26 @@ object VerificationRequest {
       else form
   }
 
-  val form: Form[VerificationRequest] =
+  val form: Form[BusinessVerificationRequest] =
     Form(
       mapping(
-        "accountName"   -> accountNameMapping,
-        "sortCode"      -> sortCodeMapping,
-        "accountNumber" -> accountNumberMapping,
-        "rollNumber"    -> optional(rollNumberMapping)
-      )(VerificationRequest.apply)(VerificationRequest.unapply)
+        "companyName"               -> companyNameMapping,
+        "companyRegistrationNumber" -> optional(companyRegistrationNumberMapping),
+        "sortCode"                  -> sortCodeMapping,
+        "accountNumber"             -> accountNumberMapping,
+        "rollNumber"                -> optional(rollNumberMapping)
+      )(BusinessVerificationRequest.apply)(BusinessVerificationRequest.unapply)
     )
 
-  def accountNameMapping = text.verifying(Constraints.nonEmpty(errorMessage = "error.accountName.required"))
+  def companyNameMapping = text.verifying(Constraints.nonEmpty(errorMessage = "error.companyName.required"))
 
-  def accountNumberMapping = text.verifying(accountNumberConstraint())
-
-  def sortCodeMapping = text.verifying(sortcodeConstraint())
-
-  def rollNumberMapping =
+  def companyRegistrationNumberMapping =
     text.verifying(
-      Constraints.pattern("""[A-Z0-9/.\-]+""".r, "constraint.rollNumber.format", "error.rollNumber.format"),
-      Constraints.minLength(1, "error.rollNumber.minLength"),
-      Constraints.maxLength(18, "error.rollNumber.maxLength")
+      Constraints
+        .pattern(
+          "^(OC|LP|SC|SO|SL|NI|R|NC|NL|oc|lp|sc|so|sl|ni|r|nc|nl)?[0-9]{6,8}$".r,
+          name = "constraint.companyRegistrationNumber",
+          error = "error.companyRegistrationNumber.invalid"
+        )
     )
-
-  def accountNumberConstraint(): Constraint[String] =
-    Constraint[String](Some("constraints.accountNumber"), Seq.empty) { input =>
-      if (input.isEmpty) Invalid(ValidationError("error.accountNumber.required"))
-      else {
-        val strippedInput = stripSortCode(input)
-        val errors =
-          Seq(
-            if (strippedInput.length < 6) Some("error.accountNumber.minLength") else None,
-            if (strippedInput.length > 8) Some("error.accountNumber.maxLength") else None,
-            """[0-9]+""".r.unapplySeq(strippedInput).map(_ => None).getOrElse(Some("error.accountNumber.digitsOnly"))
-          ).flatten
-
-        errors match {
-          case Seq() => Valid
-          case errs  => Invalid(ValidationError(errs))
-        }
-      }
-    }
-
-  def sortcodeConstraint(): Constraint[String] =
-    Constraint[String](Some("constraints.sortcode.format"), Seq.empty) { input =>
-      if (input.isEmpty) Invalid(ValidationError("error.sortcode.required"))
-      else {
-        val strippedInput = stripSortCode(input)
-        val errors =
-          Seq(
-            if (strippedInput.length != 6) Some("error.sortcode.invalidLengthError") else None,
-            if (sortcodeHasInvalidChars(strippedInput)) Some("error.sortcode.invalidCharsError") else None
-          ).flatten
-
-        errors match {
-          case Seq() => Valid
-          case errs  => Invalid(ValidationError(errs))
-        }
-      }
-    }
-
-  def stripSortCode(sortCode: String) = sortCode.replaceAll("""[ \-]""", "")
-
-  private def sortcodeHasInvalidChars(sortcode: String): Boolean =
-    Try(sortcode.toInt) match {
-      case Success(sc) => false
-      case Failure(_)  => true
-    }
 }
