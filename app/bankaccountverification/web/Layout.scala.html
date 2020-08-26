@@ -35,6 +35,7 @@
 
 @this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, govukPhaseBanner: GovukPhaseBanner, languageSelect: HmrcLanguageSelect, head: Head)
 @(pageTitle: Option[String] = None,
+        form: Option[Form[_]] = None,
         welshTranslationsAvailable: Boolean = false,
         headerBlock: Option[Html] = None,
         beforeContentBlock: Option[Html] = None,
@@ -66,8 +67,12 @@
     }
 }
 
+    @thePageTitle = {
+        @{if(form.isDefined && form.get.hasErrors) pageTitle.map(t => s"Error: $t") else pageTitle}
+    }
+
 @govukLayout(
-    pageTitle = pageTitle,
+    pageTitle = Some(s"$thePageTitle - GOV.UK"),
     headBlock = Some(head(headBlock)),
     headerBlock = headerBlock,
     footerBlock = footerBlock,
