@@ -5,6 +5,9 @@ service.text =
 
 phaseBanner.content = This is a new service – your <a href='/feedback'>feedback</a> will help us to improve it.
 
+pageTitle.accountType = Account Type
+pageTitle.accountDetails = Account Details
+
 label.accountType.personal = Personal
 label.accountType.business = Business
 label.accountType.heading = Is this a personal or a business account?

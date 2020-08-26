@@ -5,6 +5,9 @@ service.text =
 
 phaseBanner.content = W This is a new service – your <a href='/feedback'>feedback</a> will help us to improve it.
 
+pageTitle.accountType = W Account Type
+pageTitle.accountDetails = W Account Details
+
 label.accountType.personal = W Personal
 label.accountType.business = W Business
 label.accountType.heading = W Is this a personal or a business account?
