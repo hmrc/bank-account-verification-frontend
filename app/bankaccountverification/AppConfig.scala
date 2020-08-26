@@ -24,9 +24,9 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
   val footerLinkItems: Seq[String] = config.getOptional[Seq[String]]("footerLinkItems").getOrElse(Seq())
 
-  val bankAccountReputationConfig = BankAccountReputationConfig(
-    validateBankDetailsUrl = config.get[String]("bankaccountreputation.validateBankDetails.url")
-  )
+  val barsBaseUrl                = servicesConfig.baseUrl("bank-account-reputation")
+  val barsValidateBankDetailsUrl = s"$barsBaseUrl/v2/validateBankDetails"
+  val barsPersonalAssessUrl      = s"$barsBaseUrl/personal/v3/assess"
 
   val contactFormServiceIdentifier = "bank-account-verification"
 }

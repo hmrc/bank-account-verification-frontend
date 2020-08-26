@@ -1,8 +1,8 @@
 package bankaccountverification
 
 import bankaccountverification.api.{CompleteResponse, InitRequest}
-import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
-import bankaccountverification.connector.{BankAccountReputationConnector, BarsValidationResponse}
+import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
+import bankaccountverification.connector.{BankAccountReputationConnector, BarsPersonalAssessResponse, BarsValidationResponse}
 import bankaccountverification.web.{AccountTypeRequest, VerificationRequest}
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentMatchers.any
@@ -38,8 +38,12 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     }
 
   "BankAccountVerification" in {
-    when(mockBankAccountReputationConnector.validateBankDetails(any())(any(), any())).thenReturn(
-      Future.successful(Success(BarsValidationResponse(Yes, No, None)))
+    when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any())(any(), any())).thenReturn(
+      Future.successful(
+        Success(
+          BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
+        )
+      )
     )
 
     val wsClient = app.injector.instanceOf[WSClient]
@@ -94,7 +98,13 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
         "some-account-name",
         "12-12-12",
         "12349876",
-        accountNumberWithSortCodeIsValid = Yes
+        accountNumberWithSortCodeIsValid = Yes,
+        None,
+        accountExists = Some(Yes),
+        nameMatches = Some(Indeterminate),
+        nonConsented = Some(Indeterminate),
+        subjectHasDeceased = Some(Indeterminate),
+        nonStandardAccountDetailsRequiredForBacs = Some(No)
       )
     )
   }

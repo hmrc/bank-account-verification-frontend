@@ -198,7 +198,8 @@ class VerificationControllerSpec extends AnyWordSpec with Matchers with MockitoS
             Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None))
           )
         )
-      when(mockService.verify(meq(id), any())(any(), any())).thenReturn(Future.successful(formWithErrors))
+
+      when(mockService.assess(meq(id), any())(any(), any())).thenReturn(Future.successful(formWithErrors))
 
       "Render the view and display the errors" in {
         import VerificationRequest.formats.bankAccountDetailsWrites
@@ -224,7 +225,7 @@ class VerificationControllerSpec extends AnyWordSpec with Matchers with MockitoS
             Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None))
           )
         )
-      when(mockService.verify(meq(id), any())(any(), any())).thenReturn(Future.successful(form))
+      when(mockService.assess(meq(id), any())(any(), any())).thenReturn(Future.successful(form))
 
       "Redirect to the continueUrl" in {
         import VerificationRequest.formats.bankAccountDetailsWrites

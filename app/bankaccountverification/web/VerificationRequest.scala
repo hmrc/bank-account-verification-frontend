@@ -16,8 +16,8 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.connector.BarsValidationResponse
 import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
+import bankaccountverification.connector.{BarsPersonalAssessResponse, BarsValidationResponse, ReputationResponseEnum}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation._
@@ -40,17 +40,34 @@ object VerificationRequest {
 
   implicit class ValidationFormWrapper(form: Form[VerificationRequest]) {
 
-    def validateUsingBarsResponse(response: BarsValidationResponse): Form[VerificationRequest] =
-      if (response.accountNumberWithSortCodeIsValid == No)
+    def validateUsingBarsValidateResponse(response: BarsValidationResponse): Form[VerificationRequest] =
+      validate(response.accountNumberWithSortCodeIsValid, response.nonStandardAccountDetailsRequiredForBacs)
+
+    def validateUsingBarsPersonalAssessResponse(response: BarsPersonalAssessResponse): Form[VerificationRequest] =
+      validate(
+        response.accountNumberWithSortCodeIsValid,
+        response.nonStandardAccountDetailsRequiredForBacs.getOrElse(No),
+        Some(response.accountExists)
+      )
+
+    private def validate(
+      accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+      nonStandardAccountDetailsRequiredForBacs: ReputationResponseEnum,
+      accountExists: Option[ReputationResponseEnum] = None
+    ): Form[VerificationRequest] =
+      if (accountNumberWithSortCodeIsValid == No)
         form
           .fill(form.get)
           .withError("accountNumber", "error.accountNumber.modCheckFailed")
-      else if (response.nonStandardAccountDetailsRequiredForBacs == Yes && form.get.rollNumber.isEmpty)
+      else if (accountExists.isDefined && accountExists.get == No)
+        form
+          .fill(form.get)
+          .withError("accountNumber", "error.accountNumber.doesNotExist")
+      else if (nonStandardAccountDetailsRequiredForBacs == Yes && form.get.rollNumber.isEmpty)
         form
           .fill(form.get)
           .withError("rollNumber", "error.rollNumber.required")
       else form
-
   }
 
   val form: Form[VerificationRequest] =
@@ -120,5 +137,4 @@ object VerificationRequest {
       case Success(sc) => false
       case Failure(_)  => true
     }
-
 }

@@ -16,9 +16,6 @@
 
 package bankaccountverification.connector
 
-import bankaccountverification.web.VerificationRequest
-import play.api.libs.json.{Json, OFormat}
-
 sealed trait ReputationResponseEnum
 
 object ReputationResponseEnum extends Enumerable.Implicits {
@@ -33,34 +30,4 @@ object ReputationResponseEnum extends Enumerable.Implicits {
 
   implicit val enumerable: Enumerable[ReputationResponseEnum] =
     Enumerable(values.map(v => v.toString -> v): _*)
-}
-
-case class BarsValidationResponse(
-  accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-  nonStandardAccountDetailsRequiredForBacs: ReputationResponseEnum,
-  supportsBACS: Option[ReputationResponseEnum]
-)
-
-object BarsValidationResponse {
-  implicit val format: OFormat[BarsValidationResponse] =
-    Json.format[BarsValidationResponse]
-}
-
-case class BarsValidationRequestAccount(sortCode: String, accountNumber: String)
-object BarsValidationRequestAccount {
-  implicit val bankAccountReputationValidationRequestAccountReads =
-    Json.reads[BarsValidationRequestAccount]
-  implicit val bankAccountReputationValidationRequestAccountWrites =
-    Json.writes[BarsValidationRequestAccount]
-}
-
-case class BarsValidationRequest(account: BarsValidationRequestAccount)
-object BarsValidationRequest {
-  import BarsValidationRequestAccount._
-
-  def apply(sortCode: String, accountNumber: String): BarsValidationRequest =
-    BarsValidationRequest(BarsValidationRequestAccount(sortCode, accountNumber))
-
-  implicit val bankAccountReputationValidationRequestReads  = Json.reads[BarsValidationRequest]
-  implicit val bankAccountReputationValidationRequestWrites = Json.writes[BarsValidationRequest]
 }
