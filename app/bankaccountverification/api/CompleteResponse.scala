@@ -25,7 +25,12 @@ case class CompleteResponse(
   sortCode: String,
   accountNumber: String,
   accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-  rollNumber: Option[String] = None
+  rollNumber: Option[String] = None,
+  accountExists: Option[ReputationResponseEnum] = None,
+  nameMatches: Option[ReputationResponseEnum] = None,
+  nonConsented: Option[ReputationResponseEnum] = None,
+  subjectHasDeceased: Option[ReputationResponseEnum] = None,
+  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None
 )
 
 object CompleteResponse {

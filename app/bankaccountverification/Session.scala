@@ -43,7 +43,12 @@ case class Session(
   accountNumber: Option[String],
   rollNumber: Option[String] = None,
   accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
-  accountType: Option[String] = None
+  accountType: Option[String] = None,
+  accountExists: Option[ReputationResponseEnum] = None,
+  nameMatches: Option[ReputationResponseEnum] = None,
+  nonConsented: Option[ReputationResponseEnum] = None,
+  subjectHasDeceased: Option[ReputationResponseEnum] = None,
+  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None
 )
 
 case class AccountDetails(
@@ -68,7 +73,12 @@ object Session {
             Some(accountNumber),
             rollNumber,
             Some(accountNumberWithSortCodeIsValid),
-            Some(accountType)
+            Some(accountType),
+            accountExists,
+            nameMatches,
+            nonConsented,
+            subjectHasDeceased,
+            nonStandardAccountDetailsRequiredForBacs
           ) =>
         Some(
           api.CompleteResponse(
@@ -77,7 +87,12 @@ object Session {
             sortCode,
             accountNumber,
             accountNumberWithSortCodeIsValid,
-            rollNumber
+            rollNumber,
+            accountExists,
+            nameMatches,
+            nonConsented,
+            subjectHasDeceased,
+            nonStandardAccountDetailsRequiredForBacs
           )
         )
       case _ => None

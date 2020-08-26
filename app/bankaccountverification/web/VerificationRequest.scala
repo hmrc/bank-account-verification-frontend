@@ -47,7 +47,8 @@ object VerificationRequest {
       validate(
         response.accountNumberWithSortCodeIsValid,
         response.nonStandardAccountDetailsRequiredForBacs.getOrElse(No),
-        Some(response.accountExists))
+        Some(response.accountExists)
+      )
 
     private def validate(
       accountNumberWithSortCodeIsValid: ReputationResponseEnum,
