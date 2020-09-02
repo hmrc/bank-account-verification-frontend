@@ -19,6 +19,8 @@ package bankaccountverification.web
 import java.time.{ZoneOffset, ZonedDateTime}
 
 import akka.stream.Materializer
+import bankaccountverification.connector.BarsPersonalAssessResponse
+import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.Personal
 import bankaccountverification.web.controller.{AccountTypeController, PersonalVerificationController}
 import bankaccountverification.{Journey, JourneyRepository, PersonalSession, Session}
@@ -41,6 +43,7 @@ import reactivemongo.bson.BSONObjectID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.Success
 
 class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite {
   implicit val timeout = 1 second
@@ -286,8 +289,11 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           )
         )
 
-      when(mockService.assessPersonal(meq(id), any())(any(), any()))
-        .thenReturn(Future.successful(formWithErrors))
+      val barsPersonalAssessResponse =
+        BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
+
+      when(mockService.assessPersonal(any())(any(), any()))
+        .thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
 
       "Render the view and display the errors" in {
         import PersonalVerificationRequest.formats.bankAccountDetailsWrites
@@ -334,7 +340,11 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             )
           )
         )
-      when(mockService.assessPersonal(meq(id), any())(any(), any())).thenReturn(Future.successful(form))
+      val barsPersonalAssessResponse =
+        BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
+
+      when(mockService.assessPersonal(any())(any(), any()))
+        .thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
 
       "Redirect to the continueUrl" in {
         import PersonalVerificationRequest.formats.bankAccountDetailsWrites
