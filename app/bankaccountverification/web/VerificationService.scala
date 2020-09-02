@@ -17,8 +17,8 @@
 package bankaccountverification.web
 
 import bankaccountverification.connector.ReputationResponseEnum._
-import bankaccountverification.connector.{BankAccountReputationConnector, BarsPersonalAssessResponse, BarsValidationRequest, BarsValidationRequestAccount, BarsValidationResponse}
-import bankaccountverification.{AccountDetails, JourneyRepository}
+import bankaccountverification.connector.{BankAccountReputationConnector, BarsBusinessAssessResponse, BarsPersonalAssessResponse, BarsValidationRequest, BarsValidationRequestAccount, BarsValidationResponse}
+import bankaccountverification.{BusinessAccountDetails, JourneyRepository, PersonalAccountDetails}
 import javax.inject.Inject
 import play.api.Logger
 import play.api.data.Form
@@ -31,16 +31,16 @@ import scala.util.{Failure, Success}
 class VerificationService @Inject() (connector: BankAccountReputationConnector, repository: JourneyRepository) {
   private val logger = Logger(this.getClass)
 
-  def setAccountType(journeyId: BSONObjectID, accountType: String)(implicit
+  def setAccountType(journeyId: BSONObjectID, accountType: AccountTypeRequestEnum)(implicit
     ec: ExecutionContext,
     hc: HeaderCarrier
   ): Future[Boolean] =
     repository.updateAccountType(journeyId, accountType)
 
-  def verify(journeyId: BSONObjectID, form: Form[VerificationRequest])(implicit
+  def verify(journeyId: BSONObjectID, form: Form[PersonalVerificationRequest])(implicit
     ec: ExecutionContext,
     hc: HeaderCarrier
-  ): Future[Form[VerificationRequest]] =
+  ): Future[Form[PersonalVerificationRequest]] =
     connector.validateBankDetails(toBankAccountReputationRequest(form.get)).map {
       case Success(response) => (form.validateUsingBarsValidateResponse(response), response)
       case Failure(e) =>
@@ -53,7 +53,7 @@ class VerificationService @Inject() (connector: BankAccountReputationConnector, 
           verificationRequest => {
             import bankaccountverification.Journey._
 
-            val accountDetails = AccountDetails(
+            val accountDetails = PersonalAccountDetails(
               Some(verificationRequest.accountName),
               Some(verificationRequest.sortCode),
               Some(verificationRequest.accountNumber),
@@ -61,21 +61,21 @@ class VerificationService @Inject() (connector: BankAccountReputationConnector, 
               Some(response.accountNumberWithSortCodeIsValid)
             )
 
-            repository.updateAccountDetails(journeyId, accountDetails).map(_ => form)
+            repository.updatePersonalAccountDetails(journeyId, accountDetails).map(_ => form)
           }
         )
     }
 
-  def assess(journeyId: BSONObjectID, form: Form[VerificationRequest])(implicit
+  def assessPersonal(journeyId: BSONObjectID, form: Form[PersonalVerificationRequest])(implicit
     ec: ExecutionContext,
     hc: HeaderCarrier
-  ): Future[Form[VerificationRequest]] = {
+  ): Future[Form[PersonalVerificationRequest]] = {
     val formData = form.get
 
     connector
       .assessPersonal(
         formData.accountName,
-        VerificationRequest.stripSortCode(formData.sortCode),
+        PersonalVerificationRequest.stripSortCode(formData.sortCode),
         formData.accountNumber
       )
       .map {
@@ -90,28 +90,50 @@ class VerificationService @Inject() (connector: BankAccountReputationConnector, 
           verificationRequest => {
             import bankaccountverification.Journey._
 
-            val accountDetails = AccountDetails(
-              Some(verificationRequest.accountName),
-              Some(verificationRequest.sortCode),
-              Some(verificationRequest.accountNumber),
-              verificationRequest.rollNumber,
-              Some(response.accountNumberWithSortCodeIsValid),
-              Some(response.accountExists),
-              Some(response.nameMatches),
-              Some(response.nonConsented),
-              Some(response.subjectHasDeceased),
-              response.nonStandardAccountDetailsRequiredForBacs
-            )
+            val accountDetails = PersonalAccountDetails(verificationRequest, response)
 
-            repository.updateAccountDetails(journeyId, accountDetails).map(_ => form)
+            repository.updatePersonalAccountDetails(journeyId, accountDetails).map(_ => form)
           }
         )
     }
   }
 
-  private def toBankAccountReputationRequest(vr: VerificationRequest): BarsValidationRequest =
+  def assessBusiness(journeyId: BSONObjectID, form: Form[BusinessVerificationRequest])(implicit
+    ec: ExecutionContext,
+    hc: HeaderCarrier
+  ): Future[Form[BusinessVerificationRequest]] = {
+    val formData = form.get
+
+    connector
+      .assessBusiness(
+        formData.companyName,
+        formData.companyRegistrationNumber, // Company Registration Number - currently not captured
+        BusinessVerificationRequest.stripSortCode(formData.sortCode),
+        formData.accountNumber
+      )
+      .map {
+        case Success(response) => (form.validateUsingBarsBusinessAssessResponse(response), response)
+        case Failure(e) =>
+          logger.warn("Received error response from bank-account-reputation.validateBankDetails")
+          (form, businessAssessErrorResponse)
+      } flatMap {
+      case (form, response) =>
+        form.fold(
+          formWithErrors => Future.successful(formWithErrors),
+          verificationRequest => {
+            import bankaccountverification.Journey._
+
+            val accountDetails = BusinessAccountDetails(verificationRequest, response)
+
+            repository.updateBusinessAccountDetails(journeyId, accountDetails).map(_ => form)
+          }
+        )
+    }
+  }
+
+  private def toBankAccountReputationRequest(vr: PersonalVerificationRequest): BarsValidationRequest =
     BarsValidationRequest(
-      BarsValidationRequestAccount(VerificationRequest.stripSortCode(vr.sortCode), vr.accountNumber)
+      BarsValidationRequestAccount(PersonalVerificationRequest.stripSortCode(vr.sortCode), vr.accountNumber)
     )
 
   private def validationErrorResponse: BarsValidationResponse =
@@ -119,4 +141,7 @@ class VerificationService @Inject() (connector: BankAccountReputationConnector, 
 
   private def personalAssessErrorResponse: BarsPersonalAssessResponse =
     BarsPersonalAssessResponse(Error, Error, Error, Error, Error, Error, Some(Error))
+
+  private def businessAssessErrorResponse: BarsBusinessAssessResponse =
+    BarsBusinessAssessResponse(Error, Error, None, Error, Error, Error, Error, None)
 }

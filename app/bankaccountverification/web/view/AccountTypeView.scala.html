@@ -30,7 +30,7 @@
             }))
     }
 
-    @form(bankaccountverification.web.routes.VerificationController.postAccountType(journeyId)) {
+    @form(bankaccountverification.web.controller.routes.AccountTypeController.postAccountType(journeyId)) {
         @radios(Radios(
             idPrefix = Some("account-type"),
             name = "accountType",

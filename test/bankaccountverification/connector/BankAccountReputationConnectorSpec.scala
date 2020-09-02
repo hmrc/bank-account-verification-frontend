@@ -209,4 +209,102 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       }
     }
   }
+
+  "Business assess" should {
+
+    "handle a 200 response" in {
+      Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
+        import components.{defaultActionBuilder => Action}
+        {
+          case SPOST(p"/business/v2/assess") => Action(Ok("""{
+              |  "accountNumberWithSortCodeIsValid": "yes",
+              |  "sortCodeIsPresentOnEISCD": "yes",
+              |  "sortCodeBankName": "Some Company",
+              |  "accountExists": "yes",
+              |  "companyNameMatches": "yes",
+              |  "companyPostCodeMatches": "indeterminate",
+              |  "companyRegistrationNumberMatches": "indeterminate",
+              |  "nonStandardAccountDetailsRequiredForBacs": "no"
+              |}""".stripMargin).withHeaders("Content-Type" -> "application/json"))
+        }
+      } { _ =>
+        implicit val hc = HeaderCarrier()
+        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+
+        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678"))
+        response shouldBe Success(
+          BarsBusinessAssessResponse(Yes, Yes, Some("Some Company"), Yes, Yes, Indeterminate, Indeterminate, Some(No))
+        )
+      }
+    }
+
+    "handle a 200 json response that differs from the expected format" in {
+      Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
+        import components.{defaultActionBuilder => Action}
+        {
+          case SPOST(p"/business/v2/assess") =>
+            Action(
+              Ok("""{
+                |    "accountNumberWithSortCodeIsValid": "yes",
+                |    "OWAITWHATISTHIS": "no",
+                |    "sortCodeIsPresentMEGALOLSOnEISCD": "error"
+                |}""".stripMargin)
+                .withHeaders("Content-Type" -> "application/json")
+            )
+        }
+      } { _ =>
+        implicit val hc = HeaderCarrier()
+        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+
+        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678"))
+        response shouldBe a[Failure[_]]
+      }
+    }
+
+    "handle a 200 non-json response" in {
+      Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
+        import components.{defaultActionBuilder => Action}
+        {
+          case SPOST(p"/business/v2/assess") =>
+            Action(Ok("NOJSON4U").withHeaders("Content-Type" -> "application/json"))
+        }
+      } { _ =>
+        implicit val hc = HeaderCarrier()
+        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+
+        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678"))
+        response shouldBe a[Failure[_]]
+      }
+    }
+
+    "handle a 400 response" in {
+      Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
+        import components.{defaultActionBuilder => Action}
+        {
+          case SPOST(p"/business/v2/assess") => Action(BadRequest)
+        }
+      } { _ =>
+        implicit val hc = HeaderCarrier()
+        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+
+        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678"))
+        response shouldBe a[Failure[_]]
+      }
+    }
+
+    "handle a 500 response" in {
+      Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
+        import components.{defaultActionBuilder => Action}
+        {
+          case SPOST(p"/business/v2/assess") => Action(InternalServerError)
+        }
+      } { _ =>
+        implicit val hc = HeaderCarrier()
+        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+
+        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678"))
+        response shouldBe a[Failure[_]]
+      }
+    }
+  }
 }

@@ -16,24 +16,33 @@
 
 package bankaccountverification.web
 
+import bankaccountverification.connector.{Enumerable, WithName}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
-import play.api.data.{Form, Mapping}
+import play.api.data.{Form, FormError, Mapping}
 import play.api.libs.json.Json
 
-case class AccountTypeRequest(
-  accountType: String
-)
+sealed trait AccountTypeRequestEnum
+object AccountTypeRequestEnum extends Enumerable.Implicits {
+  case object Personal extends WithName("personal") with AccountTypeRequestEnum
+  case object Business extends WithName("business") with AccountTypeRequestEnum
+  case object Error extends WithName("") with AccountTypeRequestEnum
 
+  val values: Seq[AccountTypeRequestEnum] = Seq(Personal, Business)
+
+  implicit val enumerable: Enumerable[AccountTypeRequestEnum] =
+    Enumerable(values.map(v => v.toString -> v): _*)
+}
+
+case class AccountTypeRequest(accountType: AccountTypeRequestEnum)
 object AccountTypeRequest {
+  import AccountTypeRequestEnum._
+
   object formats {
     implicit val accountTypeReads  = Json.reads[AccountTypeRequest]
     implicit val accountTypeWrites = Json.writes[AccountTypeRequest]
   }
-
-  final val personalAccountType = "personal"
-  final val businessAccountType = "business"
 
   val form: Form[AccountTypeRequest] =
     Form(
@@ -43,19 +52,24 @@ object AccountTypeRequest {
     )
 
   // Need to do this as if the radio buttons are not selected then we don't get the parameter at all.
-  def accountTypeMapping: Mapping[String] = {
-    def permissiveStringFormatter: Formatter[String] =
-      new Formatter[String] {
-        def bind(key: String, data: Map[String, String]) = Right(data.getOrElse(key, ""))
-        def unbind(key: String, value: String)           = Map(key -> value)
+  def accountTypeMapping: Mapping[AccountTypeRequestEnum] = {
+    def permissiveStringFormatter: Formatter[AccountTypeRequestEnum] =
+      new Formatter[AccountTypeRequestEnum] {
+        def bind(key: String, data: Map[String, String]): Either[Seq[FormError], AccountTypeRequestEnum] =
+          Right[Seq[FormError], AccountTypeRequestEnum] {
+            val kv = data.getOrElse(key, "")
+            AccountTypeRequestEnum.enumerable.withName(kv).getOrElse(Error)
+          }
+        def unbind(key: String, value: AccountTypeRequestEnum) = Map(key -> value.toString)
       }
 
-    of[String](permissiveStringFormatter).verifying(accountTypeConstraint())
+    of[AccountTypeRequestEnum](permissiveStringFormatter).verifying(accountTypeConstraint())
   }
 
-  def accountTypeConstraint(): Constraint[String] =
-    Constraint[String](Some("constraints.accountType"), Seq()) { input =>
-      if (Set(personalAccountType, businessAccountType).contains(input)) Valid
+  def accountTypeConstraint(): Constraint[AccountTypeRequestEnum] =
+    Constraint[AccountTypeRequestEnum](Some("constraints.accountType"), Seq()) { input =>
+      if (input == Error) Invalid(ValidationError("error.accountType.required"))
+      else if (AccountTypeRequestEnum.values.contains(input)) Valid
       else Invalid(ValidationError("error.accountType.required"))
     }
 }

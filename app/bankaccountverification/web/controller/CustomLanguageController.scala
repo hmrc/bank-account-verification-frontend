@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package bankaccountverification.web
+package bankaccountverification.web.controller
 
 import javax.inject.Inject
 import play.api.Configuration

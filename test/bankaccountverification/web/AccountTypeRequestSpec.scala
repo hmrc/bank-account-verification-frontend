@@ -38,14 +38,14 @@ class AccountTypeRequestSpec extends AnyWordSpec with Matchers with GuiceOneAppP
 
     "validate personal successfully" when {
       "personal account is selected" in {
-        val accountTypeRequest = AccountTypeRequest(AccountTypeRequest.personalAccountType)
+        val accountTypeRequest = AccountTypeRequest(AccountTypeRequestEnum.Personal)
         val accountTypeForm    = AccountTypeRequest.form.fillAndValidate(accountTypeRequest)
         accountTypeForm.hasErrors shouldBe false
       }
 
       "validate business successfully" when {
         "business account is selected" in {
-          val accountTypeRequest = AccountTypeRequest(AccountTypeRequest.businessAccountType)
+          val accountTypeRequest = AccountTypeRequest(AccountTypeRequestEnum.Business)
           val accountTypeForm    = AccountTypeRequest.form.fillAndValidate(accountTypeRequest)
           accountTypeForm.hasErrors shouldBe false
         }
@@ -53,7 +53,7 @@ class AccountTypeRequestSpec extends AnyWordSpec with Matchers with GuiceOneAppP
 
       "flag account type validation errors" when {
         "accountType is not selected" in {
-          val accountTypeRequest = AccountTypeRequest("")
+          val accountTypeRequest = AccountTypeRequest(AccountTypeRequestEnum.Error)
           val accountTypeForm    = AccountTypeRequest.form.fillAndValidate(accountTypeRequest)
           accountTypeForm.hasErrors shouldBe true
 
@@ -63,7 +63,7 @@ class AccountTypeRequestSpec extends AnyWordSpec with Matchers with GuiceOneAppP
         }
 
         "accountType has invalid value" in {
-          val accountTypeRequest = AccountTypeRequest("some_type")
+          val accountTypeRequest = AccountTypeRequest(AccountTypeRequestEnum.Error)
           val accountTypeForm    = AccountTypeRequest.form.fillAndValidate(accountTypeRequest)
           accountTypeForm.hasErrors shouldBe true
 

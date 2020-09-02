@@ -27,6 +27,7 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class BankAccountReputationConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig) {
 
+  @deprecated(message = "Use assessPersonal or assessBusiness")
   def validateBankDetails(
     bankDetailsModel: BarsValidationRequest
   )(implicit
@@ -76,6 +77,43 @@ class BankAccountReputationConnector @Inject() (httpClient: HttpClient, appConfi
       .map {
         case httpResponse if httpResponse.status == 200 =>
           Json.fromJson[BarsPersonalAssessResponse](httpResponse.json) match {
+            case JsSuccess(result, _) =>
+              Success(result)
+            case JsError(errors) =>
+              Failure(new HttpException("Could not parse Json response from BARs", httpResponse.status))
+          }
+        case httpResponse => Failure(new HttpException(httpResponse.body, httpResponse.status))
+      }
+      .recoverWith {
+        case t: Throwable => Future.successful(Failure(t))
+      }
+  }
+
+  def assessBusiness(
+    companyName: String,
+    companyRegistrationNumber: Option[String],
+    sortCode: String,
+    accountNumber: String
+  )(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[Try[BarsBusinessAssessResponse]] = {
+    import BarsBusinessAssessResponse._
+    import HttpReads.Implicits.readRaw
+
+    val request = BarsBusinessAssessRequest(
+      BarsAccount(sortCode = sortCode, accountNumber = accountNumber),
+      Some(BarsBusiness(companyName = companyName, companyRegistrationNumber = companyRegistrationNumber, None))
+    )
+
+    httpClient
+      .POST[BarsBusinessAssessRequest, HttpResponse](
+        url = appConfig.barsBusinessAssessUrl,
+        body = request
+      )
+      .map {
+        case httpResponse if httpResponse.status == 200 =>
+          Json.fromJson[BarsBusinessAssessResponse](httpResponse.json) match {
             case JsSuccess(result, _) =>
               Success(result)
             case JsError(errors) =>
