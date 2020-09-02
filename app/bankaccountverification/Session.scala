@@ -155,9 +155,9 @@ case class BusinessSession(
   rollNumber: Option[String] = None,
   accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
   accountExists: Option[ReputationResponseEnum] = None,
-  compayNameMatches: Option[ReputationResponseEnum] = None,
-  compayPostCodeMatches: Option[ReputationResponseEnum] = None,
-  compayRegistrationNumberMatches: Option[ReputationResponseEnum] = None,
+  companyNameMatches: Option[ReputationResponseEnum] = None,
+  companyPostCodeMatches: Option[ReputationResponseEnum] = None,
+  companyRegistrationNumberMatches: Option[ReputationResponseEnum] = None,
   nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None
 )
 
