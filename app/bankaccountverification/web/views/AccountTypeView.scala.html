@@ -14,12 +14,13 @@
  * limitations under the License.
  *@
 
-@import bankaccountverification.web.AccountTypeRequest
+@import bankaccountverification.web.{AccountTypeRequest, RequestWithCustomisations}
+@import bankaccountverification.web.views.html.Layout
 
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, radios: GovukRadios, errorSummary: GovukErrorSummary, help: HmrcReportTechnicalIssue)
-@(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, accountTypeForm: Form[AccountTypeRequest], headerBlock: Option[Html] = None, beforeContentBlock: Option[Html] = None, footerBlock: Option[Html] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, accountTypeForm: Form[AccountTypeRequest])(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
-@layout(pageTitle = Some(messages("pageTitle.accountType")), Some(accountTypeForm), welshTranslationsAvailable, headerBlock, beforeContentBlock, footerBlock) {
+@layout(pageTitle = Some(messages("pageTitle.accountType")), Some(accountTypeForm), welshTranslationsAvailable, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
     <h1 class="govuk-heading-xl">@messages("service.header")</h1>
 
     @if(accountTypeForm.hasErrors) {
@@ -30,7 +31,7 @@
             }))
     }
 
-    @form(bankaccountverification.web.controller.routes.AccountTypeController.postAccountType(journeyId)) {
+    @form(bankaccountverification.web.routes.AccountTypeController.postAccountType(journeyId)) {
         @radios(Radios(
             idPrefix = Some("account-type"),
             name = "accountType",

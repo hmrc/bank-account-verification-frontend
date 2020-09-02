@@ -16,7 +16,7 @@
 
 package bankaccountverification.api
 
-import bankaccountverification.{AppConfig, JourneyRepository, PersonalSession}
+import bankaccountverification.{AppConfig, JourneyRepository}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
@@ -26,15 +26,11 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
 import scala.util.{Failure, Success}
 
 @Singleton
-class ApiController @Inject() (
-  appConfig: AppConfig,
-  mcc: MessagesControllerComponents,
-  journeyRepository: JourneyRepository
-) extends FrontendController(mcc) {
+class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerComponents,
+                              journeyRepository: JourneyRepository) extends FrontendController(mcc) {
 
   implicit val config: AppConfig = appConfig
 
@@ -46,8 +42,7 @@ class ApiController @Inject() (
 
       request.body.asJson match {
         case Some(json) =>
-          json
-            .validate[InitRequest]
+          json.validate[InitRequest]
             .fold(
               err =>
                 Future.successful(BadRequest(Json.obj("errors" -> err.flatMap { case (_, e) => e.map(_.message) }))),
@@ -66,29 +61,22 @@ class ApiController @Inject() (
       }
     }
 
-  def complete(journeyId: String): Action[AnyContent] =
-    Action.async {
-      import bankaccountverification.Session
-      import bankaccountverification.Session._
-      BSONObjectID.parse(journeyId) match {
-        case Success(id) =>
-          journeyRepository
-            .findById(id)
-            .map {
-              case x => x.flatMap(_.data.flatMap(Session.toCompleteResponseJson))
-            }
-            .map {
-              case Some(x) =>
-                Ok(x)
-              case None =>
-                NotFound
-            }
-            .recoverWith {
-              case x =>
-                logger.warn(s"Something bad happened: ${x.getMessage}", x)
-                Future.successful(InternalServerError)
-            }
-        case Failure(e) => Future.successful(BadRequest)
-      }
+  def complete(journeyId: String): Action[AnyContent] = Action.async {
+    import bankaccountverification.Session
+    BSONObjectID.parse(journeyId) match {
+      case Success(id) =>
+        journeyRepository
+          .findById(id)
+          .map { case x => x.flatMap(_.data.flatMap(Session.toCompleteResponseJson)) }
+          .map {
+            case Some(x) => Ok(x)
+            case None => NotFound
+          }
+          .recoverWith { case x =>
+            logger.warn(s"Something bad happened: ${x.getMessage}", x)
+            Future.successful(InternalServerError)
+          }
+      case Failure(e) => Future.successful(BadRequest)
     }
+  }
 }

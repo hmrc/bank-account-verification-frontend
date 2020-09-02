@@ -4,7 +4,9 @@ import bankaccountverification.api.{BusinessCompleteResponse, CompleteResponse, 
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.connector.{BankAccountReputationConnector, BarsBusinessAssessResponse, BarsPersonalAssessResponse, BarsValidationResponse}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
-import bankaccountverification.web.{AccountTypeRequest, BusinessVerificationRequest, PersonalVerificationRequest}
+import bankaccountverification.web.business.BusinessVerificationRequest
+import bankaccountverification.web.AccountTypeRequest
+import bankaccountverification.web.personal.PersonalVerificationRequest
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentMatchers.any
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
@@ -91,9 +93,9 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     import Journey._
     val completeUrl = s"$baseUrl/api/complete/$journeyId"
-    val completeResponse =
-      await(wsClient.url(completeUrl).get())
+    val completeResponse = await(wsClient.url(completeUrl).get())
     completeResponse.status shouldBe 200
+
     import bankaccountverification.connector.ReputationResponseEnum._
     val sessionDataMaybe = Json.fromJson[CompleteResponse](completeResponse.json)
 
@@ -197,11 +199,11 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
             "12349876",
             rollNumber = None,
             accountNumberWithSortCodeIsValid = Yes,
-            accountExists = Some(No),
+            accountExists = Some(Indeterminate),
             companyNameMatches = Some(Indeterminate),
             companyPostCodeMatches = Some(Indeterminate),
             companyRegistrationNumberMatches = Some(Indeterminate),
-            nonStandardAccountDetailsRequiredForBacs = Some(Indeterminate)
+            nonStandardAccountDetailsRequiredForBacs = Some(No)
           )
         ),
         personal = None

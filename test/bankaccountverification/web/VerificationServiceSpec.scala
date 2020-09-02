@@ -20,6 +20,8 @@ import bankaccountverification.{BusinessAccountDetails, JourneyRepository, Perso
 import bankaccountverification.connector.{BankAccountReputationConnector, BarsBusinessAssessResponse, BarsPersonalAssessResponse, BarsValidationRequest, BarsValidationResponse}
 import bankaccountverification.connector.ReputationResponseEnum._
 import bankaccountverification.web.AccountTypeRequestEnum.Personal
+import bankaccountverification.web.business.BusinessVerificationRequest
+import bankaccountverification.web.personal.PersonalVerificationRequest
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
@@ -39,28 +41,42 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
   implicit val timeout = 1 second
   implicit val hc      = HeaderCarrier()
 
-  "Assessing personal bank account details provided by the user" when {
+  "Assessing personal bank account details provided by the user" should {
+    val mockConnector  = mock[BankAccountReputationConnector]
+    val mockRepository = mock[JourneyRepository]
+    val service        = new VerificationService(mockConnector, mockRepository)
+
+    val userInput = PersonalVerificationRequest("Bob", "20-30-40", "12345678")
+
+    val assessResult =
+      Success(BarsPersonalAssessResponse(Yes, Yes, Yes, Yes, Indeterminate, Indeterminate, Some(No)))
+
+    when(mockConnector.assessPersonal(any(), any(), any())(any(), any())).thenReturn(Future.successful(assessResult))
+
+    await(service.assessPersonal(userInput))
+
+    "strip the dashes from the sort code" in {
+      verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"))(any(), any())
+    }
+  }
+
+  "processing the personal assess response" when {
     val journeyId = BSONObjectID.generate()
 
+    val mockConnector  = mock[BankAccountReputationConnector]
+    val mockRepository = mock[JourneyRepository]
+    val service        = new VerificationService(mockConnector, mockRepository)
+
+    val userInput = PersonalVerificationRequest("Bob", "20-30-40", "12345678")
+    val form      = PersonalVerificationRequest.form.fillAndValidate(userInput)
+
     "the details provided pass the remote bars checks" should {
-      val mockConnector  = mock[BankAccountReputationConnector]
-      val mockRepository = mock[JourneyRepository]
-      val service        = new VerificationService(mockConnector, mockRepository)
-
-      val userInput = PersonalVerificationRequest("Bob", "20-30-40", "12345678")
-      val form      = PersonalVerificationRequest.form.fillAndValidate(userInput)
-
-      val assessResult = Future.successful(
+      val assessResult =
         Success(BarsPersonalAssessResponse(Yes, Yes, Yes, Yes, Indeterminate, Indeterminate, Some(No)))
-      )
-      when(mockConnector.assessPersonal(any(), any(), any())(any(), any())).thenReturn(assessResult)
+
       when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
-      val updatedForm = service.assessPersonal(journeyId, form)
-
-      "strip the dashes from the sort code" in {
-        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"))(any(), any())
-      }
+      val res = await(service.processPersonalAssessResponse(journeyId, assessResult, form))
 
       "persist the details to mongo" in {
         val expectedAccountDetails = PersonalAccountDetails(
@@ -75,11 +91,12 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
           Some(Indeterminate),
           Some(No)
         )
+
         verify(mockRepository).updatePersonalAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
       }
 
       "return a valid form" in {
-        await(updatedForm).hasErrors shouldEqual false
+        res.hasErrors shouldEqual false
       }
     }
 
@@ -91,15 +108,10 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val userInput = PersonalVerificationRequest("Bob", "20-30-40", "12345678")
       val form      = PersonalVerificationRequest.form.fillAndValidate(userInput)
 
-      val assessResult = Future.successful(Failure(new HttpException("FIRE IN SERVER ROOM", 500)))
-      when(mockConnector.assessPersonal(any(), any(), any())(any(), any())).thenReturn(assessResult)
+      val assessResult = Failure(new HttpException("FIRE IN SERVER ROOM", 500))
       when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
-      val updatedForm = service.assessPersonal(journeyId, form)
-
-      "strip the dashes from the sort code" in {
-        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"))(any(), any())
-      }
+      val res = await(service.processPersonalAssessResponse(journeyId, assessResult, form))
 
       "persist the details to mongo" in {
         val expectedAccountDetails = PersonalAccountDetails(
@@ -118,38 +130,51 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       }
 
       "return a valid form" in {
-        await(updatedForm).hasErrors shouldEqual false
+        res.hasErrors shouldEqual false
       }
     }
   }
 
   "Assessing business bank account details provided by the user" when {
+    val mockConnector = mock[BankAccountReputationConnector]
+    val mockRepository = mock[JourneyRepository]
+    val service = new VerificationService(mockConnector, mockRepository)
+
+    val userInput = BusinessVerificationRequest("Bob Company", Some("SC1234567"), "20-30-40", "12345678", None)
+
+    val assessResult = Future.successful(
+      Success(BarsBusinessAssessResponse(Yes, Yes, None, Yes, Yes, Indeterminate, Indeterminate, Some(No)))
+    )
+    when(mockConnector.assessBusiness(any(), any(), any(), any())(any(), any())).thenReturn(assessResult)
+
+    await(service.assessBusiness(userInput))
+
+    "strip the dashes from the sort code" in {
+      verify(mockConnector)
+        .assessBusiness(meq("Bob Company"), meq(Some("SC1234567")), meq("203040"), meq("12345678"))(any(), any())
+      }
+  }
+
+  "processing the business assess response" when {
     val journeyId = BSONObjectID.generate()
 
+    val mockConnector = mock[BankAccountReputationConnector]
+    val mockRepository = mock[JourneyRepository]
+    val service = new VerificationService(mockConnector, mockRepository)
+
+    val userInput = BusinessVerificationRequest("Bob Company", Some("SC1234567"), "20-30-40", "12345678", None)
+    val form      = BusinessVerificationRequest.form.fillAndValidate(userInput)
+
     "the details provided pass the remote bars checks" should {
-      val mockConnector  = mock[BankAccountReputationConnector]
-      val mockRepository = mock[JourneyRepository]
-      val service        = new VerificationService(mockConnector, mockRepository)
+      val assessResult = Success(BarsBusinessAssessResponse(Yes, Yes, None, Yes, Yes, Indeterminate, Indeterminate, Some(No)))
 
-      val userInput = BusinessVerificationRequest("Bob", Some("SC1234567"), "20-30-40", "12345678", None)
-      val form      = BusinessVerificationRequest.form.fillAndValidate(userInput)
-
-      val assessResult = Future.successful(
-        Success(BarsBusinessAssessResponse(Yes, Yes, None, Yes, Yes, Indeterminate, Indeterminate, Some(No)))
-      )
-      when(mockConnector.assessBusiness(any(), any(), any(), any())(any(), any())).thenReturn(assessResult)
       when(mockRepository.updateBusinessAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
-      val updatedForm = service.assessBusiness(journeyId, form)
-
-      "strip the dashes from the sort code" in {
-        verify(mockConnector)
-          .assessBusiness(meq("Bob"), meq(Some("SC1234567")), meq("203040"), meq("12345678"))(any(), any())
-      }
+      val updatedForm = await(service.processBusinessAssessResponse(journeyId, assessResult, form))
 
       "persist the details to mongo" in {
         val expectedAccountDetails = BusinessAccountDetails(
-          Some("Bob"),
+          Some("Bob Company"),
           Some("SC1234567"),
           Some("20-30-40"),
           Some("12345678"),
@@ -165,7 +190,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       }
 
       "return a valid form" in {
-        await(updatedForm).hasErrors shouldEqual false
+        updatedForm.hasErrors shouldEqual false
       }
     }
 
@@ -174,23 +199,17 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val mockRepository = mock[JourneyRepository]
       val service        = new VerificationService(mockConnector, mockRepository)
 
-      val userInput = BusinessVerificationRequest("Bob", Some("SC1231234"), "20-30-40", "12345678", None)
+      val userInput = BusinessVerificationRequest("Bob Company", Some("SC1231234"), "20-30-40", "12345678", None)
       val form      = BusinessVerificationRequest.form.fillAndValidate(userInput)
 
-      val assessResult = Future.successful(Failure(new HttpException("FIRE IN SERVER ROOM", 500)))
-      when(mockConnector.assessBusiness(any(), any(), any(), any())(any(), any())).thenReturn(assessResult)
+      val assessResult = Failure(new HttpException("FIRE IN SERVER ROOM", 500))
       when(mockRepository.updateBusinessAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
-      val updatedForm = service.assessBusiness(journeyId, form)
-
-      "strip the dashes from the sort code" in {
-        verify(mockConnector)
-          .assessBusiness(meq("Bob"), meq(Some("SC1231234")), meq("203040"), meq("12345678"))(any(), any())
-      }
+      val updatedForm = service.processBusinessAssessResponse(journeyId,assessResult, form)
 
       "persist the details to mongo" in {
         val expectedAccountDetails = BusinessAccountDetails(
-          Some("Bob"),
+          Some("Bob Company"),
           Some("SC1231234"),
           Some("20-30-40"),
           Some("12345678"),
@@ -210,95 +229,4 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       }
     }
   }
-
-  "Verifying personal bank account details provided by the user" when {
-    val journeyId = BSONObjectID.generate()
-
-    "the remote bars check fails" should {
-      val mockConnector  = mock[BankAccountReputationConnector]
-      val mockRepository = mock[JourneyRepository]
-      val service        = new VerificationService(mockConnector, mockRepository)
-
-      val userInput = PersonalVerificationRequest("Bob", "20-30-40", "12345678")
-      val form      = PersonalVerificationRequest.form.fillAndValidate(userInput)
-
-      val validationResult = Future.successful(Failure(new HttpException("FIRE IN SERVER ROOM", 500)))
-      when(mockConnector.validateBankDetails(any())(any(), any())).thenReturn(validationResult)
-      when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
-
-      val updatedForm = service.verify(journeyId, form)
-
-      "strip the dashes from the sort code" in {
-        verify(mockConnector).validateBankDetails(meq(BarsValidationRequest("203040", "12345678")))(any(), any())
-      }
-
-      "persist the details to mongo" in {
-        val expectedAccountDetails =
-          PersonalAccountDetails(Some("Bob"), Some("20-30-40"), Some("12345678"), None, Some(Error))
-        verify(mockRepository).updatePersonalAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
-      }
-
-      "return a valid form" in {
-        await(updatedForm).hasErrors shouldEqual false
-      }
-    }
-
-    "the details provided pass the remote bars checks" should {
-      val mockConnector  = mock[BankAccountReputationConnector]
-      val mockRepository = mock[JourneyRepository]
-      val service        = new VerificationService(mockConnector, mockRepository)
-
-      val userInput = PersonalVerificationRequest("Bob", "20-30-40", "12345678")
-      val form      = PersonalVerificationRequest.form.fillAndValidate(userInput)
-
-      val validationResult = Future.successful(Success(BarsValidationResponse(Yes, No, None)))
-      when(mockConnector.validateBankDetails(any())(any(), any())).thenReturn(validationResult)
-      when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
-
-      val updatedForm = service.verify(journeyId, form)
-
-      "strip the dashes from the sort code" in {
-        verify(mockConnector).validateBankDetails(meq(BarsValidationRequest("203040", "12345678")))(any(), any())
-      }
-
-      "persist the details to mongo" in {
-        val expectedAccountDetails =
-          PersonalAccountDetails(Some("Bob"), Some("20-30-40"), Some("12345678"), None, Some(Yes))
-        verify(mockRepository).updatePersonalAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
-      }
-
-      "return a valid form" in {
-        await(updatedForm).hasErrors shouldEqual false
-      }
-    }
-
-    "the details provided do not pass the remote bars checks" should {
-      val mockConnector  = mock[BankAccountReputationConnector]
-      val mockRepository = mock[JourneyRepository]
-      val service        = new VerificationService(mockConnector, mockRepository)
-
-      val userInput = PersonalVerificationRequest("Bob", "20-30-40", "00000000")
-      val form      = PersonalVerificationRequest.form.fillAndValidate(userInput)
-
-      val validationResult = Future.successful(Success(BarsValidationResponse(No, No, None)))
-      when(mockConnector.validateBankDetails(any())(any(), any())).thenReturn(validationResult)
-      when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
-
-      val updatedForm = service.verify(journeyId, form)
-
-      "strip the dashes from the sort code" in {
-        verify(mockConnector).validateBankDetails(meq(BarsValidationRequest("203040", "00000000")))(any(), any())
-      }
-
-      "not persist the details to mongo" in {
-        verify(mockRepository, never()).updatePersonalAccountDetails(meq(journeyId), any())(any(), any())
-      }
-
-      "return a form with errors" in {
-        await(updatedForm).hasErrors shouldEqual true
-      }
-    }
-
-  }
-
 }

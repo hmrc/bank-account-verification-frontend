@@ -31,7 +31,7 @@
  *@
 
 @import bankaccountverification.AppConfig
-@import bankaccountverification.web.view.FooterLinks
+@import bankaccountverification.web.views.FooterLinks
 
 @this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, govukPhaseBanner: GovukPhaseBanner, languageSelect: HmrcLanguageSelect, head: Head)
 @(pageTitle: Option[String] = None,
@@ -60,8 +60,8 @@
             languageSelect(LanguageSelect(messages.lang.code match {
                 case "en" ⇒ En
                 case "cy" ⇒ Cy
-            }, En -> s"${bankaccountverification.web.controller.routes.CustomLanguageController.switchToLanguage("english")}",
-                Cy -> s"${bankaccountverification.web.controller.routes.CustomLanguageController.switchToLanguage("cymraeg")}"
+            }, En -> s"${bankaccountverification.web.routes.CustomLanguageController.switchToLanguage("english")}",
+                Cy -> s"${bankaccountverification.web.routes.CustomLanguageController.switchToLanguage("cymraeg")}"
             ))
         }
     }

@@ -3,14 +3,16 @@
 ->          /govuk-frontend                    govuk.Routes
 ->          /hmrc-frontend                     hmrcfrontend.Routes
 
-GET         /language/:lang                    bankaccountverification.web.controller.CustomLanguageController.switchToLanguage(lang: String)
-GET         /start/:journeyId                  bankaccountverification.web.controller.AccountTypeController.getAccountType(journeyId)
-POST        /start/:journeyId                  bankaccountverification.web.controller.AccountTypeController.postAccountType(journeyId)
+GET         /language/:lang                    bankaccountverification.web.CustomLanguageController.switchToLanguage(lang: String)
+GET         /start/:journeyId                  bankaccountverification.web.AccountTypeController.getAccountType(journeyId)
+POST        /start/:journeyId                  bankaccountverification.web.AccountTypeController.postAccountType(journeyId)
 
-GET         /verify/personal/:journeyId        bankaccountverification.web.controller.PersonalVerificationController.getAccountDetails(journeyId)
-POST        /verify/personal/:journeyId        bankaccountverification.web.controller.PersonalVerificationController.postAccountDetails(journeyId)
+GET         /verify/personal/:journeyId        bankaccountverification.web.personal.PersonalVerificationController.getAccountDetails(journeyId)
+POST        /verify/personal/:journeyId        bankaccountverification.web.personal.PersonalVerificationController.postAccountDetails(journeyId)
+GET         /confirm/personal/:journeyId       bankaccountverification.web.personal.PersonalVerificationController.getConfirmDetails(journeyId)
 
-GET         /verify/business/:journeyId        bankaccountverification.web.controller.BusinessVerificationController.getAccountDetails(journeyId)
-POST        /verify/business/:journeyId        bankaccountverification.web.controller.BusinessVerificationController.postAccountDetails(journeyId)
+GET         /verify/business/:journeyId        bankaccountverification.web.business.BusinessVerificationController.getAccountDetails(journeyId)
+POST        /verify/business/:journeyId        bankaccountverification.web.business.BusinessVerificationController.postAccountDetails(journeyId)
+GET         /confirm/business/:journeyId       bankaccountverification.web.business.BusinessVerificationController.getConfirmDetails(journeyId)
 
 GET         /assets/*file                      controllers.Assets.versioned(path = "/public", file: Asset)
