@@ -17,7 +17,8 @@
 package bankaccountverification.web.controller
 
 import bankaccountverification.connector.PartialsConnector
-import bankaccountverification.web.view.html.{ErrorTemplate, PersonalAccountDetailsView}
+import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, Yes}
+import bankaccountverification.web.view.html.{AccountExistsIndeterminate, ErrorTemplate, PersonalAccountDetailsView}
 import bankaccountverification.web.{PersonalVerificationRequest, VerificationService}
 import bankaccountverification.{AppConfig, JourneyRepository, RemoteMessagesApiProvider}
 import javax.inject.{Inject, Singleton}
@@ -37,6 +38,7 @@ class PersonalVerificationController @Inject() (
   mcc: MessagesControllerComponents,
   remoteMessagesApiProvider: RemoteMessagesApiProvider,
   accountDetailsView: PersonalAccountDetailsView,
+  accountExistsIndeterminate: AccountExistsIndeterminate,
   val errorTemplate: ErrorTemplate,
   journeyRepository: JourneyRepository,
   verificationService: VerificationService,
@@ -96,9 +98,8 @@ class PersonalVerificationController @Inject() (
               getCustomisations(journey) flatMap {
                 case (headerBlock, beforeContentBlock, footerBlock) =>
                   val form = PersonalVerificationRequest.form.bindFromRequest()
-                  (if (!form.hasErrors) verificationService.assessPersonal(id, form)
-                   else Future.successful(form)) map {
-                    case form if form.hasErrors =>
+                  if (form.hasErrors)
+                    Future.successful(
                       BadRequest(
                         accountDetailsView(
                           journeyId,
@@ -110,8 +111,61 @@ class PersonalVerificationController @Inject() (
                           footerBlock
                         )
                       )
-                    case _ => SeeOther(s"${journey.continueUrl}/$journeyId")
-                  }
+                    )
+                  else
+                    for {
+                      response    <- verificationService.assessPersonal(form.get)
+                      updatedForm <- verificationService.processAssessResponse(id, response, form)
+                    } yield updatedForm match {
+                      case form if form.hasErrors =>
+                        BadRequest(
+                          accountDetailsView(
+                            journeyId,
+                            journey.serviceIdentifier,
+                            welshTranslationsAvailable,
+                            form,
+                            headerBlock,
+                            beforeContentBlock,
+                            footerBlock
+                          )
+                        )
+                      case _ =>
+                        if (response.isFailure || response.get.accountExists == Yes)
+                          SeeOther(s"${journey.continueUrl}/$journeyId")
+                        else
+                          Redirect(routes.PersonalVerificationController.getConfirmDetails(journeyId))
+                    }
+              }
+            case None => Future.successful(NotFound(journeyIdError))
+          }
+        case Failure(exception) =>
+          Future.successful(BadRequest)
+      }
+    }
+
+  def getConfirmDetails(journeyId: String): Action[AnyContent] =
+    Action.async { implicit request =>
+      BSONObjectID.parse(journeyId) match {
+        case Success(id) =>
+          journeyRepository.findById(id) flatMap {
+            case Some(journey) =>
+              val welshTranslationsAvailable  = journey.messages.exists(_.keys.contains("cy"))
+              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
+              implicit val messages: Messages = remoteMessagesApi.preferred(request)
+
+              getCustomisations(journey) map {
+                case (headerBlock, beforeContentBlock, footerBlock) =>
+                  Ok(
+                    accountExistsIndeterminate(
+                      id.stringify,
+                      journey.data.get.personal.get,
+                      journey.serviceIdentifier,
+                      welshTranslationsAvailable,
+                      headerBlock,
+                      beforeContentBlock,
+                      footerBlock
+                    )
+                  )
               }
             case None => Future.successful(NotFound(journeyIdError))
           }

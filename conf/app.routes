@@ -13,4 +13,6 @@ POST        /verify/personal/:journeyId        bankaccountverification.web.contr
 GET         /verify/business/:journeyId        bankaccountverification.web.controller.BusinessVerificationController.getAccountDetails(journeyId)
 POST        /verify/business/:journeyId        bankaccountverification.web.controller.BusinessVerificationController.postAccountDetails(journeyId)
 
+GET         /confirm/personal/:journeyId       bankaccountverification.web.controller.PersonalVerificationController.getConfirmDetails(journeyId)
+
 GET         /assets/*file                      controllers.Assets.versioned(path = "/public", file: Asset)

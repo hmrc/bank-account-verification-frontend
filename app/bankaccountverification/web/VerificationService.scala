@@ -17,7 +17,7 @@
 package bankaccountverification.web
 
 import bankaccountverification.connector.ReputationResponseEnum._
-import bankaccountverification.connector.{BankAccountReputationConnector, BarsBusinessAssessResponse, BarsPersonalAssessResponse, BarsValidationRequest, BarsValidationRequestAccount, BarsValidationResponse}
+import bankaccountverification.connector._
 import bankaccountverification.{BusinessAccountDetails, JourneyRepository, PersonalAccountDetails}
 import javax.inject.Inject
 import play.api.Logger
@@ -26,7 +26,7 @@ import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 class VerificationService @Inject() (connector: BankAccountReputationConnector, repository: JourneyRepository) {
   private val logger = Logger(this.getClass)
@@ -66,36 +66,39 @@ class VerificationService @Inject() (connector: BankAccountReputationConnector, 
         )
     }
 
-  def assessPersonal(journeyId: BSONObjectID, form: Form[PersonalVerificationRequest])(implicit
+  def assessPersonal(
+    request: PersonalVerificationRequest
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsPersonalAssessResponse]] =
+    connector.assessPersonal(
+      request.accountName,
+      PersonalVerificationRequest.stripSortCode(request.sortCode),
+      request.accountNumber
+    )
+
+  def processAssessResponse(
+    journeyId: BSONObjectID,
+    assessResponse: Try[BarsPersonalAssessResponse],
+    form: Form[PersonalVerificationRequest]
+  )(implicit
     ec: ExecutionContext,
     hc: HeaderCarrier
   ): Future[Form[PersonalVerificationRequest]] = {
-    val formData = form.get
-
-    connector
-      .assessPersonal(
-        formData.accountName,
-        PersonalVerificationRequest.stripSortCode(formData.sortCode),
-        formData.accountNumber
-      )
-      .map {
-        case Success(response) => (form.validateUsingBarsPersonalAssessResponse(response), response)
-        case Failure(e) =>
-          logger.warn("Received error response from bank-account-reputation.validateBankDetails")
-          (form, personalAssessErrorResponse)
-      } flatMap {
-      case (form, response) =>
-        form.fold(
-          formWithErrors => Future.successful(formWithErrors),
-          verificationRequest => {
-            import bankaccountverification.Journey._
-
-            val accountDetails = PersonalAccountDetails(verificationRequest, response)
-
-            repository.updatePersonalAccountDetails(journeyId, accountDetails).map(_ => form)
-          }
-        )
+    val (updatedForm, response) = assessResponse match {
+      case Success(response) => (form.validateUsingBarsPersonalAssessResponse(response), response)
+      case Failure(e) =>
+        logger.warn("Received error response from bank-account-reputation.validateBankDetails")
+        (form, personalAssessErrorResponse)
     }
+
+    updatedForm.fold(
+      formWithErrors => Future.successful(formWithErrors),
+      verificationRequest => {
+        import bankaccountverification.Journey._
+
+        val accountDetails = PersonalAccountDetails(verificationRequest, response)
+        repository.updatePersonalAccountDetails(journeyId, accountDetails).map(_ => form)
+      }
+    )
   }
 
   def assessBusiness(journeyId: BSONObjectID, form: Form[BusinessVerificationRequest])(implicit
