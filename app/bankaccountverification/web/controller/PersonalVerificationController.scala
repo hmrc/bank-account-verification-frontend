@@ -33,18 +33,18 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 @Singleton
-class PersonalVerificationController @Inject() (
-  val appConfig: AppConfig,
-  mcc: MessagesControllerComponents,
-  remoteMessagesApiProvider: RemoteMessagesApiProvider,
-  accountDetailsView: PersonalAccountDetailsView,
-  accountExistsIndeterminate: AccountExistsIndeterminate,
-  val errorTemplate: ErrorTemplate,
-  journeyRepository: JourneyRepository,
-  verificationService: VerificationService,
-  val partialsConnector: PartialsConnector
-) extends FrontendController(mcc)
-    with ControllerHelper {
+class PersonalVerificationController @Inject()(
+                                                val appConfig: AppConfig,
+                                                mcc: MessagesControllerComponents,
+                                                remoteMessagesApiProvider: RemoteMessagesApiProvider,
+                                                accountDetailsView: PersonalAccountDetailsView,
+                                                accountExistsIndeterminate: AccountExistsIndeterminate,
+                                                val errorTemplate: ErrorTemplate,
+                                                journeyRepository: JourneyRepository,
+                                                verificationService: VerificationService,
+                                                val partialsConnector: PartialsConnector
+                                              ) extends FrontendController(mcc)
+  with ControllerHelper {
   private val logger = Logger(this.getClass)
 
   implicit val config: AppConfig = appConfig
@@ -55,9 +55,17 @@ class PersonalVerificationController @Inject() (
         case Success(id) =>
           journeyRepository.findById(id) flatMap {
             case Some(journey) =>
-              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
+              val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
               implicit val messages: Messages = remoteMessagesApi.preferred(request)
-              val welshTranslationsAvailable  = journey.messages.exists(_.keys.contains("cy"))
+              val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
+              val personalVerificationForm = journey.data.get.personal.map(ps =>
+                PersonalVerificationRequest(
+                  ps.accountName.getOrElse(""),
+                  ps.sortCode.getOrElse(""),
+                  ps.accountNumber.getOrElse(""),
+                  ps.rollNumber))
+                .map(PersonalVerificationRequest.form.fill)
+                .getOrElse(PersonalVerificationRequest.form)
 
               getCustomisations(journey) map {
                 case (headerBlock, beforeContentBlock, footerBlock) =>
@@ -66,7 +74,7 @@ class PersonalVerificationController @Inject() (
                       journeyId,
                       journey.serviceIdentifier,
                       welshTranslationsAvailable,
-                      PersonalVerificationRequest.form,
+                      personalVerificationForm,
                       headerBlock,
                       beforeContentBlock,
                       footerBlock
@@ -91,8 +99,8 @@ class PersonalVerificationController @Inject() (
                 .flatMap(_.accountType)
                 .getOrElse(throw new IllegalStateException("??? accountType is missing"))
 
-              val welshTranslationsAvailable  = journey.messages.exists(_.keys.contains("cy"))
-              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
+              val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
+              val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
               implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
               getCustomisations(journey) flatMap {
@@ -114,7 +122,7 @@ class PersonalVerificationController @Inject() (
                     )
                   else
                     for {
-                      response    <- verificationService.assessPersonal(form.get)
+                      response <- verificationService.assessPersonal(form.get)
                       updatedForm <- verificationService.processAssessResponse(id, response, form)
                     } yield updatedForm match {
                       case uform if uform.hasErrors =>
@@ -149,8 +157,8 @@ class PersonalVerificationController @Inject() (
         case Success(id) =>
           journeyRepository.findById(id) flatMap {
             case Some(journey) =>
-              val welshTranslationsAvailable  = journey.messages.exists(_.keys.contains("cy"))
-              val remoteMessagesApi           = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
+              val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
+              val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
               implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
               getCustomisations(journey) map {
@@ -160,6 +168,7 @@ class PersonalVerificationController @Inject() (
                       id.stringify,
                       journey.data.get.personal.get,
                       journey.serviceIdentifier,
+                      s"${journey.continueUrl}/$journeyId",
                       welshTranslationsAvailable,
                       headerBlock,
                       beforeContentBlock,
