@@ -257,9 +257,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
       val data   = PersonalVerificationRequest("Bob", "123456", "12345678")
 
-      val formWithErrors = PersonalVerificationRequest.form
-        .fillAndValidate(data)
-        .withError("Error", "a.specific.error")
+      val formWithErrors = PersonalVerificationRequest.form.fillAndValidate(data).withError("Error", "a.specific.error")
 
       when(mockRepository.findById(id))
         .thenReturn(
@@ -292,8 +290,10 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val barsPersonalAssessResponse =
         BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
-      when(mockService.assessPersonal(any())(any(), any()))
+      when(mockService.assessPersonal(meq(data))(any(), any()))
         .thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
+      when(mockService.processAssessResponse(meq(id), any(), any())(any(), any()))
+        .thenReturn(Future.successful(formWithErrors))
 
       "Render the view and display the errors" in {
         import PersonalVerificationRequest.formats.bankAccountDetailsWrites
@@ -306,45 +306,23 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       }
     }
 
-    "the journey is valid, a valid form is posted but the bars checks pass" should {
+    "the journey is valid, a valid form is posted and the bars checks pass and the account exists" should {
       val id     = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
       val data   = PersonalVerificationRequest("Bob", "123456", "12345678")
 
       val form = PersonalVerificationRequest.form.fillAndValidate(data)
 
-      when(mockRepository.findById(id))
-        .thenReturn(
-          Future.successful(
-            Some(
-              Journey(
-                id,
-                expiry,
-                serviceIdentifier,
-                continueUrl,
-                None,
-                None,
-                Some(
-                  Session(
-                    Some(Personal),
-                    Some(
-                      bankaccountverification.PersonalSession(
-                        accountName = Some("some account name"),
-                        sortCode = Some("112233"),
-                        accountNumber = Some("12345678")
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        )
-      val barsPersonalAssessResponse =
-        BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
+      when(mockRepository.findById(id)).thenReturn(
+        Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None,
+          Some(Session(Some(Personal), Some(bankaccountverification.PersonalSession(
+            accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))
+        )))
 
-      when(mockService.assessPersonal(any())(any(), any()))
-        .thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
+      val barsPersonalAssessResponse = BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
+
+      when(mockService.assessPersonal(any())(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
+      when(mockService.processAssessResponse(meq(id), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
       "Redirect to the continueUrl" in {
         import PersonalVerificationRequest.formats.bankAccountDetailsWrites
@@ -354,6 +332,35 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         status(result)           shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(s"$continueUrl/${id.stringify}")
+      }
+    }
+
+    "the journey is valid, a valid form is posted and the bars checks pass but the account does not exist" should {
+      val id     = BSONObjectID.generate()
+      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+      val data   = PersonalVerificationRequest("Bobby", "123456", "12345678")
+
+      val form = PersonalVerificationRequest.form.fillAndValidate(data)
+
+      when(mockRepository.findById(id)).thenReturn(
+          Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None,
+                Some(Session(Some(Personal), Some(bankaccountverification.PersonalSession(
+                        accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))
+            )))
+
+      val barsPersonalAssessResponse = BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
+
+      when(mockService.assessPersonal(meq(data))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
+      when(mockService.processAssessResponse(meq(id), any(), any())(any(), any())).thenReturn(Future.successful(form))
+
+      "Redirect to the confirm view" in {
+        import PersonalVerificationRequest.formats.bankAccountDetailsWrites
+        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.stringify}").withJsonBody(Json.toJson(data))
+
+        val result = controller.postAccountDetails(id.stringify).apply(fakeRequest)
+
+        status(result)           shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/bank-account-verification/confirm/personal/${id.stringify}")
       }
     }
   }

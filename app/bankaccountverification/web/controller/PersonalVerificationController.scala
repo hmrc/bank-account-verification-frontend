@@ -117,13 +117,13 @@ class PersonalVerificationController @Inject() (
                       response    <- verificationService.assessPersonal(form.get)
                       updatedForm <- verificationService.processAssessResponse(id, response, form)
                     } yield updatedForm match {
-                      case form if form.hasErrors =>
+                      case uform if uform.hasErrors =>
                         BadRequest(
                           accountDetailsView(
                             journeyId,
                             journey.serviceIdentifier,
                             welshTranslationsAvailable,
-                            form,
+                            uform,
                             headerBlock,
                             beforeContentBlock,
                             footerBlock

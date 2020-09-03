@@ -198,9 +198,9 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
             rollNumber = None,
             accountNumberWithSortCodeIsValid = Yes,
             accountExists = Some(No),
-            companyNameMatches = None,
-            companyPostCodeMatches = None,
-            companyRegistrationNumberMatches = None,
+            companyNameMatches = Some(Indeterminate),
+            companyPostCodeMatches = Some(Indeterminate),
+            companyRegistrationNumberMatches = Some(Indeterminate),
             nonStandardAccountDetailsRequiredForBacs = Some(Indeterminate)
           )
         ),
