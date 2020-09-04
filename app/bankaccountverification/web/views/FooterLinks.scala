@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package bankaccountverification.web.view
+package bankaccountverification.web.views
 
 import bankaccountverification.AppConfig
 import play.api.i18n.Messages

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package bankaccountverification.web
+package bankaccountverification.web.business
 
 import java.time.{ZoneOffset, ZonedDateTime}
 
 import akka.stream.Materializer
 import bankaccountverification.web.AccountTypeRequestEnum.Business
-import bankaccountverification.web.controller.{AccountTypeController, BusinessVerificationController}
+import bankaccountverification.web.{AccountTypeController, AccountTypeRequest, AccountTypeRequestEnum, VerificationService}
 import bankaccountverification.{BusinessSession, Journey, JourneyRepository, Session}
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentMatchers.{eq => meq, _}

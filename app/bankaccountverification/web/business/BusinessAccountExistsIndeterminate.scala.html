@@ -14,22 +14,24 @@
  * limitations under the License.
  *@
 
-@import bankaccountverification.PersonalSession
+@import bankaccountverification.BusinessSession
+@import bankaccountverification.web.RequestWithCustomisations
+@import bankaccountverification.web.views.html.Layout
 
 @this(layout: Layout, summary: GovukSummaryList, button: GovukButton, warning: GovukWarningText, help: HmrcReportTechnicalIssue)
-@(journeyId: String, session: PersonalSession, serviceIdentifier: String, continueUrl: String, welshTranslationsAvailable: Boolean, headerBlock: Option[Html] = None, beforeContentBlock: Option[Html] = None, footerBlock: Option[Html] = None)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(journeyId: String, session: BusinessSession, serviceIdentifier: String, continueUrl: String, welshTranslationsAvailable: Boolean)(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
-@layout(pageTitle = Some(messages("pageTitle.accountExistsIndeterminate")), None, welshTranslationsAvailable, headerBlock, beforeContentBlock, footerBlock) {
+@layout(pageTitle = Some(messages("pageTitle.accountExistsIndeterminate")), None, welshTranslationsAvailable, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
     <h1 class="govuk-heading-xl">@messages("pageTitle.accountExistsIndeterminate")</h1>
 
     @warning(WarningText(content = HtmlContent(messages("warning.accountExistsIndeterminate"))))
     <p class="govuk-body">@messages("content.accountExistsIndeterminate")</p>
 
-    @defining(bankaccountverification.web.controller.routes.PersonalVerificationController.getAccountDetails(journeyId).url) { changeUrl =>
+    @defining(bankaccountverification.web.business.routes.BusinessVerificationController.getAccountDetails(journeyId).url) { changeUrl =>
         @summary(SummaryList(
             rows = Seq(
-                SummaryListRow(Key(HtmlContent("Account name")), Value(HtmlContent(session.accountName.getOrElse(""))),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some("account name")))))),
+                SummaryListRow(Key(HtmlContent("Company name")), Value(HtmlContent(session.companyName.getOrElse(""))),
+                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some("company name")))))),
                 SummaryListRow(Key(HtmlContent("Sort code")), Value(HtmlContent(session.sortCode.getOrElse(""))),
                     actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some("sort code")))))),
                 SummaryListRow(Key(HtmlContent("Account number")), Value(HtmlContent(session.accountNumber.getOrElse(""))),

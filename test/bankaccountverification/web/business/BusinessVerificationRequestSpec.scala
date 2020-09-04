@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package bankaccountverification.web
+package bankaccountverification.web.business
 
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
-import bankaccountverification.connector.{BarsBusinessAssessResponse, BarsPersonalAssessResponse, BarsValidationResponse, ReputationResponseEnum}
+import bankaccountverification.connector.{BarsBusinessAssessResponse, ReputationResponseEnum}
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -268,58 +268,6 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         error.get.message shouldBe "error.rollNumber.format"
       }
     }
-  }
-
-  "Validation using the bars validate bank details response" when {
-    val request = BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "10-10-10", "12345678", None)
-    val form    = BusinessVerificationRequest.form.fillAndValidate(request)
-
-    "the response indicates the sort code and account number combination is not valid" should {
-      val response    = BarsValidationResponse(No, No, None)
-      val updatedForm = form.validateUsingBarsValidateResponse(response)
-
-      "flag an error against the account number" in {
-        updatedForm.error("accountNumber") shouldBe Some(
-          FormError("accountNumber", "error.accountNumber.modCheckFailed")
-        )
-      }
-    }
-
-    "the response indicates that a roll number is required but none was provided" should {
-      val response    = BarsValidationResponse(Yes, Yes, None)
-      val updatedForm = form.validateUsingBarsValidateResponse(response)
-
-      "flag an error against the roll number field" in {
-        updatedForm.error("rollNumber") shouldBe Some(FormError("rollNumber", "error.rollNumber.required"))
-      }
-    }
-
-    "the response indicates that a roll number is required and a valid roll number was provided" should {
-      val requestWithRollNumber =
-        BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "10-10-10", "12345678", Some("ROLL1"))
-      val formWithRollNumber = BusinessVerificationRequest.form.fillAndValidate(requestWithRollNumber)
-
-      val response    = BarsValidationResponse(Yes, Yes, None)
-      val updatedForm = formWithRollNumber.validateUsingBarsValidateResponse(response)
-
-      "flag no errors" in {
-        updatedForm.hasErrors shouldBe false
-      }
-    }
-
-    "the response indicates an error occurred" should {
-      val response = BarsValidationResponse(
-        ReputationResponseEnum.Error,
-        ReputationResponseEnum.Error,
-        Some(ReputationResponseEnum.Error)
-      )
-      val updatedForm = form.validateUsingBarsValidateResponse(response)
-
-      "flag no errors so that the journey is not impacted" in {
-        updatedForm.hasErrors shouldBe false
-      }
-    }
-
   }
 
   "Validation using the bars business assess response" when {

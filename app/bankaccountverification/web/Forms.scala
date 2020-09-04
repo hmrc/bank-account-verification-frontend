@@ -20,7 +20,7 @@ import play.api.data.validation.{Constraint, Constraints, Invalid, Valid, Valida
 
 import scala.util.{Failure, Success, Try}
 
-trait VerificationRequestBase {
+object Forms {
   def accountNumberMapping = text.verifying(accountNumberConstraint())
 
   def sortCodeMapping = text.verifying(sortcodeConstraint())
