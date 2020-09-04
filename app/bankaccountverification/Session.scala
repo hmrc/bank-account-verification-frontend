@@ -37,7 +37,9 @@ import java.time.ZonedDateTime
 import bankaccountverification.api.{BusinessCompleteResponse, CompleteResponse, PersonalCompleteResponse}
 import bankaccountverification.connector.{BarsBusinessAssessResponse, BarsPersonalAssessResponse, ReputationResponseEnum}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
-import bankaccountverification.web.{AccountTypeRequestEnum, BusinessVerificationRequest, PersonalVerificationRequest}
+import bankaccountverification.web.business.BusinessVerificationRequest
+import bankaccountverification.web.AccountTypeRequestEnum
+import bankaccountverification.web.personal.PersonalVerificationRequest
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 
 case class Session(

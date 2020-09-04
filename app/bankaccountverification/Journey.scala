@@ -84,7 +84,7 @@ object Journey {
 
   implicit val datetimeFormat: Format[ZonedDateTime] = Format(localDateTimeRead, localDateTimeWrite)
 
-  def defaultReads: Reads[Journey] =
+  implicit def defaultReads: Reads[Journey] =
     (__ \ "_id")
       .read[BSONObjectID]
       .and((__ \ "expiryDate").read[ZonedDateTime])
@@ -148,11 +148,11 @@ object Journey {
       .and((__ \ "data.business.accountNumber").writeNullable[String])
       .and((__ \ "data.business.rollNumber").writeNullable[String])
       .and((__ \ "data.business.accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.business.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.business.accountExists").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.business.companyNameMatches").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.business.companyPostCodeMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.business.companyRegistrationNumberMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.business.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])(
+      .and((__ \ "data.business.companyRegistrationNumberMatches").writeNullable[ReputationResponseEnum])(
         unlift(BusinessAccountDetails.unapply)
       )
 

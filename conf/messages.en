@@ -9,6 +9,10 @@ pageTitle.accountType = Account Type
 pageTitle.personal.accountDetails = Personal Account Details
 pageTitle.business.accountDetails = Business Account Details
 
+pageTitle.accountExistsIndeterminate = Confirm your bank account details
+warning.accountExistsIndeterminate = HMRC has been unable to confirm that this bank account exists. You can still proceed if you are sure your details are correct.
+content.accountExistsIndeterminate = You might be seeing this message because your bank, branch or account is very new. If not, you may have entered your details incorrectly. You should check them carefully below and click 'Change' if you need to amend them.
+
 label.accountType.personal = Personal
 label.accountType.business = Business
 label.accountType.heading = Is this a personal or a business account?

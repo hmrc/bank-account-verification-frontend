@@ -45,5 +45,6 @@ case class BarsBusinessAssessResponse(
 )
 
 object BarsBusinessAssessResponse {
-  implicit val format: OFormat[BarsBusinessAssessResponse] = Json.format[BarsBusinessAssessResponse]
+  implicit val reads: Reads[BarsBusinessAssessResponse]   = Json.reads[BarsBusinessAssessResponse]
+  implicit val writes: Writes[BarsBusinessAssessResponse] = Json.writes[BarsBusinessAssessResponse]
 }
