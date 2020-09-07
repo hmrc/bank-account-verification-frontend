@@ -1,6 +1,6 @@
 package bankaccountverification
 
-import bankaccountverification.api.{BusinessCompleteResponse, CompleteResponse, InitRequest, PersonalCompleteResponse}
+import bankaccountverification.api.{BusinessCompleteResponse, CompleteResponse, CompleteResponseAddress, InitRequest, InitRequestAddress, PersonalCompleteResponse}
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.connector.{BankAccountReputationConnector, BarsBusinessAssessResponse, BarsPersonalAssessResponse, BarsValidationResponse}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
@@ -58,9 +58,10 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     val initUrl = s"$baseUrl/api/init"
 
-    val initRequest = InitRequest("serviceIdentifier", "continueUrl")
-    val initResponse =
-      await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
+    val initRequest = InitRequest("serviceIdentifier", "continueUrl",
+      Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))))
+
+    val initResponse = await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
 
     initResponse.status shouldBe 200
     val journeyId = initResponse.json.as[String]
@@ -104,7 +105,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
         accountType = Personal,
         personal = Some(
           PersonalCompleteResponse(
-            Personal,
+            Some(CompleteResponseAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             "some-account-name",
             "12-12-12",
             "12349876",
@@ -114,9 +115,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
             nameMatches = Some(Indeterminate),
             nonConsented = Some(Indeterminate),
             subjectHasDeceased = Some(Indeterminate),
-            nonStandardAccountDetailsRequiredForBacs = Some(No)
-          )
-        ),
+            nonStandardAccountDetailsRequiredForBacs = Some(No))),
         business = None
       )
     )
@@ -124,28 +123,17 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
   "BusinessBankAccountVerification" in {
     when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any())(any(), any())).thenReturn(
-      Future.successful(
-        Success(
-          BarsBusinessAssessResponse(
-            Yes,
-            Yes,
-            None,
-            Indeterminate,
-            Indeterminate,
-            Indeterminate,
-            Indeterminate,
-            Some(No)
-          )
-        )
-      )
-    )
+      Future.successful(Success(BarsBusinessAssessResponse(
+        Yes, Yes, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No)))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl  = s"http://localhost:$port"
 
     val initUrl = s"$baseUrl/api/init"
 
-    val initRequest = InitRequest("serviceIdentifier", "continueUrl")
+    val initRequest = InitRequest("serviceIdentifier", "continueUrl",
+      Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))))
+
     val initResponse =
       await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
 
@@ -192,7 +180,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
         accountType = Business,
         business = Some(
           BusinessCompleteResponse(
-            Business,
+            Some(CompleteResponseAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             "some-company-name",
             Some("SC123123"),
             "12-12-12",

@@ -18,58 +18,55 @@ package bankaccountverification.api
 
 import bankaccountverification.connector.ReputationResponseEnum
 import bankaccountverification.web.AccountTypeRequestEnum
-import bankaccountverification.web.AccountTypeRequestEnum.Personal
 import play.api.libs.json.{Json, OWrites, Reads}
 
-case class CompleteResponse(
-  accountType: AccountTypeRequestEnum,
-  personal: Option[PersonalCompleteResponse],
-  business: Option[BusinessCompleteResponse]
-)
+case class CompleteResponseAddress(lines: List[String], town: Option[String], postcode: Option[String])
+
+case class CompleteResponse(accountType: AccountTypeRequestEnum, personal: Option[PersonalCompleteResponse],
+                            business: Option[BusinessCompleteResponse])
 
 object CompleteResponse {
-  import PersonalCompleteResponse._
-  import BusinessCompleteResponse._
-
   implicit val completeResponseWrites: OWrites[CompleteResponse] = Json.writes[CompleteResponse]
-  implicit val completeResponseReads: Reads[CompleteResponse]    = Json.reads[CompleteResponse]
+  implicit val completeResponseReads: Reads[CompleteResponse] = Json.reads[CompleteResponse]
 }
 
-case class PersonalCompleteResponse(
-  accountType: AccountTypeRequestEnum,
-  accountName: String,
-  sortCode: String,
-  accountNumber: String,
-  accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-  rollNumber: Option[String] = None,
-  accountExists: Option[ReputationResponseEnum] = None,
-  nameMatches: Option[ReputationResponseEnum] = None,
-  nonConsented: Option[ReputationResponseEnum] = None,
-  subjectHasDeceased: Option[ReputationResponseEnum] = None,
-  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None
-)
+case class PersonalCompleteResponse(address: Option[CompleteResponseAddress],
+                                    accountName: String,
+                                    sortCode: String,
+                                    accountNumber: String,
+                                    accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+                                    rollNumber: Option[String] = None,
+                                    accountExists: Option[ReputationResponseEnum] = None,
+                                    nameMatches: Option[ReputationResponseEnum] = None,
+                                    nonConsented: Option[ReputationResponseEnum] = None,
+                                    subjectHasDeceased: Option[ReputationResponseEnum] = None,
+                                    nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None)
 
 object PersonalCompleteResponse {
+  implicit val completeResponseAddressWrites: OWrites[CompleteResponseAddress] = Json.writes[CompleteResponseAddress]
+  implicit val completeResponseAddressReads: Reads[CompleteResponseAddress] = Json.reads[CompleteResponseAddress]
+
   implicit val completeResponseWrites: OWrites[PersonalCompleteResponse] = Json.writes[PersonalCompleteResponse]
-  implicit val completeResponseReads: Reads[PersonalCompleteResponse]    = Json.reads[PersonalCompleteResponse]
+  implicit val completeResponseReads: Reads[PersonalCompleteResponse] = Json.reads[PersonalCompleteResponse]
 }
 
-case class BusinessCompleteResponse(
-  accountType: AccountTypeRequestEnum,
-  companyName: String,
-  companyRegistrationNumber: Option[String],
-  sortCode: String,
-  accountNumber: String,
-  rollNumber: Option[String] = None,
-  accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-  accountExists: Option[ReputationResponseEnum] = None,
-  companyNameMatches: Option[ReputationResponseEnum],
-  companyPostCodeMatches: Option[ReputationResponseEnum],
-  companyRegistrationNumberMatches: Option[ReputationResponseEnum],
-  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None
-)
+case class BusinessCompleteResponse(address: Option[CompleteResponseAddress],
+                                    companyName: String,
+                                    companyRegistrationNumber: Option[String],
+                                    sortCode: String,
+                                    accountNumber: String,
+                                    rollNumber: Option[String] = None,
+                                    accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+                                    accountExists: Option[ReputationResponseEnum] = None,
+                                    companyNameMatches: Option[ReputationResponseEnum],
+                                    companyPostCodeMatches: Option[ReputationResponseEnum],
+                                    companyRegistrationNumberMatches: Option[ReputationResponseEnum],
+                                    nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None)
 
 object BusinessCompleteResponse {
+  implicit val completeResponseAddressWrites: OWrites[CompleteResponseAddress] = Json.writes[CompleteResponseAddress]
+  implicit val completeResponseAddressReads: Reads[CompleteResponseAddress] = Json.reads[CompleteResponseAddress]
+
   implicit val completeResponseWrites: OWrites[BusinessCompleteResponse] = Json.writes[BusinessCompleteResponse]
-  implicit val completeResponseReads: Reads[BusinessCompleteResponse]    = Json.reads[BusinessCompleteResponse]
+  implicit val completeResponseReads: Reads[BusinessCompleteResponse] = Json.reads[BusinessCompleteResponse]
 }

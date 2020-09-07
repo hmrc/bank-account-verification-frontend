@@ -34,23 +34,20 @@ package bankaccountverification
 
 import java.time.ZonedDateTime
 
-import bankaccountverification.api.{BusinessCompleteResponse, CompleteResponse, PersonalCompleteResponse}
+import bankaccountverification.api.{BusinessCompleteResponse, CompleteResponse, CompleteResponseAddress}
 import bankaccountverification.connector.{BarsBusinessAssessResponse, BarsPersonalAssessResponse, ReputationResponseEnum}
+import bankaccountverification.web.AccountTypeRequestEnum
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.web.business.BusinessVerificationRequest
-import bankaccountverification.web.AccountTypeRequestEnum
 import bankaccountverification.web.personal.PersonalVerificationRequest
-import play.api.libs.json.{JsValue, Json, Reads, Writes}
+import play.api.libs.json.{JsValue, Json}
 
-case class Session(
-  accountType: Option[AccountTypeRequestEnum] = None,
-  personal: Option[PersonalSession] = None,
-  business: Option[BusinessSession] = None
-)
+case class Address(lines: List[String], town: Option[String], postcode: Option[String])
+
+case class Session(accountType: Option[AccountTypeRequestEnum] = None, address: Option[Address] = None,
+                   personal: Option[PersonalSession] = None, business: Option[BusinessSession] = None)
 
 object Session {
-  import PersonalCompleteResponse._
-  import BusinessCompleteResponse._
 
   def toCompleteResponseJson(session: Session): Option[JsValue] =
     session.accountType match {
@@ -61,46 +58,42 @@ object Session {
     }
 }
 
-case class PersonalSession(
-  accountName: Option[String],
-  sortCode: Option[String],
-  accountNumber: Option[String],
-  rollNumber: Option[String] = None,
-  accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
-  accountExists: Option[ReputationResponseEnum] = None,
-  nameMatches: Option[ReputationResponseEnum] = None,
-  nonConsented: Option[ReputationResponseEnum] = None,
-  subjectHasDeceased: Option[ReputationResponseEnum] = None,
-  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None
-)
+case class PersonalSession(accountName: Option[String],
+                           sortCode: Option[String],
+                           accountNumber: Option[String],
+                           rollNumber: Option[String] = None,
+                           accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
+                           accountExists: Option[ReputationResponseEnum] = None,
+                           nameMatches: Option[ReputationResponseEnum] = None,
+                           nonConsented: Option[ReputationResponseEnum] = None,
+                           subjectHasDeceased: Option[ReputationResponseEnum] = None,
+                           nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None)
 
 object PersonalSession {
   def toCompleteResponse(session: Session): Option[CompleteResponse] =
     session match {
       case Session(
-            Some(accountType),
-            Some(
-              PersonalSession(
-                Some(accountName),
-                Some(sortCode),
-                Some(accountNumber),
-                rollNumber,
-                Some(accountNumberWithSortCodeIsValid),
-                accountExists,
-                nameMatches,
-                nonConsented,
-                subjectHasDeceased,
-                nonStandardAccountDetailsRequiredForBacs
-              )
-            ),
-            _
-          ) =>
+      _,
+      address,
+      Some(PersonalSession(
+      Some(accountName),
+      Some(sortCode),
+      Some(accountNumber),
+      rollNumber,
+      Some(accountNumberWithSortCodeIsValid),
+      accountExists,
+      nameMatches,
+      nonConsented,
+      subjectHasDeceased,
+      nonStandardAccountDetailsRequiredForBacs)),
+      _
+      ) =>
         Some(
           CompleteResponse(
             Personal,
             Some(
               api.PersonalCompleteResponse(
-                accountType,
+                address.map(a => CompleteResponseAddress(a.lines, a.town, a.postcode)),
                 accountName,
                 sortCode,
                 accountNumber,
@@ -120,18 +113,16 @@ object PersonalSession {
     }
 }
 
-case class PersonalAccountDetails(
-  accountName: Option[String],
-  sortCode: Option[String],
-  accountNumber: Option[String],
-  rollNumber: Option[String] = None,
-  accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
-  accountExists: Option[ReputationResponseEnum] = None,
-  nameMatches: Option[ReputationResponseEnum] = None,
-  nonConsented: Option[ReputationResponseEnum] = None,
-  subjectHasDeceased: Option[ReputationResponseEnum] = None,
-  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None
-)
+case class PersonalAccountDetails(accountName: Option[String],
+                                  sortCode: Option[String],
+                                  accountNumber: Option[String],
+                                  rollNumber: Option[String] = None,
+                                  accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
+                                  accountExists: Option[ReputationResponseEnum] = None,
+                                  nameMatches: Option[ReputationResponseEnum] = None,
+                                  nonConsented: Option[ReputationResponseEnum] = None,
+                                  subjectHasDeceased: Option[ReputationResponseEnum] = None,
+                                  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None)
 
 object PersonalAccountDetails {
   def apply(request: PersonalVerificationRequest, response: BarsPersonalAssessResponse): PersonalAccountDetails =
@@ -149,49 +140,45 @@ object PersonalAccountDetails {
     )
 }
 
-case class BusinessSession(
-  companyName: Option[String],
-  companyRegistrationNumber: Option[String],
-  sortCode: Option[String],
-  accountNumber: Option[String],
-  rollNumber: Option[String] = None,
-  accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
-  accountExists: Option[ReputationResponseEnum] = None,
-  companyNameMatches: Option[ReputationResponseEnum] = None,
-  companyPostCodeMatches: Option[ReputationResponseEnum] = None,
-  companyRegistrationNumberMatches: Option[ReputationResponseEnum] = None,
-  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None
-)
+case class BusinessSession(companyName: Option[String],
+                           companyRegistrationNumber: Option[String],
+                           sortCode: Option[String],
+                           accountNumber: Option[String],
+                           rollNumber: Option[String] = None,
+                           accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
+                           accountExists: Option[ReputationResponseEnum] = None,
+                           companyNameMatches: Option[ReputationResponseEnum] = None,
+                           companyPostCodeMatches: Option[ReputationResponseEnum] = None,
+                           companyRegistrationNumberMatches: Option[ReputationResponseEnum] = None,
+                           nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None)
 
 object BusinessSession {
   def toCompleteResponse(session: Session): Option[CompleteResponse] =
     session match {
       case Session(
-            Some(accountType),
-            _,
-            Some(
-              BusinessSession(
-                Some(companyName),
-                companyRegistrationNumber,
-                Some(sortCode),
-                Some(accountNumber),
-                rollNumber,
-                Some(accountNumberWithSortCodeIsValid),
-                accountExists,
-                companyNameMatches,
-                companyPostCodeMatches,
-                companyRegistrationNumberMatches,
-                nonStandardAccountDetailsRequiredForBacs
-              )
-            )
-          ) =>
+      _,
+      address,
+      _,
+      Some(BusinessSession(
+      Some(companyName),
+      companyRegistrationNumber,
+      Some(sortCode),
+      Some(accountNumber),
+      rollNumber,
+      Some(accountNumberWithSortCodeIsValid),
+      accountExists,
+      companyNameMatches,
+      companyPostCodeMatches,
+      companyRegistrationNumberMatches,
+      nonStandardAccountDetailsRequiredForBacs))
+      ) =>
         Some(
           CompleteResponse(
             Business,
             None,
             Some(
               BusinessCompleteResponse(
-                accountType,
+                address.map(a => CompleteResponseAddress(a.lines, a.town, a.postcode)),
                 companyName,
                 companyRegistrationNumber,
                 sortCode,
@@ -213,18 +200,18 @@ object BusinessSession {
 }
 
 case class BusinessAccountDetails(
-  companyName: Option[String],
-  companyRegistrationNumber: Option[String],
-  sortCode: Option[String],
-  accountNumber: Option[String],
-  rollNumber: Option[String] = None,
-  accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
-  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
-  accountExists: Option[ReputationResponseEnum] = None,
-  compayNameMatches: Option[ReputationResponseEnum] = None,
-  compayPostCodeMatches: Option[ReputationResponseEnum] = None,
-  compayRegistrationNumberMatches: Option[ReputationResponseEnum] = None
-)
+                                   companyName: Option[String],
+                                   companyRegistrationNumber: Option[String],
+                                   sortCode: Option[String],
+                                   accountNumber: Option[String],
+                                   rollNumber: Option[String] = None,
+                                   accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
+                                   nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
+                                   accountExists: Option[ReputationResponseEnum] = None,
+                                   compayNameMatches: Option[ReputationResponseEnum] = None,
+                                   compayPostCodeMatches: Option[ReputationResponseEnum] = None,
+                                   compayRegistrationNumberMatches: Option[ReputationResponseEnum] = None
+                                 )
 
 object BusinessAccountDetails {
   def apply(request: BusinessVerificationRequest, response: BarsBusinessAssessResponse): BusinessAccountDetails =
@@ -245,6 +232,7 @@ object BusinessAccountDetails {
 }
 
 case class PersonalAccountDetailsUpdate(expiryDate: ZonedDateTime, data: PersonalAccountDetails)
+
 case class BusinessAccountDetailsUpdate(expiryDate: ZonedDateTime, data: BusinessAccountDetails)
 
 case class AccountTypeUpdate(expiryDate: ZonedDateTime, accountType: AccountTypeRequestEnum)

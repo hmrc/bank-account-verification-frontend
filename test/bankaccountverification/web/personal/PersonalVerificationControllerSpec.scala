@@ -23,7 +23,7 @@ import bankaccountverification.connector.BarsPersonalAssessResponse
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.Personal
 import bankaccountverification.web.{AccountTypeController, AccountTypeRequest, AccountTypeRequestEnum, VerificationService}
-import bankaccountverification.{Journey, JourneyRepository, PersonalSession, Session}
+import bankaccountverification.{Address, Journey, JourneyRepository, PersonalSession, Session}
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
@@ -85,8 +85,11 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       when(mockRepository.findById(id))
         .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-          Session(Some(Personal), Some(PersonalSession(accountName = Some("account_name"), sortCode = Some("11-22-33"),
-            accountNumber = Some("12092398")))))))))
+          Session(
+            Some(Personal),
+            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            Some(PersonalSession(
+              accountName = Some("account_name"), sortCode = Some("11-22-33"), accountNumber = Some("12092398")))))))))
 
       "return 200" in {
         val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
@@ -117,8 +120,11 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       when(mockRepository.findById(id))
         .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-          Session(Some(Personal), Some(bankaccountverification.PersonalSession(accountName = Some("some account name"),
-            sortCode = Some("112233"), accountNumber = Some("12345678")))))))))
+          Session(
+            Some(Personal),
+            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            Some(PersonalSession(
+              accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678")))))))))
 
       val data = AccountTypeRequest(AccountTypeRequestEnum.Personal)
 
@@ -172,8 +178,11 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       when(mockRepository.findById(id))
         .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-          Session(Some(Personal), Some(PersonalSession(accountName = Some("account_name"), sortCode = Some("11-22-33"),
-            accountNumber = Some("12092398")))))))))
+          Session(
+            Some(Personal),
+            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            Some(PersonalSession(
+              accountName = Some("account_name"), sortCode = Some("11-22-33"), accountNumber = Some("12092398")))))))))
 
       "return 200" in {
         val fakeRequest = FakeRequest("GET", s"/verify/${id.stringify}")
@@ -202,8 +211,11 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       when(mockRepository.findById(id))
         .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-          Session(Some(Personal), Some(bankaccountverification.PersonalSession(accountName = Some("some account name"),
-            sortCode = Some("112233"), accountNumber = Some("12345678")))))))))
+          Session(
+            Some(Personal),
+            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            Some(bankaccountverification.PersonalSession(accountName = Some("some account name"),
+              sortCode = Some("112233"), accountNumber = Some("12345678")))))))))
 
       val data = PersonalVerificationRequest("", "", "")
 
@@ -225,8 +237,11 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       when(mockRepository.findById(id))
         .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-          Session(Some(Personal), Some(bankaccountverification.PersonalSession(accountName = Some("some account name"),
-            sortCode = Some("112233"), accountNumber = Some("12345678")))))))))
+          Session(
+            Some(Personal),
+            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
+              accountNumber = Some("12345678")))))))))
 
       val barsPersonalAssessResponse =
         BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
@@ -256,8 +271,11 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       when(mockRepository.findById(id)).thenReturn(
         Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None,
-          Some(Session(Some(Personal), Some(bankaccountverification.PersonalSession(
-            accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))
+          Some(Session(
+            Some(Personal),
+            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
+              accountNumber = Some("12345678"))))))
         )))
 
       val barsPersonalAssessResponse = BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
@@ -285,8 +303,11 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       when(mockRepository.findById(id)).thenReturn(
         Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None,
-          Some(Session(Some(Personal), Some(bankaccountverification.PersonalSession(
-            accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))
+          Some(Session(
+            Some(Personal),
+            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
+              accountNumber = Some("12345678"))))))
         )))
 
       val barsPersonalAssessResponse = BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
@@ -326,9 +347,12 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         when(mockRepository.findById(id)).thenReturn(
           Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None,
-            Some(Session(Some(Personal), Some(bankaccountverification.PersonalSession(
-              accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))
-          )))
+            Some(Session(
+              Some(Personal),
+              Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+              Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
+                accountNumber = Some("12345678")))))))))
+
         val fakeRequest = FakeRequest("GET", s"/confirm/personal/${id.stringify}")
 
         val result = controller.getConfirmDetails(id.stringify).apply(fakeRequest)
