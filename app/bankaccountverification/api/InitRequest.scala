@@ -16,21 +16,22 @@
 
 package bankaccountverification.api
 
-import play.api.libs.json.{JsObject, Json, OWrites}
+import play.api.libs.json.{JsObject, Json, OWrites, Reads}
 
-case class InitRequest(
-  serviceIdentifier: String,
-  continueUrl: String,
-  messages: Option[InitRequestMessages] = None,
-  customisationsUrl: Option[String] = None
-)
+case class InitRequest(serviceIdentifier: String, continueUrl: String, address: Option[InitRequestAddress] = None,
+                       messages: Option[InitRequestMessages] = None, customisationsUrl: Option[String] = None)
 
 case class InitRequestMessages(en: JsObject, cy: Option[JsObject])
 
+case class InitRequestAddress(lines: List[String], town: Option[String], postcode: Option[String])
+
 object InitRequest {
-  implicit val messagesReads                                = Json.reads[InitRequestMessages]
+  implicit val messagesReads: Reads[InitRequestMessages] = Json.reads[InitRequestMessages]
   implicit val messagesWrites: OWrites[InitRequestMessages] = Json.writes[InitRequestMessages]
 
-  implicit val writes = Json.writes[InitRequest]
-  implicit val reads  = Json.reads[InitRequest]
+  implicit val addressReads: Reads[InitRequestAddress] = Json.reads[InitRequestAddress]
+  implicit val addressWrites: OWrites[InitRequestAddress] = Json.writes[InitRequestAddress]
+
+  implicit val writes: OWrites[InitRequest] = Json.writes[InitRequest]
+  implicit val reads: Reads[InitRequest] = Json.reads[InitRequest]
 }

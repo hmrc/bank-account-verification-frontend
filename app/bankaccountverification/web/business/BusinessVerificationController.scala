@@ -74,7 +74,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
           journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))
       else
         for {
-          response <- verificationService.assessBusiness(form.get)
+          response <- verificationService.assessBusiness(form.get, journey.data.flatMap(_.address))
           updatedForm <- verificationService.processBusinessAssessResponse(journey.id, response, form)
         } yield
           updatedForm match {

@@ -16,11 +16,12 @@
 
 package bankaccountverification.web.personal
 
+import bankaccountverification.connector.BarsAddress
 import bankaccountverification.connector.ReputationResponseEnum.Yes
 import bankaccountverification.web.personal.routes
 import bankaccountverification.web.personal.html.{PersonalAccountDetailsView, PersonalAccountExistsIndeterminate}
 import bankaccountverification.web.{ActionWithCustomisationsProvider, VerificationService}
-import bankaccountverification.{AppConfig, RemoteMessagesApiProvider}
+import bankaccountverification.{Address, AppConfig, RemoteMessagesApiProvider}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.i18n.Messages
@@ -75,7 +76,7 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
           journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))
       else
         for {
-          response <- verificationService.assessPersonal(form.get)
+          response <- verificationService.assessPersonal(form.get, journey.data.flatMap(_.address))
           updatedForm <- verificationService.processPersonalAssessResponse(journey.id, response, form)
         } yield
           updatedForm match {

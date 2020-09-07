@@ -25,50 +25,37 @@ import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
-case class Journey(
-  id: BSONObjectID,
-  expiryDate: ZonedDateTime,
-  serviceIdentifier: String,
-  continueUrl: String,
-  messages: Option[JsObject] = None,
-  customisationsUrl: Option[String] = None,
-  data: Option[Session] = None
-)
+case class Journey(id: BSONObjectID, expiryDate: ZonedDateTime, serviceIdentifier: String, continueUrl: String,
+                   messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
+                   data: Option[Session] = None)
 
 object Journey {
   def expiryDate = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
-  def createExpiring(
-    id: BSONObjectID,
-    serviceIdentifier: String,
-    continueUrl: String,
-    messages: Option[JsObject] = None,
-    customisationsUrl: Option[String] = None,
-    data: Option[Session] = None
-  ): Journey =
-    Journey(
-      id,
-      expiryDate,
-      serviceIdentifier,
-      continueUrl,
-      messages,
-      customisationsUrl,
-      data
-    )
+  def createExpiring(id: BSONObjectID, serviceIdentifier: String, continueUrl: String,
+                     messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
+                     data: Option[Session] = None): Journey =
+    Journey(id, expiryDate, serviceIdentifier, continueUrl, messages, customisationsUrl, data)
 
   def updatePersonalAccountDetailsExpiring(data: PersonalAccountDetails) =
     PersonalAccountDetailsUpdate(expiryDate, data)
+
   def updateBusinessAccountDetailsExpiring(data: BusinessAccountDetails) =
     BusinessAccountDetailsUpdate(expiryDate, data)
+
   def updateAccountTypeExpiring(accountType: AccountTypeRequestEnum) = AccountTypeUpdate(expiryDate, accountType)
 
-  implicit val objectIdFormats: Format[BSONObjectID]              = ReactiveMongoFormats.objectIdFormats
-  implicit val personalSessionDataReads: Reads[PersonalSession]   = Json.reads[PersonalSession]
+  implicit val objectIdFormats: Format[BSONObjectID] = ReactiveMongoFormats.objectIdFormats
+  implicit val personalSessionDataReads: Reads[PersonalSession] = Json.reads[PersonalSession]
   implicit val personalSessionDataWrites: Writes[PersonalSession] = Json.writes[PersonalSession]
-  implicit val businessSessionDataReads: Reads[BusinessSession]   = Json.reads[BusinessSession]
+  implicit val businessSessionDataReads: Reads[BusinessSession] = Json.reads[BusinessSession]
   implicit val businessSessionDataWrites: Writes[BusinessSession] = Json.writes[BusinessSession]
-  implicit val sessionReads: Reads[Session]                       = Json.reads[Session]
-  implicit val sessionWrites: Writes[Session]                     = Json.writes[Session]
+
+  implicit val sessionAddressReads: Reads[Address] = Json.reads[Address]
+  implicit val sessionAddressWrites: Writes[Address] = Json.writes[Address]
+
+  implicit val sessionReads: Reads[Session] = Json.reads[Session]
+  implicit val sessionWrites: Writes[Session] = Json.writes[Session]
 
   implicit val localDateTimeRead: Reads[ZonedDateTime] =
     (__ \ "$date").read[Long].map { dateTime =>
@@ -101,16 +88,7 @@ object Journey {
           messages: Option[JsObject],
           customisationsUrl: Option[String],
           data: Option[Session]
-        ) =>
-          Journey.apply(
-            id,
-            expiryDate,
-            serviceIdentifier,
-            continueUrl,
-            messages,
-            customisationsUrl,
-            data
-          )
+        ) => Journey.apply(id, expiryDate, serviceIdentifier, continueUrl, messages, customisationsUrl, data)
       )
 
   implicit def defaultWrites: OWrites[Journey] =
@@ -134,6 +112,7 @@ object Journey {
       .and((__ \ "data.personal.accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.accountExists").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.nameMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.personal.addressMatches").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.nonConsented").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.subjectHasDeceased").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])(
@@ -173,7 +152,7 @@ object Journey {
   implicit def accountTypeUpdateWrites: OWrites[AccountTypeUpdate] =
     (__ \ "$set" \ "expiryDate")
       .write[ZonedDateTime]
-      .and((__ \ "$set" \ "data" \ "accountType").write[AccountTypeRequestEnum])(
+      .and((__ \ "$set" \ "data.accountType").write[AccountTypeRequestEnum])(
         unlift(AccountTypeUpdate.unapply)
       )
 

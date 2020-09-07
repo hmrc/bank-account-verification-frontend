@@ -21,7 +21,7 @@ import java.time.ZonedDateTime
 import akka.stream.Materializer
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
-import bankaccountverification.{AppConfig, BusinessSession, Journey, JourneyRepository, PersonalSession, Session}
+import bankaccountverification.{Address, AppConfig, BusinessSession, Journey, JourneyRepository, PersonalSession, Session}
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
@@ -75,11 +75,14 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             meq("serviceIdentifier"),
             meq("continueUrl"),
             meq(None),
-            meq(None)
+            meq(None),
+            meq(Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))))
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
-        val json        = Json.toJson(InitRequest("serviceIdentifier", "continueUrl"))
+        val json        = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
+          Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode")))))
+
         val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
 
         val result         = controller.init().apply(fakeRequest)
@@ -117,20 +120,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           Some(
             Session(
               Some(Personal),
+              Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
               Some(
-                PersonalSession(
-                  Some("Bob"),
-                  Some("203040"),
-                  Some("12345678"),
-                  Some("roll1"),
-                  Some(Yes),
-                  Some(Yes),
-                  Some(Indeterminate),
-                  Some(Indeterminate),
-                  Some(Indeterminate),
-                  Some(No)
-                )
-              ),
+                PersonalSession(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), Some(Yes),
+                  Some(Indeterminate), Some(No), Some(Indeterminate), Some(Indeterminate), Some(No))),
               None
             )
           )
@@ -152,6 +145,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         (json \ "personal" \ "accountExists").as[String]                            shouldBe "yes"
         (json \ "personal" \ "rollNumber").as[String]                               shouldBe "roll1"
         (json \ "personal" \ "nameMatches").as[String]                              shouldBe "indeterminate"
+        (json \ "personal" \ "addressMatches").as[String]                           shouldBe "no"
         (json \ "personal" \ "nonConsented").as[String]                             shouldBe "indeterminate"
         (json \ "personal" \ "subjectHasDeceased").as[String]                       shouldBe "indeterminate"
         (json \ "personal" \ "nonStandardAccountDetailsRequiredForBacs").as[String] shouldBe "no"
@@ -169,25 +163,11 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           Some(
             Session(
               Some(Business),
+              Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
               None,
               Some(
-                BusinessSession(
-                  Some("Bob Ltd"),
-                  Some("SC123123"),
-                  Some("203040"),
-                  Some("12345678"),
-                  Some("roll1"),
-                  Some(Yes),
-                  Some(No),
-                  Some(Indeterminate),
-                  Some(Indeterminate),
-                  Some(Indeterminate),
-                  None
-                )
-              )
-            )
-          )
-        )
+                BusinessSession(Some("Bob Ltd"), Some("SC123123"), Some("203040"), Some("12345678"), Some("roll1"),
+                  Some(Yes), Some(No), Some(Indeterminate), Some(Indeterminate), Some(Indeterminate), None)))))
 
         when(sessionStore.findById(meq(journeyId), any())(any()))
           .thenReturn(Future.successful(Some(returnData)))

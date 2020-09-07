@@ -1,8 +1,8 @@
 package bankaccountverification
 
-import bankaccountverification.api.{BusinessCompleteResponse, CompleteResponse, InitRequest, PersonalCompleteResponse}
+import bankaccountverification.api.{BusinessCompleteResponse, CompleteResponse, CompleteResponseAddress, InitRequest, InitRequestAddress, PersonalCompleteResponse}
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
-import bankaccountverification.connector.{BankAccountReputationConnector, BarsBusinessAssessResponse, BarsPersonalAssessResponse, BarsValidationResponse}
+import bankaccountverification.connector.{BankAccountReputationConnector, BarsAddress, BarsBusinessAssessResponse, BarsPersonalAssessResponse, BarsValidationResponse}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.AccountTypeRequest
@@ -45,22 +45,19 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
       .toMap
 
   "PersonalBankAccountVerification" in {
-    when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any())(any(), any())).thenReturn(
+    when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
-        Success(
-          BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
-        )
-      )
-    )
+        Success(BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Yes, No, Indeterminate, Some(No)))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl  = s"http://localhost:$port"
 
     val initUrl = s"$baseUrl/api/init"
 
-    val initRequest = InitRequest("serviceIdentifier", "continueUrl")
-    val initResponse =
-      await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
+    val initRequest = InitRequest("serviceIdentifier", "continueUrl",
+      Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))))
+
+    val initResponse = await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
 
     initResponse.status shouldBe 200
     val journeyId = initResponse.json.as[String]
@@ -104,7 +101,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
         accountType = Personal,
         personal = Some(
           PersonalCompleteResponse(
-            Personal,
+            Some(CompleteResponseAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             "some-account-name",
             "12-12-12",
             "12349876",
@@ -112,40 +109,28 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
             None,
             accountExists = Some(Yes),
             nameMatches = Some(Indeterminate),
-            nonConsented = Some(Indeterminate),
+            addressMatches = Some(Yes),
+            nonConsented = Some(No),
             subjectHasDeceased = Some(Indeterminate),
-            nonStandardAccountDetailsRequiredForBacs = Some(No)
-          )
-        ),
+            nonStandardAccountDetailsRequiredForBacs = Some(No))),
         business = None
       )
     )
   }
 
   "BusinessBankAccountVerification" in {
-    when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any())(any(), any())).thenReturn(
-      Future.successful(
-        Success(
-          BarsBusinessAssessResponse(
-            Yes,
-            Yes,
-            None,
-            Indeterminate,
-            Indeterminate,
-            Indeterminate,
-            Indeterminate,
-            Some(No)
-          )
-        )
-      )
-    )
+    when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any())(any(), any())).thenReturn(
+      Future.successful(Success(BarsBusinessAssessResponse(
+        Yes, Yes, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No)))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl  = s"http://localhost:$port"
 
     val initUrl = s"$baseUrl/api/init"
 
-    val initRequest = InitRequest("serviceIdentifier", "continueUrl")
+    val initRequest = InitRequest("serviceIdentifier", "continueUrl",
+      Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))))
+
     val initResponse =
       await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
 
@@ -192,7 +177,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
         accountType = Business,
         business = Some(
           BusinessCompleteResponse(
-            Business,
+            Some(CompleteResponseAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             "some-company-name",
             Some("SC123123"),
             "12-12-12",

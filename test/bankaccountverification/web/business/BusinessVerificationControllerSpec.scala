@@ -21,9 +21,9 @@ import java.time.{ZoneOffset, ZonedDateTime}
 import akka.stream.Materializer
 import bankaccountverification.connector.BarsBusinessAssessResponse
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
-import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
+import bankaccountverification.web.AccountTypeRequestEnum.Business
 import bankaccountverification.web.{AccountTypeController, AccountTypeRequest, AccountTypeRequestEnum, VerificationService}
-import bankaccountverification.{BusinessSession, Journey, JourneyRepository, PersonalSession, Session}
+import bankaccountverification._
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
@@ -172,8 +172,13 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       when(mockRepository.findById(id))
         .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-          Session(Some(Business), None, Some(bankaccountverification.BusinessSession(companyName = Some("some company name"), companyRegistrationNumber = Some("SC1231234"), sortCode = Some("112233"),
-            accountNumber = Some("12345678")))))))))
+          Session(
+            Some(Business),
+            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            None,
+            Some(BusinessSession(
+              companyName = Some("some company name"), companyRegistrationNumber = Some("SC1231234"),
+              sortCode = Some("112233"), accountNumber = Some("12345678")))))))))
 
       "return 200" in {
         val fakeRequest = FakeRequest("GET", s"/verify/${id.stringify}")
@@ -201,8 +206,11 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
       when(mockRepository.findById(id))
         .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-          Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(companyName = Some("some company name"), companyRegistrationNumber = Some("SC1231234"), sortCode = Some("112233"),
-            accountNumber = Some("12345678")))))))))
+          Session(
+            accountType = Some(Business),
+            business = Some(BusinessSession(
+              companyName = Some("some company name"), companyRegistrationNumber = Some("SC1231234"), sortCode = Some("112233"),
+              accountNumber = Some("12345678")))))))))
 
       val data = BusinessVerificationRequest("", None, "", "", None)
 
@@ -230,9 +238,9 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
             accountNumber = Some("12345678")))))))))
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate,Indeterminate, Some(No))
+        BarsBusinessAssessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
-      when(mockService.assessBusiness(any())(any(), any()))
+      when(mockService.assessBusiness(any(), any())(any(), any()))
         .thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
       when(mockService.processBusinessAssessResponse(meq(id), any(), any())(any(), any()))
         .thenReturn(Future.successful(formWithErrors))
@@ -261,9 +269,9 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
             accountNumber = Some("12345678")))))))))
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate,Indeterminate, Some(No))
+        BarsBusinessAssessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
-      when(mockService.assessBusiness(meq(data))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
+      when(mockService.assessBusiness(meq(data), any())(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
       when(mockService.processBusinessAssessResponse(meq(id), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
       "Redirect to the confirm view" in {
@@ -286,13 +294,13 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       when(mockRepository.findById(id))
         .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-                  Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(companyName = Some("some company name"), companyRegistrationNumber = Some("SC1231234"), sortCode = Some("112233"),
-                        accountNumber = Some("12345678")))))))))
+          Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(companyName = Some("some company name"), companyRegistrationNumber = Some("SC1231234"), sortCode = Some("112233"),
+            accountNumber = Some("12345678")))))))))
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessResponse(Yes, No, None, Yes, Indeterminate, Indeterminate,Indeterminate, Some(No))
+        BarsBusinessAssessResponse(Yes, No, None, Yes, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
-      when(mockService.assessBusiness(meq(data))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
+      when(mockService.assessBusiness(meq(data), any())(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
       when(mockService.processBusinessAssessResponse(meq(id), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
 
@@ -328,9 +336,13 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         when(mockRepository.findById(id)).thenReturn(
           Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None,
-            Some(Session(Some(Business), None, Some(BusinessSession(
-              Some("some company name"), Some("SC123456"), Some("112233"), Some("12345678"))))))
-          )))
+            Some(Session(
+              Some(Business),
+              Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+              None,
+              Some(BusinessSession(
+                Some("some company name"), Some("SC123456"), Some("112233"), Some("12345678")))))))))
+
         val fakeRequest = FakeRequest("GET", s"/confirm/business/${id.stringify}")
 
         val result = controller.getConfirmDetails(id.stringify).apply(fakeRequest)

@@ -16,7 +16,7 @@
 
 package bankaccountverification.api
 
-import bankaccountverification.{AppConfig, JourneyRepository}
+import bankaccountverification.{Address, AppConfig, JourneyRepository}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
@@ -44,15 +44,15 @@ class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerCompo
         case Some(json) =>
           json.validate[InitRequest]
             .fold(
-              err =>
-                Future.successful(BadRequest(Json.obj("errors" -> err.flatMap { case (_, e) => e.map(_.message) }))),
+              err => Future.successful(BadRequest(Json.obj("errors" -> err.flatMap { case (_, e) => e.map(_.message) }))),
               init =>
                 journeyRepository
                   .create(
                     init.serviceIdentifier,
                     init.continueUrl,
                     init.messages.map(m => Json.toJsObject(m)),
-                    init.customisationsUrl
+                    init.customisationsUrl,
+                    init.address.map(a => Address(a.lines, a.town, a.postcode))
                   )
                   .map(journeyId => Ok(Json.toJson(journeyId.stringify)))
             )

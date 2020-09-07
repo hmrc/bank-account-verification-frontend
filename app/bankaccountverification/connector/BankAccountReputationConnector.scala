@@ -25,15 +25,15 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class BankAccountReputationConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig) {
+class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig: AppConfig) {
 
   @deprecated(message = "Use assessPersonal or assessBusiness")
   def validateBankDetails(
-    bankDetailsModel: BarsValidationRequest
-  )(implicit
-    hc: HeaderCarrier,
-    ec: ExecutionContext
-  ): Future[Try[BarsValidationResponse]] = {
+                           bankDetailsModel: BarsValidationRequest
+                         )(implicit
+                           hc: HeaderCarrier,
+                           ec: ExecutionContext
+                         ): Future[Try[BarsValidationResponse]] = {
     import BarsValidationResponse._
     import HttpReads.Implicits.readRaw
 
@@ -57,16 +57,14 @@ class BankAccountReputationConnector @Inject() (httpClient: HttpClient, appConfi
       }
   }
 
-  def assessPersonal(accountName: String, sortCode: String, accountNumber: String)(implicit
-    hc: HeaderCarrier,
-    ec: ExecutionContext
-  ): Future[Try[BarsPersonalAssessResponse]] = {
+  def assessPersonal(accountName: String, sortCode: String, accountNumber: String, address: BarsAddress)
+                    (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Try[BarsPersonalAssessResponse]] = {
     import BarsPersonalAssessResponse._
     import HttpReads.Implicits.readRaw
 
     val request = BarsPersonalAssessRequest(
       BarsAccount(sortCode, accountNumber),
-      BarsSubject(None, Some(accountName), None, None, None, BarsAddress(lines = List(" "), None, None))
+      BarsSubject(None, Some(accountName), None, None, None, address)
     )
 
     httpClient
@@ -89,28 +87,18 @@ class BankAccountReputationConnector @Inject() (httpClient: HttpClient, appConfi
       }
   }
 
-  def assessBusiness(
-    companyName: String,
-    companyRegistrationNumber: Option[String],
-    sortCode: String,
-    accountNumber: String
-  )(implicit
-    hc: HeaderCarrier,
-    ec: ExecutionContext
-  ): Future[Try[BarsBusinessAssessResponse]] = {
+  def assessBusiness(companyName: String, companyRegistrationNumber: Option[String], sortCode: String,
+                     accountNumber: String, address: Option[BarsAddress])
+                    (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Try[BarsBusinessAssessResponse]] = {
     import BarsBusinessAssessResponse._
     import HttpReads.Implicits.readRaw
 
     val request = BarsBusinessAssessRequest(
       BarsAccount(sortCode = sortCode, accountNumber = accountNumber),
-      Some(BarsBusiness(companyName = companyName, companyRegistrationNumber = companyRegistrationNumber, None))
-    )
+      Some(BarsBusiness(companyName = companyName, companyRegistrationNumber = companyRegistrationNumber, address)))
 
     httpClient
-      .POST[BarsBusinessAssessRequest, HttpResponse](
-        url = appConfig.barsBusinessAssessUrl,
-        body = request
-      )
+      .POST[BarsBusinessAssessRequest, HttpResponse](url = appConfig.barsBusinessAssessUrl, body = request)
       .map {
         case httpResponse if httpResponse.status == 200 =>
           Json.fromJson[BarsBusinessAssessResponse](httpResponse.json) match {

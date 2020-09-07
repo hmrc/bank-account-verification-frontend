@@ -32,7 +32,6 @@ package bankaccountverification
  * limitations under the License.
  */
 
-import bankaccountverification.Journey.businessUpdateWrites
 import bankaccountverification.web.AccountTypeRequestEnum
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsObject, Json, OWrites}
@@ -44,58 +43,40 @@ import uk.gov.hmrc.mongo.ReactiveRepository
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class JourneyRepository @Inject() (component: ReactiveMongoComponent)
-    extends ReactiveRepository[Journey, BSONObjectID](
-      "bank-account-verification-session-store",
-      component.mongoConnector.db,
-      Journey.format
-    ) {
+class JourneyRepository @Inject()(component: ReactiveMongoComponent)
+  extends ReactiveRepository[Journey, BSONObjectID](
+    "bank-account-verification-session-store",
+    component.mongoConnector.db,
+    Journey.format
+  ) {
 
   val expireAfterSeconds: Long = 0
 
-  private lazy val ExpiryDateIndex       = "expiryDateIndex"
+  private lazy val ExpiryDateIndex = "expiryDateIndex"
   private lazy val OptExpireAfterSeconds = "expireAfterSeconds"
 
-  def create(
-    serviceIdentifier: String,
-    continueUrl: String,
-    messages: Option[JsObject] = None,
-    customisationsUrl: Option[String] = None
-  )(implicit
-    ec: ExecutionContext
-  ): Future[BSONObjectID] = {
+  def create(serviceIdentifier: String, continueUrl: String, messages: Option[JsObject] = None,
+             customisationsUrl: Option[String] = None, address: Option[Address] = None)(implicit ec: ExecutionContext): Future[BSONObjectID] = {
+
     val journeyId = BSONObjectID.generate()
-    insert(
-      Journey.createExpiring(
-        journeyId,
-        serviceIdentifier,
-        continueUrl,
-        messages,
-        customisationsUrl
-      )
-    ).map(_ => journeyId)
+
+    insert(Journey.createExpiring(journeyId, serviceIdentifier, continueUrl, messages, customisationsUrl,
+      address.map(a => Session(address = Some(a))))).map(_ => journeyId)
   }
 
-  def updatePersonalAccountDetails(id: BSONObjectID, data: PersonalAccountDetails)(implicit
-    formats: OWrites[Journey],
-    ec: ExecutionContext
-  ): Future[Boolean] = {
+  def updatePersonalAccountDetails(id: BSONObjectID, data: PersonalAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {
     import Journey.personalUpdateWrites
     val updateJson = Json.toJsObject(Journey.updatePersonalAccountDetailsExpiring(data))
     findAndUpdate(_id(id), updateJson).map(r => r.lastError.isDefined)
   }
 
-  def updateBusinessAccountDetails(id: BSONObjectID, data: BusinessAccountDetails)(implicit
-    formats: OWrites[Journey],
-    ec: ExecutionContext
-  ): Future[Boolean] = {
+  def updateBusinessAccountDetails(id: BSONObjectID, data: BusinessAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {
     import Journey.businessUpdateWrites
     val updateJson = Json.toJsObject(Journey.updateBusinessAccountDetailsExpiring(data))
     findAndUpdate(_id(id), updateJson).map(r => r.lastError.isDefined)
   }
 
-  def updateAccountType(id: BSONObjectID, accountType: AccountTypeRequestEnum)(implicit
-    ec: ExecutionContext
+  def updateAccountType(id: BSONObjectID, accountType: AccountTypeRequestEnum)(implicit ec: ExecutionContext
   ): Future[Boolean] = {
     import Journey.accountTypeUpdateWrites
     val updateJson = Json.toJsObject(Journey.updateAccountTypeExpiring(accountType))

@@ -20,7 +20,7 @@ import bankaccountverification.connector.ReputationResponseEnum._
 import bankaccountverification.connector._
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
-import bankaccountverification.{BusinessAccountDetails, JourneyRepository, PersonalAccountDetails}
+import bankaccountverification.{Address, BusinessAccountDetails, JourneyRepository, PersonalAccountDetails}
 import javax.inject.Inject
 import play.api.Logger
 import play.api.data.Form
@@ -33,11 +33,17 @@ import scala.util.{Failure, Success, Try}
 class VerificationService @Inject()(connector: BankAccountReputationConnector, repository: JourneyRepository) {
   private val logger = Logger(this.getClass)
 
-  def setAccountType(journeyId: BSONObjectID, accountType: AccountTypeRequestEnum)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Boolean] =
+  def setAccountType(journeyId: BSONObjectID, accountType: AccountTypeRequestEnum)
+                    (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Boolean] =
     repository.updateAccountType(journeyId, accountType)
 
-  def assessPersonal(request: PersonalVerificationRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsPersonalAssessResponse]] =
-    connector.assessPersonal(request.accountName, Forms.stripSortCode(request.sortCode), request.accountNumber)
+  def assessPersonal(request: PersonalVerificationRequest, address: Option[Address])
+                    (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsPersonalAssessResponse]] =
+    connector.assessPersonal(
+      request.accountName,
+      Forms.stripSortCode(request.sortCode),
+      request.accountNumber,
+      address.map(a => BarsAddress(a.lines, a.town, a.postcode)).getOrElse(BarsAddress.emptyAddress))
 
   def processPersonalAssessResponse(journeyId: BSONObjectID,
                                     assessResponse: Try[BarsPersonalAssessResponse],
@@ -62,9 +68,14 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
     )
   }
 
-  def assessBusiness(request: BusinessVerificationRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsBusinessAssessResponse]] =
-    connector.assessBusiness(request.companyName, request.companyRegistrationNumber,
-      Forms.stripSortCode(request.sortCode), request.accountNumber)
+  def assessBusiness(request: BusinessVerificationRequest, address: Option[Address])
+                    (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsBusinessAssessResponse]] =
+    connector.assessBusiness(
+      request.companyName,
+      request.companyRegistrationNumber,
+      Forms.stripSortCode(request.sortCode),
+      request.accountNumber,
+      address.map(a => BarsAddress(a.lines, a.town, a.postcode)))
 
   def processBusinessAssessResponse(journeyId: BSONObjectID,
                                     assessResponse: Try[BarsBusinessAssessResponse],
