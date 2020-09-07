@@ -20,7 +20,7 @@ import bankaccountverification.connector.ReputationResponseEnum._
 import bankaccountverification.connector._
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
-import bankaccountverification.{BusinessAccountDetails, JourneyRepository, PersonalAccountDetails}
+import bankaccountverification.{Address, BusinessAccountDetails, JourneyRepository, PersonalAccountDetails}
 import javax.inject.Inject
 import play.api.Logger
 import play.api.data.Form
@@ -36,8 +36,15 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
   def setAccountType(journeyId: BSONObjectID, accountType: AccountTypeRequestEnum)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Boolean] =
     repository.updateAccountType(journeyId, accountType)
 
-  def assessPersonal(request: PersonalVerificationRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsPersonalAssessResponse]] =
-    connector.assessPersonal(request.accountName, Forms.stripSortCode(request.sortCode), request.accountNumber)
+  def assessPersonal(request: PersonalVerificationRequest, address: Option[Address])(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsPersonalAssessResponse]] = {
+    val personalAddress = address match {
+      case Some(Address(lines, town, postcode)) if lines.forall(_.isEmpty) => BarsAddress(List(" "), town, postcode)
+      case Some(Address(lines, town, postcode)) => BarsAddress(lines, town, postcode)
+      case None => BarsAddress.emptyAddress
+    }
+
+    connector.assessPersonal(request.accountName, Forms.stripSortCode(request.sortCode), request.accountNumber, personalAddress)
+  }
 
   def processPersonalAssessResponse(journeyId: BSONObjectID,
                                     assessResponse: Try[BarsPersonalAssessResponse],

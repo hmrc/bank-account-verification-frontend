@@ -19,7 +19,7 @@ package bankaccountverification.web.personal
 import java.time.{ZoneOffset, ZonedDateTime}
 
 import akka.stream.Materializer
-import bankaccountverification.connector.BarsPersonalAssessResponse
+import bankaccountverification.connector.{BarsAddress, BarsPersonalAssessResponse}
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.Personal
 import bankaccountverification.web.{AccountTypeController, AccountTypeRequest, AccountTypeRequestEnum, VerificationService}
@@ -194,6 +194,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
   }
 
   "POST /verify" when {
+    val address = Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))
+
     "there is no valid journey" should {
       val id = BSONObjectID.generate()
       when(mockRepository.findById(id)).thenReturn(Future.successful(None))
@@ -213,7 +215,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
           Session(
             Some(Personal),
-            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            Some(address),
             Some(bankaccountverification.PersonalSession(accountName = Some("some account name"),
               sortCode = Some("112233"), accountNumber = Some("12345678")))))))))
 
@@ -239,14 +241,14 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
           Session(
             Some(Personal),
-            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            Some(address),
             Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
               accountNumber = Some("12345678")))))))))
 
       val barsPersonalAssessResponse =
         BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
-      when(mockService.assessPersonal(meq(data))(any(), any()))
+      when(mockService.assessPersonal(meq(data), any())(any(), any()))
         .thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
       when(mockService.processPersonalAssessResponse(meq(id), any(), any())(any(), any()))
         .thenReturn(Future.successful(formWithErrors))
@@ -273,14 +275,14 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None,
           Some(Session(
             Some(Personal),
-            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            Some(address),
             Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
               accountNumber = Some("12345678"))))))
         )))
 
       val barsPersonalAssessResponse = BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
-      when(mockService.assessPersonal(any())(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
+      when(mockService.assessPersonal(any(), meq(Some(address)))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
       when(mockService.processPersonalAssessResponse(meq(id), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
       "Redirect to the continueUrl" in {
@@ -305,14 +307,14 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None,
           Some(Session(
             Some(Personal),
-            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            Some(address),
             Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
               accountNumber = Some("12345678"))))))
         )))
 
       val barsPersonalAssessResponse = BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
-      when(mockService.assessPersonal(meq(data))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
+      when(mockService.assessPersonal(meq(data), meq(Some(address)))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
       when(mockService.processPersonalAssessResponse(meq(id), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
       "Redirect to the confirm view" in {

@@ -57,16 +57,13 @@ class BankAccountReputationConnector @Inject() (httpClient: HttpClient, appConfi
       }
   }
 
-  def assessPersonal(accountName: String, sortCode: String, accountNumber: String)(implicit
-    hc: HeaderCarrier,
-    ec: ExecutionContext
-  ): Future[Try[BarsPersonalAssessResponse]] = {
+  def assessPersonal(accountName: String, sortCode: String, accountNumber: String, address: BarsAddress)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Try[BarsPersonalAssessResponse]] = {
     import BarsPersonalAssessResponse._
     import HttpReads.Implicits.readRaw
 
     val request = BarsPersonalAssessRequest(
       BarsAccount(sortCode, accountNumber),
-      BarsSubject(None, Some(accountName), None, None, None, BarsAddress(lines = List(" "), None, None))
+      BarsSubject(None, Some(accountName), None, None, None, address)
     )
 
     httpClient

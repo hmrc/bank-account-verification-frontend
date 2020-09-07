@@ -49,16 +49,30 @@ object BarsAccount {
   implicit val format: OFormat[BarsAccount] = Json.format[BarsAccount]
 }
 
-case class BarsAddress(
-  lines: List[String], // One to four lines; cumulative length must be between 1 and 140 characters.
-  town: Option[String], // Must be between 1 and 35 characters long
-  postcode: Option[
-    String
-  ] // Must be between 5 and 8 characters long, all uppercase. The internal space character can be omitted.
+case class BarsAddress (
+   lines: List[String], // One to four lines; cumulative length must be between 1 and 140 characters.
+   town: Option[String], // Must be between 1 and 35 characters long
+   postcode: Option[String] // Must be between 5 and 8 characters long, all uppercase. The internal space character can be omitted.
 )
 
 object BarsAddress {
   implicit val format: OFormat[BarsAddress] = Json.format[BarsAddress]
+
+  val emptyAddress: BarsAddress = BarsAddress(lines = List(" "), None, None)
+
+  def  apply(lines: List[String], town: Option[String], postcode: Option[String]): BarsAddress = {
+    val addressLinesMaxLength = 140
+    val (truncatedLines, _) = lines.foldLeft((List[String](), 0)) {
+      case ((s, l), c) =>
+        (s :+ (if((l + c.length) > addressLinesMaxLength) c.take(addressLinesMaxLength - l) else c),
+          l + c.length)
+    }
+
+    new BarsAddress(
+      truncatedLines.filterNot(_.isEmpty).take(4),
+      town.flatMap(t => if(t.isEmpty) None else Some(t.take(35))),
+      postcode)
+  }
 }
 
 case class BarsSubject(

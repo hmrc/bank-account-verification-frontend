@@ -2,7 +2,7 @@ package bankaccountverification
 
 import bankaccountverification.api.{BusinessCompleteResponse, CompleteResponse, CompleteResponseAddress, InitRequest, InitRequestAddress, PersonalCompleteResponse}
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
-import bankaccountverification.connector.{BankAccountReputationConnector, BarsBusinessAssessResponse, BarsPersonalAssessResponse, BarsValidationResponse}
+import bankaccountverification.connector.{BankAccountReputationConnector, BarsAddress, BarsBusinessAssessResponse, BarsPersonalAssessResponse, BarsValidationResponse}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.AccountTypeRequest
@@ -45,7 +45,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
       .toMap
 
   "PersonalBankAccountVerification" in {
-    when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any())(any(), any())).thenReturn(
+    when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
         Success(
           BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
