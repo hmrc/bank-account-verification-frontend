@@ -48,13 +48,10 @@ case class Session(accountType: Option[AccountTypeRequestEnum] = None, address: 
                    personal: Option[PersonalSession] = None, business: Option[BusinessSession] = None)
 
 object Session {
-
   def toCompleteResponseJson(session: Session): Option[JsValue] =
     session.accountType match {
-      case Some(AccountTypeRequestEnum.Personal) =>
-        PersonalSession.toCompleteResponse(session).map(Json.toJson(_))
-      case Some(AccountTypeRequestEnum.Business) =>
-        BusinessSession.toCompleteResponse(session).map(Json.toJson(_))
+      case Some(AccountTypeRequestEnum.Personal) => PersonalSession.toCompleteResponse(session).map(Json.toJson(_))
+      case Some(AccountTypeRequestEnum.Business) => BusinessSession.toCompleteResponse(session).map(Json.toJson(_))
     }
 }
 
@@ -65,6 +62,7 @@ case class PersonalSession(accountName: Option[String],
                            accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
                            accountExists: Option[ReputationResponseEnum] = None,
                            nameMatches: Option[ReputationResponseEnum] = None,
+                           addressMatches: Option[ReputationResponseEnum] = None,
                            nonConsented: Option[ReputationResponseEnum] = None,
                            subjectHasDeceased: Option[ReputationResponseEnum] = None,
                            nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None)
@@ -83,6 +81,7 @@ object PersonalSession {
       Some(accountNumberWithSortCodeIsValid),
       accountExists,
       nameMatches,
+      addressMatches,
       nonConsented,
       subjectHasDeceased,
       nonStandardAccountDetailsRequiredForBacs)),
@@ -94,21 +93,10 @@ object PersonalSession {
             Some(
               api.PersonalCompleteResponse(
                 address.map(a => CompleteResponseAddress(a.lines, a.town, a.postcode)),
-                accountName,
-                sortCode,
-                accountNumber,
-                accountNumberWithSortCodeIsValid,
-                rollNumber,
-                accountExists,
-                nameMatches,
-                nonConsented,
-                subjectHasDeceased,
-                nonStandardAccountDetailsRequiredForBacs
-              )
-            ),
-            None
-          )
-        )
+                accountName, sortCode, accountNumber, accountNumberWithSortCodeIsValid, rollNumber, accountExists,
+                nameMatches, addressMatches, nonConsented, subjectHasDeceased,
+                nonStandardAccountDetailsRequiredForBacs)),
+            None))
       case _ => None
     }
 }
@@ -120,6 +108,7 @@ case class PersonalAccountDetails(accountName: Option[String],
                                   accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
                                   accountExists: Option[ReputationResponseEnum] = None,
                                   nameMatches: Option[ReputationResponseEnum] = None,
+                                  addressMatches: Option[ReputationResponseEnum] = None,
                                   nonConsented: Option[ReputationResponseEnum] = None,
                                   subjectHasDeceased: Option[ReputationResponseEnum] = None,
                                   nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None)
@@ -134,6 +123,7 @@ object PersonalAccountDetails {
       Some(response.accountNumberWithSortCodeIsValid),
       Some(response.accountExists),
       Some(response.nameMatches),
+      Some(response.addressMatches),
       Some(response.nonConsented),
       Some(response.subjectHasDeceased),
       response.nonStandardAccountDetailsRequiredForBacs
@@ -179,39 +169,25 @@ object BusinessSession {
             Some(
               BusinessCompleteResponse(
                 address.map(a => CompleteResponseAddress(a.lines, a.town, a.postcode)),
-                companyName,
-                companyRegistrationNumber,
-                sortCode,
-                accountNumber,
-                rollNumber,
-                accountNumberWithSortCodeIsValid,
-                accountExists,
-                companyNameMatches,
-                companyPostCodeMatches,
-                companyRegistrationNumberMatches,
-                nonStandardAccountDetailsRequiredForBacs
-              )
-            )
-          )
-        )
+                companyName, companyRegistrationNumber, sortCode, accountNumber, rollNumber,
+                accountNumberWithSortCodeIsValid, accountExists, companyNameMatches, companyPostCodeMatches,
+                companyRegistrationNumberMatches, nonStandardAccountDetailsRequiredForBacs))))
       case _ =>
         None
     }
 }
 
-case class BusinessAccountDetails(
-                                   companyName: Option[String],
-                                   companyRegistrationNumber: Option[String],
-                                   sortCode: Option[String],
-                                   accountNumber: Option[String],
-                                   rollNumber: Option[String] = None,
-                                   accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
-                                   nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
-                                   accountExists: Option[ReputationResponseEnum] = None,
-                                   compayNameMatches: Option[ReputationResponseEnum] = None,
-                                   compayPostCodeMatches: Option[ReputationResponseEnum] = None,
-                                   compayRegistrationNumberMatches: Option[ReputationResponseEnum] = None
-                                 )
+case class BusinessAccountDetails(companyName: Option[String],
+                                  companyRegistrationNumber: Option[String],
+                                  sortCode: Option[String],
+                                  accountNumber: Option[String],
+                                  rollNumber: Option[String] = None,
+                                  accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None,
+                                  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
+                                  accountExists: Option[ReputationResponseEnum] = None,
+                                  compayNameMatches: Option[ReputationResponseEnum] = None,
+                                  compayPostCodeMatches: Option[ReputationResponseEnum] = None,
+                                  compayRegistrationNumberMatches: Option[ReputationResponseEnum] = None)
 
 object BusinessAccountDetails {
   def apply(request: BusinessVerificationRequest, response: BarsBusinessAssessResponse): BusinessAccountDetails =

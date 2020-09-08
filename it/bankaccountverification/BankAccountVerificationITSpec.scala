@@ -47,11 +47,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
   "PersonalBankAccountVerification" in {
     when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
-        Success(
-          BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
-        )
-      )
-    )
+        Success(BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Yes, No, Indeterminate, Some(No)))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl  = s"http://localhost:$port"
@@ -113,7 +109,8 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
             None,
             accountExists = Some(Yes),
             nameMatches = Some(Indeterminate),
-            nonConsented = Some(Indeterminate),
+            addressMatches = Some(Yes),
+            nonConsented = Some(No),
             subjectHasDeceased = Some(Indeterminate),
             nonStandardAccountDetailsRequiredForBacs = Some(No))),
         business = None
@@ -122,7 +119,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
   }
 
   "BusinessBankAccountVerification" in {
-    when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any())(any(), any())).thenReturn(
+    when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(Success(BarsBusinessAssessResponse(
         Yes, Yes, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No)))))
 

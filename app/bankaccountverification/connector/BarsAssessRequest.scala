@@ -31,58 +31,58 @@ object BarsBusinessAssessRequest {
 }
 
 case class BarsBusiness(
-  companyName: String, // Must be between 1 and 70 characters long
-  companyRegistrationNumber: Option[String],
-  address: Option[BarsAddress]
-)
+                         companyName: String, // Must be between 1 and 70 characters long
+                         companyRegistrationNumber: Option[String],
+                         address: Option[BarsAddress]
+                       )
 
 object BarsBusiness {
   implicit val format: OFormat[BarsBusiness] = Json.format[BarsBusiness]
 }
 
 case class BarsAccount(
-  sortCode: String, // The bank sort code, 6 characters long (whitespace and/or dashes should be removed)
-  accountNumber: String // The bank account number, 8 characters long
-)
+                        sortCode: String, // The bank sort code, 6 characters long (whitespace and/or dashes should be removed)
+                        accountNumber: String // The bank account number, 8 characters long
+                      )
 
 object BarsAccount {
   implicit val format: OFormat[BarsAccount] = Json.format[BarsAccount]
 }
 
-case class BarsAddress (
-   lines: List[String], // One to four lines; cumulative length must be between 1 and 140 characters.
-   town: Option[String], // Must be between 1 and 35 characters long
-   postcode: Option[String] // Must be between 5 and 8 characters long, all uppercase. The internal space character can be omitted.
-)
+case class BarsAddress(lines: List[String], // One to four lines; cumulative length must be between 1 and 140 characters.
+                        town: Option[String], // Must be between 1 and 35 characters long
+                        postcode: Option[String]) // Must be between 5 and 8 characters long, all uppercase. The internal space character can be omitted.
 
 object BarsAddress {
   implicit val format: OFormat[BarsAddress] = Json.format[BarsAddress]
 
   val emptyAddress: BarsAddress = BarsAddress(lines = List(" "), None, None)
 
-  def  apply(lines: List[String], town: Option[String], postcode: Option[String]): BarsAddress = {
+  def apply(lines: List[String], town: Option[String], postcode: Option[String]): BarsAddress = {
+    val validLines = if (lines.forall(_.isEmpty)) List(" ") else lines
+
     val addressLinesMaxLength = 140
-    val (truncatedLines, _) = lines.foldLeft((List[String](), 0)) {
+    val (truncatedLines, _) = validLines.foldLeft((List[String](), 0)) {
       case ((s, l), c) =>
-        (s :+ (if((l + c.length) > addressLinesMaxLength) c.take(addressLinesMaxLength - l) else c),
+        (s :+ (if ((l + c.length) > addressLinesMaxLength) c.take(addressLinesMaxLength - l) else c),
           l + c.length)
     }
 
     new BarsAddress(
       truncatedLines.filterNot(_.isEmpty).take(4),
-      town.flatMap(t => if(t.isEmpty) None else Some(t.take(35))),
+      town.flatMap(t => if (t.isEmpty) None else Some(t.take(35))),
       postcode)
   }
 }
 
 case class BarsSubject(
-  title: Option[String], // e.g. "Mr" etc; must >= 2 character and <= 35 characters long
-  name: Option[String], // Must be between 1 and 70 characters long
-  firstName: Option[String], // Must be between 1 and 35 characters long
-  lastName: Option[String], // Must be between 1 and 35 characters long
-  dob: Option[String], // date of birth: ISO-8601 YYYY-MM-DD
-  address: BarsAddress
-) {
+                        title: Option[String], // e.g. "Mr" etc; must >= 2 character and <= 35 characters long
+                        name: Option[String], // Must be between 1 and 70 characters long
+                        firstName: Option[String], // Must be between 1 and 35 characters long
+                        lastName: Option[String], // Must be between 1 and 35 characters long
+                        dob: Option[String], // date of birth: ISO-8601 YYYY-MM-DD
+                        address: BarsAddress
+                      ) {
   require(
     (name.isEmpty && firstName.isDefined && lastName.isDefined) ||
       (name.isDefined && firstName.isEmpty && lastName.isEmpty)

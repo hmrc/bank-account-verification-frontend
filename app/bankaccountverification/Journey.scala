@@ -112,6 +112,7 @@ object Journey {
       .and((__ \ "data.personal.accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.accountExists").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.nameMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.personal.addressMatches").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.nonConsented").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.subjectHasDeceased").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])(

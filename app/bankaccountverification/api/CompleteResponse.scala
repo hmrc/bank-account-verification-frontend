@@ -38,6 +38,7 @@ case class PersonalCompleteResponse(address: Option[CompleteResponseAddress],
                                     rollNumber: Option[String] = None,
                                     accountExists: Option[ReputationResponseEnum] = None,
                                     nameMatches: Option[ReputationResponseEnum] = None,
+                                    addressMatches: Option[ReputationResponseEnum] = None,
                                     nonConsented: Option[ReputationResponseEnum] = None,
                                     subjectHasDeceased: Option[ReputationResponseEnum] = None,
                                     nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None)

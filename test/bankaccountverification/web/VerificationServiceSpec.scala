@@ -210,7 +210,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
 
     "the details provided pass the remote bars checks" should {
       val assessResult =
-        Success(BarsPersonalAssessResponse(Yes, Yes, Yes, Yes, Indeterminate, Indeterminate, Some(No)))
+        Success(BarsPersonalAssessResponse(Yes, Yes, Yes, No, Indeterminate, Indeterminate, Some(No)))
 
       when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
@@ -225,6 +225,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
           Some(Yes),
           Some(Yes),
           Some(Yes),
+          Some(No),
           Some(Indeterminate),
           Some(Indeterminate),
           Some(No)
@@ -262,6 +263,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
           Some(Error),
           Some(Error),
           Some(Error),
+          Some(Error),
           Some(Error)
         )
         verify(mockRepository).updatePersonalAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
@@ -281,16 +283,159 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     val userInput = BusinessVerificationRequest("Bob Company", Some("SC1234567"), "20-30-40", "12345678", None)
 
     val assessResult = Future.successful(
-      Success(BarsBusinessAssessResponse(Yes, Yes, None, Yes, Yes, Indeterminate, Indeterminate, Some(No)))
-    )
-    when(mockConnector.assessBusiness(any(), any(), any(), any())(any(), any())).thenReturn(assessResult)
+      Success(BarsBusinessAssessResponse(Yes, Yes, None, Yes, Yes, Indeterminate, Indeterminate, Some(No))))
 
-    await(service.assessBusiness(userInput))
+    when(mockConnector.assessBusiness(any(), any(), any(), any(), any())(any(), any())).thenReturn(assessResult)
 
-    "strip the dashes from the sort code" in {
-      verify(mockConnector)
-        .assessBusiness(meq("Bob Company"), meq(Some("SC1234567")), meq("203040"), meq("12345678"))(any(), any())
+    "a valid address is provided" should {
+      val inputAddress = Some(Address(List("line1", "line2"), Some("town"), Some("postcode")))
+      val expectedBarsAddress = Some(BarsAddress(List("line1", "line2"), Some("town"), Some("postcode")))
+
+      "strip the dashes from the sort code and pass address as is" in {
+        clearInvocations(mockConnector)
+        await(service.assessBusiness(userInput, inputAddress))
+
+        verify(mockConnector).assessBusiness(meq("Bob Company"), meq(Some("SC1234567")), meq("203040"), meq("12345678"), meq(expectedBarsAddress))(any(), any())
       }
+    }
+
+    "an address where the address lines are all empty is provided" should {
+      val inputAddress = Some(Address(List("", ""), Some("town"), Some("postcode-b")))
+      val expectedBarsAddress = Some(BarsAddress(List(" "), Some("town"), Some("postcode-b")))
+
+      "modify the address to one with a single non-empty line" in {
+        clearInvocations(mockConnector)
+        await(service.assessBusiness(userInput, inputAddress))
+
+        verify(mockConnector).assessBusiness(meq("Bob Company"), meq(Some("SC1234567")), meq("203040"), meq("12345678"), meq(expectedBarsAddress))(any(), any())
+      }
+    }
+
+    "an address with no lines is provided" should {
+      val inputAddress = Some(Address(List.empty, Some("town"), Some("postcode-c")))
+      val expectedBarsAddress = Some(BarsAddress(List(" "), Some("town"), Some("postcode-c")))
+
+      "modify the address to one with a single non-empty line" in {
+        clearInvocations(mockConnector)
+        await(service.assessBusiness(userInput, inputAddress))
+
+        verify(mockConnector).assessBusiness(meq("Bob Company"), meq(Some("SC1234567")), meq("203040"), meq("12345678"), meq(expectedBarsAddress))(any(), any())
+      }
+    }
+
+    "an address with too many lines (> 4) is provided" should {
+      val inputAddress = Some(Address(List("line1","line2","line3","line4","line5"), Some("town"), Some("postcode-d")))
+      val expectedBarsAddress = Some(BarsAddress(List("line1","line2","line3","line4"), Some("town"), Some("postcode-d")))
+
+      "modify the address to one with a single non-empty line" in {
+        clearInvocations(mockConnector)
+        await(service.assessBusiness(userInput, inputAddress))
+
+        verify(mockConnector).assessBusiness(meq("Bob Company"), meq(Some("SC1234567")), meq("203040"), meq("12345678"), meq(expectedBarsAddress))(any(), any())
+      }
+    }
+
+    "an address with mixture of blank and non-blank lines is provided" should {
+      val inputAddress = Some(Address(List("line1","","line3",""), Some("town"), Some("postcode-e")))
+      val expectedBarsAddress = Some(BarsAddress(List("line1","line3"), Some("town"), Some("postcode-e")))
+
+      "modify the address to one with a single non-empty line" in {
+        clearInvocations(mockConnector)
+        await(service.assessBusiness(userInput, inputAddress))
+
+        verify(mockConnector).assessBusiness(meq("Bob Company"), meq(Some("SC1234567")), meq("203040"), meq("12345678"), meq(expectedBarsAddress))(any(), any())
+      }
+    }
+
+    "an address with too many and mixture of blank and non-blank lines is provided" should {
+      val inputAddress = Some(Address(List("", "line2","","line4","", "line6"), Some("town"), Some("postcode-f")))
+      val expectedBarsAddress = Some(BarsAddress(List("line2","line4", "line6"), Some("town"), Some("postcode-f")))
+
+      "modify the address to one with a single non-empty line" in {
+        clearInvocations(mockConnector)
+        await(service.assessBusiness(userInput, inputAddress))
+
+        verify(mockConnector).assessBusiness(meq("Bob Company"), meq(Some("SC1234567")), meq("203040"), meq("12345678"), meq(expectedBarsAddress))(any(), any())
+      }
+    }
+
+    "an address having lines with a total length > 140 characters is provided" should {
+      val inputAddress = Some(Address(List(
+        "11111222223333344444555556666677777888889999900000",
+        "11111222223333344444555556666677777888889999900000",
+        "11111222223333344444555556666677777888889999900000"), Some("town"), Some("postcode-h")))
+      val expectedBarsAddress = Some(new BarsAddress(List(
+        "11111222223333344444555556666677777888889999900000",
+        "11111222223333344444555556666677777888889999900000",
+        "1111122222333334444455555666667777788888"), Some("town"), Some("postcode-h")))
+
+      "modify the address to one with a single non-empty line" in {
+        clearInvocations(mockConnector)
+        await(service.assessBusiness(userInput, inputAddress))
+
+        verify(mockConnector).assessBusiness(meq("Bob Company"),
+          meq(Some("SC1234567")),
+          meq("203040"),
+          meq("12345678"),
+          meq(expectedBarsAddress))(any(), any())
+      }
+    }
+
+    "an address having lines with a total length > 140 chars and having empty line is provided" should {
+      val inputAddress = Some(Address(List(
+        "1111122222333334444455555666667777788888999990000011111222223333344444555556666677777888889999900000", "",
+        "11111222223333344444555556666677777888889999900000", "",
+        "11111222223333344444555556666677777888889999900000"), Some("town"), Some("postcode-h")))
+      val expectedBarsAddress = Some(new BarsAddress(List(
+        "1111122222333334444455555666667777788888999990000011111222223333344444555556666677777888889999900000",
+        "1111122222333334444455555666667777788888"), Some("town"), Some("postcode-h")))
+
+      "modify the address to one with a single non-empty line" in {
+        clearInvocations(mockConnector)
+        await(service.assessBusiness(userInput, inputAddress))
+
+        verify(mockConnector).assessBusiness(meq("Bob Company"),
+          meq(Some("SC1234567")),
+          meq("203040"),
+          meq("12345678"),
+          meq(expectedBarsAddress))(any(), any())
+      }
+    }
+
+    "an address with a town that is too short is provided" should {
+      val inputAddress = Some(Address(List("line1","line2"), Some(""), Some("postcode-g")))
+      val expectedBarsAddress = Some(BarsAddress(List("line1", "line2"), None, Some("postcode-g")))
+
+      "modify the address to one with a single non-empty line" in {
+        clearInvocations(mockConnector)
+        await(service.assessBusiness(userInput, inputAddress))
+
+        verify(mockConnector).assessBusiness(meq("Bob Company"), meq(Some("SC1234567")), meq("203040"), meq("12345678"), meq(expectedBarsAddress))(any(), any())
+      }
+    }
+
+    "an address with a town that is too long is provided" should {
+      val inputAddress = Some(Address(List("line1","line2"), Some("111112222233333444445555566666777778"), Some("postcode-i")))
+      val expectedBarsAddress = Some(BarsAddress(List("line1", "line2"), Some("11111222223333344444555556666677777"), Some("postcode-i")))
+
+      "modify the address to one with a single non-empty line" in {
+        clearInvocations(mockConnector)
+        await(service.assessBusiness(userInput, inputAddress))
+
+        verify(mockConnector).assessBusiness(meq("Bob Company"), meq(Some("SC1234567")), meq("203040"), meq("12345678"), meq(expectedBarsAddress))(any(), any())
+      }
+    }
+
+    "no address is provided" should {
+      val inputAddress = None
+      val expectedBarsAddress = None
+
+      "modify the address to one with a single non-empty line" in {
+        await(service.assessBusiness(userInput, inputAddress))
+
+        verify(mockConnector).assessBusiness(meq("Bob Company"), meq(Some("SC1234567")), meq("203040"), meq("12345678"), meq(expectedBarsAddress))(any(), any())
+      }
+    }
   }
 
   "processing the business assess response" when {

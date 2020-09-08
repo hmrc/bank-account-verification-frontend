@@ -33,18 +33,17 @@ import scala.util.{Failure, Success, Try}
 class VerificationService @Inject()(connector: BankAccountReputationConnector, repository: JourneyRepository) {
   private val logger = Logger(this.getClass)
 
-  def setAccountType(journeyId: BSONObjectID, accountType: AccountTypeRequestEnum)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Boolean] =
+  def setAccountType(journeyId: BSONObjectID, accountType: AccountTypeRequestEnum)
+                    (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Boolean] =
     repository.updateAccountType(journeyId, accountType)
 
-  def assessPersonal(request: PersonalVerificationRequest, address: Option[Address])(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsPersonalAssessResponse]] = {
-    val personalAddress = address match {
-      case Some(Address(lines, town, postcode)) if lines.forall(_.isEmpty) => BarsAddress(List(" "), town, postcode)
-      case Some(Address(lines, town, postcode)) => BarsAddress(lines, town, postcode)
-      case None => BarsAddress.emptyAddress
-    }
-
-    connector.assessPersonal(request.accountName, Forms.stripSortCode(request.sortCode), request.accountNumber, personalAddress)
-  }
+  def assessPersonal(request: PersonalVerificationRequest, address: Option[Address])
+                    (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsPersonalAssessResponse]] =
+    connector.assessPersonal(
+      request.accountName,
+      Forms.stripSortCode(request.sortCode),
+      request.accountNumber,
+      address.map(a => BarsAddress(a.lines, a.town, a.postcode)).getOrElse(BarsAddress.emptyAddress))
 
   def processPersonalAssessResponse(journeyId: BSONObjectID,
                                     assessResponse: Try[BarsPersonalAssessResponse],
@@ -69,9 +68,14 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
     )
   }
 
-  def assessBusiness(request: BusinessVerificationRequest)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsBusinessAssessResponse]] =
-    connector.assessBusiness(request.companyName, request.companyRegistrationNumber,
-      Forms.stripSortCode(request.sortCode), request.accountNumber)
+  def assessBusiness(request: BusinessVerificationRequest, address: Option[Address])
+                    (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsBusinessAssessResponse]] =
+    connector.assessBusiness(
+      request.companyName,
+      request.companyRegistrationNumber,
+      Forms.stripSortCode(request.sortCode),
+      request.accountNumber,
+      address.map(a => BarsAddress(a.lines, a.town, a.postcode)))
 
   def processBusinessAssessResponse(journeyId: BSONObjectID,
                                     assessResponse: Try[BarsBusinessAssessResponse],

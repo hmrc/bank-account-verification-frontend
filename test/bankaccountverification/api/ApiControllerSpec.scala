@@ -123,7 +123,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
               Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
               Some(
                 PersonalSession(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), Some(Yes),
-                  Some(Indeterminate), Some(Indeterminate), Some(Indeterminate), Some(No))),
+                  Some(Indeterminate), Some(No), Some(Indeterminate), Some(Indeterminate), Some(No))),
               None
             )
           )
@@ -145,6 +145,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         (json \ "personal" \ "accountExists").as[String]                            shouldBe "yes"
         (json \ "personal" \ "rollNumber").as[String]                               shouldBe "roll1"
         (json \ "personal" \ "nameMatches").as[String]                              shouldBe "indeterminate"
+        (json \ "personal" \ "addressMatches").as[String]                           shouldBe "no"
         (json \ "personal" \ "nonConsented").as[String]                             shouldBe "indeterminate"
         (json \ "personal" \ "subjectHasDeceased").as[String]                       shouldBe "indeterminate"
         (json \ "personal" \ "nonStandardAccountDetailsRequiredForBacs").as[String] shouldBe "no"

@@ -240,7 +240,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val barsBusinessAssessResponse =
         BarsBusinessAssessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
-      when(mockService.assessBusiness(any())(any(), any()))
+      when(mockService.assessBusiness(any(), any())(any(), any()))
         .thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
       when(mockService.processBusinessAssessResponse(meq(id), any(), any())(any(), any()))
         .thenReturn(Future.successful(formWithErrors))
@@ -271,7 +271,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val barsBusinessAssessResponse =
         BarsBusinessAssessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
-      when(mockService.assessBusiness(meq(data))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
+      when(mockService.assessBusiness(meq(data), any())(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
       when(mockService.processBusinessAssessResponse(meq(id), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
       "Redirect to the confirm view" in {
@@ -300,7 +300,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val barsBusinessAssessResponse =
         BarsBusinessAssessResponse(Yes, No, None, Yes, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
-      when(mockService.assessBusiness(meq(data))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
+      when(mockService.assessBusiness(meq(data), any())(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
       when(mockService.processBusinessAssessResponse(meq(id), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
 
