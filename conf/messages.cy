@@ -9,9 +9,14 @@ pageTitle.accountType = W Account Type
 pageTitle.personal.accountDetails = W Personal Account Details
 pageTitle.business.accountDetails = W Business Account Details
 
+pageTitle.accountExistsIndeterminate = W Check the account details
+content.accountExistsIndeterminate = We have not been able to check the account details with your bank. Make sure the details you entered are correct.
+
 label.accountType.personal = W Personal
 label.accountType.business = W Business
-label.accountType.heading = W Is this a personal or a business account?
+label.accountType.heading = W What type of account details are you providing?
+
+label.accountDetails.heading = W Bank or building society account details
 
 label.accountName = W Name on the account
 label.sortCode = W Sort code
@@ -22,6 +27,7 @@ label.companyName = W Company name
 label.companyRegistrationNumber = W Company registration number
 
 label.submitLabel = W Continue
+label.checkSubmitLabel = W Confirm and continue
 label.back = W Back
 
 hint.companyRegistrationNumber = W This should optionally begin with OC,LP,SC,SO,SL,NI,R,NC or NL followed by 6-8 digits
@@ -29,14 +35,14 @@ hint.sortCode = W Must be 6 digits long
 hint.accountNumber = W Must be between 6 and 8 digits long
 hint.rollNumber = W You can find it on your card, statement or passbook
 
-error.summaryText = W There is an error
+error.summaryText = W There is a problem
 
 error.accountName.required = W Enter the name on the account
 
 error.companyName.required = W Enter the name on the account
 error.companyRegistrationNumber.invalid = W Company registration number is invalid
 
-error.accountType.required = W Please select an account type
+error.accountType.required = W Select an account type
 
 error.accountNumber.required = W Enter an account number
 error.accountNumber.digitsOnly = W Enter a valid account number like 00733445
@@ -55,7 +61,7 @@ error.rollNumber.maxLength = W Roll number must be at most 18 characters long
 error.rollNumber.required = W Roll number is required
 
 error.journeyId.pageTitle = W Error
-error.journeyId.heading = W There was a problem
+error.journeyId.heading = W There is a problem
 error.journeyId.message = W The journey could not be found
 
 footer.cookies.text = W Cookies

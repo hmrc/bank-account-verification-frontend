@@ -22,7 +22,7 @@
 @(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, detailsForm: Form[PersonalVerificationRequest])(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
 @layout(pageTitle = Some(messages("pageTitle.personal.accountDetails")), Some(detailsForm), welshTranslationsAvailable, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
-    <h1 class="govuk-heading-xl">@messages("service.header")</h1>
+    <h1 class="govuk-heading-xl">@messages("label.accountDetails.heading")</h1>
 
     @if(detailsForm.hasErrors) {
         @errorSummary(ErrorSummary(title = HtmlContent(messages("error.summaryText")),
@@ -52,7 +52,7 @@
             errorMessage = detailsForm("accountNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("rollNumber").value,
-            label = Label(content = HtmlContent(messages("label.rollNumber"))),
+            label = Label(content = HtmlContent(messages("label.rollNumber.optional"))),
             formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(messages("hint.rollNumber")))),
             name = detailsForm("rollNumber").name, id = detailsForm("rollNumber").name, classes = "govuk-input--width-20",
             errorMessage = detailsForm("rollNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
