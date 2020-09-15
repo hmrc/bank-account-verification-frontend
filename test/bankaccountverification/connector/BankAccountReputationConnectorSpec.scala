@@ -135,7 +135,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
         val response = await(connector.assessPersonal("Mr Joe Bloggs", "20-30-40", "12345678", BarsAddress.emptyAddress))
         response shouldBe Success(
-          BarsPersonalAssessResponse(Yes, Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Some(No))
+          BarsPersonalAssessResponse(Yes, Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Some(No), None)
         )
       }
     }

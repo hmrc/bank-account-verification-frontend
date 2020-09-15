@@ -102,7 +102,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
 
 
   private def personalAssessErrorResponse: BarsPersonalAssessResponse =
-    BarsPersonalAssessResponse(Error, Error, Error, Error, Error, Error, Some(Error))
+    BarsPersonalAssessResponse(Error, Error, Error, Error, Error, Error, Some(Error), None)
 
   private def businessAssessErrorResponse: BarsBusinessAssessResponse =
     BarsBusinessAssessResponse(Error, Error, None, Error, Error, Error, Error, None)

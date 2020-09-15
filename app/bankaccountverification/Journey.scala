@@ -115,7 +115,8 @@ object Journey {
       .and((__ \ "data.personal.addressMatches").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.nonConsented").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.subjectHasDeceased").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.personal.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])(
+      .and((__ \ "data.personal.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.personal.sortCodeBankName").writeNullable[String])(
         unlift(PersonalAccountDetails.unapply)
       )
 
@@ -131,7 +132,8 @@ object Journey {
       .and((__ \ "data.business.accountExists").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.business.companyNameMatches").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.business.companyPostCodeMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.business.companyRegistrationNumberMatches").writeNullable[ReputationResponseEnum])(
+      .and((__ \ "data.business.companyRegistrationNumberMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "data.business.sortCodeBankName").writeNullable[String])(
         unlift(BusinessAccountDetails.unapply)
       )
 

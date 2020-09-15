@@ -225,7 +225,8 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
-        Some(No)
+        Some(No),
+        None
       )
       val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
 
@@ -244,7 +245,8 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
-        Some(No)
+        Some(No),
+        None
       )
 
       val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
@@ -264,7 +266,8 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
-        Some(Yes)
+        Some(Yes),
+        None
       )
       val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
 
@@ -284,7 +287,8 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
-        Some(Yes)
+        Some(Yes),
+        None
       )
       val updatedForm = formWithRollNumber.validateUsingBarsPersonalAssessResponse(response)
 
@@ -301,7 +305,8 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,
-        Some(ReputationResponseEnum.Error)
+        Some(ReputationResponseEnum.Error),
+        None
       )
 
       val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)

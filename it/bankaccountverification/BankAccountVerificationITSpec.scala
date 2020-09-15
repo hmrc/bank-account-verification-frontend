@@ -47,7 +47,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
   "PersonalBankAccountVerification" in {
     when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
-        Success(BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Yes, No, Indeterminate, Some(No)))))
+        Success(BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Yes, No, Indeterminate, Some(No), Some("sort-code-bank-name-personal")))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl  = s"http://localhost:$port"
@@ -112,7 +112,8 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
             addressMatches = Some(Yes),
             nonConsented = Some(No),
             subjectHasDeceased = Some(Indeterminate),
-            nonStandardAccountDetailsRequiredForBacs = Some(No))),
+            nonStandardAccountDetailsRequiredForBacs = Some(No),
+          sortCodeBankName = Some("sort-code-bank-name-personal"))),
         business = None
       )
     )
@@ -121,7 +122,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
   "BusinessBankAccountVerification" in {
     when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(Success(BarsBusinessAssessResponse(
-        Yes, Yes, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No)))))
+        Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No)))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl  = s"http://localhost:$port"
@@ -188,7 +189,8 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
             companyNameMatches = Some(Indeterminate),
             companyPostCodeMatches = Some(Indeterminate),
             companyRegistrationNumberMatches = Some(Indeterminate),
-            nonStandardAccountDetailsRequiredForBacs = Some(No)
+            nonStandardAccountDetailsRequiredForBacs = Some(No),
+            sortCodeBankName = Some("sort-code-bank-name-business")
           )
         ),
         personal = None

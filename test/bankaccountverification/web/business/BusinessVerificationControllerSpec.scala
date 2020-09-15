@@ -330,7 +330,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
     }
 
     "there is a valid journey" should {
-      "confirmation view is rendered correctly" in {
+      "confirmation view is rendered correctly without a bank name" in {
         val id = BSONObjectID.generate()
         val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
@@ -352,6 +352,32 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         contentAsString(result) should include("SC123456")
         contentAsString(result) should include("112233")
         contentAsString(result) should include("12345678")
+        contentAsString(result) should include("We have not been able to check the account details. Make sure the details you entered are correct.")
+      }
+
+      "confirmation view is rendered correctly with a bank name" in {
+        val id = BSONObjectID.generate()
+        val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+
+        when(mockRepository.findById(id)).thenReturn(
+          Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None,
+            Some(Session(
+              Some(Business),
+              Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+              None,
+              Some(BusinessSession(
+                Some("some company name"), Some("SC123456"), Some("112233"), Some("12345678"), sortCodeBankName = Some("sort-code-bank-name-business")))))))))
+
+        val fakeRequest = FakeRequest("GET", s"/confirm/business/${id.stringify}")
+
+        val result = controller.getConfirmDetails(id.stringify).apply(fakeRequest)
+
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("some company name")
+        contentAsString(result) should include("SC123456")
+        contentAsString(result) should include("112233")
+        contentAsString(result) should include("12345678")
+        contentAsString(result) should include("We have not been able to check the account details with sort-code-bank-name-business. Make sure the details you entered are correct.")
       }
     }
   }
