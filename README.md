@@ -3,7 +3,7 @@
 `bank-account-verification-frontend` (`BAVFE`) provides a common frontend implementation for client services that need to capture, validate and verify bank account information.
 It provides mechanisms to customise messaging, eg page titles, element labels, etc, to ensure that it _blends_ with the calling service.
 
-An example of a client service can be seen in [bank-account-verification-example-frontend](https://github.com/hmrc/bank-account-verification-example-frontend) (`BEVEFE`).
+An example of a client service can be seen in [bank-account-verification-example-frontend](https://github.com/hmrc/bank-account-verification-example-frontend) (`BAVEFE`).
 
 ## Flow
 There are 3 parts to the usage of `BAVFE`:
