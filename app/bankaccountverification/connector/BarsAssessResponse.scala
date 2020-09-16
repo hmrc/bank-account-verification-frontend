@@ -19,32 +19,33 @@ package bankaccountverification.connector
 import play.api.libs.json.{Json, OFormat, Reads, Writes}
 
 case class BarsPersonalAssessResponse(
-  accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-  accountExists: ReputationResponseEnum,
-  nameMatches: ReputationResponseEnum,
-  addressMatches: ReputationResponseEnum,
-  nonConsented: ReputationResponseEnum,
-  subjectHasDeceased: ReputationResponseEnum,
-  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum]
+     accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+     accountExists: ReputationResponseEnum,
+     nameMatches: ReputationResponseEnum,
+     addressMatches: ReputationResponseEnum,
+     nonConsented: ReputationResponseEnum,
+     subjectHasDeceased: ReputationResponseEnum,
+     nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum],
+     sortCodeBankName: Option[String]
 )
 
 object BarsPersonalAssessResponse {
-  implicit val reads: Reads[BarsPersonalAssessResponse]   = Json.reads[BarsPersonalAssessResponse]
+  implicit val reads: Reads[BarsPersonalAssessResponse] = Json.reads[BarsPersonalAssessResponse]
   implicit val writes: Writes[BarsPersonalAssessResponse] = Json.writes[BarsPersonalAssessResponse]
 }
 
 case class BarsBusinessAssessResponse(
-  accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-  sortCodeIsPresentOnEISCD: ReputationResponseEnum,
-  sortCodeBankName: Option[String],
-  accountExists: ReputationResponseEnum,
-  companyNameMatches: ReputationResponseEnum,
-  companyPostCodeMatches: ReputationResponseEnum,
-  companyRegistrationNumberMatches: ReputationResponseEnum,
-  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum]
-)
+                                       accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+                                       sortCodeIsPresentOnEISCD: ReputationResponseEnum,
+                                       sortCodeBankName: Option[String],
+                                       accountExists: ReputationResponseEnum,
+                                       companyNameMatches: ReputationResponseEnum,
+                                       companyPostCodeMatches: ReputationResponseEnum,
+                                       companyRegistrationNumberMatches: ReputationResponseEnum,
+                                       nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum]
+                                     )
 
 object BarsBusinessAssessResponse {
-  implicit val reads: Reads[BarsBusinessAssessResponse]   = Json.reads[BarsBusinessAssessResponse]
+  implicit val reads: Reads[BarsBusinessAssessResponse] = Json.reads[BarsBusinessAssessResponse]
   implicit val writes: Writes[BarsBusinessAssessResponse] = Json.writes[BarsBusinessAssessResponse]
 }

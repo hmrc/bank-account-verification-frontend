@@ -246,7 +246,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
               accountNumber = Some("12345678")))))))))
 
       val barsPersonalAssessResponse =
-        BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
+        BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No), None)
 
       when(mockService.assessPersonal(meq(data), any())(any(), any()))
         .thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
@@ -280,7 +280,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
               accountNumber = Some("12345678"))))))
         )))
 
-      val barsPersonalAssessResponse = BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
+      val barsPersonalAssessResponse = BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No), None)
 
       when(mockService.assessPersonal(any(), meq(Some(address)))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
       when(mockService.processPersonalAssessResponse(meq(id), any(), any())(any(), any())).thenReturn(Future.successful(form))
@@ -312,7 +312,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
               accountNumber = Some("12345678"))))))
         )))
 
-      val barsPersonalAssessResponse = BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
+      val barsPersonalAssessResponse = BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No), None)
 
       when(mockService.assessPersonal(meq(data), meq(Some(address)))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
       when(mockService.processPersonalAssessResponse(meq(id), any(), any())(any(), any())).thenReturn(Future.successful(form))
@@ -343,7 +343,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
     }
 
     "there is a valid journey" should {
-      "confirmation view is rendered correctly" in {
+      "confirmation view is rendered correctly without a bank name" in {
         val id = BSONObjectID.generate()
         val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
@@ -363,6 +363,29 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         contentAsString(result) should include("some account name")
         contentAsString(result) should include("112233")
         contentAsString(result) should include("12345678")
+        contentAsString(result) should include("We have not been able to check the account details. Make sure the details you entered are correct.")
+      }
+      "confirmation view is rendered correctly with a bank name" in {
+        val id = BSONObjectID.generate()
+        val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+
+        when(mockRepository.findById(id)).thenReturn(
+          Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None,
+            Some(Session(
+              Some(Personal),
+              Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+              Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
+                accountNumber = Some("12345678"), sortCodeBankName = Some("sort-code-bank-name-personal")))))))))
+
+        val fakeRequest = FakeRequest("GET", s"/confirm/personal/${id.stringify}")
+
+        val result = controller.getConfirmDetails(id.stringify).apply(fakeRequest)
+
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("some account name")
+        contentAsString(result) should include("112233")
+        contentAsString(result) should include("12345678")
+        contentAsString(result) should include("We have not been able to check the account details with sort-code-bank-name-personal. Make sure the details you entered are correct.")
       }
     }
   }

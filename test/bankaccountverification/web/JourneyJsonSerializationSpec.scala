@@ -50,7 +50,8 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
             nameMatches = Some(No),
             nonConsented = Some(Indeterminate),
             subjectHasDeceased = Some(Inapplicable),
-            nonStandardAccountDetailsRequiredForBacs = Some(Error)
+            nonStandardAccountDetailsRequiredForBacs = Some(Error),
+            sortCodeBankName = Some("sort-code-bank-name")
           )),
           business = None
         ))
@@ -82,6 +83,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         (personalJourneyJsValue \ "data" \ "personal" \ "nonConsented").as[String] shouldBe "indeterminate"
         (personalJourneyJsValue \ "data" \ "personal" \ "subjectHasDeceased").as[String] shouldBe "inapplicable"
         (personalJourneyJsValue \ "data" \ "personal" \ "nonStandardAccountDetailsRequiredForBacs").as[String] shouldBe "error"
+        (personalJourneyJsValue \ "data" \ "personal" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name"
 
         (personalJourneyJsValue \ "data" \ "business").isEmpty shouldBe true
       }
@@ -120,7 +122,8 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
             companyNameMatches = Some(No),
             companyPostCodeMatches = Some(Indeterminate),
             companyRegistrationNumberMatches = Some(Inapplicable),
-            nonStandardAccountDetailsRequiredForBacs = Some(Error)
+            nonStandardAccountDetailsRequiredForBacs = Some(Error),
+            sortCodeBankName = Some("sort-code-bank-name-business")
           )),
           personal = None
         ))
@@ -153,6 +156,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         (businessJourneyJsValue \ "data" \ "business" \ "companyPostCodeMatches").as[String] shouldBe "indeterminate"
         (businessJourneyJsValue \ "data" \ "business" \ "companyRegistrationNumberMatches").as[String] shouldBe "inapplicable"
         (businessJourneyJsValue \ "data" \ "business" \ "nonStandardAccountDetailsRequiredForBacs").as[String] shouldBe "error"
+        (businessJourneyJsValue \ "data" \ "business" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-business"
 
         (businessJourneyJsValue \ "data" \ "personal").isEmpty shouldBe true
       }
