@@ -24,25 +24,28 @@
 @layout(pageTitle = Some(messages("pageTitle.accountExistsIndeterminate")), None, welshTranslationsAvailable, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
     <h1 class="govuk-heading-xl">@messages("pageTitle.accountExistsIndeterminate")</h1>
 
-    @warning(WarningText(content = HtmlContent(messages("warning.accountExistsIndeterminate"))))
     <p class="govuk-body">@messages("content.accountExistsIndeterminate")</p>
 
     @defining(bankaccountverification.web.personal.routes.PersonalVerificationController.getAccountDetails(journeyId).url) { changeUrl =>
         @summary(SummaryList(
             rows = Seq(
-                SummaryListRow(Key(HtmlContent("Account name")), Value(HtmlContent(session.accountName.getOrElse(""))),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some("account name")))))),
-                SummaryListRow(Key(HtmlContent("Sort code")), Value(HtmlContent(session.sortCode.getOrElse(""))),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some("sort code")))))),
-                SummaryListRow(Key(HtmlContent("Account number")), Value(HtmlContent(session.accountNumber.getOrElse(""))),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some("account number")))))),
-                SummaryListRow(Key(HtmlContent("Roll number")), Value(HtmlContent(session.rollNumber.getOrElse(""))),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some("roll number"))))))
-            )
+                session.accountName.map(an =>
+                SummaryListRow(Key(HtmlContent(messages("label.accountName"))), Value(HtmlContent(an)),
+                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some(messages("label.accountName")))))))),
+                session.sortCode.map(sc =>
+                SummaryListRow(Key(HtmlContent(messages("label.sortCode"))), Value(HtmlContent(sc)),
+                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some(messages("label.sortCode")))))))),
+                session.accountNumber.map(an =>
+                SummaryListRow(Key(HtmlContent(messages("label.accountNumber"))), Value(HtmlContent(an)),
+                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some(messages("label.accountNumber")))))))),
+                session.rollNumber.map(rn =>
+                SummaryListRow(Key(HtmlContent(messages("label.rollNumber"))), Value(HtmlContent(rn)),
+                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some(messages("label.rollNumber"))))))))
+            ).flatten
         ))
     }
 
-    @button(Button(content = HtmlContent(messages("label.submitLabel")),
+    @button(Button(content = HtmlContent(messages("label.checkSubmitLabel")),
         name = Some("continue"),
         inputType = Some("submit"),
         attributes = Map("id" → "continue"),

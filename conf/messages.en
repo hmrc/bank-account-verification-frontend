@@ -1,6 +1,6 @@
 service.name =
 service.homePageUrl =
-service.header = Bank or building society account details
+service.header =
 service.text =
 
 phaseBanner.content = This is a new service – your <a href='/feedback'>feedback</a> will help us to improve it.
@@ -9,23 +9,26 @@ pageTitle.accountType = Account Type
 pageTitle.personal.accountDetails = Personal Account Details
 pageTitle.business.accountDetails = Business Account Details
 
-pageTitle.accountExistsIndeterminate = Confirm your bank account details
-warning.accountExistsIndeterminate = HMRC has been unable to confirm that this bank account exists. You can still proceed if you are sure your details are correct.
-content.accountExistsIndeterminate = You might be seeing this message because your bank, branch or account is very new. If not, you may have entered your details incorrectly. You should check them carefully below and click 'Change' if you need to amend them.
+pageTitle.accountExistsIndeterminate = Check the account details
+content.accountExistsIndeterminate = We have not been able to check the account details with your bank. Make sure the details you entered are correct.
 
 label.accountType.personal = Personal
 label.accountType.business = Business
-label.accountType.heading = Is this a personal or a business account?
+label.accountType.heading = What type of account details are you providing?
+
+label.accountDetails.heading = Bank or building society account details
 
 label.accountName = Name on the account
 label.sortCode = Sort code
 label.accountNumber = Account number
-label.rollNumber = Building society roll number (if you have one)
+label.rollNumber.optional = Building society roll number (if you have one)
+label.rollNumber = Building society roll number
 
 label.companyName = Company name
 label.companyRegistrationNumber = Company registration number
 
 label.submitLabel = Continue
+label.checkSubmitLabel = Confirm and continue
 label.back = Back
 
 hint.companyRegistrationNumber = Must be a valid company registration number
@@ -34,14 +37,14 @@ hint.accountNumber = Must be between 6 and 8 digits long
 hint.rollNumber = You can find it on your card, statement or passbook
 hint.companyRegistrationNumber = This should optionally begin with OC,LP,SC,SO,SL,NI,R,NC or NL followed by 6-8 digits
 
-error.summaryText = There is an error
+error.summaryText = There is a problem
 
 error.accountName.required = Enter the name on the account
 
 error.companyName.required = Enter the name on the account
 error.companyRegistrationNumber.invalid = Company registration number is invalid
 
-error.accountType.required = Please select an account type
+error.accountType.required = Select an account type
 
 error.accountNumber.required = Enter an account number
 error.accountNumber.digitsOnly = Enter a valid account number like 00733445
@@ -60,7 +63,7 @@ error.rollNumber.maxLength = Roll number must be at most 18 characters long
 error.rollNumber.required = Roll number is required
 
 error.journeyId.pageTitle = Error
-error.journeyId.heading = There was a problem
+error.journeyId.heading = There is a problem
 error.journeyId.message = The journey could not be found
 
 footer.cookies.text = Cookies
