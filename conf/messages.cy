@@ -18,7 +18,7 @@ label.accountType.heading = W What type of account details are you providing?
 
 label.accountDetails.heading = W Bank or building society account details
 
-label.accountName = W Account name
+label.accountName = W Name on the account
 label.sortCode = W Sort code
 label.accountNumber = W Account number
 label.rollNumber = W Building society roll number (if you have one)
