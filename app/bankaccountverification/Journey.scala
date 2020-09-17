@@ -21,6 +21,7 @@ import java.time.{Instant, ZoneOffset, ZonedDateTime}
 import bankaccountverification.connector.ReputationResponseEnum
 import bankaccountverification.web.AccountTypeRequestEnum
 import play.api.libs.functional.syntax._
+import play.api.libs.json.JsonConfiguration.Aux
 import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -108,7 +109,7 @@ object Journey {
       .writeNullable[String]
       .and((__ \ "data.personal.sortCode").writeNullable[String])
       .and((__ \ "data.personal.accountNumber").writeNullable[String])
-      .and((__ \ "data.personal.rollNumber").writeNullable[String])
+      .and((__ \ "data.personal.rollNumber").writeOptionWithNull[String])
       .and((__ \ "data.personal.accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.accountExists").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.nameMatches").writeNullable[ReputationResponseEnum])
@@ -123,10 +124,10 @@ object Journey {
   implicit def businessAccountDetailsWrites: OWrites[BusinessAccountDetails] =
     (__ \ "data.business.companyName")
       .writeNullable[String]
-      .and((__ \ "data.business.companyRegistrationNumber").writeNullable[String])
+      .and((__ \ "data.business.companyRegistrationNumber").writeOptionWithNull[String])
       .and((__ \ "data.business.sortCode").writeNullable[String])
       .and((__ \ "data.business.accountNumber").writeNullable[String])
-      .and((__ \ "data.business.rollNumber").writeNullable[String])
+      .and((__ \ "data.business.rollNumber").writeOptionWithNull[String])
       .and((__ \ "data.business.accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.business.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.business.accountExists").writeNullable[ReputationResponseEnum])
@@ -137,12 +138,12 @@ object Journey {
         unlift(BusinessAccountDetails.unapply)
       )
 
-  implicit def personalUpdateWrites: OWrites[PersonalAccountDetailsUpdate] =
+  implicit def personalUpdateWrites: OWrites[PersonalAccountDetailsUpdate] = {
     (__ \ "$set" \ "expiryDate")
       .write[ZonedDateTime]
       .and((__ \ "$set").write[PersonalAccountDetails])(
-        unlift(PersonalAccountDetailsUpdate.unapply)
-      )
+        unlift(PersonalAccountDetailsUpdate.unapply))
+  }
 
   implicit def businessUpdateWrites: OWrites[BusinessAccountDetailsUpdate] =
     (__ \ "$set" \ "expiryDate")

@@ -34,7 +34,8 @@ package bankaccountverification
 
 import bankaccountverification.web.AccountTypeRequestEnum
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.{JsObject, Json, OWrites}
+import play.api.libs.json.JsonConfiguration.Aux
+import play.api.libs.json.{JsObject, Json, JsonConfiguration, OWrites, OptionHandlers}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
@@ -66,6 +67,7 @@ class JourneyRepository @Inject()(component: ReactiveMongoComponent)
 
   def updatePersonalAccountDetails(id: BSONObjectID, data: PersonalAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {
     import Journey.personalUpdateWrites
+
     val updateJson = Json.toJsObject(Journey.updatePersonalAccountDetailsExpiring(data))
     findAndUpdate(_id(id), updateJson).map(r => r.lastError.isDefined)
   }
