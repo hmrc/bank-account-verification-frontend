@@ -83,7 +83,7 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
             case uform if uform.hasErrors =>
               BadRequest(accountDetailsView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable, uform))
             case _ =>
-              if (response.isFailure || response.get.accountExists == Yes)
+              if (!response.isFailure && response.get.accountExists == Yes)
                 SeeOther(s"${journey.continueUrl}/$journeyId")
               else
                 Redirect(routes.PersonalVerificationController.getConfirmDetails(journeyId))

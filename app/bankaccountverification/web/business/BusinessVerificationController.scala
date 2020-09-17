@@ -81,7 +81,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
             case uform if uform.hasErrors =>
               BadRequest(businessAccountDetailsView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable, uform))
             case _ =>
-              if (response.isFailure || response.get.accountExists == Yes)
+              if (!response.isFailure && response.get.accountExists == Yes)
                 SeeOther(s"${journey.continueUrl}/$journeyId")
               else
                 Redirect(routes.BusinessVerificationController.getConfirmDetails(journeyId))
