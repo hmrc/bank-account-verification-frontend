@@ -1,6 +1,6 @@
 service.name =
 service.homePageUrl =
-service.header = W Bank or building society account details
+service.header =
 service.text =
 
 phaseBanner.content = W This is a new service – your <a href='/feedback'>feedback</a> will help us to improve it.
@@ -10,7 +10,7 @@ pageTitle.personal.accountDetails = W Personal Account Details
 pageTitle.business.accountDetails = W Business Account Details
 
 pageTitle.accountExistsIndeterminate = W Check the account details
-content.accountExistsIndeterminate = W We have not been able to check the account details $bankName$. Make sure the details you entered are correct.
+content.accountExistsIndeterminate = W We have not been able to check the account details you entered $bankName$. Make sure the details you entered are correct.
 
 label.accountType.personal = W Personal
 label.accountType.business = W Business
@@ -21,7 +21,7 @@ label.accountDetails.heading = W Bank or building society account details
 label.accountName = W Name on the account
 label.sortCode = W Sort code
 label.accountNumber = W Account number
-label.rollNumber = W Building society roll number (if you have one)
+label.rollNumber = W Building society roll number
 
 label.companyName = W Company name
 label.companyRegistrationNumber = W Company registration number
@@ -45,7 +45,7 @@ error.companyRegistrationNumber.invalid = W Company registration number is inval
 error.accountType.required = W Select an account type
 
 error.accountNumber.required = W Enter an account number
-error.accountNumber.digitsOnly = W Enter a valid account number like 00733445
+error.accountNumber.digitsOnly = W Enter a valid account number
 error.accountNumber.minLength = W Account number must be between 6 and 8 digits
 error.accountNumber.maxLength = W Account number must be between 6 and 8 digits
 error.accountNumber.modCheckFailed = W Account number must be valid for the given sort-code
@@ -53,7 +53,7 @@ error.accountNumber.doesNotExist = W Account number must belong to an active ban
 
 error.sortcode.required = W Enter a sort code
 error.sortcode.invalidLengthError = W Sort code must be 6 digits long
-error.sortcode.invalidCharsError = W Enter a valid sort code like 309430
+error.sortcode.invalidCharsError = W Enter a valid sort code
 
 error.rollNumber.format = W Roll number can only contain uppercase characters, digits, dots or hyphens
 error.rollNumber.minLength = W Roll number must be at least 1 character long

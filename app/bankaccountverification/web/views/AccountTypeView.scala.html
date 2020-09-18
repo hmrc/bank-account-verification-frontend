@@ -36,14 +36,14 @@
             idPrefix = Some("account-type"),
             name = "accountType",
             items = Seq(
-                RadioItem(content = HtmlContent(messages("label.accountType.personal")),
-                    id = Some("personal"),
-                    value = Some("personal"),
-                    checked = accountTypeForm("accountType").value == Some("personal")),
                 RadioItem(content = HtmlContent(messages("label.accountType.business")),
                     id = Some("business"),
                     value = Some("business"),
-                    checked = accountTypeForm("accountType").value == Some("business"))
+                    checked = accountTypeForm("accountType").value == Some("business")),
+                RadioItem(content = HtmlContent(messages("label.accountType.personal")),
+                    id = Some("personal"),
+                    value = Some("personal"),
+                    checked = accountTypeForm("accountType").value == Some("personal"))
             ),
             errorMessage = accountTypeForm.errors.headOption.map(fe => ErrorMessage(content = HtmlContent(messages(fe.message))))
         ))
