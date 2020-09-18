@@ -36,7 +36,7 @@ hint.sortCode = Must be 6 digits long
 hint.accountNumber = Must be between 6 and 8 digits long
 hint.rollNumber = You can find it on your card, statement or passbook
 
-error.summaryText = There is an problem
+error.summaryText = There is a problem
 
 error.accountName.required = Enter the name on the account
 
