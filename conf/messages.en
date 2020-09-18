@@ -34,7 +34,7 @@ hint.accountNumber = Must be between 6 and 8 digits long
 hint.rollNumber = You can find it on your card, statement or passbook
 hint.companyRegistrationNumber = This should optionally begin with OC,LP,SC,SO,SL,NI,R,NC or NL followed by 6-8 digits
 
-error.summaryText = There is an problem
+error.summaryText = There is a problem
 
 error.accountName.required = Enter the name on the account
 
