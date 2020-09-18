@@ -1,6 +1,6 @@
 service.name =
 service.homePageUrl =
-service.header =
+service.header = What type of account details are you providing?
 service.text =
 
 phaseBanner.content = This is a new service – your <a href='/feedback'>feedback</a> will help us to improve it.
@@ -10,25 +10,22 @@ pageTitle.personal.accountDetails = Personal Account Details
 pageTitle.business.accountDetails = Business Account Details
 
 pageTitle.accountExistsIndeterminate = Check the account details
-content.accountExistsIndeterminate = We have not been able to check the account details $bankName$. Make sure the details you entered are correct.
+warning.accountExistsIndeterminate =
+content.accountExistsIndeterminate = We have not been able to check the account details with <bank name>. Make sure the details you entered are correct.
 
-label.accountType.personal = Personal
-label.accountType.business = Business
-label.accountType.heading = What type of account details are you providing?
-
-label.accountDetails.heading = Bank or building society account details
+label.accountType.personal = Personal bank account
+label.accountType.business = Business bank account
+label.accountType.heading =
 
 label.accountName = Name on the account
 label.sortCode = Sort code
 label.accountNumber = Account number
-label.rollNumber.optional = Building society roll number (if you have one)
-label.rollNumber = Building society roll number
+label.rollNumber = Building society roll number (if you have one)
 
 label.companyName = Company name
 label.companyRegistrationNumber = Company registration number
 
 label.submitLabel = Continue
-label.checkSubmitLabel = Confirm and continue
 label.back = Back
 
 hint.companyRegistrationNumber = Must be a valid company registration number
@@ -37,17 +34,17 @@ hint.accountNumber = Must be between 6 and 8 digits long
 hint.rollNumber = You can find it on your card, statement or passbook
 hint.companyRegistrationNumber = This should optionally begin with OC,LP,SC,SO,SL,NI,R,NC or NL followed by 6-8 digits
 
-error.summaryText = There is a problem
+error.summaryText = There is an problem
 
 error.accountName.required = Enter the name on the account
 
 error.companyName.required = Enter the name on the account
-error.companyRegistrationNumber.invalid = Company registration number is invalid
+error.companyRegistrationNumber.invalid = Enter a valid company registration number
 
 error.accountType.required = Select an account type
 
 error.accountNumber.required = Enter an account number
-error.accountNumber.digitsOnly = Enter a valid account number like 00733445
+error.accountNumber.digitsOnly = Enter a valid account number, for example 00733445
 error.accountNumber.minLength = Account number must be between 6 and 8 digits
 error.accountNumber.maxLength = Account number must be between 6 and 8 digits
 error.accountNumber.modCheckFailed = Account number must be valid for the given sort-code
@@ -55,15 +52,15 @@ error.accountNumber.doesNotExist = Account number must belong to an active bank 
 
 error.sortcode.required = Enter a sort code
 error.sortcode.invalidLengthError = Sort code must be 6 digits long
-error.sortcode.invalidCharsError = Enter a valid sort code like 309430
+error.sortcode.invalidCharsError = Enter a valid sort code, for example 309430
 
 error.rollNumber.format = Roll number can only contain uppercase characters, digits, dots or hyphens
 error.rollNumber.minLength = Roll number must be at least 1 character long
 error.rollNumber.maxLength = Roll number must be at most 18 characters long
-error.rollNumber.required = Roll number is required
+error.rollNumber.required = Enter a roll number
 
 error.journeyId.pageTitle = Error
-error.journeyId.heading = There is a problem
+error.journeyId.heading = There was a problem
 error.journeyId.message = The journey could not be found
 
 footer.cookies.text = Cookies
