@@ -29,6 +29,7 @@ label.companyName = Company name
 label.companyRegistrationNumber = Company registration number
 
 label.submitLabel = Continue
+label.checkSubmitLabel = Confirm and continue
 label.back = Back
 
 hint.companyRegistrationNumber = This should optionally begin with OC,LP,SC,SO,SL,NI,R,NC or NL followed by 6-8 digits
