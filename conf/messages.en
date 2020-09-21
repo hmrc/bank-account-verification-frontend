@@ -1,6 +1,6 @@
 service.name =
 service.homePageUrl =
-service.header = What type of account details are you providing?
+service.header =
 service.text =
 
 phaseBanner.content = This is a new service – your <a href='/feedback'>feedback</a> will help us to improve it.
