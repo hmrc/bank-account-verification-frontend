@@ -11,7 +11,7 @@ pageTitle.business.accountDetails = Business Account Details
 
 pageTitle.accountExistsIndeterminate = Check the account details
 warning.accountExistsIndeterminate =
-content.accountExistsIndeterminate = We have not been able to check the account details you entered $bankName$. Make sure the details you entered are correct.
+content.accountExistsIndeterminate = We have not been able to check the account details with $bankName$. Make sure the details you entered are correct.
 
 label.accountType.personal = Personal bank account
 label.accountType.business = Business bank account
