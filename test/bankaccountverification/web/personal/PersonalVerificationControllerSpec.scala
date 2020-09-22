@@ -415,7 +415,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         contentAsString(result) should include("some account name")
         contentAsString(result) should include("112233")
         contentAsString(result) should include("12345678")
-        contentAsString(result) should include("We have not been able to check the account details you entered. Make sure the details you entered are correct.")
+        contentAsString(result) shouldNot include("$bankName$")
       }
 
       "confirmation view is rendered correctly with a bank name" in {
@@ -439,8 +439,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         contentAsString(result) should include("some account name")
         contentAsString(result) should include("112233")
         contentAsString(result) should include("12345678")
-        contentAsString(result) should include("We have not been able to check the account details you entered with sort-code-bank-name-personal. Make sure the details you entered are correct.")
-      }
+        contentAsString(result) should include("with sort-code-bank-name-business")}
     }
   }
 }
