@@ -439,7 +439,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         contentAsString(result) should include("some account name")
         contentAsString(result) should include("112233")
         contentAsString(result) should include("12345678")
-        contentAsString(result) should include("with sort-code-bank-name-business")}
+        contentAsString(result) should include("with sort-code-bank-name-personal")}
     }
   }
 }
