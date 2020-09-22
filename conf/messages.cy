@@ -10,7 +10,7 @@ pageTitle.personal.accountDetails = W Personal Account Details
 pageTitle.business.accountDetails = W Business Account Details
 
 pageTitle.accountExistsIndeterminate = W Check the account details
-content.accountExistsIndeterminate = W We have not been able to check the account details you entered $bankName$. Make sure the details you entered are correct.
+content.accountExistsIndeterminate = W We have not been able to check the account details $bankName$. Make sure the details you entered are correct.
 
 label.accountType.personal = W Personal
 label.accountType.business = W Business
