@@ -47,12 +47,14 @@
 
         @input(Input(value = detailsForm("sortCode").value,
             label = Label(content = HtmlContent(messages("label.sortCode"))),
+            autocomplete = Some("off"),
             formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(messages("hint.sortCode")))),
             name = detailsForm("sortCode").name, id = detailsForm("sortCode").name, classes = "govuk-input--width-5",
             errorMessage = detailsForm("sortCode").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("accountNumber").value,
             label = Label(content = HtmlContent(messages("label.accountNumber"))),
+            autocomplete = Some("off"),
             formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(messages("hint.accountNumber")))),
             name = detailsForm("accountNumber").name, id = detailsForm("accountNumber").name, classes = "govuk-input--width-10",
             errorMessage = detailsForm("accountNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
