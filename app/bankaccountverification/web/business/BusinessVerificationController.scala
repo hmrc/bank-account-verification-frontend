@@ -24,6 +24,8 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.i18n.Messages
 import play.api.mvc._
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,7 +38,8 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
                                                businessAccountDetailsView: BusinessAccountDetailsView,
                                                businessAccountExistsIndeterminate: BusinessAccountExistsIndeterminate,
                                                verificationService: VerificationService,
-                                               withCustomisations: ActionWithCustomisationsProvider
+                                               withCustomisations: ActionWithCustomisationsProvider,
+                                               auditConnector: AuditConnector
                                               ) extends FrontendController(mcc) {
   private val logger = Logger(this.getClass)
 
@@ -69,6 +72,18 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
       implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
       val form = BusinessVerificationRequest.form.bindFromRequest()
+      val dataEvent = DataEvent(
+        appConfig.appName,
+        "AccountDetailsEntered",
+        detail = Map("accountType" -> "business", "trueCallingService" -> journey.serviceIdentifier,
+          "journeyId" -> journey.id.stringify)
+          ++ form.data.filterKeys {
+            case "csrfToken" | "continue" => false
+            case _ => true
+        })
+
+      auditConnector.sendEvent(dataEvent)
+
       if (form.hasErrors)
         Future.successful(BadRequest(businessAccountDetailsView(
           journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))

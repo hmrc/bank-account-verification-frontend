@@ -30,6 +30,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val barsBusinessAssessUrl      = s"$barsBaseUrl/business/v2/assess"
 
   val contactFormServiceIdentifier = "bank-account-verification"
+  val appName: String = config.get[String]("appName")
 }
 
 case class BankAccountReputationConfig(validateBankDetailsUrl: String)
