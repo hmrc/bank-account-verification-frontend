@@ -16,13 +16,14 @@
 
 package bankaccountverification
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import play.api.http.HttpConfiguration
 import play.api.i18n.Messages.MessageSource
 import play.api.i18n.{DefaultMessagesApi, DefaultMessagesApiProvider, Langs}
 import play.api.libs.json.{JsObject, JsSuccess}
 import play.api.{Configuration, Environment}
 
+@Singleton
 class RemoteMessagesApiProvider @Inject() (
   environment: Environment,
   config: Configuration,
@@ -30,11 +31,13 @@ class RemoteMessagesApiProvider @Inject() (
   httpConfiguration: HttpConfiguration
 ) extends DefaultMessagesApiProvider(environment, config, langs, httpConfiguration) {
 
+  lazy val defaultMessages: Map[String, Map[String, String]] = loadAllMessages
+
   def getRemoteMessagesApi(remoteMessages: Option[JsObject]) = {
     val english = remoteMessages.map(_("en").as[Map[String, String]]).getOrElse(Map())
     val welsh   = remoteMessages.flatMap(js => (js \ "cy").asOpt[Map[String, String]]).getOrElse(Map())
 
-    val allMessages = loadAllMessages.map {
+    val allMessages = defaultMessages.map {
       case (s, m) if s == "en" => s -> (m ++ english)
       case (s, m) if s == "cy" => s -> (m ++ welsh)
       case (s, m)              => s -> m
