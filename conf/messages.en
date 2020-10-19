@@ -31,6 +31,8 @@ label.submitLabel = Continue
 label.checkSubmitLabel = Confirm and continue
 label.back = Back
 
+label.change = Change
+
 hint.companyRegistrationNumber = This should optionally begin with OC,LP,SC,SO,SL,NI,R,NC or NL followed by 6-8 digits
 hint.sortCode = Must be 6 digits long
 hint.accountNumber = Must be between 6 and 8 digits long

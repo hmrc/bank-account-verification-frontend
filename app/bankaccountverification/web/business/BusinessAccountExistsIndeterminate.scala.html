@@ -34,20 +34,20 @@
         @summary(SummaryList(
             rows = Seq(
                 session.companyName.map(cn =>
-                SummaryListRow(Key(HtmlContent(messages("label.companyName"))), Value(HtmlContent(cn)),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some(messages("label.companyName")))))))),
+                SummaryListRow(Key(HtmlContent(messages("label.companyName"))), Value(Text(cn)),
+                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent(messages("label.change")), visuallyHiddenText = Some(messages("label.companyName")))))))),
                 session.companyRegistrationNumber.map(crn =>
-                SummaryListRow(Key(HtmlContent(messages("label.companyRegistrationNumber"))), Value(HtmlContent(crn)),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some(messages("label.companyRegistrationNumber")))))))),
+                SummaryListRow(Key(HtmlContent(messages("label.companyRegistrationNumber"))), Value(Text(crn)),
+                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent(messages("label.change")), visuallyHiddenText = Some(messages("label.companyRegistrationNumber")))))))),
                 session.sortCode.map(sc =>
-                SummaryListRow(Key(HtmlContent(messages("label.sortCode"))), Value(HtmlContent(sc)),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some(messages("label.sortCode")))))))),
+                SummaryListRow(Key(HtmlContent(messages("label.sortCode"))), Value(Text(sc)),
+                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent(messages("label.change")), visuallyHiddenText = Some(messages("label.sortCode")))))))),
                 session.accountNumber.map(an =>
-                SummaryListRow(Key(HtmlContent(messages("label.accountNumber"))), Value(HtmlContent(an)),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some(messages("label.accountNumber")))))))),
+                SummaryListRow(Key(HtmlContent(messages("label.accountNumber"))), Value(Text(an)),
+                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent(messages("label.change")), visuallyHiddenText = Some(messages("label.accountNumber")))))))),
                 session.rollNumber.map(rn =>
-                SummaryListRow(Key(HtmlContent(messages("label.rollNumber"))), Value(HtmlContent(rn)),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent("Change"), visuallyHiddenText = Some(messages("label.rollNumber"))))))))
+                SummaryListRow(Key(HtmlContent(messages("label.rollNumber"))), Value(Text(rn)),
+                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent(messages("label.change")), visuallyHiddenText = Some(messages("label.rollNumber"))))))))
             ).flatten
         ))
     }
