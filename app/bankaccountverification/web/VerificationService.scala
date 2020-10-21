@@ -72,7 +72,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
                     (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsBusinessAssessResponse]] =
     connector.assessBusiness(
       request.companyName,
-      request.companyRegistrationNumber,
+      None,
       Forms.stripSortCode(request.sortCode),
       request.accountNumber,
       address.map(a => BarsAddress(a.lines, a.town, a.postcode)))

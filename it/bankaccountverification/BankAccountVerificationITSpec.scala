@@ -151,7 +151,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
       )
 
     val bankAccountDetails =
-      BusinessVerificationRequest("some-company-name", Some("SC123123"), "12-12-12", "12349876", None)
+      BusinessVerificationRequest("some-company-name", "12-12-12", "12349876", None)
     val formData  = getCCParams(bankAccountDetails) ++ Map("rollNumber" -> Seq())
     val verifyUrl = s"$baseUrl/bank-account-verification/verify/business/$journeyId"
 
@@ -180,7 +180,6 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
           BusinessCompleteResponse(
             Some(CompleteResponseAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             "some-company-name",
-            Some("SC123123"),
             "12-12-12",
             "12349876",
             rollNumber = None,

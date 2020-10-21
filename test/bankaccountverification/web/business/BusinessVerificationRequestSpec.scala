@@ -39,24 +39,24 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     "validate sortcode successfully" when {
       "sortcode is hyphenated" in {
         val bankAccountDetails =
-          BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "10-10-10", "12345678", None)
+          BusinessVerificationRequest("Joe Blogs", "10-10-10", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe false
       }
       "sortcode is hyphenated with spaces" in {
         val bankAccountDetails =
-          BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "10 10 10", "12345678", None)
+          BusinessVerificationRequest("Joe Blogs", "10 10 10", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe false
       }
       "sortcode contains just 6 digits" in {
-        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "101010", "12345678", None)
+        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", "101010", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe false
       }
       "sortcode contains just 6 digits and leading & trailing spaces" in {
         val bankAccountDetails =
-          BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), " 10-10 10   ", "12345678", None)
+          BusinessVerificationRequest("Joe Blogs", " 10-10 10   ", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe false
       }
@@ -64,7 +64,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
     "flag company name validation errors" when {
       "company name is empty" in {
-        val bankAccountDetails     = BusinessVerificationRequest("", Some("SC1231234"), "123456", "12345678", None)
+        val bankAccountDetails     = BusinessVerificationRequest("", "123456", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -74,58 +74,9 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
       }
     }
 
-    "flag company registration number validation errors" when {
-      "company registration number is empty" in {
-        val bankAccountDetails =
-          BusinessVerificationRequest("some company name", None, "123456", "12345678", None)
-        val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
-        bankAccountDetailsForm.hasErrors shouldBe false
-      }
-
-      "company registration number is not empty but begins with invalid chars" in {
-        val bankAccountDetails =
-          BusinessVerificationRequest("some company name", Some("AB1231234"), "123456", "12345678", None)
-        val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
-        bankAccountDetailsForm.hasErrors shouldBe true
-
-        val error = bankAccountDetailsForm.errors.find(e => e.key == "companyRegistrationNumber")
-        error shouldNot be(None)
-        error.get.message shouldBe "error.companyRegistrationNumber.invalid"
-      }
-
-      "company registration number is not empty but contains invalid chars" in {
-        val bankAccountDetails =
-          BusinessVerificationRequest("some company name", Some("1231SC234"), "123456", "12345678", None)
-        val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
-        bankAccountDetailsForm.hasErrors shouldBe true
-
-        val error = bankAccountDetailsForm.errors.find(e => e.key == "companyRegistrationNumber")
-        error shouldNot be(None)
-        error.get.message shouldBe "error.companyRegistrationNumber.invalid"
-      }
-
-      "company registration number is not empty but ends with invalid chars" in {
-        val bankAccountDetails =
-          BusinessVerificationRequest("some company name", Some("1231234SC"), "123456", "12345678", None)
-        val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
-        bankAccountDetailsForm.hasErrors shouldBe true
-
-        val error = bankAccountDetailsForm.errors.find(e => e.key == "companyRegistrationNumber")
-        error shouldNot be(None)
-        error.get.message shouldBe "error.companyRegistrationNumber.invalid"
-      }
-
-      "company registration number is not empty and is valid" in {
-        val bankAccountDetails =
-          BusinessVerificationRequest("some company name", Some("SC1231234"), "123456", "12345678", None)
-        val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
-        bankAccountDetailsForm.hasErrors shouldBe false
-      }
-    }
-
     "flag account number validation errors" when {
       "account number is empty" in {
-        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "123456", "", None)
+        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", "123456", "", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -135,7 +86,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
       }
 
       "account number is less than 6 digits" in {
-        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "123456", "12345", None)
+        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", "123456", "12345", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -146,7 +97,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
       "account number is more than 8 digits" in {
         val bankAccountDetails =
-          BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "123456", "123456789", None)
+          BusinessVerificationRequest("Joe Blogs", "123456", "123456789", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -156,7 +107,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
       }
 
       "account number is not numeric" in {
-        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "123456", "123FOO78", None)
+        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", "123456", "123FOO78", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -167,7 +118,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
       "account number is too long and not numeric" in {
         val bankAccountDetails =
-          BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "123456", "123FOOO78", None)
+          BusinessVerificationRequest("Joe Blogs", "123456", "123FOOO78", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -179,7 +130,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
     "flag sortcode validation errors" when {
       "sortcode is empty" in {
-        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "", "12345678", None)
+        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", "", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -189,7 +140,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
       }
 
       "sortcode is less than 6 digits" in {
-        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "1010", "12345678", None)
+        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", "1010", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -200,7 +151,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
       "sortcode is longer than 6 digits" in {
         val bankAccountDetails =
-          BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "1010101", "12345678", None)
+          BusinessVerificationRequest("Joe Blogs", "1010101", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -210,7 +161,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
       }
 
       "sortcode contains invalid characters" in {
-        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "SRTCDE", "12345678", None)
+        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", "SRTCDE", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -221,7 +172,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
       "sortcode contains too many invalid characters" in {
         val bankAccountDetails =
-          BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "SORTCODE", "12345678", None)
+          BusinessVerificationRequest("Joe Blogs", "SORTCODE", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -237,7 +188,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     "flag roll number validation errors" when {
       "roll number contains more than 18 characters" in {
         val bankAccountDetails =
-          BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "1010", "12345678", Some("1234567890123456789"))
+          BusinessVerificationRequest("Joe Blogs", "1010", "12345678", Some("1234567890123456789"))
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -248,7 +199,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
       "roll number contains invalid characters" in {
         val bankAccountDetails =
-          BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "1010", "12345678", Some("1234*$£@!"))
+          BusinessVerificationRequest("Joe Blogs", "1010", "12345678", Some("1234*$£@!"))
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -259,7 +210,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
       "roll number is too long and contains invalid characters" in {
         val bankAccountDetails =
-          BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "1010", "12345678", Some("1234*$£@!%1234*$£@!%"))
+          BusinessVerificationRequest("Joe Blogs", "1010", "12345678", Some("1234*$£@!%1234*$£@!%"))
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -271,7 +222,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
   }
 
   "Validation using the bars business assess response" when {
-    val request = BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "10-10-10", "12345678", None)
+    val request = BusinessVerificationRequest("Joe Blogs", "10-10-10", "12345678", None)
     val form    = BusinessVerificationRequest.form.fillAndValidate(request)
 
     "the response indicates the sort code and account number combination is not valid" should {
@@ -335,7 +286,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
     "the response indicates that a roll number is required and a valid roll number was provided" should {
       val requestWithRollNumber =
-        BusinessVerificationRequest("Joe Blogs", Some("SC1231234"), "10-10-10", "12345678", Some("ROLL1"))
+        BusinessVerificationRequest("Joe Blogs", "10-10-10", "12345678", Some("ROLL1"))
       val formWithRollNumber = BusinessVerificationRequest.form.fillAndValidate(requestWithRollNumber)
 
       val response = BarsBusinessAssessResponse(

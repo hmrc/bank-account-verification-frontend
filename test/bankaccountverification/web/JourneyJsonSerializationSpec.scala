@@ -118,7 +118,6 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
             rollNumber = Some("A.BC"),
             accountNumberWithSortCodeIsValid = Some(Yes),
             accountExists = Some(Indeterminate),
-            companyRegistrationNumber = Some("NI123987"),
             companyNameMatches = Some(No),
             companyPostCodeMatches = Some(Indeterminate),
             companyRegistrationNumberMatches = Some(Inapplicable),
@@ -151,7 +150,6 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         (businessJourneyJsValue \ "data" \ "business" \ "rollNumber").as[String] shouldBe "A.BC"
         (businessJourneyJsValue \ "data" \ "business" \ "accountNumberWithSortCodeIsValid").as[String] shouldBe "yes"
         (businessJourneyJsValue \ "data" \ "business" \ "accountExists").as[String] shouldBe "indeterminate"
-        (businessJourneyJsValue \ "data" \ "business" \ "companyRegistrationNumber").as[String] shouldBe "NI123987"
         (businessJourneyJsValue \ "data" \ "business" \ "companyNameMatches").as[String] shouldBe "no"
         (businessJourneyJsValue \ "data" \ "business" \ "companyPostCodeMatches").as[String] shouldBe "indeterminate"
         (businessJourneyJsValue \ "data" \ "business" \ "companyRegistrationNumberMatches").as[String] shouldBe "inapplicable"

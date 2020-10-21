@@ -24,8 +24,8 @@ import play.api.data.Forms._
 import play.api.data.validation._
 import play.api.libs.json.Json
 
-case class BusinessVerificationRequest(companyName: String, companyRegistrationNumber: Option[String], sortCode: String,
-                                       accountNumber: String, rollNumber: Option[String])
+case class BusinessVerificationRequest(companyName: String, sortCode: String, accountNumber: String,
+                                       rollNumber: Option[String])
 
 object BusinessVerificationRequest {
 
@@ -57,7 +57,6 @@ object BusinessVerificationRequest {
     Form(
       mapping(
         "companyName" -> companyNameMapping,
-        "companyRegistrationNumber" -> optional(companyRegistrationNumberMapping),
         "sortCode" -> sortCodeMapping,
         "accountNumber" -> accountNumberMapping,
         "rollNumber" -> optional(rollNumberMapping)

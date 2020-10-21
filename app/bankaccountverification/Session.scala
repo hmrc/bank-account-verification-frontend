@@ -66,8 +66,7 @@ case class PersonalSession(accountName: Option[String],
                            nonConsented: Option[ReputationResponseEnum] = None,
                            subjectHasDeceased: Option[ReputationResponseEnum] = None,
                            nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
-                           sortCodeBankName: Option[String] = None
-                          )
+                           sortCodeBankName: Option[String] = None)
 
 object PersonalSession {
   def toCompleteResponse(session: Session): Option[CompleteResponse] =
@@ -115,8 +114,7 @@ case class PersonalAccountDetails(accountName: Option[String],
                                   nonConsented: Option[ReputationResponseEnum] = None,
                                   subjectHasDeceased: Option[ReputationResponseEnum] = None,
                                   nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
-                                  sortCodeBankName: Option[String] = None
-                                 )
+                                  sortCodeBankName: Option[String] = None)
 
 object PersonalAccountDetails {
   def apply(request: PersonalVerificationRequest, response: BarsPersonalAssessResponse): PersonalAccountDetails =
@@ -132,12 +130,10 @@ object PersonalAccountDetails {
       Some(response.nonConsented),
       Some(response.subjectHasDeceased),
       response.nonStandardAccountDetailsRequiredForBacs,
-      response.sortCodeBankName
-    )
+      response.sortCodeBankName)
 }
 
 case class BusinessSession(companyName: Option[String],
-                           companyRegistrationNumber: Option[String],
                            sortCode: Option[String],
                            accountNumber: Option[String],
                            rollNumber: Option[String] = None,
@@ -147,8 +143,7 @@ case class BusinessSession(companyName: Option[String],
                            companyPostCodeMatches: Option[ReputationResponseEnum] = None,
                            companyRegistrationNumberMatches: Option[ReputationResponseEnum] = None,
                            nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
-                           sortCodeBankName: Option[String] = None
-                          )
+                           sortCodeBankName: Option[String] = None)
 
 object BusinessSession {
   def toCompleteResponse(session: Session): Option[CompleteResponse] =
@@ -159,7 +154,6 @@ object BusinessSession {
       _,
       Some(BusinessSession(
       Some(companyName),
-      companyRegistrationNumber,
       Some(sortCode),
       Some(accountNumber),
       rollNumber,
@@ -178,16 +172,15 @@ object BusinessSession {
             Some(
               BusinessCompleteResponse(
                 address.map(a => CompleteResponseAddress(a.lines, a.town, a.postcode)),
-                companyName, companyRegistrationNumber, sortCode, accountNumber, rollNumber,
-                accountNumberWithSortCodeIsValid, accountExists, companyNameMatches, companyPostCodeMatches,
-                companyRegistrationNumberMatches, nonStandardAccountDetailsRequiredForBacs, sortCodeBankName))))
+                companyName, sortCode, accountNumber, rollNumber, accountNumberWithSortCodeIsValid, accountExists,
+                companyNameMatches, companyPostCodeMatches, companyRegistrationNumberMatches,
+                nonStandardAccountDetailsRequiredForBacs, sortCodeBankName))))
       case _ =>
         None
     }
 }
 
 case class BusinessAccountDetails(companyName: Option[String],
-                                  companyRegistrationNumber: Option[String],
                                   sortCode: Option[String],
                                   accountNumber: Option[String],
                                   rollNumber: Option[String] = None,
@@ -197,14 +190,12 @@ case class BusinessAccountDetails(companyName: Option[String],
                                   compayNameMatches: Option[ReputationResponseEnum] = None,
                                   compayPostCodeMatches: Option[ReputationResponseEnum] = None,
                                   compayRegistrationNumberMatches: Option[ReputationResponseEnum] = None,
-                                  sortCodeBankName: Option[String] = None
-                                 )
+                                  sortCodeBankName: Option[String] = None)
 
 object BusinessAccountDetails {
   def apply(request: BusinessVerificationRequest, response: BarsBusinessAssessResponse): BusinessAccountDetails =
     BusinessAccountDetails(
       Some(request.companyName),
-      request.companyRegistrationNumber,
       Some(request.sortCode),
       Some(request.accountNumber),
       request.rollNumber,
@@ -214,9 +205,7 @@ object BusinessAccountDetails {
       Some(response.companyNameMatches),
       Some(response.companyPostCodeMatches),
       Some(response.companyRegistrationNumberMatches),
-      response.sortCodeBankName
-    )
-
+      response.sortCodeBankName)
 }
 
 case class PersonalAccountDetailsUpdate(expiryDate: ZonedDateTime, data: PersonalAccountDetails)

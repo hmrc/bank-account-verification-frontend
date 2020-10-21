@@ -54,8 +54,8 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
       val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
 
       val businessVerificationForm = journey.data.get.business
-        .map(bs => BusinessVerificationRequest(bs.companyName.getOrElse(""), bs.companyRegistrationNumber,
-          bs.sortCode.getOrElse(""), bs.accountNumber.getOrElse(""), bs.rollNumber))
+        .map(bs => BusinessVerificationRequest(bs.companyName.getOrElse(""), bs.sortCode.getOrElse(""),
+          bs.accountNumber.getOrElse(""), bs.rollNumber))
         .map(BusinessVerificationRequest.form.fill)
         .getOrElse(BusinessVerificationRequest.form)
 

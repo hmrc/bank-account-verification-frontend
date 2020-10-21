@@ -124,7 +124,6 @@ object Journey {
   implicit def businessAccountDetailsWrites: OWrites[BusinessAccountDetails] =
     (__ \ "data.business.companyName")
       .writeNullable[String]
-      .and((__ \ "data.business.companyRegistrationNumber").writeOptionWithNull[String])
       .and((__ \ "data.business.sortCode").writeNullable[String])
       .and((__ \ "data.business.accountNumber").writeNullable[String])
       .and((__ \ "data.business.rollNumber").writeOptionWithNull[String])

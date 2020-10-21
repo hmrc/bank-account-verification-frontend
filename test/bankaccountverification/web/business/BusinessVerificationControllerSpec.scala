@@ -90,7 +90,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-            Session(accountType = Some(Business), business = Some(BusinessSession(companyName = Some("company_name"), companyRegistrationNumber = Some("SC1231234"), sortCode = Some("11-22-33"),
+            Session(accountType = Some(Business), business = Some(BusinessSession(companyName = Some("company_name"), sortCode = Some("11-22-33"),
               accountNumber = Some("12092398")))))))))
 
         val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
@@ -126,7 +126,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(companyName = Some("some company name"), companyRegistrationNumber = Some("SC1231234"), sortCode = Some("112233"),
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(companyName = Some("some company name"), sortCode = Some("112233"),
               accountNumber = Some("12345678")))))))))
 
         val fakeRequest = FakeRequest("POST", s"/start/${id.stringify}")
@@ -188,9 +188,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
               Some(Business),
               Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
               None,
-              Some(BusinessSession(
-                companyName = Some("some company name"), companyRegistrationNumber = Some("SC1231234"),
-                sortCode = Some("112233"), accountNumber = Some("12345678")))))))))
+              Some(BusinessSession(companyName = Some("some company name"), sortCode = Some("112233"),
+                accountNumber = Some("12345678")))))))))
 
         val fakeRequest = FakeRequest("GET", s"/verify/${id.stringify}")
         val result = controller.getAccountDetails(id.stringify).apply(fakeRequest)
@@ -218,7 +217,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val id = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
-      val data = BusinessVerificationRequest("", None, "", "", None)
+      val data = BusinessVerificationRequest("", "", "", None)
 
       "return 400" in {
         reset(mockRepository)
@@ -227,7 +226,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Session(
               accountType = Some(Business),
               business = Some(BusinessSession(
-                companyName = Some("some company name"), companyRegistrationNumber = Some("SC1231234"), sortCode = Some("112233"),
+                companyName = Some("some company name"), sortCode = Some("112233"),
                 accountNumber = Some("12345678")))))))))
 
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.stringify}")
@@ -241,7 +240,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
     "the journey is valid, a valid form is posted and the bars call fails" should {
       val id = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
-      val data = BusinessVerificationRequest("some company name", Some("SC1231234"), "123456", "12345678", None)
+      val data = BusinessVerificationRequest("some company name", "123456", "12345678", None)
 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
 
@@ -249,8 +248,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(companyName = Some("some company name"), None, sortCode = Some("112233"),
-              accountNumber = Some("12345678")))))))))
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(
+              companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678")))))))))
 
         reset(mockService)
         when(mockService.assessBusiness(any(), any())(any(), any())).thenReturn(Future.successful(Failure(new HttpException("SERVER ON FIRE", 500))))
@@ -270,7 +269,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
     "the journey is valid, a valid form is posted and the bars checks indicate an issue" should {
       val id = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
-      val data = BusinessVerificationRequest("some company name", Some("SC1231234"), "123456", "12345678", None)
+      val data = BusinessVerificationRequest("some company name", "123456", "12345678", None)
 
       val formWithErrors = BusinessVerificationRequest.form
         .fillAndValidate(data)
@@ -283,8 +282,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(companyName = Some("some company name"), None, sortCode = Some("112233"),
-              accountNumber = Some("12345678")))))))))
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(
+              companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678")))))))))
 
         reset(mockService)
         when(mockService.assessBusiness(any(), any())(any(), any()))
@@ -305,7 +304,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
     "the journey is valid, a valid form is posted and the bars checks pass and the account existence is indeterminate" should {
       val id = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
-      val data = BusinessVerificationRequest("some company name 2", Some("SC1231234"), "123456", "12345678", None)
+      val data = BusinessVerificationRequest("some company name 2", "123456", "12345678", None)
 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
 
@@ -316,8 +315,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(companyName = Some("some company name 2"), companyRegistrationNumber = Some("SC1231234"), sortCode = Some("112233"),
-              accountNumber = Some("12345678")))))))))
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(
+              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678")))))))))
 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any())(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
@@ -336,7 +335,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
     "the journey is valid, a valid form is posted and the bars checks pass and the account exists" should {
       val id = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
-      val data = BusinessVerificationRequest("some company name", Some("SC1231234"), "123456", "12345678", None)
+      val data = BusinessVerificationRequest("some company name", "123456", "12345678", None)
 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
 
@@ -347,7 +346,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, None, None, Some(
-            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(companyName = Some("some company name"), companyRegistrationNumber = Some("SC1231234"), sortCode = Some("112233"),
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(companyName = Some("some company name"), sortCode = Some("112233"),
               accountNumber = Some("12345678")))))))))
 
         reset(mockService)

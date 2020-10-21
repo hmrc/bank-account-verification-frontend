@@ -43,19 +43,18 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
   "Updating business account details" should {
     val repository = app.injector.instanceOf[JourneyRepository]
 
-    "handle unsetting the roll number and company registration number" in {
+    "handle unsetting the roll number" in {
       val journeyId = BSONObjectID.generate()
 
-      val businessSession = BusinessSession(Some("companyName"), Some("companyRegistrationNumber"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
+      val businessSession = BusinessSession(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
       val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
       val journey = Journey(journeyId, ZonedDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", None, None, data = Some(session))
       await(repository.insert(journey))
 
-      val accountDetails = BusinessAccountDetails(Some("updated companyName"), None, Some("updated sortCode"), Some("updated accountNumber"), None)
+      val accountDetails = BusinessAccountDetails(Some("updated companyName"), Some("updated sortCode"), Some("updated accountNumber"), None)
       await(repository.updateBusinessAccountDetails(journeyId, accountDetails))
 
       val updatedBusinessData = await(repository.findById(journeyId)).flatMap(j => j.data).flatMap(d => d.business)
-      updatedBusinessData.get.companyRegistrationNumber shouldBe None
       updatedBusinessData.get.rollNumber shouldBe None
     }
 
