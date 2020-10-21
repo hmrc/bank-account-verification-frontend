@@ -24,11 +24,17 @@
 @layout(pageTitle = Some(messages("pageTitle.accountExistsIndeterminate")), None, welshTranslationsAvailable, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
     <h1 class="govuk-heading-xl">@messages("pageTitle.accountExistsIndeterminate")</h1>
 
-    <p class="govuk-body">@{
-        session.sortCodeBankName
-                .map(bn => messages("content.accountExistsIndeterminate").replace(" $bankName$", s" with $bn"))
-                .getOrElse(messages("content.accountExistsIndeterminate").replace(" $bankName$", ""))
-    }</p>
+    <div class="govuk-warning-text">
+        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+        <strong class="govuk-warning-text__text">
+            <span class="govuk-warning-text__assistive">@{messages("content.warning")}</span>
+            @{
+                session.sortCodeBankName
+                        .map(bn => messages("content.accountExistsIndeterminate").replace(" $bankName$", s" with $bn"))
+                        .getOrElse(messages("content.accountExistsIndeterminate").replace(" $bankName$", ""))
+            }
+        </strong>
+    </div>
 
     @defining(bankaccountverification.web.personal.routes.PersonalVerificationController.getAccountDetails(journeyId).url) { changeUrl =>
         @summary(SummaryList(
