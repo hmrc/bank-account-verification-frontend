@@ -10,6 +10,7 @@ pageTitle.personal.accountDetails = W Personal Account Details
 pageTitle.business.accountDetails = W Business Account Details
 
 pageTitle.accountExistsIndeterminate = W Check the account details
+content.warning = W Warning
 content.accountExistsIndeterminate = W We have not been able to check the account details $bankName$. Make sure the details you entered are correct.
 
 label.accountType.personal = W Personal
@@ -21,6 +22,7 @@ label.accountDetails.heading = W Bank or building society account details
 label.accountName = W Name on the account
 label.sortCode = W Sort code
 label.accountNumber = W Account number
+label.rollNumber.optional = W Building society roll number (if you have one)
 label.rollNumber = W Building society roll number
 
 label.companyName = W Company name

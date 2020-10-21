@@ -60,7 +60,7 @@
             errorMessage = detailsForm("accountNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("rollNumber").value,
-            label = Label(content = HtmlContent(messages("label.rollNumber"))),
+            label = Label(content = HtmlContent(messages("label.rollNumber.optional"))),
             formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(messages("hint.rollNumber")))),
             name = detailsForm("rollNumber").name, id = detailsForm("rollNumber").name, classes = "govuk-input--width-20",
             errorMessage = detailsForm("rollNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
