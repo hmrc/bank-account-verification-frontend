@@ -39,12 +39,6 @@
             name = detailsForm("companyName").name, id = detailsForm("companyName").name,
             errorMessage = detailsForm("companyName").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
-        @input(Input(value = detailsForm("companyRegistrationNumber").value,
-            label = Label(content = HtmlContent(messages("label.companyRegistrationNumber"))),
-            formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(messages("hint.companyRegistrationNumber")))),
-            name = detailsForm("companyRegistrationNumber").name, id = detailsForm("companyRegistrationNumber").name,
-            errorMessage = detailsForm("companyRegistrationNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
-
         @input(Input(value = detailsForm("sortCode").value,
             label = Label(content = HtmlContent(messages("label.sortCode"))),
             autocomplete = Some("off"),
