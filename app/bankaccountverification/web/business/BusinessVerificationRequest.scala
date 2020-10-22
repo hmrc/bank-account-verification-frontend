@@ -64,14 +64,4 @@ object BusinessVerificationRequest {
     )
 
   def companyNameMapping = text.verifying(Constraints.nonEmpty(errorMessage = "error.companyName.required"))
-
-  def companyRegistrationNumberMapping =
-    text.verifying(
-      Constraints
-        .pattern(
-          "^(OC|LP|SC|SO|SL|NI|R|NC|NL|oc|lp|sc|so|sl|ni|r|nc|nl)?[0-9]{6,8}$".r,
-          name = "constraint.companyRegistrationNumber",
-          error = "error.companyRegistrationNumber.invalid"
-        )
-    )
 }

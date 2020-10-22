@@ -26,26 +26,18 @@ label.rollNumber.optional = Building society roll number (if you have one)
 label.rollNumber = Building society roll number
 
 label.companyName = Company name
-label.companyRegistrationNumber = Company registration number
-
 label.submitLabel = Continue
 label.checkSubmitLabel = Confirm and continue
 label.back = Back
-
 label.change = Change
 
-hint.companyRegistrationNumber = This should optionally begin with OC,LP,SC,SO,SL,NI,R,NC or NL followed by 6-8 digits
 hint.sortCode = Must be 6 digits long
 hint.accountNumber = Must be between 6 and 8 digits long
 hint.rollNumber = You can find it on your card, statement or passbook
 
 error.summaryText = There is a problem
-
 error.accountName.required = Enter the name on the account
-
 error.companyName.required = Enter the name on the account
-error.companyRegistrationNumber.invalid = Enter a valid company registration number
-
 error.accountType.required = Select an account type
 
 error.accountNumber.required = Enter an account number
