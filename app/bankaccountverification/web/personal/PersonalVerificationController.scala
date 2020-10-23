@@ -16,7 +16,7 @@
 
 package bankaccountverification.web.personal
 
-import bankaccountverification.connector.BarsAddress
+import bankaccountverification.connector.{BarsAddress, BarsPersonalAssessSuccessResponse}
 import bankaccountverification.connector.ReputationResponseEnum.Yes
 import bankaccountverification.web.personal.routes
 import bankaccountverification.web.personal.html.{PersonalAccountDetailsView, PersonalAccountExistsIndeterminate}
@@ -32,6 +32,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Success
 
 
 @Singleton
@@ -98,10 +99,11 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
             case uform if uform.hasErrors =>
               BadRequest(accountDetailsView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable, uform))
             case _ =>
-              if (!response.isFailure && response.get.accountExists == Yes)
-                SeeOther(s"${journey.continueUrl}/$journeyId")
-              else
-                Redirect(routes.PersonalVerificationController.getConfirmDetails(journeyId))
+              response match {
+                case Success(success: BarsPersonalAssessSuccessResponse) if success.accountExists == Yes =>
+                  SeeOther(s"${journey.continueUrl}/$journeyId")
+                case _ => Redirect(routes.PersonalVerificationController.getConfirmDetails(journeyId))
+              }
           }
     }
 

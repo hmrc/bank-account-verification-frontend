@@ -74,11 +74,16 @@ class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig
       )
       .map {
         case httpResponse if httpResponse.status == 200 =>
-          Json.fromJson[BarsPersonalAssessResponse](httpResponse.json) match {
-            case JsSuccess(result, _) =>
-              Success(result)
+          Json.fromJson[BarsPersonalAssessSuccessResponse](httpResponse.json) match {
+            case JsSuccess(result, _) => Success(result)
             case JsError(errors) =>
-              Failure(new HttpException("Could not parse Json response from BARs", httpResponse.status))
+              Failure(new HttpException("Could not parse Json success response from BARs", httpResponse.status))
+          }
+        case httpResponse if httpResponse.status == 400 =>
+          Json.fromJson[BarsPersonalAssessBadRequestResponse](httpResponse.json) match {
+            case JsSuccess(result, _) => Success(result)
+            case JsError(errors) =>
+              Failure(new HttpException("Could not parse Json bad request response from BARs", httpResponse.status))
           }
         case httpResponse => Failure(new HttpException(httpResponse.body, httpResponse.status))
       }
@@ -101,11 +106,16 @@ class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig
       .POST[BarsBusinessAssessRequest, HttpResponse](url = appConfig.barsBusinessAssessUrl, body = request)
       .map {
         case httpResponse if httpResponse.status == 200 =>
-          Json.fromJson[BarsBusinessAssessResponse](httpResponse.json) match {
-            case JsSuccess(result, _) =>
-              Success(result)
+          Json.fromJson[BarsBusinessAssessSuccessResponse](httpResponse.json) match {
+            case JsSuccess(result, _) => Success(result)
             case JsError(errors) =>
               Failure(new HttpException("Could not parse Json response from BARs", httpResponse.status))
+          }
+        case httpResponse if httpResponse.status == 400 =>
+          Json.fromJson[BarsBusinessAssessBadRequestResponse](httpResponse.json) match {
+            case JsSuccess(result, _) => Success(result)
+            case JsError(errors) =>
+              Failure(new HttpException("Could not parse Json bad request response from BARs", httpResponse.status))
           }
         case httpResponse => Failure(new HttpException(httpResponse.body, httpResponse.status))
       }

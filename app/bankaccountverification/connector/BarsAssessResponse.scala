@@ -16,36 +16,48 @@
 
 package bankaccountverification.connector
 
-import play.api.libs.json.{Json, OFormat, Reads, Writes}
+import play.api.libs.json.{Json, Reads, Writes}
 
-case class BarsPersonalAssessResponse(
-     accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-     accountExists: ReputationResponseEnum,
-     nameMatches: ReputationResponseEnum,
-     addressMatches: ReputationResponseEnum,
-     nonConsented: ReputationResponseEnum,
-     subjectHasDeceased: ReputationResponseEnum,
-     nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum],
-     sortCodeBankName: Option[String]
-)
+sealed trait BarsPersonalAssessResponse {}
+
+case class BarsPersonalAssessSuccessResponse(accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+                                             accountExists: ReputationResponseEnum,
+                                             nameMatches: ReputationResponseEnum,
+                                             addressMatches: ReputationResponseEnum,
+                                             nonConsented: ReputationResponseEnum,
+                                             subjectHasDeceased: ReputationResponseEnum,
+                                             nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum],
+                                             sortCodeBankName: Option[String]) extends BarsPersonalAssessResponse
+
+case class BarsPersonalAssessBadRequestResponse(code: String, desc: String) extends BarsPersonalAssessResponse
+
+case class BarsPersonalAssessErrorResponse() extends BarsPersonalAssessResponse
 
 object BarsPersonalAssessResponse {
-  implicit val reads: Reads[BarsPersonalAssessResponse] = Json.reads[BarsPersonalAssessResponse]
-  implicit val writes: Writes[BarsPersonalAssessResponse] = Json.writes[BarsPersonalAssessResponse]
+  implicit val reads: Reads[BarsPersonalAssessSuccessResponse] = Json.reads[BarsPersonalAssessSuccessResponse]
+  implicit val writes: Writes[BarsPersonalAssessSuccessResponse] = Json.writes[BarsPersonalAssessSuccessResponse]
+
+  implicit val badrequestReads: Reads[BarsPersonalAssessBadRequestResponse] = Json.reads[BarsPersonalAssessBadRequestResponse]
 }
 
-case class BarsBusinessAssessResponse(
-                                       accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-                                       sortCodeIsPresentOnEISCD: ReputationResponseEnum,
-                                       sortCodeBankName: Option[String],
-                                       accountExists: ReputationResponseEnum,
-                                       companyNameMatches: ReputationResponseEnum,
-                                       companyPostCodeMatches: ReputationResponseEnum,
-                                       companyRegistrationNumberMatches: ReputationResponseEnum,
-                                       nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum]
-                                     )
+sealed trait BarsBusinessAssessResponse {}
+
+case class BarsBusinessAssessSuccessResponse(accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+                                      sortCodeIsPresentOnEISCD: ReputationResponseEnum,
+                                      sortCodeBankName: Option[String],
+                                      accountExists: ReputationResponseEnum,
+                                      companyNameMatches: ReputationResponseEnum,
+                                      companyPostCodeMatches: ReputationResponseEnum,
+                                      companyRegistrationNumberMatches: ReputationResponseEnum,
+                                      nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum]) extends BarsBusinessAssessResponse
+
+case class BarsBusinessAssessBadRequestResponse(code: String, desc: String) extends BarsBusinessAssessResponse
+
+case class BarsBusinessAssessErrorResponse() extends BarsBusinessAssessResponse
 
 object BarsBusinessAssessResponse {
-  implicit val reads: Reads[BarsBusinessAssessResponse] = Json.reads[BarsBusinessAssessResponse]
-  implicit val writes: Writes[BarsBusinessAssessResponse] = Json.writes[BarsBusinessAssessResponse]
+  implicit val reads: Reads[BarsBusinessAssessSuccessResponse] = Json.reads[BarsBusinessAssessSuccessResponse]
+  implicit val writes: Writes[BarsBusinessAssessSuccessResponse] = Json.writes[BarsBusinessAssessSuccessResponse]
+
+  implicit val badrequestReads: Reads[BarsBusinessAssessBadRequestResponse] = Json.reads[BarsBusinessAssessBadRequestResponse]
 }

@@ -17,7 +17,7 @@
 package bankaccountverification.web.personal
 
 import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
-import bankaccountverification.connector.{BarsPersonalAssessResponse, ReputationResponseEnum}
+import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse, ReputationResponseEnum}
 import bankaccountverification.web.Forms._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -35,23 +35,21 @@ object PersonalVerificationRequest {
   }
 
   implicit class ValidationFormWrapper(form: Form[PersonalVerificationRequest]) {
-
     def validateUsingBarsPersonalAssessResponse(response: BarsPersonalAssessResponse): Form[PersonalVerificationRequest] =
-      validatePersonal(response.accountNumberWithSortCodeIsValid,
-        response.nonStandardAccountDetailsRequiredForBacs.getOrElse(No), Some(response.accountExists))
+      response match {
+        case badRequest: BarsPersonalAssessBadRequestResponse =>
+          form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
+        case success: BarsPersonalAssessSuccessResponse =>
+          import success._
 
-    private def validatePersonal(accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-                         nonStandardAccountDetailsRequiredForBacs: ReputationResponseEnum,
-                         accountExists: Option[ReputationResponseEnum] = None): Form[PersonalVerificationRequest] =
-
-      if (accountNumberWithSortCodeIsValid == No)
-        form.fill(form.get).withError("accountNumber", "error.accountNumber.modCheckFailed")
-      else if (accountExists.isDefined && accountExists.get == No)
-        form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")
-      else if (nonStandardAccountDetailsRequiredForBacs == Yes && form.get.rollNumber.isEmpty)
-        form.fill(form.get).withError("rollNumber", "error.rollNumber.required")
-      else form
-
+          if (accountNumberWithSortCodeIsValid == No)
+            form.fill(form.get).withError("accountNumber", "error.accountNumber.modCheckFailed")
+          else if (accountExists == No)
+            form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")
+          else if (nonStandardAccountDetailsRequiredForBacs.getOrElse(No) == Yes && form.get.rollNumber.isEmpty)
+            form.fill(form.get).withError("rollNumber", "error.rollNumber.required")
+          else form
+      }
   }
 
   val form: Form[PersonalVerificationRequest] =

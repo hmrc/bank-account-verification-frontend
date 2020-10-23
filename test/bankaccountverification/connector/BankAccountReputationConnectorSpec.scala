@@ -47,7 +47,8 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/v2/validateBankDetails") => Action(Ok("""{
+          case SPOST(p"/v2/validateBankDetails") => Action(Ok(
+            """{
               |    "accountNumberWithSortCodeIsValid": "yes",
               |    "nonStandardAccountDetailsRequiredForBacs": "no",
               |    "sortCodeIsPresentOnEISCD": "error"
@@ -55,7 +56,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.validateBankDetails(BarsValidationRequest("203040", "12345678")))
         response shouldBe Success(BarsValidationResponse(Yes, No, None))
@@ -66,7 +67,8 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/v2/validateBankDetails") => Action(Ok("""{
+          case SPOST(p"/v2/validateBankDetails") => Action(Ok(
+            """{
               |    "accountNumberWithSortCodeIsValid": "yes",
               |    "OWAITWHATISTHIS": "no",
               |    "sortCodeIsPresentMEGALOLSOnEISCD": "error"
@@ -74,7 +76,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.validateBankDetails(BarsValidationRequest("203040", "12345678")))
         response shouldBe a[Failure[_]]
@@ -90,7 +92,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.validateBankDetails(BarsValidationRequest("203040", "12345678")))
         response shouldBe a[Failure[_]]
@@ -105,7 +107,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.validateBankDetails(BarsValidationRequest("203040", "12345678")))
         response shouldBe a[Failure[_]]
@@ -119,7 +121,8 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/personal/v3/assess") => Action(Ok("""{
+          case SPOST(p"/personal/v3/assess") => Action(Ok(
+            """{
               |  "accountNumberWithSortCodeIsValid": "yes",
               |  "accountExists": "yes",
               |  "nameMatches": "yes",
@@ -131,11 +134,11 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessPersonal("Mr Joe Bloggs", "20-30-40", "12345678", BarsAddress.emptyAddress))
         response shouldBe Success(
-          BarsPersonalAssessResponse(Yes, Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Some(No), None)
+          BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Some(No), None)
         )
       }
     }
@@ -146,17 +149,18 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         {
           case SPOST(p"/personal/v3/assess") =>
             Action(
-              Ok("""{
-                                                                |    "accountNumberWithSortCodeIsValid": "yes",
-                                                                |    "OWAITWHATISTHIS": "no",
-                                                                |    "sortCodeIsPresentMEGALOLSOnEISCD": "error"
-                                                                |}""".stripMargin)
+              Ok(
+                """{
+                  |    "accountNumberWithSortCodeIsValid": "yes",
+                  |    "OWAITWHATISTHIS": "no",
+                  |    "sortCodeIsPresentMEGALOLSOnEISCD": "error"
+                  |}""".stripMargin)
                 .withHeaders("Content-Type" -> "application/json")
             )
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", BarsAddress.emptyAddress))
         response shouldBe a[Failure[_]]
@@ -172,7 +176,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", BarsAddress.emptyAddress))
         response shouldBe a[Failure[_]]
@@ -183,14 +187,15 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/personal/v3/assess") => Action(BadRequest)
+          case SPOST(p"/personal/v3/assess") => Action(BadRequest(
+            """{"code": "SORT_CODE_ON_DENY_LIST", "desc": "083200: sort code is in deny list"}"""))
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", BarsAddress.emptyAddress))
-        response shouldBe a[Failure[_]]
+        response shouldBe a[Success[BarsPersonalAssessBadRequestResponse]]
       }
     }
 
@@ -202,7 +207,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", BarsAddress.emptyAddress))
         response shouldBe a[Failure[_]]
@@ -216,7 +221,8 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/business/v2/assess") => Action(Ok("""{
+          case SPOST(p"/business/v2/assess") => Action(Ok(
+            """{
               |  "accountNumberWithSortCodeIsValid": "yes",
               |  "sortCodeIsPresentOnEISCD": "yes",
               |  "sortCodeBankName": "Some Company",
@@ -229,11 +235,11 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", Some(BarsAddress.emptyAddress)))
         response shouldBe Success(
-          BarsBusinessAssessResponse(Yes, Yes, Some("Some Company"), Yes, Yes, Indeterminate, Indeterminate, Some(No))
+          BarsBusinessAssessSuccessResponse(Yes, Yes, Some("Some Company"), Yes, Yes, Indeterminate, Indeterminate, Some(No))
         )
       }
     }
@@ -244,17 +250,18 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         {
           case SPOST(p"/business/v2/assess") =>
             Action(
-              Ok("""{
-                |    "accountNumberWithSortCodeIsValid": "yes",
-                |    "OWAITWHATISTHIS": "no",
-                |    "sortCodeIsPresentMEGALOLSOnEISCD": "error"
-                |}""".stripMargin)
+              Ok(
+                """{
+                  |    "accountNumberWithSortCodeIsValid": "yes",
+                  |    "OWAITWHATISTHIS": "no",
+                  |    "sortCodeIsPresentMEGALOLSOnEISCD": "error"
+                  |}""".stripMargin)
                 .withHeaders("Content-Type" -> "application/json")
             )
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", Some(BarsAddress.emptyAddress)))
         response shouldBe a[Failure[_]]
@@ -270,7 +277,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", Some(BarsAddress.emptyAddress)))
         response shouldBe a[Failure[_]]
@@ -281,14 +288,15 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/business/v2/assess") => Action(BadRequest)
+          case SPOST(p"/business/v2/assess") => Action(BadRequest(
+            """{"code": "SORT_CODE_ON_DENY_LIST", "desc": "083200: sort code is in deny list"}"""))
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", Some(BarsAddress.emptyAddress)))
-        response shouldBe a[Failure[_]]
+        response shouldBe a[Success[BarsBusinessAssessBadRequestResponse]]
       }
     }
 
@@ -300,7 +308,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
-        val connector   = app.injector.instanceOf[BankAccountReputationConnector]
+        val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", Some(BarsAddress.emptyAddress)))
         response shouldBe a[Failure[_]]

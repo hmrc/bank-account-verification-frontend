@@ -35,7 +35,8 @@ package bankaccountverification
 import java.time.ZonedDateTime
 
 import bankaccountverification.api.{BusinessCompleteResponse, CompleteResponse, CompleteResponseAddress}
-import bankaccountverification.connector.{BarsBusinessAssessResponse, BarsPersonalAssessResponse, ReputationResponseEnum}
+import bankaccountverification.connector.ReputationResponseEnum.Error
+import bankaccountverification.connector._
 import bankaccountverification.web.AccountTypeRequestEnum
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.web.business.BusinessVerificationRequest
@@ -118,19 +119,26 @@ case class PersonalAccountDetails(accountName: Option[String],
 
 object PersonalAccountDetails {
   def apply(request: PersonalVerificationRequest, response: BarsPersonalAssessResponse): PersonalAccountDetails =
-    PersonalAccountDetails(
-      Some(request.accountName),
-      Some(request.sortCode),
-      Some(request.accountNumber),
-      request.rollNumber,
-      Some(response.accountNumberWithSortCodeIsValid),
-      Some(response.accountExists),
-      Some(response.nameMatches),
-      Some(response.addressMatches),
-      Some(response.nonConsented),
-      Some(response.subjectHasDeceased),
-      response.nonStandardAccountDetailsRequiredForBacs,
-      response.sortCodeBankName)
+    response match {
+      case success: BarsPersonalAssessSuccessResponse =>
+        PersonalAccountDetails(
+          Some(request.accountName),
+          Some(request.sortCode),
+          Some(request.accountNumber),
+          request.rollNumber,
+          Some(success.accountNumberWithSortCodeIsValid),
+          Some(success.accountExists),
+          Some(success.nameMatches),
+          Some(success.addressMatches),
+          Some(success.nonConsented),
+          Some(success.subjectHasDeceased),
+          success.nonStandardAccountDetailsRequiredForBacs,
+          success.sortCodeBankName)
+      case _ =>
+        PersonalAccountDetails(
+          Some(request.accountName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber,
+          Some(Error), Some(Error), Some(Error), Some(Error), Some(Error), Some(Error),Some(Error), None)
+    }
 }
 
 case class BusinessSession(companyName: Option[String],
@@ -194,18 +202,25 @@ case class BusinessAccountDetails(companyName: Option[String],
 
 object BusinessAccountDetails {
   def apply(request: BusinessVerificationRequest, response: BarsBusinessAssessResponse): BusinessAccountDetails =
-    BusinessAccountDetails(
-      Some(request.companyName),
-      Some(request.sortCode),
-      Some(request.accountNumber),
-      request.rollNumber,
-      Some(response.accountNumberWithSortCodeIsValid),
-      response.nonStandardAccountDetailsRequiredForBacs,
-      Some(response.accountExists),
-      Some(response.companyNameMatches),
-      Some(response.companyPostCodeMatches),
-      Some(response.companyRegistrationNumberMatches),
-      response.sortCodeBankName)
+    response match {
+      case success: BarsBusinessAssessSuccessResponse =>
+        BusinessAccountDetails(
+          Some(request.companyName),
+          Some(request.sortCode),
+          Some(request.accountNumber),
+          request.rollNumber,
+          Some(success.accountNumberWithSortCodeIsValid),
+          success.nonStandardAccountDetailsRequiredForBacs,
+          Some(success.accountExists),
+          Some(success.companyNameMatches),
+          Some(success.companyPostCodeMatches),
+          Some(success.companyRegistrationNumberMatches),
+          success.sortCodeBankName)
+      case _ =>
+        BusinessAccountDetails(
+          Some(request.companyName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber,
+          Some(Error), None, Some(Error), Some(Error), Some(Error), Some(Error), None)
+    }
 }
 
 case class PersonalAccountDetailsUpdate(expiryDate: ZonedDateTime, data: PersonalAccountDetails)

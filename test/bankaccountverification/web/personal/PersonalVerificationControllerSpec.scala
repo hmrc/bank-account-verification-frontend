@@ -19,7 +19,7 @@ package bankaccountverification.web.personal
 import java.time.{ZoneOffset, ZonedDateTime}
 
 import akka.stream.Materializer
-import bankaccountverification.connector.BarsPersonalAssessResponse
+import bankaccountverification.connector.BarsPersonalAssessSuccessResponse
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.Personal
 import bankaccountverification.web.{AccountTypeController, AccountTypeRequest, AccountTypeRequestEnum, VerificationService}
@@ -283,7 +283,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val formWithErrors = PersonalVerificationRequest.form.fillAndValidate(data).withError("Error", "a.specific.error")
 
       val barsPersonalAssessResponse =
-        BarsPersonalAssessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No), None)
+        BarsPersonalAssessSuccessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No), None)
 
       "Render the view and display the errors" in {
         reset(mockRepository)
@@ -317,7 +317,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val data = PersonalVerificationRequest("Bob", "123456", "12345678")
 
       val form = PersonalVerificationRequest.form.fillAndValidate(data)
-      val barsPersonalAssessResponse = BarsPersonalAssessResponse(Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No), None)
+      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No), None)
 
       "Redirect to the continueUrl" in {
         reset(mockRepository)
@@ -350,7 +350,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val data = PersonalVerificationRequest("Bobby", "123456", "12345678")
 
       val form = PersonalVerificationRequest.form.fillAndValidate(data)
-      val barsPersonalAssessResponse = BarsPersonalAssessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No), None)
+      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No), None)
 
       "Redirect to the confirm view" in {
         reset(mockRepository)

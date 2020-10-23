@@ -16,10 +16,8 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.{Address, BusinessAccountDetails, JourneyRepository, PersonalAccountDetails,
-  PersonalSession, Session}
-import bankaccountverification.connector.{BankAccountReputationConnector, BarsAddress, BarsBusinessAssessResponse,
-  BarsPersonalAssessResponse, BarsValidationRequest, BarsValidationResponse}
+import bankaccountverification.{Address, BusinessAccountDetails, JourneyRepository, PersonalAccountDetails, PersonalSession, Session}
+import bankaccountverification.connector.{BankAccountReputationConnector, BarsAddress, BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse, BarsBusinessAssessSuccessResponse, BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse, BarsValidationRequest, BarsValidationResponse}
 import bankaccountverification.connector.ReputationResponseEnum._
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
@@ -50,7 +48,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     val userInput = PersonalVerificationRequest("Bob", "20-30-40", "12345678")
 
     val assessResult =
-      Success(BarsPersonalAssessResponse(Yes, Yes, Yes, Yes, Indeterminate, Indeterminate, Some(No), None))
+      Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Indeterminate, Indeterminate, Some(No), None))
 
     when(mockConnector.assessPersonal(any(), any(), any(), any())(any(), any())).thenReturn(Future.successful
     (assessResult))
@@ -215,7 +213,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
 
     "the details provided pass the remote bars checks" should {
       val assessResult =
-        Success(BarsPersonalAssessResponse(Yes, Yes, Yes, No, Indeterminate, Indeterminate, Some(No), Some
+        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, No, Indeterminate, Indeterminate, Some(No), Some
         ("sort-code-bank-name-personal")))
 
       when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
@@ -281,6 +279,22 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         res.hasErrors shouldEqual false
       }
     }
+
+    "the remote bars check fails with an 400 Error" should {
+      val mockConnector = mock[BankAccountReputationConnector]
+      val mockRepository = mock[JourneyRepository]
+      val service = new VerificationService(mockConnector, mockRepository)
+
+      val userInput = PersonalVerificationRequest("Bob", "08-32-00", "12345678")
+      val form = PersonalVerificationRequest.form.fillAndValidate(userInput)
+
+      val assessResult = Success(BarsPersonalAssessBadRequestResponse("SORT_CODE_ON_DENY_LIST", "083200: sort code is in deny list"))
+      val updatedForm = service.processPersonalAssessResponse(journeyId, assessResult, form)
+
+      "return an invalid form" in {
+        await(updatedForm).hasErrors shouldEqual true
+      }
+    }
   }
 
   "Assessing business bank account details provided by the user" when {
@@ -291,7 +305,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     val userInput = BusinessVerificationRequest("Bob Company", "20-30-40", "12345678", None)
 
     val assessResult = Future.successful(
-      Success(BarsBusinessAssessResponse(Yes, Yes, None, Yes, Yes, Indeterminate, Indeterminate, Some(No))))
+      Success(BarsBusinessAssessSuccessResponse(Yes, Yes, None, Yes, Yes, Indeterminate, Indeterminate, Some(No))))
 
     when(mockConnector.assessBusiness(any(), any(), any(), any(), any())(any(), any())).thenReturn(assessResult)
 
@@ -470,7 +484,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     val form = BusinessVerificationRequest.form.fillAndValidate(userInput)
 
     "the details provided pass the remote bars checks" should {
-      val assessResult = Success(BarsBusinessAssessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Yes, Yes,
+      val assessResult = Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Yes, Yes,
         Indeterminate, Indeterminate, Some(No)))
 
       clearInvocations(mockRepository)
@@ -531,6 +545,22 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
 
       "return a valid form" in {
         await(updatedForm).hasErrors shouldEqual false
+      }
+    }
+
+    "the remote bars check fails with an 400 Error" should {
+      val mockConnector = mock[BankAccountReputationConnector]
+      val mockRepository = mock[JourneyRepository]
+      val service = new VerificationService(mockConnector, mockRepository)
+
+      val userInput = BusinessVerificationRequest("Bob Company", "08-32-00", "12345678", None)
+      val form = BusinessVerificationRequest.form.fillAndValidate(userInput)
+
+      val assessResult = Success(BarsBusinessAssessBadRequestResponse("SORT_CODE_ON_DENY_LIST", "083200: sort code is in deny list"))
+      val updatedForm = service.processBusinessAssessResponse(journeyId, assessResult, form)
+
+      "return an invalid form" in {
+        await(updatedForm).hasErrors shouldEqual true
       }
     }
   }
