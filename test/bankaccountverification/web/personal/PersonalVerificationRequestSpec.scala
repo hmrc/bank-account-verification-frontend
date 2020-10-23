@@ -17,7 +17,7 @@
 package bankaccountverification.web.personal
 
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
-import bankaccountverification.connector.{BarsPersonalAssessResponse, BarsValidationResponse, ReputationResponseEnum}
+import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessSuccessResponse, BarsValidationResponse, ReputationResponseEnum}
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -218,7 +218,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     val form    = PersonalVerificationRequest.form.fillAndValidate(request)
 
     "the response indicates the sort code and account number combination is not valid" should {
-      val response = BarsPersonalAssessResponse(
+      val response = BarsPersonalAssessSuccessResponse(
         No,
         Indeterminate,
         Indeterminate,
@@ -238,7 +238,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates the account does not exist" should {
-      val response = BarsPersonalAssessResponse(
+      val response = BarsPersonalAssessSuccessResponse(
         Yes,
         No,
         Indeterminate,
@@ -259,7 +259,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates that a roll number is required but none was provided" should {
-      val response = BarsPersonalAssessResponse(
+      val response = BarsPersonalAssessSuccessResponse(
         Yes,
         Indeterminate,
         Indeterminate,
@@ -280,7 +280,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
       val requestWithRollNumber = PersonalVerificationRequest("Joe Blogs", "10-10-10", "12345678", Some("ROLL1"))
       val formWithRollNumber    = PersonalVerificationRequest.form.fillAndValidate(requestWithRollNumber)
 
-      val response = BarsPersonalAssessResponse(
+      val response = BarsPersonalAssessSuccessResponse(
         Yes,
         Indeterminate,
         Indeterminate,
@@ -298,7 +298,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates an error occurred" should {
-      val response = BarsPersonalAssessResponse(
+      val response = BarsPersonalAssessSuccessResponse(
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,
@@ -316,5 +316,13 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
       }
     }
 
+    "the response indicates that the sort code provided was on the deny list" should {
+      val response = BarsPersonalAssessBadRequestResponse("SORT_CODE_ON_DENY_LIST", "083200: sort code is in deny list")
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
+
+      "flag an error against the sort code field" in {
+        updatedForm.error("sortCode") shouldBe Some(FormError("sortCode", "error.sortCode.denyListed"))
+      }
+    }
   }
 }

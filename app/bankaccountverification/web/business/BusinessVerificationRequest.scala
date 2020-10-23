@@ -17,7 +17,7 @@
 package bankaccountverification.web.business
 
 import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
-import bankaccountverification.connector.{BarsBusinessAssessResponse, ReputationResponseEnum}
+import bankaccountverification.connector.{BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse, BarsBusinessAssessSuccessResponse, ReputationResponseEnum}
 import bankaccountverification.web.Forms._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -36,21 +36,19 @@ object BusinessVerificationRequest {
 
   implicit class ValidationFormWrapper(form: Form[BusinessVerificationRequest]) {
     def validateUsingBarsBusinessAssessResponse(response: BarsBusinessAssessResponse): Form[BusinessVerificationRequest] =
-      validateBusiness(response.accountNumberWithSortCodeIsValid,
-        response.nonStandardAccountDetailsRequiredForBacs.getOrElse(No), Some(response.accountExists))
-
-    private def validateBusiness(accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-                                 nonStandardAccountDetailsRequiredForBacs: ReputationResponseEnum,
-                                 accountExists: Option[ReputationResponseEnum] = None
-                                ): Form[BusinessVerificationRequest] =
-
-      if (accountNumberWithSortCodeIsValid == No)
-        form.fill(form.get).withError("accountNumber", "error.accountNumber.modCheckFailed")
-      else if (accountExists.isDefined && accountExists.get == No)
-        form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")
-      else if (nonStandardAccountDetailsRequiredForBacs == Yes && form.get.rollNumber.isEmpty)
-        form.fill(form.get).withError("rollNumber", "error.rollNumber.required")
-      else form
+      response match {
+        case badRequest: BarsBusinessAssessBadRequestResponse =>
+          form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
+        case success: BarsBusinessAssessSuccessResponse =>
+          import success._
+          if (accountNumberWithSortCodeIsValid == No)
+            form.fill(form.get).withError("accountNumber", "error.accountNumber.modCheckFailed")
+          else if (accountExists == No)
+            form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")
+          else if (nonStandardAccountDetailsRequiredForBacs.getOrElse(No) == Yes && form.get.rollNumber.isEmpty)
+            form.fill(form.get).withError("rollNumber", "error.rollNumber.required")
+          else form
+      }
   }
 
   val form: Form[BusinessVerificationRequest] =

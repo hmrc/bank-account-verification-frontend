@@ -20,7 +20,7 @@ import java.time.{ZoneOffset, ZonedDateTime}
 
 import akka.stream.Materializer
 import bankaccountverification._
-import bankaccountverification.connector.BarsBusinessAssessResponse
+import bankaccountverification.connector.{BarsBusinessAssessResponse, BarsBusinessAssessSuccessResponse}
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.Business
 import bankaccountverification.web.{AccountTypeController, AccountTypeRequest, AccountTypeRequestEnum, VerificationService}
@@ -276,7 +276,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         .withError("Error", "a.specific.error")
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
+        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
       "Render the view and display the errors" in {
         reset(mockRepository)
@@ -309,7 +309,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
+        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
       "Redirect to the confirm view" in {
         reset(mockRepository)
@@ -340,7 +340,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessResponse(Yes, No, None, Yes, Indeterminate, Indeterminate, Indeterminate, Some(No))
+        BarsBusinessAssessSuccessResponse(Yes, No, None, Yes, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
       "Redirect to the continueUrl" in {
         reset(mockRepository)

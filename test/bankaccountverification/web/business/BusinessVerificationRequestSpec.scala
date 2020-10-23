@@ -17,7 +17,7 @@
 package bankaccountverification.web.business
 
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
-import bankaccountverification.connector.{BarsBusinessAssessResponse, ReputationResponseEnum}
+import bankaccountverification.connector.{BarsBusinessAssessBadRequestResponse, BarsBusinessAssessErrorResponse, BarsBusinessAssessResponse, BarsBusinessAssessSuccessResponse, ReputationResponseEnum}
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -226,7 +226,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     val form    = BusinessVerificationRequest.form.fillAndValidate(request)
 
     "the response indicates the sort code and account number combination is not valid" should {
-      val response = BarsBusinessAssessResponse(
+      val response = BarsBusinessAssessSuccessResponse(
         No,
         Indeterminate,
         None,
@@ -246,7 +246,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates the account does not exist" should {
-      val response = BarsBusinessAssessResponse(
+      val response = BarsBusinessAssessSuccessResponse(
         Yes,
         No,
         None,
@@ -267,7 +267,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates that a roll number is required but none was provided" should {
-      val response = BarsBusinessAssessResponse(
+      val response = BarsBusinessAssessSuccessResponse(
         Yes,
         Indeterminate,
         None,
@@ -289,7 +289,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         BusinessVerificationRequest("Joe Blogs", "10-10-10", "12345678", Some("ROLL1"))
       val formWithRollNumber = BusinessVerificationRequest.form.fillAndValidate(requestWithRollNumber)
 
-      val response = BarsBusinessAssessResponse(
+      val response = BarsBusinessAssessSuccessResponse(
         Yes,
         Indeterminate,
         None,
@@ -307,7 +307,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates an error occurred" should {
-      val response = BarsBusinessAssessResponse(
+      val response = BarsBusinessAssessSuccessResponse(
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,
         None,
@@ -322,6 +322,15 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
       "flag no errors so that the journey is not impacted" in {
         updatedForm.hasErrors shouldBe false
+      }
+    }
+
+    "the response indicates that the sort code provided was on the deny list" should {
+      val response = BarsBusinessAssessBadRequestResponse("SORT_CODE_ON_DENY_LIST", "083200: sort code is in deny list")
+      val updatedForm = form.validateUsingBarsBusinessAssessResponse(response)
+
+      "flag an error against the sort code field" in {
+        updatedForm.error("sortCode") shouldBe Some(FormError("sortCode", "error.sortCode.denyListed"))
       }
     }
 

@@ -16,9 +16,10 @@
 
 package bankaccountverification.web.business
 
+import bankaccountverification.connector.BarsBusinessAssessSuccessResponse
 import bankaccountverification.connector.ReputationResponseEnum.Yes
-import bankaccountverification.web.{ActionWithCustomisationsProvider, VerificationService}
 import bankaccountverification.web.business.html.{BusinessAccountDetailsView, BusinessAccountExistsIndeterminate}
+import bankaccountverification.web.{ActionWithCustomisationsProvider, VerificationService}
 import bankaccountverification.{AppConfig, RemoteMessagesApiProvider}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
@@ -30,6 +31,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Success
 
 @Singleton
 class BusinessVerificationController @Inject()(val appConfig: AppConfig,
@@ -78,8 +80,8 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
         detail = Map("accountType" -> "business", "trueCallingService" -> journey.serviceIdentifier,
           "journeyId" -> journey.id.stringify)
           ++ form.data.filterKeys {
-            case "csrfToken" | "continue" => false
-            case _ => true
+          case "csrfToken" | "continue" => false
+          case _ => true
         })
 
       auditConnector.sendEvent(dataEvent)
@@ -96,10 +98,11 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
             case uform if uform.hasErrors =>
               BadRequest(businessAccountDetailsView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable, uform))
             case _ =>
-              if (!response.isFailure && response.get.accountExists == Yes)
-                SeeOther(s"${journey.continueUrl}/$journeyId")
-              else
-                Redirect(routes.BusinessVerificationController.getConfirmDetails(journeyId))
+              response match {
+                case Success(success: BarsBusinessAssessSuccessResponse) if success.accountExists == Yes =>
+                  SeeOther(s"${journey.continueUrl}/$journeyId")
+                case _ => Redirect(routes.BusinessVerificationController.getConfirmDetails(journeyId))
+              }
           }
     }
 

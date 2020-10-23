@@ -54,7 +54,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
       case Success(response) => (form.validateUsingBarsPersonalAssessResponse(response), response)
       case Failure(e) =>
         logger.warn("Received error response from bank-account-reputation.validateBankDetails")
-        (form, personalAssessErrorResponse)
+        (form, BarsPersonalAssessErrorResponse())
     }
 
     updatedForm.fold(
@@ -86,7 +86,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
       case Success(response) => (form.validateUsingBarsBusinessAssessResponse(response), response)
       case Failure(e) =>
         logger.warn("Received error response from bank-account-reputation.validateBankDetails")
-        (form, businessAssessErrorResponse)
+        (form, BarsBusinessAssessErrorResponse())
     }
 
     updatedForm.fold(
@@ -99,11 +99,4 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
       }
     )
   }
-
-
-  private def personalAssessErrorResponse: BarsPersonalAssessResponse =
-    BarsPersonalAssessResponse(Error, Error, Error, Error, Error, Error, Some(Error), None)
-
-  private def businessAssessErrorResponse: BarsBusinessAssessResponse =
-    BarsBusinessAssessResponse(Error, Error, None, Error, Error, Error, Error, None)
 }
