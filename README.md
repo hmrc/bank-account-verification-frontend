@@ -96,6 +96,13 @@ case class BusinessCompleteResponse(
     nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None
   )
 ```
+### Writing acceptance tests for a service that uses `BAVFE` 
+
+We suggest that you mock out `BAVFE` in any acceptance tests that you write.  This will speed up your tests and allow us to make changes to the GUI without affecting your tests.
+ 
+`bank-account-verification-acceptance-example` is our recommended solution for creating acceptance tests for a service that integrates with `bank-account-verification-frontend`.  
+
+Check it out on [Github](https://github.com/hmrc/bank-account-verification-acceptance-example).
 
 ### License
 
