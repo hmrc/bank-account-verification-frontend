@@ -77,7 +77,8 @@ case class PersonalCompleteResponse(
     addressMatches: Option[ReputationResponseEnum] = None,
     nonConsented: Option[ReputationResponseEnum] = None,
     subjectHasDeceased: Option[ReputationResponseEnum] = None,
-    nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None
+    nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
+    sortCodeBankName: Option[String] = None
 )
 ```
 `business` has the following data model:
@@ -93,7 +94,8 @@ case class BusinessCompleteResponse(
     companyNameMatches: Option[ReputationResponseEnum],
     companyPostCodeMatches: Option[ReputationResponseEnum],
     companyRegistrationNumberMatches: Option[ReputationResponseEnum],
-    nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None
+    nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
+    sortCodeBankName: Option[String] = None
   )
 ```
 ### Writing acceptance tests for a service that uses `BAVFE` 
