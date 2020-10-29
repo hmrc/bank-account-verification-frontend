@@ -51,8 +51,11 @@ class AccountTypeController @Inject()(val appConfig: AppConfig,
       implicit val messages: Messages = remoteMessagesApi.preferred(request)
       val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
 
+      val accountTypeData = journey.data.accountType
       Future.successful(Ok(
-        accountTypeView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable, AccountTypeRequest.form)))
+        accountTypeView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable,
+          accountTypeData.map(accountType =>
+            AccountTypeRequest.form.fill(AccountTypeRequest(accountType))).getOrElse(AccountTypeRequest.form))))
     }
 
   def postAccountType(journeyId: String): Action[AnyContent] =

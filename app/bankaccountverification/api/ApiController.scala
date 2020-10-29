@@ -16,7 +16,8 @@
 
 package bankaccountverification.api
 
-import bankaccountverification.{Address, AppConfig, JourneyRepository}
+import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
+import bankaccountverification.{Address, AppConfig, JourneyRepository, PrepopulatedData}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
@@ -45,16 +46,37 @@ class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerCompo
           json.validate[InitRequest]
             .fold(
               err => Future.successful(BadRequest(Json.obj("errors" -> err.flatMap { case (_, e) => e.map(_.message) }))),
-              init =>
+              init => {
+                val prepopulatedData = init.prepopulatedData.map(p =>
+                  PrepopulatedData(accountType = p.accountType, name = p.name, sortCode = p.sortCode,
+                    accountNumber = p.accountNumber, p.rollNumber))
+
                 journeyRepository
                   .create(
                     init.serviceIdentifier,
                     init.continueUrl,
                     init.messages.map(m => Json.toJsObject(m)),
                     init.customisationsUrl,
-                    init.address.map(a => Address(a.lines, a.town, a.postcode))
+                    address = init.address.map(a => Address(a.lines, a.town, a.postcode)),
+                    prepopulatedData
                   )
-                  .map(journeyId => Ok(Json.toJson(journeyId.stringify)))
+                  .map { journeyId =>
+                    import bankaccountverification._
+
+                    val startUrl = web.routes.AccountTypeController.getAccountType(journeyId.stringify).url
+                    val completeUrl = api.routes.ApiController.complete(journeyId.stringify).url
+
+                    val detailsUrl = prepopulatedData.map {
+                      case p if p.accountType == Personal =>
+                        web.personal.routes.PersonalVerificationController.getAccountDetails(journeyId.stringify).url
+                      case p if p.accountType == Business =>
+                        web.business.routes.BusinessVerificationController.getAccountDetails(journeyId.stringify).url
+                    }
+
+                    import InitResponse._
+                    Ok(Json.toJson(InitResponse(journeyId.stringify, startUrl, completeUrl, detailsUrl)))
+                  }
+              }
             )
         case None =>
           Future.successful(BadRequest(Json.obj("error" -> "No json")))
@@ -67,7 +89,7 @@ class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerCompo
       case Success(id) =>
         journeyRepository
           .findById(id)
-          .map { case x => x.flatMap(_.data.flatMap(Session.toCompleteResponseJson)) }
+          .map { x => x.flatMap(j => Session.toCompleteResponseJson(j.data)) }
           .map {
             case Some(x) => Ok(x)
             case None => NotFound

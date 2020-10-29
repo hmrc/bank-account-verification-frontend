@@ -43,6 +43,9 @@ import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
 import play.api.libs.json.{JsValue, Json}
 
+case class PrepopulatedData(accountType: AccountTypeRequestEnum, name: Option[String],
+                            sortCode: Option[String], accountNumber: Option[String], rollNumber: Option[String])
+
 case class Address(lines: List[String], town: Option[String], postcode: Option[String])
 
 case class Session(accountType: Option[AccountTypeRequestEnum] = None, address: Option[Address] = None,

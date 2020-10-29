@@ -19,10 +19,9 @@ package bankaccountverification.api
 import java.time.ZonedDateTime
 
 import akka.stream.Materializer
+import bankaccountverification._
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
-import bankaccountverification.{Address, AppConfig, BusinessSession, Journey, JourneyRepository, PersonalSession,
-  Session}
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
@@ -77,27 +76,80 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             meq("continueUrl"),
             meq(None),
             meq(None),
-            meq(Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))))
+            meq(Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode")))),
+            meq(None)
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
         val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
-          Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode")))))
+          address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode")))))
 
         val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
-        val journeyIdMaybe = contentAsJson(result).as[String]
+        val initResponse = contentAsJson(result).as[InitResponse]
 
         status(result) shouldBe Status.OK
-        journeyIdMaybe should not be ""
-        BSONObjectID.parse(journeyIdMaybe).toOption shouldBe Some(newJourneyId)
+        BSONObjectID.parse(initResponse.journeyId).toOption shouldBe Some(newJourneyId)
+
+        initResponse.startUrl shouldBe s"/bank-account-verification/start/${initResponse.journeyId}"
+        initResponse.completeUrl shouldBe s"/api/complete/${initResponse.journeyId}"
+        initResponse.detailsUrl shouldBe None
+      }
+
+      "prepopulated data is provided" in {
+        when(
+          sessionStore.create(
+            meq("serviceIdentifier"),
+            meq("continueUrl"),
+            meq(None),
+            meq(None),
+            meq(Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode")))),
+            meq(Some(PrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))))
+          )(any())
+        ).thenReturn(Future.successful(newJourneyId))
+
+        val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
+          address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+          prepopulatedData = Some(InitRequestPrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))))
+
+        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
+
+        val result = controller.init().apply(fakeRequest)
+        val initResponse = contentAsJson(result).as[InitResponse]
+
+        status(result) shouldBe Status.OK
+        BSONObjectID.parse(initResponse.journeyId).toOption shouldBe Some(newJourneyId)
+
+        initResponse.startUrl shouldBe s"/bank-account-verification/start/${initResponse.journeyId}"
+        initResponse.completeUrl shouldBe s"/api/complete/${initResponse.journeyId}"
+        initResponse.detailsUrl shouldBe Some(s"/bank-account-verification/verify/personal/${initResponse.journeyId}")
       }
     }
 
     "return 400" when {
       "A continueUrl is not provided" in {
         val json = Json.parse("{}")
+        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
+
+        val result = controller.init().apply(fakeRequest)
+
+        status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "return 400" when {
+      "Prepopulated data is present but account type is not provided" in {
+        val json = Json.parse(
+          """{
+            |    "serviceIdentifier":"serviceIdentifier",
+            |    "continueUrl":"continueUrl",
+            |    "address":{"lines":["Line 1","Line 2"],"town":"Town","postcode":"Postcode"},
+            |    "prepopulatedData": {
+            |        "name": "Bob"
+            |    }
+            |}""".stripMargin)
+
         val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
@@ -116,19 +168,14 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           ZonedDateTime.now(),
           "serviceIdentifier",
           "continueUrl",
-          None,
-          None,
-          Some(
-            Session(
-              Some(Personal),
-              Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-              Some(
-                PersonalSession(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), Some(Yes),
-                  Some(Indeterminate), Some(No), Some(Indeterminate), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"))),
-              None
-            )
-          )
-        )
+          Session(
+            Some(Personal),
+            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            Some(
+              PersonalSession(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), Some(Yes),
+                Some(Indeterminate), Some(No), Some(Indeterminate), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"))),
+            None
+          ))
 
         when(sessionStore.findById(meq(journeyId), any())(any())).thenReturn(Future.successful(Some(returnData)))
 
@@ -160,17 +207,14 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           ZonedDateTime.now(),
           "serviceIdentifier",
           "continueUrl",
-          None,
-          None,
-          Some(
-            Session(
-              Some(Business),
-              Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-              None,
-              Some(
-                BusinessSession(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
-                  Some(Yes), Some(No), Some(Indeterminate), Some(Indeterminate), Some(Indeterminate), None, Some
-                  ("sort-code-bank-name-business"))))))
+          Session(
+            Some(Business),
+            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            None,
+            Some(
+              BusinessSession(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
+                Some(Yes), Some(No), Some(Indeterminate), Some(Indeterminate), Some(Indeterminate), None, Some
+                ("sort-code-bank-name-business")))))
 
         when(sessionStore.findById(meq(journeyId), any())(any()))
           .thenReturn(Future.successful(Some(returnData)))

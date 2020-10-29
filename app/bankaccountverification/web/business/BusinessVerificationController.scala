@@ -51,18 +51,22 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
     withCustomisations.action(journeyId).async { implicit request =>
       val journey = request.journey
 
-      val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
-      implicit val messages: Messages = remoteMessagesApi.preferred(request)
-      val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
+      if (journey.data.accountType.isDefined) {
+        val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
+        implicit val messages: Messages = remoteMessagesApi.preferred(request)
+        val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
 
-      val businessVerificationForm = journey.data.get.business
-        .map(bs => BusinessVerificationRequest(bs.companyName.getOrElse(""), bs.sortCode.getOrElse(""),
-          bs.accountNumber.getOrElse(""), bs.rollNumber))
-        .map(BusinessVerificationRequest.form.fill)
-        .getOrElse(BusinessVerificationRequest.form)
+        val businessVerificationForm = journey.data.business
+          .map(bs => BusinessVerificationRequest(bs.companyName.getOrElse(""), bs.sortCode.getOrElse(""),
+            bs.accountNumber.getOrElse(""), bs.rollNumber))
+          .map(BusinessVerificationRequest.form.fill)
+          .getOrElse(BusinessVerificationRequest.form)
 
-      Future.successful(Ok(businessAccountDetailsView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable,
-        businessVerificationForm)))
+        Future.successful(Ok(businessAccountDetailsView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable,
+          businessVerificationForm)))
+      }
+      else
+        Future.successful(Redirect(bankaccountverification.web.routes.AccountTypeController.getAccountType(journeyId)))
     }
 
   def postAccountDetails(journeyId: String): Action[AnyContent] =
@@ -91,7 +95,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
           journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))
       else
         for {
-          response <- verificationService.assessBusiness(form.get, journey.data.flatMap(_.address))
+          response <- verificationService.assessBusiness(form.get, journey.data.address)
           updatedForm <- verificationService.processBusinessAssessResponse(journey.id, response, form)
         } yield
           updatedForm match {
@@ -110,12 +114,16 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
     withCustomisations.action(journeyId).async { implicit request =>
       val journey = request.journey
 
-      val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
-      val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
-      implicit val messages: Messages = remoteMessagesApi.preferred(request)
+      if (journey.data.business.isDefined) {
+        val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
+        val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
+        implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
-      Future.successful(Ok(
-        businessAccountExistsIndeterminate(journeyId, journey.data.get.business.get, journey.serviceIdentifier,
-          s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable)))
+        Future.successful(Ok(
+          businessAccountExistsIndeterminate(journeyId, journey.data.business.get, journey.serviceIdentifier,
+            s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable)))
+
+      }
+      else Future.successful(NotFound(withCustomisations.journeyIdError(request)))
     }
 }

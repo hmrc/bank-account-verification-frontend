@@ -21,22 +21,43 @@ import java.time.{Instant, ZoneOffset, ZonedDateTime}
 import bankaccountverification.connector.ReputationResponseEnum
 import bankaccountverification.web.AccountTypeRequestEnum
 import play.api.libs.functional.syntax._
-import play.api.libs.json.JsonConfiguration.Aux
 import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 case class Journey(id: BSONObjectID, expiryDate: ZonedDateTime, serviceIdentifier: String, continueUrl: String,
-                   messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
-                   data: Option[Session] = None)
+                   data: Session, messages: Option[JsObject] = None, customisationsUrl: Option[String] = None)
 
 object Journey {
   def expiryDate = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
+  def createSession(address: Option[Address], prepopulatedData: Option[PrepopulatedData]): Session = {
+    val session = Session(address = address)
+
+    prepopulatedData match {
+      case None => session
+      case Some(p) => {
+        p.accountType match {
+          case AccountTypeRequestEnum.Personal =>
+            session.copy(
+              accountType = Some(p.accountType),
+              personal = Some(PersonalSession(accountName = p.name, sortCode = p.sortCode,
+                accountNumber = p.accountNumber, rollNumber = p.rollNumber)))
+          case AccountTypeRequestEnum.Business =>
+            session.copy(
+              accountType = Some(p.accountType),
+              business = Some(BusinessSession(companyName = p.name, sortCode = p.sortCode,
+                accountNumber = p.accountNumber, rollNumber = p.rollNumber)))
+        }
+      }
+    }
+  }
+
   def createExpiring(id: BSONObjectID, serviceIdentifier: String, continueUrl: String,
                      messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
-                     data: Option[Session] = None): Journey =
-    Journey(id, expiryDate, serviceIdentifier, continueUrl, messages, customisationsUrl, data)
+                     address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None): Journey =
+    Journey(id, expiryDate, serviceIdentifier, continueUrl, createSession(address, prepopulatedData),
+      messages, customisationsUrl)
 
   def updatePersonalAccountDetailsExpiring(data: PersonalAccountDetails) =
     PersonalAccountDetailsUpdate(expiryDate, data)
@@ -78,18 +99,18 @@ object Journey {
       .and((__ \ "expiryDate").read[ZonedDateTime])
       .and((__ \ "serviceIdentifier").read[String])
       .and((__ \ "continueUrl").read[String])
+      .and((__ \ "data").read[Session])
       .and((__ \ "messages").readNullable[JsObject])
-      .and((__ \ "customisationsUrl").readNullable[String])
-      .and((__ \ "data").readNullable[Session])(
+      .and((__ \ "customisationsUrl").readNullable[String])(
         (
           id: BSONObjectID,
           expiryDate: ZonedDateTime,
           serviceIdentifier: String,
           continueUrl: String,
-          messages: Option[JsObject],
-          customisationsUrl: Option[String],
-          data: Option[Session]
-        ) => Journey.apply(id, expiryDate, serviceIdentifier, continueUrl, messages, customisationsUrl, data)
+          data: Session,
+            messages: Option[JsObject],
+            customisationsUrl: Option[String]
+        ) => Journey.apply(id, expiryDate, serviceIdentifier, continueUrl, data, messages, customisationsUrl)
       )
 
   implicit def defaultWrites: OWrites[Journey] =
@@ -98,11 +119,11 @@ object Journey {
       .and((__ \ "expiryDate").write[ZonedDateTime])
       .and((__ \ "serviceIdentifier").write[String])
       .and((__ \ "continueUrl").write[String])
+      .and((__ \ "data").write[Session])
       .and((__ \ "messages").writeNullable[JsObject])
-      .and((__ \ "customisationsUrl").writeNullable[String])
-      .and((__ \ "data").writeNullable[Session])(
+      .and((__ \ "customisationsUrl").writeNullable[String]) {
         unlift(Journey.unapply)
-      )
+      }
 
   implicit def personalAccountDetailsWrites: OWrites[PersonalAccountDetails] =
     (__ \ "data.personal.accountName")
