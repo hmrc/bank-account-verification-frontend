@@ -16,15 +16,15 @@
 
 package bankaccountverification.web.personal
 
-import bankaccountverification.connector.{BarsAddress, BarsPersonalAssessSuccessResponse}
+import bankaccountverification.connector.BarsPersonalAssessSuccessResponse
 import bankaccountverification.connector.ReputationResponseEnum.Yes
-import bankaccountverification.web.personal.routes
 import bankaccountverification.web.personal.html.{PersonalAccountDetailsView, PersonalAccountExistsIndeterminate}
 import bankaccountverification.web.{ActionWithCustomisationsProvider, VerificationService}
-import bankaccountverification.{Address, AppConfig, RemoteMessagesApiProvider}
+import bankaccountverification.{AppConfig, RemoteMessagesApiProvider}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.i18n.Messages
+import play.api.mvc.Results.NotFound
 import play.api.mvc._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
@@ -52,18 +52,22 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
     withCustomisations.action(journeyId).async { implicit request =>
       val journey = request.journey
 
-      val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
-      implicit val messages: Messages = remoteMessagesApi.preferred(request)
-      val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
+      if (journey.data.accountType.isDefined) {
+        val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
+        implicit val messages: Messages = remoteMessagesApi.preferred(request)
+        val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
 
-      val personalVerificationForm = journey.data.get.personal
-        .map(ps => PersonalVerificationRequest(ps.accountName.getOrElse(""), ps.sortCode.getOrElse(""),
-          ps.accountNumber.getOrElse(""), ps.rollNumber))
-        .map(PersonalVerificationRequest.form.fill)
-        .getOrElse(PersonalVerificationRequest.form)
+        val personalVerificationForm = journey.data.personal
+          .map(ps => PersonalVerificationRequest(ps.accountName.getOrElse(""), ps.sortCode.getOrElse(""),
+            ps.accountNumber.getOrElse(""), ps.rollNumber))
+          .map(PersonalVerificationRequest.form.fill)
+          .getOrElse(PersonalVerificationRequest.form)
 
-      Future.successful(Ok(accountDetailsView(
-        journeyId, journey.serviceIdentifier, welshTranslationsAvailable, personalVerificationForm)))
+        Future.successful(Ok(accountDetailsView(
+          journeyId, journey.serviceIdentifier, welshTranslationsAvailable, personalVerificationForm)))
+      }
+      else
+        Future.successful(Redirect(bankaccountverification.web.routes.AccountTypeController.getAccountType(journeyId)))
     }
 
   def postAccountDetails(journeyId: String): Action[AnyContent] =
@@ -92,7 +96,7 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
           journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))
       else
         for {
-          response <- verificationService.assessPersonal(form.get, journey.data.flatMap(_.address))
+          response <- verificationService.assessPersonal(form.get, journey.data.address)
           updatedForm <- verificationService.processPersonalAssessResponse(journey.id, response, form)
         } yield
           updatedForm match {
@@ -111,12 +115,15 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
     withCustomisations.action(journeyId).async { implicit request =>
       val journey = request.journey
 
-      val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
-      val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
-      implicit val messages: Messages = remoteMessagesApi.preferred(request)
+      if (journey.data.personal.isDefined) {
+        val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
+        val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
+        implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
-      Future.successful(Ok(
-        accountExistsIndeterminate(journeyId, journey.data.get.personal.get, journey.serviceIdentifier,
-          s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable)))
+        Future.successful(Ok(
+          accountExistsIndeterminate(journeyId, journey.data.personal.get, journey.serviceIdentifier,
+            s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable)))
+      }
+      else Future.successful(NotFound(withCustomisations.journeyIdError(request)))
     }
 }

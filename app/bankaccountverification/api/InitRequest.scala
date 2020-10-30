@@ -16,16 +16,29 @@
 
 package bankaccountverification.api
 
+import bankaccountverification.web.AccountTypeRequestEnum
 import play.api.libs.json.{JsObject, Json, OWrites, Reads}
 
-case class InitRequest(serviceIdentifier: String, continueUrl: String, address: Option[InitRequestAddress] = None,
-                       messages: Option[InitRequestMessages] = None, customisationsUrl: Option[String] = None)
+case class InitRequest(serviceIdentifier: String, continueUrl: String,
+                       prepopulatedData: Option[InitRequestPrepopulatedData] = None,
+                       address: Option[InitRequestAddress] = None,
+                       messages: Option[InitRequestMessages] = None,
+                       customisationsUrl: Option[String] = None)
 
-case class InitRequestMessages(en: JsObject, cy: Option[JsObject])
+case class InitRequestPrepopulatedData(accountType: AccountTypeRequestEnum,
+                                       name: Option[String] = None,
+                                       sortCode: Option[String] = None,
+                                       accountNumber: Option[String] = None,
+                                       rollNumber: Option[String] = None)
 
 case class InitRequestAddress(lines: List[String], town: Option[String], postcode: Option[String])
 
+case class InitRequestMessages(en: JsObject, cy: Option[JsObject])
+
 object InitRequest {
+  implicit val prepopulatedDataReads: Reads[InitRequestPrepopulatedData] = Json.reads[InitRequestPrepopulatedData]
+  implicit val prepopulatedDataWrites: OWrites[InitRequestPrepopulatedData] = Json.writes[InitRequestPrepopulatedData]
+
   implicit val messagesReads: Reads[InitRequestMessages] = Json.reads[InitRequestMessages]
   implicit val messagesWrites: OWrites[InitRequestMessages] = Json.writes[InitRequestMessages]
 

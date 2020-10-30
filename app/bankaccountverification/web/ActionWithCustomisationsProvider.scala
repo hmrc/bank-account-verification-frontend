@@ -89,7 +89,7 @@ class ActionWithCustomisationsProvider @Inject()(val messagesApi: MessagesApi, i
       (headerBlock, beforeContentBlock, footerBlock)
     }
 
-  private def journeyIdError(implicit request: Request[_]) = {
+  def journeyIdError(implicit request: Request[_]) = {
     val messages = implicitly[Messages]
     errorTemplate(messages("error.journeyId.pageTitle"), messages("error.journeyId.heading"), messages("error.journeyId.message"))
   }
