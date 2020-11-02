@@ -128,9 +128,9 @@ case class BusinessCompleteResponse(
   )
 ```
 ### Supporting a 'Check your answers flow'
-At the end of your journey, you may present information captured in a summary screen and allow the user to skip back to a specific section in order to amend their answers. You may want to configure this summary can show data gathered by your service as well as the data gathered by BAVFEFE.
+At the end of your journey, you may display information provided by the user in a summary screen and allow them to skip back to a specific section in order to amend their answers. You may want to configure this summary to show data gathered by your service as well as the data gathered by BAVFEFE.
 
-In order to allow the user to change the data gathered by BAVFEFE, you should handle the 'change' link by initiating a *new journey* with BAVFEFE and using the `prepopulatedData` block to provide the previous answers. You should also set the `continueUrl` to a landing page that then returns to the 'Check your answers' page at the end of the flow.
+In order to allow the user to change the data gathered by BAVFEFE, you should handle the 'change' link by initiating a *new journey* with BAVFEFE and using the `prepopulatedData` block to provide the previous answers. You should also set the `continueUrl` to a seperate landing page in your service that then returns to the 'Check your answers' page at the end of the flow.
 
 ### Writing acceptance tests for a service that uses `BAVFE` 
 
