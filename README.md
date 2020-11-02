@@ -18,14 +18,43 @@ To initiate a journey a `POST` call must be made to `/api/init` with a payload t
 ```scala
 case class InitRequest(
     serviceIdentifier: String, 
-    continueUrl: String, 
+    continueUrl: String,
+    prepopulatedData: Option[InitRequestPrepopulatedData] = None,
     address: Option[InitRequestAddress] = None,
     messages: Option[InitRequestMessages] = None, 
     customisationsUrl: Option[String] = None
 )
 ```
 
+The init endpoint will respond in the following format:
+```scala
+case class InitResponse(
+  journeyId: String, 
+  startUrl: String, // relative URL for you to redirect to begin the journey
+  completeUrl: String, // relative API URL for you to retrieve data at the end of the journey
+  detailsUrl: Option[String]) // relative URL for you to redirect to the account details page, skipping the account type question.
+```
+
+Please note, the detailsUrl will only be populated if you provide the `prePopulatedData` block on the init call, and allows you to skip asking for account type for example if you already have this information.
+
 As can be seen, the only mandatory parameters are `serviceIdentifier` - the name of the calling service, and `continueUrl` - the callback url to call the `BAVFE` journey segment is completed. The `customisationsUrl` is used by `BAVFE` to retrieve `HtmlPartials` for customisation of `header`, `beforeContent` and `footer` sections of the pages. See [CustomisationsController](https://github.com/hmrc/bank-account-verification-example-frontend/blob/master/app/uk/gov/hmrc/bankaccountverificationexamplefrontend/bavf/CustomisationsController.scala) for an example implementation.
+
+#### Pre-populating data
+If you have already captured some of the relevant bank account information in another part of your journey, you can supply this on the init call and BAVFEFE will pre-populate the relevant fields for you. You can also supply prepopulated data to support a 'Check your answers' flow between your service and BAVFEFE.
+
+You must supply an account type in order to use this feature.
+
+The optional `prepopulatedData` parameter has the following model:
+```scala
+case class InitRequestPrepopulatedData(
+  accountType: AccountTypeRequestEnum, // "personal" or "business" (lower case)
+  name: Option[String] = None,
+  sortCode: Option[String] = None,
+  accountNumber: Option[String] = None,
+  rollNumber: Option[String] = None)
+```
+
+#### Other parameters
 
 The optional `address` parameter has the following model:
 ```scala
@@ -98,6 +127,11 @@ case class BusinessCompleteResponse(
     sortCodeBankName: Option[String] = None
   )
 ```
+### Supporting a 'Check your answers flow'
+At the end of your journey, you may present information captured in a summary screen and allow the user to skip back to a specific section in order to amend their answers. You may want to configure this summary can show data gathered by your service as well as the data gathered by BAVFEFE.
+
+In order to allow the user to change the data gathered by BAVFEFE, you should handle the 'change' link by initiating a *new journey* with BAVFEFE and using the `prepopulatedData` block to provide the previous answers. You should also set the `continueUrl` to a landing page that then returns to the 'Check your answers' page at the end of the flow.
+
 ### Writing acceptance tests for a service that uses `BAVFE` 
 
 We suggest that you mock out `BAVFE` in any acceptance tests that you write.  This will speed up your tests and allow us to make changes to the GUI without affecting your tests.
