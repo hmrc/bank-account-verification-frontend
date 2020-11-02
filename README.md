@@ -35,14 +35,14 @@ case class InitResponse(
   detailsUrl: Option[String]) // relative URL for you to redirect to the account details page, skipping the account type question.
 ```
 
-Please note, the detailsUrl will only be populated if you provide the `prePopulatedData` block on the init call, and allows you to skip asking for account type for example if you already have this information.
+Please note, the `detailsUrl` will only be populated if you provide the `prePopulatedData` block on the init call, and allows you to skip asking for account type for example if you already have this information.
 
 As can be seen, the only mandatory parameters are `serviceIdentifier` - the name of the calling service, and `continueUrl` - the callback url to call the `BAVFE` journey segment is completed. The `customisationsUrl` is used by `BAVFE` to retrieve `HtmlPartials` for customisation of `header`, `beforeContent` and `footer` sections of the pages. See [CustomisationsController](https://github.com/hmrc/bank-account-verification-example-frontend/blob/master/app/uk/gov/hmrc/bankaccountverificationexamplefrontend/bavf/CustomisationsController.scala) for an example implementation.
 
 #### Pre-populating data
 If you have already captured some of the relevant bank account information in another part of your journey, you can supply this on the init call and BAVFEFE will pre-populate the relevant fields for you. You can also supply prepopulated data to support a 'Check your answers' flow between your service and BAVFEFE.
 
-You must supply an account type in order to use this feature.
+You must supply an `accountType` in order to use this feature.
 
 The optional `prepopulatedData` parameter has the following model:
 ```scala
