@@ -120,8 +120,9 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
         implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
         Future.successful(Ok(
-          businessAccountExistsIndeterminate(journeyId, journey.data.business.get, journey.serviceIdentifier,
-            s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable)))
+          businessAccountExistsIndeterminate(
+            BusinessAccountExistsIndeterminateViewModel(journeyId, journey.data.business.get, journey.serviceIdentifier,
+            s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable))))
 
       }
       else Future.successful(NotFound(withCustomisations.journeyIdError(request)))

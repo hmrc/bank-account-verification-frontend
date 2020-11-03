@@ -120,9 +120,9 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
         val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
         implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
-        Future.successful(Ok(
-          accountExistsIndeterminate(journeyId, journey.data.personal.get, journey.serviceIdentifier,
-            s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable)))
+        Future.successful(Ok(accountExistsIndeterminate(
+          PersonalAccountExistsIndeterminateViewModel(journeyId, journey.data.personal.get, journey.serviceIdentifier,
+            s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable))))
       }
       else Future.successful(NotFound(withCustomisations.journeyIdError(request)))
     }

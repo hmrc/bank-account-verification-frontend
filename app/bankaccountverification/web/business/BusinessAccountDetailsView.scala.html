@@ -34,7 +34,7 @@
 
     @form(bankaccountverification.web.business.routes.BusinessVerificationController.postAccountDetails(journeyId)) {
         @input(Input(value = detailsForm("companyName").value,
-            label = Label(content = HtmlContent(messages("label.companyName"))),
+            label = Label(content = HtmlContent(messages("label.accountName"))),
             formGroupClasses = "form-field-group",
             name = detailsForm("companyName").name, id = detailsForm("companyName").name,
             errorMessage = detailsForm("companyName").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))

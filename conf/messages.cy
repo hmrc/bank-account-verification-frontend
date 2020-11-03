@@ -13,6 +13,7 @@ pageTitle.accountExistsIndeterminate = W Check the account details
 content.warning = W Warning
 content.accountExistsIndeterminate = W We have not been able to check the account details $bankName$. Make sure the details you entered are correct.
 
+label.accountType = W Account type
 label.accountType.personal = W Personal
 label.accountType.business = W Business
 label.accountType.heading = W What type of account details are you providing?

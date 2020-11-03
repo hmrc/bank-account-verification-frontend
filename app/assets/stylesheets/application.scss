@@ -7,3 +7,23 @@ $hmrc-assets-path: "/bank-account-verification/assets/lib/hmrc-frontend/hmrc/";
 .hmrc-language-select {
   float: right;
 }
+
+.confirm-page-summary {
+  .account-details-summary-row:not(.account-details-summary-row--first) {
+    dt, dd {
+      padding-top: 0.4em;
+    }
+  }
+
+  .account-details-summary-row:not(.account-details-summary-row--last) {
+    dt, dd {
+      padding-bottom: 0;
+    }
+  }
+
+  .account-details-summary-row {
+    dd {
+      vertical-align: middle;
+    }
+  }
+}

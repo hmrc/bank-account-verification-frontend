@@ -14,12 +14,14 @@
  * limitations under the License.
  *@
 
-@import bankaccountverification.PersonalSession
 @import bankaccountverification.web.RequestWithCustomisations
 @import bankaccountverification.web.views.html.Layout
+@import bankaccountverification.web.personal.PersonalAccountExistsIndeterminateViewModel
 
 @this(layout: Layout, summary: GovukSummaryList, button: GovukButton, warning: GovukWarningText, help: HmrcReportTechnicalIssue)
-@(journeyId: String, session: PersonalSession, serviceIdentifier: String, continueUrl: String, welshTranslationsAvailable: Boolean)(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
+@(viewModel: PersonalAccountExistsIndeterminateViewModel)(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
+
+@import viewModel._
 
 @layout(pageTitle = Some(messages("pageTitle.accountExistsIndeterminate")), None, welshTranslationsAvailable, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
     <h1 class="govuk-heading-xl">@messages("pageTitle.accountExistsIndeterminate")</h1>
@@ -27,7 +29,9 @@
     <div class="govuk-warning-text">
         <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
         <strong class="govuk-warning-text__text">
-            <span class="govuk-warning-text__assistive">@{messages("content.warning")}</span>
+            <span class="govuk-warning-text__assistive">@{
+                messages("content.warning")
+            }</span>
             @{
                 session.sortCodeBankName
                         .map(bn => messages("content.accountExistsIndeterminate").replace(" $bankName$", s" with $bn"))
@@ -36,22 +40,32 @@
         </strong>
     </div>
 
-    @defining(bankaccountverification.web.personal.routes.PersonalVerificationController.getAccountDetails(journeyId).url) { changeUrl =>
+    @defining(bankaccountverification.web.routes.AccountTypeController.getAccountType(journeyId).url) { changeAccountTypeUrl =>
         @summary(SummaryList(
+            classes = "confirm-page-summary",
             rows = Seq(
+                SummaryListRow(
+                    Key(HtmlContent(messages("label.accountType"))),
+                    Value(HtmlContent(messages("label.accountType.personal"))),
+                    actions = Some(Actions(items = Seq(ActionItem(
+                        href = changeAccountTypeUrl,
+                        content = HtmlContent(messages("label.change")),
+                        visuallyHiddenText = Some(messages("label.accountType")))))))
+            ) ++ fixRows(Seq(
                 session.accountName.map(an =>
-                SummaryListRow(Key(HtmlContent(messages("label.accountName"))), Value(Text(an)),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent(messages("label.change")), visuallyHiddenText = Some(messages("label.accountName")))))))),
+                    SummaryListRow(
+                        Key(HtmlContent(messages("label.accountName"))), Value(Text(an)),
+                        classes = "account-details-summary-row govuk-summary-list__row--no-border")),
                 session.sortCode.map(sc =>
-                SummaryListRow(Key(HtmlContent(messages("label.sortCode"))), Value(Text(sc)),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent(messages("label.change")), visuallyHiddenText = Some(messages("label.sortCode")))))))),
+                    SummaryListRow(Key(HtmlContent(messages("label.sortCode"))), Value(Text(sc)),
+                        classes = "account-details-summary-row govuk-summary-list__row--no-border")),
                 session.accountNumber.map(an =>
-                SummaryListRow(Key(HtmlContent(messages("label.accountNumber"))), Value(Text(an)),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent(messages("label.change")), visuallyHiddenText = Some(messages("label.accountNumber")))))))),
+                    SummaryListRow(Key(HtmlContent(messages("label.accountNumber"))), Value(Text(an)),
+                        classes = "account-details-summary-row govuk-summary-list__row--no-border")),
                 session.rollNumber.map(rn =>
-                SummaryListRow(Key(HtmlContent(messages("label.rollNumber"))), Value(Text(rn)),
-                    actions = Some(Actions(items = Seq(ActionItem(href = changeUrl, content = HtmlContent(messages("label.change")), visuallyHiddenText = Some(messages("label.rollNumber"))))))))
-            ).flatten
+                    SummaryListRow(Key(HtmlContent(messages("label.rollNumber"))), Value(Text(rn)),
+                        classes = "account-details-summary-row govuk-summary-list__row--no-border"))
+            ).flatten)
         ))
     }
 
