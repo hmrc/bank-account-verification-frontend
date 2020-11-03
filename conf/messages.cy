@@ -50,6 +50,7 @@ error.accountNumber.doesNotExist = W Account number must belong to an active ban
 error.sortcode.required = W Enter a sort code
 error.sortcode.invalidLengthError = W Sort code must be 6 digits long
 error.sortcode.invalidCharsError = W Enter a valid sort code
+error.sortCode.denyListed = W You have entered an HMRC sort code. Enter a different sort code.
 
 error.rollNumber.format = W Roll number can only contain uppercase characters, digits, dots or hyphens
 error.rollNumber.minLength = W Roll number must be at least 1 character long

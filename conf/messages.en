@@ -50,6 +50,7 @@ error.accountNumber.doesNotExist = Account number must belong to an active bank 
 error.sortcode.required = Enter a sort code
 error.sortcode.invalidLengthError = Sort code must be 6 digits long
 error.sortcode.invalidCharsError = Enter a valid sort code, for example 309430
+error.sortCode.denyListed = You have entered an HMRC sort code. Enter a different sort code.
 
 error.rollNumber.format = Roll number can only contain uppercase characters, digits, dots or hyphens
 error.rollNumber.minLength = Roll number must be at least 1 character long
