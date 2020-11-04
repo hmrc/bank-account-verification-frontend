@@ -138,7 +138,7 @@ object Journey {
       .and((__ \ "data.personal.nonConsented").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.subjectHasDeceased").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.personal.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.personal.sortCodeBankName").writeNullable[String])(
+      .and((__ \ "data.personal.sortCodeBankName").writeOptionWithNull[String])(
         unlift(PersonalAccountDetails.unapply)
       )
 
@@ -154,7 +154,7 @@ object Journey {
       .and((__ \ "data.business.companyNameMatches").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.business.companyPostCodeMatches").writeNullable[ReputationResponseEnum])
       .and((__ \ "data.business.companyRegistrationNumberMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.business.sortCodeBankName").writeNullable[String])(
+      .and((__ \ "data.business.sortCodeBankName").writeOptionWithNull[String])(
         unlift(BusinessAccountDetails.unapply)
       )
 

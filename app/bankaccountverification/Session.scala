@@ -140,7 +140,7 @@ object PersonalAccountDetails {
       case _ =>
         PersonalAccountDetails(
           Some(request.accountName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber,
-          Some(Error), Some(Error), Some(Error), Some(Error), Some(Error), Some(Error),Some(Error), None)
+          Some(Error), Some(Error), Some(Error), Some(Error), Some(Error), Some(Error), Some(Error), None)
     }
 }
 
