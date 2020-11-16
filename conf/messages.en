@@ -11,6 +11,7 @@ pageTitle.business.accountDetails = Business Account Details
 
 pageTitle.accountExistsIndeterminate = Check the account details
 content.warning = Warning
+content.with = with
 content.accountExistsIndeterminate = We have not been able to check the account details $bankName$. Make sure the details you entered are correct.
 
 label.accountType = Account type

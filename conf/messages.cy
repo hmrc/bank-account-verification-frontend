@@ -11,6 +11,7 @@ pageTitle.business.accountDetails = Manylion Cyfrif Busnes
 
 pageTitle.accountExistsIndeterminate = Gwirio manylion y cyfrif
 content.warning = Rhybudd
+content.with = gyda
 content.accountExistsIndeterminate = Nid ydym wedi gallu gwirio manylion y cyfrif $bankName$. Sicrhewch fod y manylion a nodoch yn gywir.
 
 label.accountType = Math o gyfrif
