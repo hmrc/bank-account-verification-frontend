@@ -34,7 +34,7 @@
             }</span>
             @{
                 session.sortCodeBankName
-                        .map(bn => messages("content.accountExistsIndeterminate").replace(" $bankName$", s" with $bn"))
+                        .map(bn => messages("content.accountExistsIndeterminate").replace(" $bankName$", s" ${messages("content.with")} $bn"))
                         .getOrElse(messages("content.accountExistsIndeterminate").replace(" $bankName$", ""))
             }
         </strong>
