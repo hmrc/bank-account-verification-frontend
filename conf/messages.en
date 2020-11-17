@@ -59,7 +59,7 @@ error.rollNumber.minLength = Roll number must be at least 1 character long
 error.rollNumber.maxLength = Roll number must be at most 18 characters long
 error.rollNumber.required = Enter a roll number
 
-error.journeyId.pageTitle = Error
+error.pageTitle = Error
 error.journeyId.heading = There was a problem
 error.journeyId.message = The journey could not be found
 

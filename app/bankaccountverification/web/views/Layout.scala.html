@@ -52,7 +52,7 @@
 }
 
 @thePageTitle = {
-    @{if(form.isDefined && form.get.hasErrors) pageTitle.map(t => s"Error: $t") else pageTitle}
+    @{if(form.isDefined && form.get.hasErrors) pageTitle.map(t => s"${messages("error.pageTitle")}: $t") else pageTitle}
 }
 
 @govukLayout(

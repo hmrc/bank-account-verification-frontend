@@ -59,7 +59,7 @@ error.rollNumber.minLength = Mae’n rhaid i’r rhif rôl fod o leiaf 1 cymeria
 error.rollNumber.maxLength = Mae’n rhaid i’r rhif rôl fod yn 18 cymeriad o hyd ar y mwyaf
 error.rollNumber.required = Nodwch rif rôl
 
-error.journeyId.pageTitle = Gwall
+error.pageTitle = Gwall
 error.journeyId.heading = Roedd yna broblem
 error.journeyId.message = Nid oedd modd dod o hyd i’r daith
 
