@@ -21,8 +21,6 @@
 @(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, accountTypeForm: Form[AccountTypeRequest])(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
 @layout(pageTitle = Some(messages("pageTitle.accountType")), Some(accountTypeForm), welshTranslationsAvailable, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
-    <h1 class="govuk-heading-xl">@messages("label.accountType.heading")</h1>
-
     @if(accountTypeForm.hasErrors) {
         @errorSummary(ErrorSummary(title = HtmlContent(messages("error.summaryText")),
             errorList = accountTypeForm.errors.map { error ⇒
@@ -31,17 +29,17 @@
             }))
     }
 
+    <h1 class="govuk-heading-xl">@messages("label.accountType.heading")</h1>
+
     @form(bankaccountverification.web.routes.AccountTypeController.postAccountType(journeyId)) {
         @radios(Radios(
-            idPrefix = Some("account-type"),
+            idPrefix = Some("accountType"),
             name = "accountType",
             items = Seq(
                 RadioItem(content = HtmlContent(messages("label.accountType.business")),
-                    id = Some("business"),
                     value = Some("business"),
                     checked = accountTypeForm("accountType").value == Some("business")),
                 RadioItem(content = HtmlContent(messages("label.accountType.personal")),
-                    id = Some("personal"),
                     value = Some("personal"),
                     checked = accountTypeForm("accountType").value == Some("personal"))
             ),
