@@ -17,10 +17,10 @@
 @this()
 
 @(scriptsBlock: Option[Html] = None)
-    @scriptsBlock
 
-    <!-- Google Tag Manager (noscript) →
-
+<script src='@controllers.routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
+<script src='@controllers.routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
+<script>window.GOVUKFrontend.initAll();</script>
+<!-- Google Tag Manager (noscript) →
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NDJKHWK" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-
 End Google Tag Manager (noscript) -->
