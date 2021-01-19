@@ -19,12 +19,13 @@ package bankaccountverification.web
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.web.business.{routes => businessRoutes}
 import bankaccountverification.web.personal.{routes => personalRoutes}
-import bankaccountverification.web.views.html.AccountTypeView
+import bankaccountverification.web.views.html.{AccountTypeView, ErrorTemplate}
 import bankaccountverification.{AppConfig, RemoteMessagesApiProvider}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.i18n.Messages
 import play.api.mvc._
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -44,18 +45,19 @@ class AccountTypeController @Inject()(val appConfig: AppConfig,
   implicit val config: AppConfig = appConfig
 
   def getAccountType(journeyId: String): Action[AnyContent] =
-    withCustomisations.action(journeyId).async { implicit request =>
-      val journey = request.journey
+      withCustomisations.action(journeyId).async { implicit request =>
+        val journey = request.journey
 
-      val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
-      implicit val messages: Messages = remoteMessagesApi.preferred(request)
-      val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
+        val remoteMessagesApi = remoteMessagesApiProvider.getRemoteMessagesApi(journey.messages)
+        implicit val messages: Messages = remoteMessagesApi.preferred(request)
+        val welshTranslationsAvailable = journey.messages.exists(_.keys.contains("cy"))
 
-      val accountTypeData = journey.data.accountType
-      Future.successful(Ok(
-        accountTypeView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable,
-          accountTypeData.map(accountType =>
-            AccountTypeRequest.form.fill(AccountTypeRequest(accountType))).getOrElse(AccountTypeRequest.form))))
+        val accountTypeData = journey.data.accountType
+        Future.successful(Ok(
+          accountTypeView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable,
+            accountTypeData.map(accountType =>
+              AccountTypeRequest.form.fill(AccountTypeRequest(accountType))).getOrElse(AccountTypeRequest.form))))
+
     }
 
   def postAccountType(journeyId: String): Action[AnyContent] =

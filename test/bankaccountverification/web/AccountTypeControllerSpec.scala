@@ -35,6 +35,9 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import reactivemongo.bson.BSONObjectID
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.internalId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -45,7 +48,9 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
   private val mockService = mock[VerificationService]
   private val mockRepository = mock[JourneyRepository]
+  private val mockAuthConnector = mock[AuthConnector]
   private val serviceIdentifier = "example-service"
+
   private val continueUrl = "https://continue.url"
 
   override implicit lazy val app: Application = {
@@ -53,6 +58,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
     new GuiceApplicationBuilder()
       .overrides(bind[JourneyRepository].toInstance(mockRepository))
+      .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
       .overrides(bind[VerificationService].toInstance(mockService))
       .build()
   }
@@ -62,10 +68,34 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
   implicit val mat: Materializer = injector.instanceOf[Materializer]
 
   "GET /start" when {
+
+    "the user is not logged in" should {
+      val id = BSONObjectID.generate()
+      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+
+      "return 401" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
+
+        reset(mockRepository)
+        when(mockRepository.findById(id))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
+
+        val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
+        val result = accountTypeController.getAccountType(id.stringify).apply(fakeRequest)
+        status(result) shouldBe Status.UNAUTHORIZED
+      }
+    }
+
     "there is no valid journey" should {
       val id = BSONObjectID.generate()
 
       "return 404" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(Future.successful(None))
 
@@ -75,14 +105,37 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
       }
     }
 
-    "there is a valid journey" should {
+    "there is a valid journey but it does not match this user" should {
+      val id = BSONObjectID.generate()
+      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+
+      "return 404" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+            .thenReturn(Future.successful(Some("9876")))
+
+        reset(mockRepository)
+        when(mockRepository.findById(id))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
+
+        val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
+        val result = accountTypeController.getAccountType(id.stringify).apply(fakeRequest)
+        status(result) shouldBe Status.NOT_FOUND
+      }
+    }
+
+    "there is a valid journey and the user is logged in" should {
       val id = BSONObjectID.generate()
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
       "return 200" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, Session()))))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
 
         val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
         val result = accountTypeController.getAccountType(id.stringify).apply(fakeRequest)
@@ -96,9 +149,13 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
       "render account type view with the prepopulated account type" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(
-          Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, Session(Some(Personal))))))
+          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(Some(Personal))))))
 
         val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
         val result = accountTypeController.getAccountType(id.stringify).apply(fakeRequest)
@@ -109,14 +166,57 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
   }
 
   "POST /start" when {
-    "there is no valid journey" should {
+    "the user is not logged in" should {
       val id = BSONObjectID.generate()
 
-      "return 404" in {
+      "return 401" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
+
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(Future.successful(None))
         val fakeRequest = FakeRequest("POST", s"/start/${id.stringify}")
           .withFormUrlEncodedBody("accountType" -> AccountTypeRequestEnum.Personal.toString)
+
+        val result = accountTypeController.postAccountType(id.stringify).apply(fakeRequest)
+        status(result) shouldBe Status.UNAUTHORIZED
+      }
+    }
+
+    "there is no valid journey" should {
+      val id = BSONObjectID.generate()
+
+      "return 404" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
+        reset(mockRepository)
+        when(mockRepository.findById(id)).thenReturn(Future.successful(None))
+        val fakeRequest = FakeRequest("POST", s"/start/${id.stringify}")
+          .withFormUrlEncodedBody("accountType" -> AccountTypeRequestEnum.Personal.toString)
+
+        val result = accountTypeController.postAccountType(id.stringify).apply(fakeRequest)
+        status(result) shouldBe Status.NOT_FOUND
+      }
+    }
+
+    "the journey is valid but does not match the current user" should {
+      val id = BSONObjectID.generate()
+      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+
+      "return 404" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("9876")))
+
+        reset(mockRepository)
+        when(mockRepository.findById(id))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
+
+        val fakeRequest = FakeRequest("POST", s"/start/${id.stringify}")
+          .withFormUrlEncodedBody("accountType" -> "")
 
         val result = accountTypeController.postAccountType(id.stringify).apply(fakeRequest)
         status(result) shouldBe Status.NOT_FOUND
@@ -128,9 +228,13 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
       "return 400" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, Session()))))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
 
         val fakeRequest = FakeRequest("POST", s"/start/${id.stringify}")
           .withFormUrlEncodedBody("accountType" -> "")
@@ -145,9 +249,13 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
       "Redirect to the getAccountDetails endpoint" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(
-          Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, Session()))))
+          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
 
         reset(mockService)
         when(mockService.setAccountType(meq(id), meq(AccountTypeRequestEnum.Personal))(any(), any()))
@@ -169,9 +277,13 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
       "Redirect to the getAccountDetails endpoint" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(
-          Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, Session()))))
+          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
 
         reset(mockService)
         when(mockService.setAccountType(meq(id), meq(AccountTypeRequestEnum.Business))(any(), any()))

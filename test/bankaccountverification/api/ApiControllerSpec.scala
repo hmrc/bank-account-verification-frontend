@@ -72,6 +72,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
       "A continueUrl is provided" in {
         when(
           sessionStore.create(
+            meq(Some("1234")),
             meq("serviceIdentifier"),
             meq("continueUrl"),
             meq(None),
@@ -81,7 +82,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
-        val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
+        val json = Json.toJson(InitRequest(Some("1234"), "serviceIdentifier", "continueUrl",
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode")))))
 
         val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
@@ -100,6 +101,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
       "prepopulated data is provided" in {
         when(
           sessionStore.create(
+            meq(Some("1234")),
             meq("serviceIdentifier"),
             meq("continueUrl"),
             meq(None),
@@ -109,7 +111,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
-        val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
+        val json = Json.toJson(InitRequest(Some("1234"), "serviceIdentifier", "continueUrl",
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
           prepopulatedData = Some(InitRequestPrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))))
 
@@ -165,6 +167,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         val journeyId = BSONObjectID.generate()
         val returnData = Journey(
           journeyId,
+          Some("1234"),
           ZonedDateTime.now(),
           "serviceIdentifier",
           "continueUrl",
@@ -204,6 +207,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         val journeyId = BSONObjectID.generate()
         val returnData = Journey(
           journeyId,
+          Some("1234"),
           ZonedDateTime.now(),
           "serviceIdentifier",
           "continueUrl",

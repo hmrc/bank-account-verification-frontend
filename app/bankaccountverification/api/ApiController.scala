@@ -53,6 +53,7 @@ class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerCompo
 
                 journeyRepository
                   .create(
+                    init.internalAuthId,
                     init.serviceIdentifier,
                     init.continueUrl,
                     init.messages.map(m => Json.toJsObject(m)),

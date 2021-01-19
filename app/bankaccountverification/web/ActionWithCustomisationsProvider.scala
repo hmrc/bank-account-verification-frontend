@@ -25,43 +25,52 @@ import play.api.mvc.Results._
 import play.api.mvc._
 import play.twirl.api.Html
 import reactivemongo.bson.BSONObjectID
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvider
 import uk.gov.hmrc.play.partials.HtmlPartial
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-
 class RequestWithCustomisations[A](request: Request[A], val journey: Journey, val headerBlock: Option[Html], val beforeContentBlock: Option[Html], val footerBlock: Option[Html]) extends WrappedRequest[A](request)
 
-class ActionWithCustomisationsProvider @Inject()(val messagesApi: MessagesApi, implicit val appConfig: AppConfig,
+class ActionWithCustomisationsProvider @Inject()(val messagesApi: MessagesApi,
+                                                 val authConnector: AuthConnector,
+                                                 implicit val appConfig: AppConfig,
                                                  journeyRepository: JourneyRepository,
                                                  partialsConnector: PartialsConnector, bodyParser: BodyParsers.Default,
                                                  errorTemplate: ErrorTemplate)
 
-  extends FrontendHeaderCarrierProvider with I18nSupport {
+  extends FrontendHeaderCarrierProvider with I18nSupport with AuthorisedFunctions {
 
   def action(journeyId: String)(implicit ec: ExecutionContext): ActionBuilder[RequestWithCustomisations, AnyContent] =
     new ActionBuilder[RequestWithCustomisations, AnyContent] with ActionRefiner[Request, RequestWithCustomisations] {
+
       def parser = bodyParser
 
       def executionContext = ec
 
-      override protected def refine[A](request: Request[A]): Future[Either[Result, RequestWithCustomisations[A]]] =
-        BSONObjectID.parse(journeyId) match {
-          case Success(id) =>
-            journeyRepository.findById(id) flatMap {
-              case None =>
-                Future.successful(Left(NotFound(journeyIdError(request))))
-              case Some(journey) =>
-                getCustomisations(journey)(ec, request) map {
-                  case (headerBlock, beforeContentBlock, footerBlock) =>
-                    Right(new RequestWithCustomisations(request, journey, headerBlock, beforeContentBlock, footerBlock))
-                }
-            }
+      override protected def refine[A](request: Request[A]): Future[Either[Result, RequestWithCustomisations[A]]] = {
+        implicit val headerCarrier = hc(request)
 
-          case Failure(exception) => Future.successful(Left(BadRequest))
-        }
+        authorised().retrieve(internalId) {
+          case Some(internalAuthId) =>
+            BSONObjectID.parse(journeyId) match {
+              case Success(id) =>
+                journeyRepository.findById(id) flatMap {
+                  case Some(journey) if journey.internalAuthId.isEmpty || journey.internalAuthId.get == internalAuthId =>
+                    getCustomisations(journey)(ec, request) map {
+                      case (headerBlock, beforeContentBlock, footerBlock) =>
+                        Right(new RequestWithCustomisations(request, journey, headerBlock, beforeContentBlock, footerBlock))
+                    }
+                  case _ => Future.successful(Left(NotFound(journeyIdError(request))))
+                }
+
+              case Failure(_) => Future.successful(Left(BadRequest))
+            }
+        } recoverWith { case _ => Future.successful(Left(Unauthorized(unauthorisedError(request)))) }
+      }
     }
 
   private def getCustomisations(journey: Journey)(implicit ec: ExecutionContext, request: Request[_]): Future[(Option[Html], Option[Html], Option[Html])] =
@@ -92,5 +101,10 @@ class ActionWithCustomisationsProvider @Inject()(val messagesApi: MessagesApi, i
   def journeyIdError(implicit request: Request[_]) = {
     val messages = implicitly[Messages]
     errorTemplate(messages("error.pageTitle"), messages("error.journeyId.heading"), messages("error.journeyId.message"))
+  }
+
+  def unauthorisedError(implicit request: Request[_]) = {
+    val messages = implicitly[Messages]
+    errorTemplate(messages("error.pageTitle"), messages("error.unauthorised.heading"), messages("error.unauthorised.message"))
   }
 }

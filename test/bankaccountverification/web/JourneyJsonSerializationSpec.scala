@@ -33,6 +33,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
       val theExpiryDate = ZonedDateTime.now(ZoneOffset.UTC)
       val personalJourney = Journey(
         id = id,
+        Some("1234"),
         expiryDate = theExpiryDate,
         serviceIdentifier = "some-service",
         continueUrl = "some-url",
@@ -64,6 +65,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
       "serialize to JSON correctly" in {
 
         (personalJourneyJsValue \ "_id").as[BSONObjectID] shouldBe id
+        (personalJourneyJsValue \ "internalAuthId").as[String] shouldBe "1234"
         (personalJourneyJsValue \ "expiryDate").as[ZonedDateTime] shouldBe theExpiryDate
         (personalJourneyJsValue \ "serviceIdentifier").as[String] shouldBe "some-service"
         (personalJourneyJsValue \ "continueUrl").as[String] shouldBe "some-url"
@@ -104,6 +106,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
       val theExpiryDate = ZonedDateTime.now(ZoneOffset.UTC)
       val businessJourney = Journey(
         id = id,
+        Some("1234"),
         expiryDate = theExpiryDate,
         serviceIdentifier = "some-service",
         continueUrl = "some-url",
@@ -135,6 +138,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
       "serialize to JSON correctly" in {
 
         (businessJourneyJsValue \ "_id").as[BSONObjectID] shouldBe id
+        (businessJourneyJsValue \ "internalAuthId").as[String] shouldBe "1234"
         (businessJourneyJsValue \ "expiryDate").as[ZonedDateTime] shouldBe theExpiryDate
         (businessJourneyJsValue \ "serviceIdentifier").as[String] shouldBe "some-service"
         (businessJourneyJsValue \ "continueUrl").as[String] shouldBe "some-url"

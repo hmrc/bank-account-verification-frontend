@@ -7,7 +7,7 @@ import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
 import com.codahale.metrics.SharedMetricRegistries
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.Mockito._
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatest.wordspec.AnyWordSpec
@@ -20,16 +20,22 @@ import play.api.libs.ws.WSClient
 import play.api.test.CSRFTokenHelper.CSRFRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import play.api.test._
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.internalId
 
 import scala.concurrent.Future
 import scala.util.Success
 
 class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPerSuite with MockitoSugar {
   private val mockBankAccountReputationConnector = mock[BankAccountReputationConnector]
+  private val mockAuthConnector = mock[AuthConnector]
+
   override lazy val app = {
     SharedMetricRegistries.clear()
     new GuiceApplicationBuilder()
       .overrides(bind[BankAccountReputationConnector].toInstance(mockBankAccountReputationConnector))
+      .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
       .build()
   }
 
@@ -44,6 +50,9 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
       .toMap
 
   "PersonalBankAccountVerification" in {
+    when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+      .thenReturn(Future.successful(Some("1234")))
+
     when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
         Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, No, Indeterminate, Some(No), Some("sort-code-bank-name-personal")))))
@@ -53,7 +62,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     val initUrl = s"$baseUrl/api/init"
 
-    val initRequest = InitRequest("serviceIdentifier", "continueUrl",
+    val initRequest = InitRequest(Some("1234"), "serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))))
 
     val initResponse = await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
@@ -117,6 +126,9 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
   }
 
   "BusinessBankAccountVerification" in {
+    when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+      .thenReturn(Future.successful(Some("1234")))
+
     when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(Success(BarsBusinessAssessSuccessResponse(
         Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No)))))
@@ -126,7 +138,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     val initUrl = s"$baseUrl/api/init"
 
-    val initRequest = InitRequest("serviceIdentifier", "continueUrl",
+    val initRequest = InitRequest(Some("1234"), "serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))))
 
     val initResponse =
@@ -201,7 +213,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     val initUrl = s"$baseUrl/api/init"
 
-    val initRequest = InitRequest("serviceIdentifier", "continueUrl",
+    val initRequest = InitRequest(Some("1234"), "serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
       prepopulatedData = Some(InitRequestPrepopulatedData(Personal)))
 

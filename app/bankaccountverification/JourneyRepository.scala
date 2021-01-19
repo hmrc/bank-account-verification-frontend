@@ -56,13 +56,14 @@ class JourneyRepository @Inject()(component: ReactiveMongoComponent)
   private lazy val ExpiryDateIndex = "expiryDateIndex"
   private lazy val OptExpireAfterSeconds = "expireAfterSeconds"
 
-  def create(serviceIdentifier: String, continueUrl: String, messages: Option[JsObject] = None,
-             customisationsUrl: Option[String] = None, address: Option[Address] = None,
-             prepopulatedData: Option[PrepopulatedData] = None)(implicit ec: ExecutionContext): Future[BSONObjectID] = {
+  def create(internalAuthId: Option[String], serviceIdentifier: String, continueUrl: String,
+             messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
+             address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None)
+            (implicit ec: ExecutionContext): Future[BSONObjectID] = {
 
     val journeyId = BSONObjectID.generate()
 
-    insert(Journey.createExpiring(journeyId, serviceIdentifier, continueUrl, messages, customisationsUrl,
+    insert(Journey.createExpiring(journeyId, internalAuthId, serviceIdentifier, continueUrl, messages, customisationsUrl,
       address, prepopulatedData)).map(_ => journeyId)
   }
 

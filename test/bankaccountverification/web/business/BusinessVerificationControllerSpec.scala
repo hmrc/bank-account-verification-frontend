@@ -40,6 +40,9 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import reactivemongo.bson.BSONObjectID
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.internalId
 import uk.gov.hmrc.http.HttpException
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -52,6 +55,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
   val mockRepository = mock[JourneyRepository]
   val mockService = mock[VerificationService]
+  val mockAuthConnector = mock[AuthConnector]
   val serviceIdentifier = "example-service"
   val continueUrl = "https://continue.url"
 
@@ -60,6 +64,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     new GuiceApplicationBuilder()
       .overrides(bind[JourneyRepository].toInstance(mockRepository))
+      .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
       .overrides(bind[VerificationService].toInstance(mockService))
       .build()
   }
@@ -69,12 +74,58 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
   implicit val mat: Materializer = injector.instanceOf[Materializer]
 
   "GET /verify/business" when {
+    "the user is not logged in" should {
+      val id = BSONObjectID.generate()
+      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+
+      "return 401" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
+
+        reset(mockRepository)
+
+        val fakeRequest = FakeRequest("GET", s"/verify/business/${id.stringify}")
+        val result = controller.getAccountDetails(id.stringify).apply(fakeRequest)
+        status(result) shouldBe Status.UNAUTHORIZED
+      }
+    }
+
     "there is no valid journey" should {
       val id = BSONObjectID.generate()
 
       "return 404" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(Future.successful(None))
+
+        val fakeRequest = FakeRequest("GET", s"/verify/business/${id.stringify}")
+        val result = controller.getAccountDetails(id.stringify).apply(fakeRequest)
+        status(result) shouldBe Status.NOT_FOUND
+      }
+    }
+
+    "there is a valid journey but for a different user" should {
+      val id = BSONObjectID.generate()
+      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+
+      "return 404" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("9876")))
+
+        reset(mockRepository)
+        when(mockRepository.findById(id))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(
+              Some(Business),
+              Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+              None,
+              Some(BusinessSession(companyName = Some("some company name"), sortCode = Some("112233"),
+                accountNumber = Some("12345678"))))))))
 
         val fakeRequest = FakeRequest("GET", s"/verify/business/${id.stringify}")
         val result = controller.getAccountDetails(id.stringify).apply(fakeRequest)
@@ -87,9 +138,13 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
       "redirect to the account type screen" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, Session()))))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
 
         val fakeRequest = FakeRequest("GET", s"/verify/business/${id.stringify}")
         val result = controller.getAccountDetails(id.stringify).apply(fakeRequest)
@@ -103,9 +158,13 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
       "return 200" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl,
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(
               Some(Business),
               Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
@@ -125,9 +184,13 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
       "the account details view should be pre-filled with this data" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, Session(
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Business),
             None,
             None,
@@ -149,14 +212,62 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
   }
 
   "POST /verify/business" when {
+    "the user is not logged in" should {
+      val id = BSONObjectID.generate()
+
+      "return 404" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
+
+        reset(mockRepository)
+
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.stringify}")
+        val result = controller.postAccountDetails(id.stringify).apply(fakeRequest)
+        status(result) shouldBe Status.UNAUTHORIZED
+      }
+    }
+
     "there is no valid journey" should {
       val id = BSONObjectID.generate()
 
       "return 404" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(Future.successful(None))
 
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.stringify}")
+        val result = controller.postAccountDetails(id.stringify).apply(fakeRequest)
+        status(result) shouldBe Status.NOT_FOUND
+      }
+    }
+
+    "the journey is valid but for a different user" should {
+      val id = BSONObjectID.generate()
+      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+
+      val data = BusinessVerificationRequest("", "", "", None)
+
+      "return 404" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("9876")))
+
+        reset(mockRepository)
+        when(mockRepository.findById(id))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(
+              accountType = Some(Business),
+              business = Some(BusinessSession(
+                companyName = Some("some company name"), sortCode = Some("112233"),
+                accountNumber = Some("12345678"))))))))
+
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.stringify}")
+          .withBody(data)
+
         val result = controller.postAccountDetails(id.stringify).apply(fakeRequest)
         status(result) shouldBe Status.NOT_FOUND
       }
@@ -169,9 +280,13 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val data = BusinessVerificationRequest("", "", "", None)
 
       "return 400" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl,
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(
               accountType = Some(Business),
               business = Some(BusinessSession(
@@ -194,9 +309,13 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
 
       "Redirect to the confirm view" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl,
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(
               companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))))
 
@@ -228,9 +347,13 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
       "Render the view and display the errors" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl,
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(
               companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))))
 
@@ -261,9 +384,13 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
       "Redirect to the confirm view" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl,
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(
               companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))))
 
@@ -292,9 +419,13 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         BarsBusinessAssessSuccessResponse(Yes, No, None, Yes, Indeterminate, Indeterminate, Indeterminate, Some(No))
 
       "Redirect to the continueUrl" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl,
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(companyName = Some("some company name"), sortCode = Some("112233"),
               accountNumber = Some("12345678"))))))))
 
@@ -314,10 +445,35 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
   }
 
   "GET /confirm/business" when {
+    "the user is not logged in" should {
+      val id = BSONObjectID.generate()
+
+      "return 404" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
+
+        reset(mockRepository)
+        when(mockRepository.findById(id)).thenReturn(Future.successful(None))
+
+        val fakeRequest = FakeRequest("GET", s"/confirm/business/${id.stringify}")
+        val result = controller.getConfirmDetails(id.stringify).apply(fakeRequest)
+
+        status(result) shouldBe Status.UNAUTHORIZED
+      }
+    }
+
     "there is no valid journey" should {
       val id = BSONObjectID.generate()
 
       "return 404" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(Future.successful(None))
 
@@ -333,8 +489,12 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         val id = BSONObjectID.generate()
         val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         when(mockRepository.findById(id)).thenReturn(
-          Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, Session(Some(Business))))))
+          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(Some(Business))))))
 
         val fakeRequest = FakeRequest("GET", s"/confirm/business/${id.stringify}")
 
@@ -349,8 +509,12 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         val id = BSONObjectID.generate()
         val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
         when(mockRepository.findById(id)).thenReturn(
-          Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl,
+          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(
               Some(Business),
               Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
@@ -374,8 +538,13 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         val id = BSONObjectID.generate()
         val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+          .thenReturn(Future.successful(Some("1234")))
+
+        reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(
-          Future.successful(Some(Journey(id, expiry, serviceIdentifier, continueUrl, Session(
+          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Business),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             None,
