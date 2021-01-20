@@ -38,24 +38,32 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
     "validate sortcode successfully" when {
       "sortcode is hyphenated" in {
-        val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "10-10-10", "12345678")
+        val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "1-0-1-0-1-0", "12345678")
         val bankAccountDetailsForm = PersonalVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
         bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.sortCode shouldBe "101010"
       }
       "sortcode is hyphenated with spaces" in {
-        val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "10 10 10", "12345678")
+        val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "1 0 1 0 1 0", "12345678")
         val bankAccountDetailsForm = PersonalVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
         bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.sortCode shouldBe "101010"
       }
       "sortcode contains just 6 digits" in {
         val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "101010", "12345678")
         val bankAccountDetailsForm = PersonalVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
         bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.sortCode shouldBe "101010"
       }
       "sortcode contains just 6 digits and leading & trailing spaces" in {
         val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", " 10-10 10   ", "12345678")
         val bankAccountDetailsForm = PersonalVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
         bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.sortCode shouldBe "101010"
       }
     }
 
@@ -68,6 +76,30 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountName")
         error shouldNot be(None)
         error.get.message shouldBe "error.accountName.required"
+      }
+    }
+
+    "validate account numbers" when {
+      "account number contains spaces" in {
+        val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "123456", " 1 2 3 4 5 6 7 8 ")
+        val bankAccountDetailsForm = PersonalVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
+        bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.accountNumber shouldBe "12345678"
+      }
+      "account number contains dashes" in {
+        val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "123456", "-1-2-3-4-5-6-7-8-")
+        val bankAccountDetailsForm = PersonalVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
+        bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.accountNumber shouldBe "12345678"
+      }
+      "account number contains dashes and spaces" in {
+        val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "123456", "-1 -2 -3 -4- 5- 6- 7 8 -")
+        val bankAccountDetailsForm = PersonalVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
+        bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.accountNumber shouldBe "12345678"
       }
     }
 
@@ -175,6 +207,17 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
           "error.sortcode.invalidLengthError",
           "error.sortcode.invalidCharsError"
         )
+      }
+    }
+
+    "validate roll numbers" when {
+      "roll number contains spaces" in {
+        val bankAccountDetails =
+          PersonalVerificationRequest("Joe Blogs", "100010", "12345678", Some(" 12 34 56 78 90 12 34 56 78 "))
+        val bankAccountDetailsForm = PersonalVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
+        bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.rollNumber shouldBe Some("123456789012345678")
       }
     }
 

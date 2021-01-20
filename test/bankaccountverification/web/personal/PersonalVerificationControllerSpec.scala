@@ -162,7 +162,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             Some(PersonalSession(
-              accountName = Some("account_name"), sortCode = Some("11-22-33"), accountNumber = Some("12092398"))))))))
+              accountName = Some("account_name"), sortCode = Some("112233"), accountNumber = Some("12092398"))))))))
 
         val fakeRequest = FakeRequest("GET", s"/verify/personal/${id.stringify}")
         val result = controller.getAccountDetails(id.stringify).apply(fakeRequest)

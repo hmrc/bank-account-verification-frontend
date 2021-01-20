@@ -19,15 +19,23 @@ package bankaccountverification.web.personal
 import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
 import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse, ReputationResponseEnum}
 import bankaccountverification.web.Forms._
+import bankaccountverification.web.Implicits.SanitizedString
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation._
 import play.api.libs.json.Json
 
-case class PersonalVerificationRequest(accountName: String, sortCode: String, accountNumber: String,
+case class PersonalVerificationRequest private (accountName: String, sortCode: String, accountNumber: String,
                                        rollNumber: Option[String] = None)
-
 object PersonalVerificationRequest {
+  def apply(accountName: String, sortCode: String, accountNumber: String,
+            rollNumber: Option[String] = None): PersonalVerificationRequest = {
+    val cleanSortCode = sortCode.stripSpacesAndDashes()
+    val cleanAccountNumber = accountNumber.stripSpacesAndDashes()
+    val cleanRollNumber = rollNumber.map(_.stripSpaces())
+
+    new PersonalVerificationRequest(accountName, cleanSortCode, cleanAccountNumber, cleanRollNumber)
+  }
 
   object formats {
     implicit val bankAccountDetailsReads = Json.reads[PersonalVerificationRequest]
@@ -60,6 +68,4 @@ object PersonalVerificationRequest {
         "accountNumber" -> accountNumberMapping,
         "rollNumber" -> optional(rollNumberMapping)
       )(PersonalVerificationRequest.apply)(PersonalVerificationRequest.unapply))
-
-  def accountNameMapping = text.verifying(Constraints.nonEmpty(errorMessage = "error.accountName.required"))
 }

@@ -15,28 +15,37 @@
  */
 
 package bankaccountverification.web
+
 import play.api.data.Forms.text
-import play.api.data.validation.{Constraint, Constraints, Invalid, Valid, ValidationError}
+import play.api.data.Mapping
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 
 import scala.util.{Failure, Success, Try}
 
 object Forms {
-  def accountNumberMapping = text.verifying(accountNumberConstraint())
 
-  def sortCodeMapping = text.verifying(sortcodeConstraint())
+  import Implicits._
 
-  def rollNumberMapping =
-    text.verifying(
-      Constraints.pattern("""[A-Z0-9/.\-]+""".r, "constraint.rollNumber.format", "error.rollNumber.format"),
-      Constraints.minLength(1, "error.rollNumber.minLength"),
-      Constraints.maxLength(18, "error.rollNumber.maxLength")
-    )
+  def accountNameMapping: Mapping[String] = text.verifying(accountNameConstraint())
+
+  def accountNumberMapping: Mapping[String] = text.verifying(accountNumberConstraint())
+
+  def sortCodeMapping: Mapping[String] = text.verifying(sortcodeConstraint())
+
+  def rollNumberMapping: Mapping[String] = text.verifying(rollNumberConstraint())
+
+  def accountNameConstraint(): Constraint[String] =
+    Constraint[String](Some("constraints.accountName"), Seq.empty) { input =>
+      if (input.isEmpty) Invalid(ValidationError("error.accountName.required"))
+      else if (input.length > 70) Invalid(ValidationError("error.accountName.maxLength"))
+      else Valid
+    }
 
   def accountNumberConstraint(): Constraint[String] =
     Constraint[String](Some("constraints.accountNumber"), Seq.empty) { input =>
       if (input.isEmpty) Invalid(ValidationError("error.accountNumber.required"))
       else {
-        val strippedInput = stripSortCode(input)
+        val strippedInput = input.stripSpacesAndDashes
         val errors =
           Seq(
             if (strippedInput.length < 6) Some("error.accountNumber.minLength") else None,
@@ -46,7 +55,7 @@ object Forms {
 
         errors match {
           case Seq() => Valid
-          case errs  => Invalid(ValidationError(errs))
+          case errs => Invalid(ValidationError(errs))
         }
       }
     }
@@ -55,7 +64,7 @@ object Forms {
     Constraint[String](Some("constraints.sortcode.format"), Seq.empty) { input =>
       if (input.isEmpty) Invalid(ValidationError("error.sortcode.required"))
       else {
-        val strippedInput = stripSortCode(input)
+        val strippedInput = input.stripSpacesAndDashes
         val errors =
           Seq(
             if (strippedInput.length != 6) Some("error.sortcode.invalidLengthError") else None,
@@ -64,16 +73,32 @@ object Forms {
 
         errors match {
           case Seq() => Valid
-          case errs  => Invalid(ValidationError(errs))
+          case errs => Invalid(ValidationError(errs))
         }
       }
     }
 
-  def stripSortCode(sortCode: String) = sortCode.replaceAll("""[ \-]""", "")
+  def rollNumberConstraint(): Constraint[String] = {
+    Constraint[String](Some("constraint.rollNumber.format"), Seq.empty) { (input: String) =>
+      if (input.isEmpty) Invalid(ValidationError("error.rollNumber.minLength"))
+      else {
+        val strippedInput = input.stripSpaces
+        val errors = Seq(
+          if (strippedInput.length > 18) Some("error.rollNumber.maxLength") else None,
+          if (!"""[A-Z0-9/.\-]+""".r.pattern.matcher(strippedInput).matches()) Some("error.rollNumber.format") else None
+        ).flatten
+
+        errors match {
+          case Seq() => Valid
+          case errs => Invalid(ValidationError(errs))
+        }
+      }
+    }
+  }
 
   private def sortcodeHasInvalidChars(sortcode: String): Boolean =
     Try(sortcode.toInt) match {
       case Success(sc) => false
-      case Failure(_)  => true
+      case Failure(_) => true
     }
 }

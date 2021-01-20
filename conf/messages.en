@@ -35,6 +35,7 @@ hint.rollNumber = You can find it on your card, statement or passbook
 
 error.summaryText = There is a problem
 error.accountName.required = Enter the name on the account
+error.accountName.maxLength = Account name must be 70 characters or shorter
 error.companyName.required = Enter the name on the account
 error.accountType.required = Select an account type
 

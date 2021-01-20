@@ -16,7 +16,6 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.connector.ReputationResponseEnum._
 import bankaccountverification.connector._
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
@@ -41,7 +40,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
                     (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsPersonalAssessResponse]] =
     connector.assessPersonal(
       request.accountName,
-      Forms.stripSortCode(request.sortCode),
+      request.sortCode,
       request.accountNumber,
       address.map(a => BarsAddress(a.lines, a.town, a.postcode)).getOrElse(BarsAddress.emptyAddress))
 
@@ -73,7 +72,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
     connector.assessBusiness(
       request.companyName,
       None,
-      Forms.stripSortCode(request.sortCode),
+      request.sortCode,
       request.accountNumber,
       address.map(a => BarsAddress(a.lines, a.town, a.postcode)))
 

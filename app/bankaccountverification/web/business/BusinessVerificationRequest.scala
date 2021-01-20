@@ -19,6 +19,7 @@ package bankaccountverification.web.business
 import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
 import bankaccountverification.connector.{BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse, BarsBusinessAssessSuccessResponse, ReputationResponseEnum}
 import bankaccountverification.web.Forms._
+import bankaccountverification.web.Implicits.SanitizedString
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation._
@@ -28,6 +29,14 @@ case class BusinessVerificationRequest(companyName: String, sortCode: String, ac
                                        rollNumber: Option[String])
 
 object BusinessVerificationRequest {
+  def apply(companyName: String, sortCode: String, accountNumber: String,
+            rollNumber: Option[String] = None): BusinessVerificationRequest = {
+    val cleanSortCode = sortCode.stripSpacesAndDashes()
+    val cleanAccountNumber = accountNumber.stripSpacesAndDashes()
+    val cleanRollNumber = rollNumber.map(_.stripSpaces())
+
+    new BusinessVerificationRequest(companyName, cleanSortCode, cleanAccountNumber, cleanRollNumber)
+  }
 
   object formats {
     implicit val bankAccountDetailsReads = Json.reads[BusinessVerificationRequest]

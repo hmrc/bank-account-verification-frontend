@@ -109,7 +109,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
           PersonalCompleteResponse(
             Some(CompleteResponseAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             "some-account-name",
-            "12-12-12",
+            "121212",
             "12349876",
             accountNumberWithSortCodeIsValid = Yes,
             None,
@@ -186,7 +186,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
           BusinessCompleteResponse(
             Some(CompleteResponseAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             "some-company-name",
-            "12-12-12",
+            "121212",
             "12349876",
             rollNumber = None,
             accountNumberWithSortCodeIsValid = Yes,
@@ -250,7 +250,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
           PersonalCompleteResponse(
             Some(CompleteResponseAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             "some-account-name",
-            "12-12-12",
+            "121212",
             "12349876",
             accountNumberWithSortCodeIsValid = Yes,
             None,
