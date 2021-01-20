@@ -5,10 +5,6 @@ service.text =
 
 phaseBanner.content = Gwasanaeth newydd yw hwn – bydd eich <a href='/feedback'>adborth</a> yn ein helpu i’w wella.
 
-pageTitle.accountType = Math o Gyfrif
-pageTitle.personal.accountDetails = Manylion Cyfrif Personol
-pageTitle.business.accountDetails = Manylion Cyfrif Busnes
-
 pageTitle.accountExistsIndeterminate = Gwirio manylion y cyfrif
 content.warning = Rhybudd
 content.with = gyda

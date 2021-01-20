@@ -5,10 +5,6 @@ service.text =
 
 phaseBanner.content = This is a new service – your <a href='/feedback'>feedback</a> will help us to improve it.
 
-pageTitle.accountType = Account Type
-pageTitle.personal.accountDetails = Personal Account Details
-pageTitle.business.accountDetails = Business Account Details
-
 pageTitle.accountExistsIndeterminate = Check the account details
 content.warning = Warning
 content.with = with
@@ -56,7 +52,7 @@ error.sortCode.denyListed = You have entered an HMRC sort code. Enter a differen
 
 error.rollNumber.format = Roll number can only contain uppercase characters, digits, dots or hyphens
 error.rollNumber.minLength = Roll number must be at least 1 character long
-error.rollNumber.maxLength = Roll number must be at most 18 characters long
+error.rollNumber.maxLength = Roll number must be 18 characters or fewer
 error.rollNumber.required = Enter a roll number
 
 error.pageTitle = Error
