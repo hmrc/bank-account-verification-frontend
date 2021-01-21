@@ -41,24 +41,32 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         val bankAccountDetails =
           BusinessVerificationRequest("Joe Blogs", "10-10-10", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
         bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.sortCode shouldBe "101010"
       }
       "sortcode is hyphenated with spaces" in {
         val bankAccountDetails =
           BusinessVerificationRequest("Joe Blogs", "10 10 10", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
         bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.sortCode shouldBe "101010"
       }
       "sortcode contains just 6 digits" in {
         val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", "101010", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
         bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.sortCode shouldBe "101010"
       }
-      "sortcode contains just 6 digits and leading & trailing spaces" in {
+      "sortcode contains just 6 digits and spaces and dashes" in {
         val bankAccountDetails =
           BusinessVerificationRequest("Joe Blogs", " 10-10 10   ", "12345678", None)
         val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
         bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.sortCode shouldBe "101010"
       }
     }
 
@@ -71,6 +79,30 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         val error = bankAccountDetailsForm.errors.find(e => e.key == "companyName")
         error shouldNot be(None)
         error.get.message shouldBe "error.companyName.required"
+      }
+    }
+
+    "validate account numbers" when {
+      "account number contains spaces" in {
+        val bankAccountDetails     = BusinessVerificationRequest("Some Company", "123456", " 1 2 3 4 5 6 7 8 ")
+        val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
+        bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.accountNumber shouldBe "12345678"
+      }
+      "account number contains dashes" in {
+        val bankAccountDetails     = BusinessVerificationRequest("Some Company", "123456", "-1-2-3-4-5-6-7-8-")
+        val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
+        bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.accountNumber shouldBe "12345678"
+      }
+      "account number contains dashes and spaces" in {
+        val bankAccountDetails     = BusinessVerificationRequest("Some Company", "123456", "-1 -2 -3 -4- 5- 6- 7 8 -")
+        val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
+        bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.accountNumber shouldBe "12345678"
       }
     }
 
@@ -185,6 +217,17 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
       }
     }
 
+    "validate roll numbers" when {
+      "roll number contains spaces" in {
+        val bankAccountDetails =
+          BusinessVerificationRequest("Some Company", "100010", "12345678", Some(" 12 34 56 78 90 12 34 56 78 "))
+        val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
+
+        bankAccountDetailsForm.hasErrors shouldBe false
+        bankAccountDetailsForm.get.rollNumber shouldBe Some("123456789012345678")
+      }
+    }
+
     "flag roll number validation errors" when {
       "roll number contains more than 18 characters" in {
         val bankAccountDetails =
@@ -222,7 +265,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
   }
 
   "Validation using the bars business assess response" when {
-    val request = BusinessVerificationRequest("Joe Blogs", "10-10-10", "12345678", None)
+    val request = BusinessVerificationRequest("Some Company", "10-10-10", "12345678", None)
     val form    = BusinessVerificationRequest.form.fillAndValidate(request)
 
     "the response indicates the sort code and account number combination is not valid" should {

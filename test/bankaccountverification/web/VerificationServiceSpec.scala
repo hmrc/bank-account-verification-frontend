@@ -223,7 +223,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       "persist the details to mongo" in {
         val expectedAccountDetails = PersonalAccountDetails(
           Some("Bob"),
-          Some("20-30-40"),
+          Some("203040"),
           Some("12345678"),
           None,
           Some(Yes),
@@ -260,7 +260,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       "persist the details to mongo" in {
         val expectedAccountDetails = PersonalAccountDetails(
           Some("Bob"),
-          Some("20-30-40"),
+          Some("203040"),
           Some("12345678"),
           None,
           Some(Error),
@@ -495,7 +495,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       "persist the details to mongo" in {
         val expectedAccountDetails = BusinessAccountDetails(
           Some("Bob Company"),
-          Some("20-30-40"),
+          Some("203040"),
           Some("12345678"),
           None,
           Some(Yes),
@@ -530,7 +530,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       "persist the details to mongo" in {
         val expectedAccountDetails = BusinessAccountDetails(
           Some("Bob Company"),
-          Some("20-30-40"),
+          Some("203040"),
           Some("12345678"),
           None,
           Some(Error),

@@ -1,5 +1,4 @@
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
-import uk.gov.hmrc.SbtArtifactory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 val appName = "bank-account-verification-frontend"
@@ -11,8 +10,7 @@ lazy val microservice = Project(appName, file("."))
     play.sbt.PlayScala,
     SbtAutoBuildPlugin,
     SbtGitVersioning,
-    SbtDistributablesPlugin,
-    SbtArtifactory
+    SbtDistributablesPlugin
   )
   .settings(
     majorVersion := 0,
