@@ -19,7 +19,7 @@ package bankaccountverification.api
 import bankaccountverification.web.AccountTypeRequestEnum
 import play.api.libs.json.{JsObject, Json, OWrites, Reads}
 
-case class InitRequest(internalAuthId: Option[String],
+case class InitRequest(authProviderId: Option[String],
                        serviceIdentifier: String,
                        continueUrl: String,
                        prepopulatedData: Option[InitRequestPrepopulatedData] = None,

@@ -50,8 +50,8 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
       .toMap
 
   "PersonalBankAccountVerification" in {
-    when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-      .thenReturn(Future.successful(Some("1234")))
+    when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+      .thenReturn(Future.successful("1234"))
 
     when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
@@ -126,8 +126,8 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
   }
 
   "BusinessBankAccountVerification" in {
-    when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-      .thenReturn(Future.successful(Some("1234")))
+    when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+      .thenReturn(Future.successful("1234"))
 
     when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(Success(BarsBusinessAssessSuccessResponse(

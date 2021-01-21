@@ -80,7 +80,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "return 401" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
 
         reset(mockRepository)
@@ -96,8 +96,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "return 404" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(Future.successful(None))
@@ -114,8 +114,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "return 404" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("9876")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("9876"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -139,8 +139,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "redirect to the account type screen" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -159,8 +159,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "return 200" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -185,8 +185,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "the account details view should be pre-filled with this data" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -217,7 +217,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "return 404" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
 
         reset(mockRepository)
@@ -233,8 +233,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "return 404" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(Future.successful(None))
@@ -253,8 +253,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "return 404" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("9876")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("9876"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -281,8 +281,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "return 400" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -310,8 +310,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Redirect to the confirm view" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -348,8 +348,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Render the view and display the errors" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -385,8 +385,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Redirect to the confirm view" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -420,8 +420,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Redirect to the continueUrl" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -450,10 +450,10 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "return 404" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
 
         reset(mockRepository)
@@ -471,8 +471,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "return 404" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(Future.successful(None))
@@ -490,8 +490,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         when(mockRepository.findById(id)).thenReturn(
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(Some(Business))))))
@@ -510,8 +510,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         when(mockRepository.findById(id)).thenReturn(
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
@@ -539,8 +539,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(

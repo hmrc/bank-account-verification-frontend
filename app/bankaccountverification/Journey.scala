@@ -25,7 +25,7 @@ import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
-case class Journey(id: BSONObjectID, internalAuthId: Option[String], expiryDate: ZonedDateTime, serviceIdentifier: String, continueUrl: String,
+case class Journey(id: BSONObjectID, authProviderId: Option[String], expiryDate: ZonedDateTime, serviceIdentifier: String, continueUrl: String,
                    data: Session, messages: Option[JsObject] = None, customisationsUrl: Option[String] = None)
 
 object Journey {
@@ -53,10 +53,10 @@ object Journey {
     }
   }
 
-  def createExpiring(id: BSONObjectID, internalAuthId: Option[String], serviceIdentifier: String, continueUrl: String,
+  def createExpiring(id: BSONObjectID, authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
                      messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
                      address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None): Journey =
-    Journey(id, internalAuthId, expiryDate, serviceIdentifier, continueUrl, createSession(address, prepopulatedData),
+    Journey(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, createSession(address, prepopulatedData),
       messages, customisationsUrl)
 
   def updatePersonalAccountDetailsExpiring(data: PersonalAccountDetails) =
@@ -96,7 +96,7 @@ object Journey {
   implicit def defaultReads: Reads[Journey] =
     (__ \ "_id")
       .read[BSONObjectID]
-      .and((__ \ "internalAuthId").readNullable[String])
+      .and((__ \ "authProviderId").readNullable[String])
       .and((__ \ "expiryDate").read[ZonedDateTime])
       .and((__ \ "serviceIdentifier").read[String])
       .and((__ \ "continueUrl").read[String])
@@ -105,20 +105,20 @@ object Journey {
       .and((__ \ "customisationsUrl").readNullable[String])(
         (
           id: BSONObjectID,
-          internalAuthId: Option[String],
+          authProviderId: Option[String],
           expiryDate: ZonedDateTime,
           serviceIdentifier: String,
           continueUrl: String,
           data: Session,
           messages: Option[JsObject],
           customisationsUrl: Option[String]
-        ) => Journey.apply(id, internalAuthId, expiryDate, serviceIdentifier, continueUrl, data, messages, customisationsUrl)
+        ) => Journey.apply(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, data, messages, customisationsUrl)
       )
 
   implicit def defaultWrites: OWrites[Journey] =
     (__ \ "_id")
       .write[BSONObjectID]
-      .and((__ \ "internalAuthId").write[Option[String]])
+      .and((__ \ "authProviderId").write[Option[String]])
       .and((__ \ "expiryDate").write[ZonedDateTime])
       .and((__ \ "serviceIdentifier").write[String])
       .and((__ \ "continueUrl").write[String])

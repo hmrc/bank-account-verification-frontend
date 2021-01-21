@@ -75,7 +75,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
       "return 401" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
 
         reset(mockRepository)
@@ -93,8 +93,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
       "return 404" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(Future.successful(None))
@@ -111,8 +111,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
       "return 404" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-            .thenReturn(Future.successful(Some("9876")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+            .thenReturn(Future.successful("9876"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -130,8 +130,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
       "return 200" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -150,8 +150,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
       "render account type view with the prepopulated account type" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(
@@ -171,7 +171,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
       "return 401" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
 
         reset(mockRepository)
@@ -189,8 +189,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
       "return 404" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(Future.successful(None))
@@ -208,8 +208,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
       "return 404" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("9876")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("9876"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -229,8 +229,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
       "return 400" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id))
@@ -250,8 +250,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
       "Redirect to the getAccountDetails endpoint" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(
@@ -278,8 +278,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
       "Redirect to the getAccountDetails endpoint" in {
         reset(mockAuthConnector)
-        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(internalId))(any(), any()))
-          .thenReturn(Future.successful(Some("1234")))
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(
