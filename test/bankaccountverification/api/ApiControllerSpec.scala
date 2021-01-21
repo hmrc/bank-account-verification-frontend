@@ -90,7 +90,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
-        val json = Json.toJson(InitRequest(Some("1234"), "serviceIdentifier", "continueUrl",
+        val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode")))))
 
         val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
@@ -123,7 +123,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
-        val json = Json.toJson(InitRequest(Some("1234"), "serviceIdentifier", "continueUrl",
+        val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
           prepopulatedData = Some(InitRequestPrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))))
 

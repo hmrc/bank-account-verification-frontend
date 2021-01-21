@@ -62,7 +62,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     val initUrl = s"$baseUrl/api/init"
 
-    val initRequest = InitRequest(Some("1234"), "serviceIdentifier", "continueUrl",
+    val initRequest = InitRequest("serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))))
 
     val initResponse = await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
@@ -138,7 +138,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     val initUrl = s"$baseUrl/api/init"
 
-    val initRequest = InitRequest(Some("1234"), "serviceIdentifier", "continueUrl",
+    val initRequest = InitRequest("serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))))
 
     val initResponse =
@@ -213,7 +213,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     val initUrl = s"$baseUrl/api/init"
 
-    val initRequest = InitRequest(Some("1234"), "serviceIdentifier", "continueUrl",
+    val initRequest = InitRequest("serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
       prepopulatedData = Some(InitRequestPrepopulatedData(Personal)))
 
