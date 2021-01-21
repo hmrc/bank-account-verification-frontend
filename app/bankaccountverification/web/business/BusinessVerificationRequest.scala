@@ -69,6 +69,4 @@ object BusinessVerificationRequest {
         "rollNumber" -> optional(rollNumberMapping)
       )(BusinessVerificationRequest.apply)(BusinessVerificationRequest.unapply)
     )
-
-  def companyNameMapping = text.verifying(Constraints.nonEmpty(errorMessage = "error.companyName.required"))
 }
