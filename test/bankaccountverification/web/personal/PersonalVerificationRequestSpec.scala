@@ -77,6 +77,17 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         error shouldNot be(None)
         error.get.message shouldBe "error.accountName.required"
       }
+
+      "account name is too long" in {
+        val tooLongName = "ASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPASDFGHJKLPA"
+        val bankAccountDetails     = PersonalVerificationRequest(tooLongName, "123456", "12345678")
+        val bankAccountDetailsForm = PersonalVerificationRequest.form.fillAndValidate(bankAccountDetails)
+        bankAccountDetailsForm.hasErrors shouldBe true
+
+        val error = bankAccountDetailsForm.errors.find(e => e.key == "accountName")
+        error shouldNot be(None)
+        error.get.message shouldBe "error.accountName.maxLength"
+      }
     }
 
     "validate account numbers" when {

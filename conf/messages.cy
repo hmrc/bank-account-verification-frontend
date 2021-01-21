@@ -37,6 +37,7 @@ error.summaryText = Mae problem wedi codi
 error.accountName.required = Nodwch yr enw sydd ar y cyfrif
 error.accountName.maxLength = W Account name must be 70 characters or shorter
 error.companyName.required = Nodwch yr enw sydd ar y cyfrif
+error.companyName.maxLength = W Company name must be 70 characters or shorter
 error.accountType.required = Dewiswch fath o gyfrif
 
 error.accountNumber.required = Nodwch rif cyfrif

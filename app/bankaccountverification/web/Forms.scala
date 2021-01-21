@@ -26,7 +26,9 @@ object Forms {
 
   import Implicits._
 
-  def accountNameMapping: Mapping[String] = text.verifying(accountNameConstraint())
+  def accountNameMapping: Mapping[String] = text.verifying(nameConstraint("accountName"))
+
+  def companyNameMapping: Mapping[String] = text.verifying(nameConstraint("companyName"))
 
   def accountNumberMapping: Mapping[String] = text.verifying(accountNumberConstraint())
 
@@ -34,10 +36,10 @@ object Forms {
 
   def rollNumberMapping: Mapping[String] = text.verifying(rollNumberConstraint())
 
-  def accountNameConstraint(): Constraint[String] =
-    Constraint[String](Some("constraints.accountName"), Seq.empty) { input =>
-      if (input.isEmpty) Invalid(ValidationError("error.accountName.required"))
-      else if (input.length > 70) Invalid(ValidationError("error.accountName.maxLength"))
+  def nameConstraint(nameTag: String): Constraint[String] =
+    Constraint[String](Some(s"constraints.$nameTag"), Seq.empty) { input =>
+      if (input.isEmpty) Invalid(ValidationError(s"error.$nameTag.required"))
+      else if (input.length > 70) Invalid(ValidationError(s"error.$nameTag.maxLength"))
       else Valid
     }
 
