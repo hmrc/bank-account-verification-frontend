@@ -63,6 +63,9 @@ error.pageTitle = Gwall
 error.journeyId.heading = Roedd yna broblem
 error.journeyId.message = Nid oedd modd dod o hyd i’r daith
 
+error.unauthorised.heading = Roedd yna broblem
+error.unauthorised.message = W The user is not authenticated
+
 footer.cookies.text = Cwcis
 footer.cookies.url = /help/cookies
 footer.privacy.text = Polisi Preifatrwydd

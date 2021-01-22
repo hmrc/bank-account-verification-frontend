@@ -17,14 +17,13 @@
 package bankaccountverification.api
 
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
-import bankaccountverification.{Address, AppConfig, AuthProviderId, JourneyRepository, PrepopulatedData}
+import bankaccountverification._
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -33,7 +32,7 @@ import scala.util.{Failure, Success}
 @Singleton
 class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerComponents,
                               journeyRepository: JourneyRepository,
-                              val authConnector: AuthConnector) extends FrontendController(mcc) with AuthorisedFunctions {
+                              val authConnector: AuthConnector) extends FrontendApiController(mcc) with AuthorisedFunctions {
 
   implicit val config: AppConfig = appConfig
 
@@ -99,11 +98,13 @@ class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerCompo
           case Success(id) =>
             journeyRepository
               .findById(id)
-              .map { x => x.flatMap { j =>
-                if (j.authProviderId.isEmpty || j.authProviderId.get == authProviderId) {
-                  Session.toCompleteResponseJson(j.data)
-                } else None
-              }}
+              .map { x =>
+                x.flatMap { j =>
+                  if (j.authProviderId.isEmpty || j.authProviderId.get == authProviderId) {
+                    Session.toCompleteResponseJson(j.data)
+                  } else None
+                }
+              }
               .map {
                 case Some(x) => Ok(x)
                 case _ => NotFound
