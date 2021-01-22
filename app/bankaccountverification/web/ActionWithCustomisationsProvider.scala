@@ -18,15 +18,17 @@ package bankaccountverification.web
 
 import bankaccountverification.connector.PartialsConnector
 import bankaccountverification.web.views.html.ErrorTemplate
-import bankaccountverification.{AppConfig, Journey, JourneyRepository}
+import bankaccountverification.{AppConfig, AuthProviderId, Journey, JourneyRepository}
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.Results._
 import play.api.mvc._
 import play.twirl.api.Html
 import reactivemongo.bson.BSONObjectID
+import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders, AuthorisedFunctions}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvider
 import uk.gov.hmrc.play.partials.HtmlPartial
 
@@ -52,14 +54,15 @@ class ActionWithCustomisationsProvider @Inject()(val messagesApi: MessagesApi,
       def executionContext = ec
 
       override protected def refine[A](request: Request[A]): Future[Either[Result, RequestWithCustomisations[A]]] = {
-        implicit val headerCarrier = hc(request)
+        implicit val headerCarrier: HeaderCarrier = hc(request)
 
-        authorised().retrieve(internalId) {
-          case Some(internalAuthId) =>
+        authorised().retrieve(AuthProviderId.retrieval) {
+          authProviderId =>
+
             BSONObjectID.parse(journeyId) match {
               case Success(id) =>
                 journeyRepository.findById(id) flatMap {
-                  case Some(journey) if journey.internalAuthId.isEmpty || journey.internalAuthId.get == internalAuthId =>
+                  case Some(journey) if journey.authProviderId.isEmpty || journey.authProviderId.get == authProviderId =>
                     getCustomisations(journey)(ec, request) map {
                       case (headerBlock, beforeContentBlock, footerBlock) =>
                         Right(new RequestWithCustomisations(request, journey, headerBlock, beforeContentBlock, footerBlock))

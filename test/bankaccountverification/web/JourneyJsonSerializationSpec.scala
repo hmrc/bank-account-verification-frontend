@@ -65,7 +65,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
       "serialize to JSON correctly" in {
 
         (personalJourneyJsValue \ "_id").as[BSONObjectID] shouldBe id
-        (personalJourneyJsValue \ "internalAuthId").as[String] shouldBe "1234"
+        (personalJourneyJsValue \ "authProviderId").as[String] shouldBe "1234"
         (personalJourneyJsValue \ "expiryDate").as[ZonedDateTime] shouldBe theExpiryDate
         (personalJourneyJsValue \ "serviceIdentifier").as[String] shouldBe "some-service"
         (personalJourneyJsValue \ "continueUrl").as[String] shouldBe "some-url"
@@ -138,7 +138,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
       "serialize to JSON correctly" in {
 
         (businessJourneyJsValue \ "_id").as[BSONObjectID] shouldBe id
-        (businessJourneyJsValue \ "internalAuthId").as[String] shouldBe "1234"
+        (businessJourneyJsValue \ "authProviderId").as[String] shouldBe "1234"
         (businessJourneyJsValue \ "expiryDate").as[ZonedDateTime] shouldBe theExpiryDate
         (businessJourneyJsValue \ "serviceIdentifier").as[String] shouldBe "some-service"
         (businessJourneyJsValue \ "continueUrl").as[String] shouldBe "some-url"

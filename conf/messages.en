@@ -61,6 +61,9 @@ error.pageTitle = Error
 error.journeyId.heading = There was a problem
 error.journeyId.message = The journey could not be found
 
+error.unauthorised.heading = There was a problem
+error.unauthorised.message = The user is not authenticated
+
 footer.cookies.text = Cookies
 footer.cookies.url = /help/cookies
 footer.privacy.text = Privacy policy

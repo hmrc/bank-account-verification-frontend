@@ -36,6 +36,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
 import reactivemongo.bson.BSONObjectID
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.internalId
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
@@ -57,9 +60,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
   }
 
   private lazy val sessionStore = mock[JourneyRepository]
+  private lazy val mockAuthConnector = mock[AuthConnector]
 
   private val controller =
-    new ApiController(appConfig, stubMessagesControllerComponents(), sessionStore)
+    new ApiController(appConfig, stubMessagesControllerComponents(), sessionStore, mockAuthConnector)
 
   implicit val mat = app.injector.instanceOf[Materializer]
 
@@ -70,6 +74,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
 
     "return 200" when {
       "A continueUrl is provided" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
         when(
           sessionStore.create(
             meq(Some("1234")),
@@ -82,7 +90,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
-        val json = Json.toJson(InitRequest(Some("1234"), "serviceIdentifier", "continueUrl",
+        val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode")))))
 
         val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
@@ -99,6 +107,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
       }
 
       "prepopulated data is provided" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
         when(
           sessionStore.create(
             meq(Some("1234")),
@@ -111,7 +123,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
-        val json = Json.toJson(InitRequest(Some("1234"), "serviceIdentifier", "continueUrl",
+        val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
           prepopulatedData = Some(InitRequestPrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))))
 
@@ -131,6 +143,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
 
     "return 400" when {
       "A continueUrl is not provided" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
         val json = Json.parse("{}")
         val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
 
@@ -142,6 +158,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
 
     "return 400" when {
       "Prepopulated data is present but account type is not provided" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
         val json = Json.parse(
           """{
             |    "serviceIdentifier":"serviceIdentifier",
@@ -159,11 +179,28 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         status(result) shouldBe Status.BAD_REQUEST
       }
     }
+
+    "return 401" when {
+      "The user is not logged in" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
+
+        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(Json.parse("{}"))
+        val result = controller.init().apply(fakeRequest)
+
+        status(result) shouldBe Status.UNAUTHORIZED
+      }
+    }
   }
 
   "GET /complete" should {
     "return 200" when {
       "a valid journeyId is provided with a personal response" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
         val journeyId = BSONObjectID.generate()
         val returnData = Journey(
           journeyId,
@@ -204,6 +241,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
       }
 
       "a valid journeyId is provided with a business response" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
         val journeyId = BSONObjectID.generate()
         val returnData = Journey(
           journeyId,
@@ -245,6 +286,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
 
     "return NotFound" when {
       "a non-existent journeyId is provided" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
         val nonExistentJourneyId = BSONObjectID.generate()
         when(sessionStore.findById(meq(nonExistentJourneyId), any())(any())).thenReturn(Future.successful(None))
 
@@ -252,14 +297,62 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         val completeResult = controller.complete(nonExistentJourneyId.stringify).apply(fakeCompleteRequest)
         status(completeResult) shouldBe Status.NOT_FOUND
       }
+
+      "a journey is found but it belongs to another user" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("9876"))
+
+        val journeyId = BSONObjectID.generate()
+        val returnData = Journey(
+          journeyId,
+          Some("1234"),
+          ZonedDateTime.now(),
+          "serviceIdentifier",
+          "continueUrl",
+          Session(
+            Some(Business),
+            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            None,
+            Some(
+              BusinessSession(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
+                Some(Yes), Some(No), Some(Indeterminate), Some(Indeterminate), Some(Indeterminate), None, Some
+                ("sort-code-bank-name-business")))))
+
+        when(sessionStore.findById(meq(journeyId), any())(any()))
+          .thenReturn(Future.successful(Some(returnData)))
+
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$journeyId")
+        val completeResult = controller.complete(journeyId.stringify).apply(fakeCompleteRequest)
+        status(completeResult) shouldBe Status.NOT_FOUND
+      }
     }
 
     "return BadRequest" when {
       "an invalid journeyId is provided" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
         val nonExistentJourneyId = "invalid-journey-id"
         val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
         val completeResult = controller.complete(nonExistentJourneyId).apply(fakeCompleteRequest)
         status(completeResult) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "return 401" when {
+      "The user is not logged in" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
+
+        val nonExistentJourneyId = BSONObjectID.generate()
+        when(sessionStore.findById(meq(nonExistentJourneyId), any())(any())).thenReturn(Future.successful(None))
+
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
+        val completeResult = controller.complete(nonExistentJourneyId.stringify).apply(fakeCompleteRequest)
+        status(completeResult) shouldBe Status.UNAUTHORIZED
       }
     }
   }
