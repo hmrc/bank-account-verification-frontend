@@ -54,7 +54,7 @@ error.sortCode.denyListed = You have entered an HMRC sort code. Enter a differen
 
 error.rollNumber.format = Roll number can only contain uppercase characters, digits, dots or hyphens
 error.rollNumber.minLength = Roll number must be at least 1 character long
-error.rollNumber.maxLength = Roll number must be 18 characters or fewer
+error.rollNumber.maxLength = Roll number must be between 1 and 18 characters
 error.rollNumber.required = Enter a roll number
 
 error.pageTitle = Error
