@@ -9,7 +9,7 @@ An example of a client service can be seen in [bank-account-verification-example
 There are 3 parts to the usage of `BAVFE`:
 1. **Initiate a journey** - Initialises a new journey with a unique id (provided by `BAVFE`) and customisation parameters. 
 1. **Perform the journey** - Hands control to `BAVFE` which progresses the journey to capture, validate and verify bank account details.
-1. **Complete the journey** - The client service calls `BAVFE` to collect the entered data and verification results.
+1. **Complete the journey** - The client service calls `BAVFE` to collect the entered data and verification results. Completed journeys will have a sort code, account number and roll number that are valid and appropriately populated, plus an `accountExists` result of `yes`, `indeterminate` or `error`.
 
 In steps 2 & 3, if an invalid `journeyId` is provided or is missing, a `BadRequest` or `NotFound` is returned respectively.
 
