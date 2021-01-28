@@ -54,15 +54,15 @@ error.sortCode.denyListed = Rydych wedi nodi cod didoli CThEM. Nodwch god didoli
 
 error.rollNumber.format = Gall y rhif rôl gynnwys prif lythrennau, digidau, atalnodau neu gysylltnodau yn unig
 error.rollNumber.minLength = Mae’n rhaid i’r rhif rôl fod o leiaf 1 cymeriad o hyd
-error.rollNumber.maxLength = Mae’n rhaid i’r rhif rôl fod yn 18 cymeriad o hyd ar y mwyaf
+error.rollNumber.maxLength = Mae’n rhaid i’r rhif rôl fod rhwng 1 a 18 o gymeriadau
 error.rollNumber.required = Nodwch rif rôl
 
 error.pageTitle = Gwall
 error.journeyId.heading = Roedd yna broblem
 error.journeyId.message = Nid oedd modd dod o hyd i’r daith
 
-error.unauthorised.heading = Roedd yna broblem
-error.unauthorised.message = W The user is not authenticated
+error.unauthorised.heading = Mae problem wedi codi
+error.unauthorised.message = Nid yw’r defnyddiwr wedi’i ddilysu
 
 footer.cookies.text = Cwcis
 footer.cookies.url = /help/cookies
