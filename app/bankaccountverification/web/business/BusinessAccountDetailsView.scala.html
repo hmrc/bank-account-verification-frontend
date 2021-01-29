@@ -44,7 +44,7 @@
             autocomplete = Some("off"),
             formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(messages("hint.sortCode")))),
             name = detailsForm("sortCode").name, id = detailsForm("sortCode").name, classes = "govuk-input--width-5",
-            pattern=Some("[0-9]"), inputmode=Some("numeric"),
+            pattern=Some("[0-9]*"), inputmode=Some("numeric"),
             errorMessage = detailsForm("sortCode").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("accountNumber").value,
@@ -52,7 +52,7 @@
             autocomplete = Some("off"),
             formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(messages("hint.accountNumber")))),
             name = detailsForm("accountNumber").name, id = detailsForm("accountNumber").name, classes = "govuk-input--width-10",
-            pattern=Some("[0-9]"), inputmode=Some("numeric"),
+            pattern=Some("[0-9]*"), inputmode=Some("numeric"),
             errorMessage = detailsForm("accountNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("rollNumber").value,
