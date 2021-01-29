@@ -116,8 +116,8 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
     "flag account number validation errors" when {
       "account number is empty" in {
-        val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "123456", "")
-        val bankAccountDetailsForm = PersonalVerificationRequest.form.fillAndValidate(bankAccountDetails)
+        val bankAccountDetails     = Map("accountName" -> "Joe Blogs", "sortCode" -> "123456","accountNumber" -> "")
+        val bankAccountDetailsForm = PersonalVerificationRequest.form.bind(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
@@ -125,9 +125,9 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         error.get.message shouldBe "error.accountNumber.required"
       }
 
-      "account number is less than 6 digits" in {
-        val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "123456", "12345")
-        val bankAccountDetailsForm = PersonalVerificationRequest.form.fillAndValidate(bankAccountDetails)
+      "account nu1mber is less than 6 digits" in {
+        val bankAccountDetails     = Map("accountName" -> "Joe Blogs", "sortCode" -> "123456","accountNumber" -> "12345")
+        val bankAccountDetailsForm = PersonalVerificationRequest.form.bind(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
@@ -136,8 +136,8 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
       }
 
       "account number is more than 8 digits" in {
-        val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "123456", "123456789")
-        val bankAccountDetailsForm = PersonalVerificationRequest.form.fillAndValidate(bankAccountDetails)
+        val bankAccountDetails     = Map("accountName" -> "Joe Blogs", "sortCode" -> "123456","accountNumber" -> "123456789")
+        val bankAccountDetailsForm = PersonalVerificationRequest.form.bind(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
