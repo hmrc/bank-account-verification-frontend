@@ -31,7 +31,7 @@ object PersonalVerificationRequest {
   def apply(accountName: String, sortCode: String, accountNumber: String,
             rollNumber: Option[String] = None): PersonalVerificationRequest = {
     val cleanSortCode = sortCode.stripSpacesAndDashes()
-    val cleanAccountNumber = accountNumber.stripSpacesAndDashes()
+    val cleanAccountNumber = accountNumber.stripSpacesAndDashes().leftPadToLength(8, '0')
     val cleanRollNumber = rollNumber.map(_.stripSpaces())
 
     new PersonalVerificationRequest(accountName, cleanSortCode, cleanAccountNumber, cleanRollNumber)
