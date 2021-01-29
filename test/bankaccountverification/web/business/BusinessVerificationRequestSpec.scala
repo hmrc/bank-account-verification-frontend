@@ -119,8 +119,9 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
     "flag account number validation errors" when {
       "account number is empty" in {
-        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", "123456", "", None)
-        val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
+        val bankAccountDetails     = Map("companyName" -> "Joe Blogs", "sortCode" -> "123456",
+          "accountNumber" -> "")
+        val bankAccountDetailsForm = BusinessVerificationRequest.form.bind(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
@@ -129,8 +130,8 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
       }
 
       "account number is less than 6 digits" in {
-        val bankAccountDetails     = BusinessVerificationRequest("Joe Blogs", "123456", "12345", None)
-        val bankAccountDetailsForm = BusinessVerificationRequest.form.fillAndValidate(bankAccountDetails)
+        val bankAccountDetails     = Map("companyName" -> "Joe Blogs", "sortCode" -> "123456", "accountNumber" -> "12345")
+        val bankAccountDetailsForm = BusinessVerificationRequest.form.bind(bankAccountDetails)
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")

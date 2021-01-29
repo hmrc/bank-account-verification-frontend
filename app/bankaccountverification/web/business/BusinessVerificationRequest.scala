@@ -32,7 +32,7 @@ object BusinessVerificationRequest {
   def apply(companyName: String, sortCode: String, accountNumber: String,
             rollNumber: Option[String] = None): BusinessVerificationRequest = {
     val cleanSortCode = sortCode.stripSpacesAndDashes()
-    val cleanAccountNumber = accountNumber.stripSpacesAndDashes()
+    val cleanAccountNumber = accountNumber.stripSpacesAndDashes().leftPadToLength(8, '0')
     val cleanRollNumber = rollNumber.map(_.stripSpaces())
 
     new BusinessVerificationRequest(companyName, cleanSortCode, cleanAccountNumber, cleanRollNumber)
