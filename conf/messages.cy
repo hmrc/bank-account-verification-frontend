@@ -35,9 +35,9 @@ hint.rollNumber = Bydd hwn i’w weld ar eich cerdyn, cyfriflen neu baslyfr
 
 error.summaryText = Mae problem wedi codi
 error.accountName.required = Nodwch yr enw sydd ar y cyfrif
-error.accountName.maxLength = W Account name must be 70 characters or shorter
+error.accountName.maxLength = Mae’n rhaid i enw’r cyfrif fod yn 70 o gymeriadau neu lai
 error.companyName.required = Nodwch yr enw sydd ar y cyfrif
-error.companyName.maxLength = W Company name must be 70 characters or shorter
+error.companyName.maxLength = Mae’n rhaid i enw’r cwmni fod yn 70 o gymeriadau neu lai
 error.accountType.required = Dewiswch fath o gyfrif
 
 error.accountNumber.required = Nodwch rif cyfrif
