@@ -11,10 +11,10 @@ content.with = with
 content.accountExistsIndeterminate = We have not been able to check the account details $bankName$. Make sure the details you entered are correct.
 
 label.accountType = Account type
-label.accountType.legend = ADD LEGEND HERE
+label.accountType.heading = What type of account details are you providing?
+label.accountType.legend = What type of account details are you providing?
 label.accountType.personal = Personal bank account
 label.accountType.business = Business bank account
-label.accountType.heading = What type of account details are you providing?
 
 label.accountDetails.heading = Bank or building society account details
 
