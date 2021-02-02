@@ -15,7 +15,6 @@
  *@
 
 @import bankaccountverification.web.{AccountTypeRequest, RequestWithCustomisations}
-@import bankaccountverification.web.views.html.Layout
 
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, radios: GovukRadios, errorSummary: GovukErrorSummary, help: HmrcReportTechnicalIssue)
 @(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, accountTypeForm: Form[AccountTypeRequest])(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
@@ -35,6 +34,12 @@
         @radios(Radios(
             idPrefix = Some("accountType"),
             name = "accountType",
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(messages("label.accountType.legend")),
+                    classes = "govuk-visually-hidden"
+                ))
+            )),
             items = Seq(
                 RadioItem(content = HtmlContent(messages("label.accountType.business")),
                     value = Some("business"),

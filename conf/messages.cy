@@ -3,7 +3,7 @@ service.homePageUrl =
 service.header =
 service.text =
 
-phaseBanner.content = Gwasanaeth newydd yw hwn – bydd eich <a href='/feedback'>adborth</a> yn ein helpu i’w wella.
+phaseBanner.content = Gwasanaeth newydd yw hwn – bydd eich <a href='/feedback' class="govuk-link">adborth</a> yn ein helpu i’w wella.
 
 pageTitle.accountExistsIndeterminate = Gwirio manylion y cyfrif
 content.warning = Rhybudd
@@ -11,9 +11,10 @@ content.with = gyda
 content.accountExistsIndeterminate = Nid ydym wedi gallu gwirio manylion y cyfrif $bankName$. Sicrhewch fod y manylion a nodoch yn gywir.
 
 label.accountType = Math o gyfrif
+label.accountType.heading = Pa fath o fanylion cyfrif ydych yn eu rhoi?
+label.accountType.legend = Pa fath o fanylion cyfrif ydych yn eu rhoi?
 label.accountType.personal = Cyfrif banc personol
 label.accountType.business = Cyfrif banc busnes
-label.accountType.heading = Pa fath o fanylion cyfrif ydych yn eu rhoi?
 
 label.accountDetails.heading = Manylion eich cyfrif banc neu gymdeithas adeiladu
 
