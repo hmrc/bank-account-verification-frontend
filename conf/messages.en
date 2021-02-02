@@ -3,7 +3,7 @@ service.homePageUrl =
 service.header =
 service.text =
 
-phaseBanner.content = This is a new service – your <a href='/feedback'>feedback</a> will help us to improve it.
+phaseBanner.content = This is a new service – your <a href='/feedback' class="govuk-link">feedback</a> will help us to improve it.
 
 pageTitle.accountExistsIndeterminate = Check the account details
 content.warning = Warning

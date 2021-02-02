@@ -3,7 +3,7 @@ service.homePageUrl =
 service.header =
 service.text =
 
-phaseBanner.content = Gwasanaeth newydd yw hwn – bydd eich <a href='/feedback'>adborth</a> yn ein helpu i’w wella.
+phaseBanner.content = Gwasanaeth newydd yw hwn – bydd eich <a href='/feedback' class="govuk-link">adborth</a> yn ein helpu i’w wella.
 
 pageTitle.accountExistsIndeterminate = Gwirio manylion y cyfrif
 content.warning = Rhybudd
