@@ -11,6 +11,7 @@ content.with = gyda
 content.accountExistsIndeterminate = Nid ydym wedi gallu gwirio manylion y cyfrif $bankName$. Sicrhewch fod y manylion a nodoch yn gywir.
 
 label.accountType = Math o gyfrif
+label.accountType.legend = W ADD LEGEND HERE W
 label.accountType.personal = Cyfrif banc personol
 label.accountType.business = Cyfrif banc busnes
 label.accountType.heading = Pa fath o fanylion cyfrif ydych yn eu rhoi?
