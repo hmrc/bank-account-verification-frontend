@@ -37,7 +37,12 @@
       }
     }
 
-    @govukBackLink(BackLink(href="javascript:history.back()", content = HtmlContent(messages("label.back"))))
+    @govukBackLink(BackLink(
+        href="#",
+        content = HtmlContent(messages("label.back")),
+        classes = "govuk-visually-hidden",
+        attributes = Map("id" -> "back", "onclick" -> "javascript:history.back()")
+    ))
 
     @{
         if(welshTranslationsAvailable) {
