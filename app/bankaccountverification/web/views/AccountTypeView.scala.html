@@ -28,16 +28,15 @@
             }))
     }
 
-    <h1 class="govuk-heading-xl">@messages("label.accountType.heading")</h1>
-
     @form(bankaccountverification.web.routes.AccountTypeController.postAccountType(journeyId)) {
         @radios(Radios(
             idPrefix = Some("accountType"),
             name = "accountType",
             fieldset = Some(Fieldset(
                 legend = Some(Legend(
-                    content = Text(messages("label.accountType.legend")),
-                    classes = "govuk-visually-hidden"
+                    content = Text(messages("label.accountType.heading")),
+                    classes = "govuk-label--xl",
+                    isPageHeading = true
                 ))
             )),
             items = Seq(
