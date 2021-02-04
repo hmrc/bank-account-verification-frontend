@@ -15,17 +15,20 @@
  *@
 
 @import bankaccountverification.AppConfig
-@import bankaccountverification.web.views.{FooterLinks}
+@import bankaccountverification.web.views.FooterLinks
+@import bankaccountverification.TimeoutConfig
 
-@this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, govukPhaseBanner: GovukPhaseBanner, languageSelect: HmrcLanguageSelect, head: Head, scripts: Scripts)
+@this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, govukPhaseBanner: GovukPhaseBanner,
+languageSelect: HmrcLanguageSelect, timeoutDialog: HmrcTimeoutDialog, head: Head, scripts: Scripts)
+
 @(pageTitle: Option[String] = None,
         form: Option[Form[_]] = None,
         welshTranslationsAvailable: Boolean = false,
+        timeoutConfig: Option[TimeoutConfig] = None,
         headerBlock: Option[Html] = None,
         beforeContentBlock: Option[Html] = None,
         footerBlock: Option[Html] = None,
-        headBlock: Option[Html] = None,
-        scriptsBlock: Option[Html] = None
+        headBlock: Option[Html] = None
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @defaultBeforeContentBlock = {
@@ -60,12 +63,25 @@
     @{if(form.isDefined && form.get.hasErrors) pageTitle.map(t => s"${messages("error.pageTitle")}: $t") else pageTitle}
 }
 
+@timeoutScripts = @{
+    timeoutConfig.map { tc =>
+        timeoutDialog(TimeoutDialog(
+         name = messages("constants.timeoutSignedOut"),
+         countdown = Some(120),
+         title = Some(messages("constants.timeoutSignedOut")),
+         keepAliveUrl = tc.timeoutKeepAliveUrl.orElse(Some("/lookup-address/renewSession")),
+         timeout = Some(tc.timeoutAmount),
+         signOutUrl = Some(s"/lookup-address/destroySession?timeoutUrl=${tc.timeoutUrl}")
+        ))
+    }
+}
+
 @govukLayout(
     pageTitle = Some(s"$thePageTitle - ${messages("service.name")} - GOV.UK"),
     headBlock = Some(head(headBlock)),
     headerBlock = headerBlock,
     footerBlock = footerBlock,
-    scriptsBlock = Some(scripts(scriptsBlock)),
+    scriptsBlock = Some(scripts(timeoutScripts)),
     beforeContentBlock = beforeContentBlock.orElse(Some(defaultBeforeContentBlock)),
     footerItems = FooterLinks()
 )(contentBlock)

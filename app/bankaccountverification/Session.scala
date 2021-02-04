@@ -43,6 +43,8 @@ import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
 import play.api.libs.json.{JsValue, Json}
 
+case class TimeoutConfig(timeoutUrl: String, timeoutAmount: Int, timeoutKeepAliveUrl: Option[String])
+
 case class PrepopulatedData(accountType: AccountTypeRequestEnum, name: Option[String],
                             sortCode: Option[String], accountNumber: Option[String], rollNumber: Option[String])
 
@@ -225,6 +227,8 @@ object BusinessAccountDetails {
           Some(Error), None, Some(Error), Some(Error), Some(Error), Some(Error), None)
     }
 }
+
+case class RenewExpiryDateUpdate(expiryDate: ZonedDateTime)
 
 case class PersonalAccountDetailsUpdate(expiryDate: ZonedDateTime, data: PersonalAccountDetails)
 

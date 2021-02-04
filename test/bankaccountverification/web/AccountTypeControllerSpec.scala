@@ -80,7 +80,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(), timeoutConfig = None))))
 
         val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
         val result = accountTypeController.getAccountType(id.stringify).apply(fakeRequest)
@@ -116,7 +117,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(), timeoutConfig = None))))
 
         val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
         val result = accountTypeController.getAccountType(id.stringify).apply(fakeRequest)
@@ -135,7 +137,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(), timeoutConfig = None))))
 
         val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
         val result = accountTypeController.getAccountType(id.stringify).apply(fakeRequest)
@@ -155,7 +158,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(
-          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(Some(Personal))))))
+          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(Some(Personal)), timeoutConfig = None))))
 
         val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
         val result = accountTypeController.getAccountType(id.stringify).apply(fakeRequest)
@@ -213,7 +217,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(), timeoutConfig = None))))
 
         val fakeRequest = FakeRequest("POST", s"/start/${id.stringify}")
           .withFormUrlEncodedBody("accountType" -> "")
@@ -234,7 +239,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(), timeoutConfig = None))))
 
         val fakeRequest = FakeRequest("POST", s"/start/${id.stringify}")
           .withFormUrlEncodedBody("accountType" -> "")
@@ -255,7 +261,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(
-          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
+          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(),
+            timeoutConfig = None))))
 
         reset(mockService)
         when(mockService.setAccountType(meq(id), meq(AccountTypeRequestEnum.Personal))(any(), any()))
@@ -283,7 +290,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(
-          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
+          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(), timeoutConfig = None))))
 
         reset(mockService)
         when(mockService.setAccountType(meq(id), meq(AccountTypeRequestEnum.Business))(any(), any()))

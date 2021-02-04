@@ -62,7 +62,8 @@ class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerCompo
                         init.messages.map(m => Json.toJsObject(m)),
                         init.customisationsUrl,
                         address = init.address.map(a => Address(a.lines, a.town, a.postcode)),
-                        prepopulatedData
+                        prepopulatedData,
+                        init.timeoutConfig.map(tc => TimeoutConfig(tc.timeoutUrl, tc.timeoutAmount, tc.timeoutKeepAliveUrl))
                       )
                       .map { journeyId =>
                         import bankaccountverification._
