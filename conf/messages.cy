@@ -12,7 +12,6 @@ content.accountExistsIndeterminate = Nid ydym wedi gallu gwirio manylion y cyfri
 
 label.accountType = Math o gyfrif
 label.accountType.heading = Pa fath o fanylion cyfrif ydych yn eu rhoi?
-label.accountType.legend = Pa fath o fanylion cyfrif ydych yn eu rhoi?
 label.accountType.personal = Cyfrif banc personol
 label.accountType.business = Cyfrif banc busnes
 
