@@ -22,7 +22,7 @@
 @(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, detailsForm: Form[BusinessVerificationRequest])(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
 @layout(pageTitle = Some(messages("label.accountDetails.heading")), Some(detailsForm), welshTranslationsAvailable,
-    request.journey.timeoutConfig, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
+    Some(journeyId), request.journey.timeoutConfig, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
     @if(detailsForm.hasErrors) {
         @errorSummary(ErrorSummary(title = HtmlContent(messages("error.summaryText")),
             errorList = detailsForm.errors.map { error ⇒

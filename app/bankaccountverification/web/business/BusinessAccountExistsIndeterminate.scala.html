@@ -25,7 +25,7 @@
 @import viewModel._
 
 @layout(pageTitle = Some(messages("pageTitle.accountExistsIndeterminate")), None, welshTranslationsAvailable,
-    request.journey.timeoutConfig, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
+    Some(request.journey.id.stringify), request.journey.timeoutConfig, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
     <h1 class="govuk-heading-xl">@messages("pageTitle.accountExistsIndeterminate")</h1>
 
     <div class="govuk-warning-text">

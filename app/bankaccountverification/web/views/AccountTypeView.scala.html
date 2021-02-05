@@ -20,7 +20,7 @@
 @(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, accountTypeForm: Form[AccountTypeRequest])(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
 @layout(pageTitle = Some(messages("label.accountType.heading")), Some(accountTypeForm), welshTranslationsAvailable,
-    request.journey.timeoutConfig, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
+    Some(journeyId), request.journey.timeoutConfig, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
     @if(accountTypeForm.hasErrors) {
         @errorSummary(ErrorSummary(title = HtmlContent(messages("error.summaryText")),
             errorList = accountTypeForm.errors.map { error ⇒

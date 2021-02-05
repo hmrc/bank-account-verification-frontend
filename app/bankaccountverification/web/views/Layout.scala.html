@@ -17,6 +17,7 @@
 @import bankaccountverification.AppConfig
 @import bankaccountverification.web.views.FooterLinks
 @import bankaccountverification.TimeoutConfig
+@import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 @this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, govukPhaseBanner: GovukPhaseBanner,
 languageSelect: HmrcLanguageSelect, timeoutDialog: HmrcTimeoutDialog, head: Head, scripts: Scripts)
@@ -24,6 +25,7 @@ languageSelect: HmrcLanguageSelect, timeoutDialog: HmrcTimeoutDialog, head: Head
 @(pageTitle: Option[String] = None,
         form: Option[Form[_]] = None,
         welshTranslationsAvailable: Boolean = false,
+        journeyId: Option[String],
         timeoutConfig: Option[TimeoutConfig] = None,
         headerBlock: Option[Html] = None,
         beforeContentBlock: Option[Html] = None,
@@ -69,9 +71,9 @@ languageSelect: HmrcLanguageSelect, timeoutDialog: HmrcTimeoutDialog, head: Head
          name = messages("constants.timeoutSignedOut"),
          countdown = Some(120),
          title = Some(messages("constants.timeoutSignedOut")),
-         keepAliveUrl = tc.timeoutKeepAliveUrl.orElse(Some("/lookup-address/renewSession")),
+         keepAliveUrl = tc.timeoutKeepAliveUrl.orElse(Some(bankaccountverification.web.routes.TimeoutController.renewSession(journeyId.get).url)),
          timeout = Some(tc.timeoutAmount),
-         signOutUrl = Some(s"/lookup-address/destroySession?timeoutUrl=${tc.timeoutUrl}")
+         signOutUrl = Some(bankaccountverification.web.routes.TimeoutController.timeoutSession(journeyId.get, RedirectUrl(timeoutConfig.get.timeoutUrl)).url)
         ))
     }
 }
