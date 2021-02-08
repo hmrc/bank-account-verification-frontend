@@ -25,8 +25,9 @@ import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
-case class Journey(id: BSONObjectID, authProviderId: Option[String], expiryDate: ZonedDateTime, serviceIdentifier: String, continueUrl: String,
-                   data: Session, messages: Option[JsObject] = None, customisationsUrl: Option[String] = None)
+case class Journey(id: BSONObjectID, authProviderId: Option[String], expiryDate: ZonedDateTime,
+                   serviceIdentifier: String, continueUrl: String, data: Session, messages: Option[JsObject] = None,
+                   customisationsUrl: Option[String] = None, timeoutConfig: Option[TimeoutConfig] = None)
 
 object Journey {
   def expiryDate = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
@@ -55,9 +56,10 @@ object Journey {
 
   def createExpiring(id: BSONObjectID, authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
                      messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
-                     address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None): Journey =
+                     address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None,
+                     timeoutConfig: Option[TimeoutConfig]): Journey =
     Journey(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, createSession(address, prepopulatedData),
-      messages, customisationsUrl)
+      messages, customisationsUrl, timeoutConfig)
 
   def updatePersonalAccountDetailsExpiring(data: PersonalAccountDetails) =
     PersonalAccountDetailsUpdate(expiryDate, data)
@@ -78,6 +80,9 @@ object Journey {
 
   implicit val sessionReads: Reads[Session] = Json.reads[Session]
   implicit val sessionWrites: Writes[Session] = Json.writes[Session]
+
+  implicit val timeoutConfigReads: Reads[TimeoutConfig] = Json.reads[TimeoutConfig]
+  implicit val timeoutConfigWrites: Writes[TimeoutConfig] = Json.writes[TimeoutConfig]
 
   implicit val localDateTimeRead: Reads[ZonedDateTime] =
     (__ \ "$date").read[Long].map { dateTime =>
@@ -102,7 +107,8 @@ object Journey {
       .and((__ \ "continueUrl").read[String])
       .and((__ \ "data").read[Session])
       .and((__ \ "messages").readNullable[JsObject])
-      .and((__ \ "customisationsUrl").readNullable[String])(
+      .and((__ \ "customisationsUrl").readNullable[String])
+      .and((__ \ "timeoutConfig").readNullable[TimeoutConfig])(
         (
           id: BSONObjectID,
           authProviderId: Option[String],
@@ -111,8 +117,9 @@ object Journey {
           continueUrl: String,
           data: Session,
           messages: Option[JsObject],
-          customisationsUrl: Option[String]
-        ) => Journey.apply(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, data, messages, customisationsUrl)
+          customisationsUrl: Option[String],
+          timeoutConfig: Option[TimeoutConfig]
+        ) => Journey.apply(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, data, messages, customisationsUrl, timeoutConfig)
       )
 
   implicit def defaultWrites: OWrites[Journey] =
@@ -124,7 +131,8 @@ object Journey {
       .and((__ \ "continueUrl").write[String])
       .and((__ \ "data").write[Session])
       .and((__ \ "messages").writeNullable[JsObject])
-      .and((__ \ "customisationsUrl").writeNullable[String]) {
+      .and((__ \ "customisationsUrl").writeNullable[String])
+      .and((__ \ "timeoutConfig").writeNullable[TimeoutConfig]) {
         unlift(Journey.unapply)
       }
 
@@ -160,6 +168,11 @@ object Journey {
       .and((__ \ "data.business.sortCodeBankName").writeOptionWithNull[String])(
         unlift(BusinessAccountDetails.unapply)
       )
+
+  implicit def renewExpiryDateUpdateWrites: OWrites[RenewExpiryDateUpdate] = {
+    (__ \ "$set" \ "expiryDate").write[ZonedDateTime]
+      .contramap[RenewExpiryDateUpdate](u => u.expiryDate)
+  }
 
   implicit def personalUpdateWrites: OWrites[PersonalAccountDetailsUpdate] = {
     (__ \ "$set" \ "expiryDate")

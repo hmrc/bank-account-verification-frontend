@@ -21,7 +21,8 @@
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, errorSummary: GovukErrorSummary, help: HmrcReportTechnicalIssue)
 @(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, detailsForm: Form[PersonalVerificationRequest])(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
-@layout(pageTitle = Some(messages("label.accountDetails.heading")), Some(detailsForm), welshTranslationsAvailable, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
+@layout(pageTitle = Some(messages("label.accountDetails.heading")), Some(detailsForm), welshTranslationsAvailable,
+    Some(journeyId), request.journey.timeoutConfig, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
     @if(detailsForm.hasErrors) {
         @errorSummary(ErrorSummary(title = HtmlContent(messages("error.summaryText")),
             errorList = detailsForm.errors.map { error ⇒

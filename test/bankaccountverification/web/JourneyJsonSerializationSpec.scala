@@ -20,7 +20,7 @@ import java.time.{ZoneOffset, ZonedDateTime}
 
 import bankaccountverification.connector.ReputationResponseEnum._
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
-import bankaccountverification.{BusinessSession, Journey, PersonalSession, Session}
+import bankaccountverification.{BusinessSession, Journey, PersonalSession, Session, TimeoutConfig}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
@@ -55,7 +55,8 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
             sortCodeBankName = Some("sort-code-bank-name")
           )),
           business = None
-        )
+        ),
+        timeoutConfig = Some(TimeoutConfig("url", 100, Some("keepAlive")))
       )
 
       import Journey._
@@ -88,6 +89,10 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         (personalJourneyJsValue \ "data" \ "personal" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name"
 
         (personalJourneyJsValue \ "data" \ "business").isEmpty shouldBe true
+
+        (personalJourneyJsValue \ "timeoutConfig" \ "timeoutUrl").as[String] shouldBe "url"
+        (personalJourneyJsValue \ "timeoutConfig" \ "timeoutAmount").as[Int] shouldBe 100
+        (personalJourneyJsValue \ "timeoutConfig" \ "timeoutKeepAliveUrl").as[String] shouldBe "keepAlive"
       }
 
       "de-serialize from JSON correctly" in {
@@ -128,7 +133,8 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
             sortCodeBankName = Some("sort-code-bank-name-business")
           )),
           personal = None
-        )
+        ),
+        timeoutConfig = Some(TimeoutConfig("url", 100, Some("keepAlive")))
       )
 
       import Journey._
@@ -161,6 +167,10 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         (businessJourneyJsValue \ "data" \ "business" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-business"
 
         (businessJourneyJsValue \ "data" \ "personal").isEmpty shouldBe true
+
+        (businessJourneyJsValue \ "timeoutConfig" \ "timeoutUrl").as[String] shouldBe "url"
+        (businessJourneyJsValue \ "timeoutConfig" \ "timeoutAmount").as[Int] shouldBe 100
+        (businessJourneyJsValue \ "timeoutConfig" \ "timeoutKeepAliveUrl").as[String] shouldBe "keepAlive"
       }
 
       "de-serialize from JSON correctly" in {

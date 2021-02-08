@@ -24,13 +24,18 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
   "Creating personal account details" should {
     val repository = app.injector.instanceOf[JourneyRepository]
 
-    "Should create the session including the prepopulated data" in {
+    "Should create the journey and session including the prepopulated data" in {
       val journeyId = await(repository.create(Some("1234"), "serviceIndentifier", "continueUrl", None, None,
         Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("HP1 1HP"))),
-        Some(PrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))))
+        Some(PrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))),
+        Some(TimeoutConfig("url", 100, None))))
 
-      val personalSession = await(repository.findById(journeyId)).flatMap(j => j.data.personal)
-      personalSession.get shouldBe PersonalSession(Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))
+      val journey = await(repository.findById(journeyId))
+      val timeoutConfig = journey.flatMap(j => j.timeoutConfig)
+      timeoutConfig shouldBe Some(TimeoutConfig("url", 100, None))
+
+      val personalSession = journey.flatMap(j => j.data.personal)
+      personalSession shouldBe Some(PersonalSession(Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))
     }
   }
 
@@ -40,10 +45,15 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
     "Should create the session including the prepopulated data" in {
       val journeyId = await(repository.create(Some("1234"), "serviceIndentifier", "continueUrl", None, None,
         Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("HP1 1HP"))),
-        Some(PrepopulatedData(Business, Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))))
+        Some(PrepopulatedData(Business, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))),
+        Some(TimeoutConfig("url", 100, None))))
 
-      val personalSession = await(repository.findById(journeyId)).flatMap(j => j.data.business)
-      personalSession.get shouldBe BusinessSession(Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))
+      val journey = await(repository.findById(journeyId))
+      val timeoutConfig = journey.flatMap(j => j.timeoutConfig)
+      timeoutConfig shouldBe Some(TimeoutConfig("url", 100, None))
+
+      val businessSession = journey.flatMap(j => j.data.business)
+      businessSession shouldBe Some(BusinessSession(Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))
     }
   }
 
@@ -55,7 +65,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
 
       val personalSession = PersonalSession(Some("accountName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
       val session = Session(accountType = Some(Personal), address = None, personal = Some(personalSession))
-      val journey = Journey(journeyId, Some("1234"), ZonedDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None)
+      val journey = Journey(journeyId, Some("1234"), ZonedDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None, None)
       await(repository.insert(journey))
 
       val accountDetails = PersonalAccountDetails(Some("updated accountName"), Some("updated sortCode"), Some("updated accountNumber"), None)
@@ -74,7 +84,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
 
       val businessSession = BusinessSession(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
       val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
-      val journey = Journey(journeyId, Some("1234"), ZonedDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None)
+      val journey = Journey(journeyId, Some("1234"), ZonedDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None, None)
       await(repository.insert(journey))
 
       val accountDetails = BusinessAccountDetails(Some("updated companyName"), Some("updated sortCode"), Some("updated accountNumber"), None)

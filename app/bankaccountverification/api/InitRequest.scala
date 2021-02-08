@@ -19,12 +19,15 @@ package bankaccountverification.api
 import bankaccountverification.web.AccountTypeRequestEnum
 import play.api.libs.json.{JsObject, Json, OWrites, Reads}
 
+case class InitRequestTimeoutConfig(timeoutUrl: String, timeoutAmount: Int, timeoutKeepAliveUrl: Option[String])
+
 case class InitRequest(serviceIdentifier: String,
                        continueUrl: String,
                        prepopulatedData: Option[InitRequestPrepopulatedData] = None,
                        address: Option[InitRequestAddress] = None,
                        messages: Option[InitRequestMessages] = None,
-                       customisationsUrl: Option[String] = None)
+                       customisationsUrl: Option[String] = None,
+                       timeoutConfig: Option[InitRequestTimeoutConfig])
 
 case class InitRequestPrepopulatedData(accountType: AccountTypeRequestEnum,
                                        name: Option[String] = None,
@@ -45,6 +48,9 @@ object InitRequest {
 
   implicit val addressReads: Reads[InitRequestAddress] = Json.reads[InitRequestAddress]
   implicit val addressWrites: OWrites[InitRequestAddress] = Json.writes[InitRequestAddress]
+
+  implicit val timeoutConfigReads: Reads[InitRequestTimeoutConfig] = Json.reads[InitRequestTimeoutConfig]
+  implicit val timeoutConfigWrites: OWrites[InitRequestTimeoutConfig] = Json.writes[InitRequestTimeoutConfig]
 
   implicit val writes: OWrites[InitRequest] = Json.writes[InitRequest]
   implicit val reads: Reads[InitRequest] = Json.reads[InitRequest]

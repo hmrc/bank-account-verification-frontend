@@ -63,7 +63,8 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     val initUrl = s"$baseUrl/api/init"
 
     val initRequest = InitRequest("serviceIdentifier", "continueUrl",
-      address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))))
+      address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
     val initResponse = await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
 
@@ -139,7 +140,8 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     val initUrl = s"$baseUrl/api/init"
 
     val initRequest = InitRequest("serviceIdentifier", "continueUrl",
-      address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))))
+      address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
     val initResponse =
       await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
@@ -215,7 +217,8 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     val initRequest = InitRequest("serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-      prepopulatedData = Some(InitRequestPrepopulatedData(Personal)))
+      prepopulatedData = Some(InitRequestPrepopulatedData(Personal)),
+      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
     val initResponse = await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
 

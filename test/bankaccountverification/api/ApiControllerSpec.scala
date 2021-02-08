@@ -19,7 +19,7 @@ package bankaccountverification.api
 import java.time.ZonedDateTime
 
 import akka.stream.Materializer
-import bankaccountverification._
+import bankaccountverification.{TimeoutConfig, _}
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import com.codahale.metrics.SharedMetricRegistries
@@ -86,12 +86,14 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             meq(None),
             meq(None),
             meq(Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode")))),
-            meq(None)
+            meq(None),
+            meq(Some(TimeoutConfig("url", 100, None)))
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
         val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
-          address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode")))))
+          address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+          timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))))
 
         val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
 
@@ -119,13 +121,16 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             meq(None),
             meq(None),
             meq(Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode")))),
-            meq(Some(PrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))))
+            meq(Some(PrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))),
+            meq(Some(TimeoutConfig("url", 100, None)))
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
         val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-          prepopulatedData = Some(InitRequestPrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))))
+          prepopulatedData = Some(InitRequestPrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))),
+          timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))
+        ))
 
         val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
 
@@ -215,7 +220,8 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
               PersonalSession(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), Some(Yes),
                 Some(Indeterminate), Some(No), Some(Indeterminate), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"))),
             None
-          ))
+          ),
+          timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId), any())(any())).thenReturn(Future.successful(Some(returnData)))
 
@@ -259,7 +265,8 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             Some(
               BusinessSession(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
                 Some(Yes), Some(No), Some(Indeterminate), Some(Indeterminate), Some(Indeterminate), None, Some
-                ("sort-code-bank-name-business")))))
+                ("sort-code-bank-name-business")))),
+          timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId), any())(any()))
           .thenReturn(Future.successful(Some(returnData)))
@@ -317,7 +324,8 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             Some(
               BusinessSession(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
                 Some(Yes), Some(No), Some(Indeterminate), Some(Indeterminate), Some(Indeterminate), None, Some
-                ("sort-code-bank-name-business")))))
+                ("sort-code-bank-name-business")))),
+          timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId), any())(any()))
           .thenReturn(Future.successful(Some(returnData)))

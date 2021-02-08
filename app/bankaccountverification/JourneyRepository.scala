@@ -32,7 +32,9 @@ package bankaccountverification
  * limitations under the License.
  */
 
+import bankaccountverification.Journey.renewExpiryDateUpdateWrites
 import bankaccountverification.web.AccountTypeRequestEnum
+
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.JsonConfiguration.Aux
 import play.api.libs.json.{JsObject, Json, JsonConfiguration, OWrites, OptionHandlers}
@@ -56,15 +58,21 @@ class JourneyRepository @Inject()(component: ReactiveMongoComponent)
   private lazy val ExpiryDateIndex = "expiryDateIndex"
   private lazy val OptExpireAfterSeconds = "expireAfterSeconds"
 
+  def renewExpiryDate(id: BSONObjectID)(implicit ec: ExecutionContext): Future[Boolean] ={
+    val updateJson = Json.toJsObject(RenewExpiryDateUpdate(Journey.expiryDate))
+    findAndUpdate(_id(id), updateJson).map(r => r.lastError.isDefined)
+  }
+
   def create(authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
              messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
-             address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None)
+             address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None,
+             timeoutConfig: Option[TimeoutConfig])
             (implicit ec: ExecutionContext): Future[BSONObjectID] = {
 
     val journeyId = BSONObjectID.generate()
 
     insert(Journey.createExpiring(journeyId, authProviderId, serviceIdentifier, continueUrl, messages, customisationsUrl,
-      address, prepopulatedData)).map(_ => journeyId)
+      address, prepopulatedData, timeoutConfig)).map(_ => journeyId)
   }
 
   def updatePersonalAccountDetails(id: BSONObjectID, data: PersonalAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {

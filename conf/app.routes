@@ -15,4 +15,7 @@ GET         /verify/business/:journeyId        bankaccountverification.web.busin
 POST        /verify/business/:journeyId        bankaccountverification.web.business.BusinessVerificationController.postAccountDetails(journeyId)
 GET         /confirm/business/:journeyId       bankaccountverification.web.business.BusinessVerificationController.getConfirmDetails(journeyId)
 
+GET         /renewSession                   bankaccountverification.web.TimeoutController.renewSession(journeyId: String)
+GET         /destroySession                 bankaccountverification.web.TimeoutController.timeoutSession(journeyId: String, timeoutUrl: uk.gov.hmrc.play.bootstrap.binders.RedirectUrl)
+
 GET         /assets/*file                      controllers.Assets.versioned(path = "/public", file: Asset)
