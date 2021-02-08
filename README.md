@@ -22,8 +22,13 @@ case class InitRequest(
     prepopulatedData: Option[InitRequestPrepopulatedData] = None,
     address: Option[InitRequestAddress] = None,
     messages: Option[InitRequestMessages] = None, 
-    customisationsUrl: Option[String] = None
+    customisationsUrl: Option[String] = None,
+    timeoutConfig: Option[InitRequestTimeoutConfig])
 )
+```
+```scala
+case class InitRequestTimeoutConfig(timeoutUrl: String, timeoutAmount: Int, timeoutKeepAliveUrl: Option[String])
+// timeoutUrl must be a relative url, a full url will be considered invalid
 ```
 
 The init endpoint will respond in the following format:
