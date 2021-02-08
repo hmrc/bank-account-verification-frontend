@@ -71,6 +71,9 @@ languageSelect: HmrcLanguageSelect, timeoutDialog: HmrcTimeoutDialog, head: Head
          name = messages("constants.timeoutSignedOut"),
          countdown = Some(120),
          title = Some(messages("constants.timeoutSignedOut")),
+         message = Some(messages("constants.timeoutSignYouOut")),
+         keepAliveButtonText = Some(messages("constants.timeoutKeepAlive")),
+         signOutButtonText = Some(messages("constants.timeoutSignOut")),
          keepAliveUrl = tc.timeoutKeepAliveUrl.orElse(Some(bankaccountverification.web.routes.TimeoutController.renewSession(journeyId.get).url)),
          timeout = Some(tc.timeoutAmount),
          signOutUrl = Some(bankaccountverification.web.routes.TimeoutController.timeoutSession(journeyId.get, RedirectUrl(timeoutConfig.get.timeoutUrl)).url)
