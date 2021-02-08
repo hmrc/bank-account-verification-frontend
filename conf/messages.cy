@@ -64,6 +64,14 @@ error.journeyId.message = Nid oedd modd dod o hyd i’r daith
 error.unauthorised.heading = Mae problem wedi codi
 error.unauthorised.message = Nid yw’r defnyddiwr wedi’i ddilysu
 
+constants.timeoutSeconds = eiliad
+constants.timeoutMinutes = munud
+constants.timeoutMinute = munud
+constants.timeoutSignedOut = Rydych ar fin cael eich allgofnodi
+constants.timeoutSignYouOut = Er eich diogelwch, byddwn yn eich allgofnodi cyn pen
+constants.timeoutResumeSession = Ailgydio yn eich sesiwn
+constants.timeoutInactive = Rydych wedi bod yn anweithredol am sbel.
+
 footer.cookies.text = Cwcis
 footer.cookies.url = /help/cookies
 footer.privacy.text = Polisi Preifatrwydd

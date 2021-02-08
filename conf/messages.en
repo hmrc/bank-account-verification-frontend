@@ -64,6 +64,14 @@ error.journeyId.message = The journey could not be found
 error.unauthorised.heading = There was a problem
 error.unauthorised.message = The user is not authenticated
 
+constants.timeoutSeconds = seconds
+constants.timeoutMinutes = minutes
+constants.timeoutMinute = minute
+constants.timeoutSignedOut = You're about to be signed out
+constants.timeoutSignYouOut = For your security, we'll sign you out in
+constants.timeoutResumeSession = Resume your session
+constants.timeoutInactive = You've been inactive for a while.
+
 footer.cookies.text = Cookies
 footer.cookies.url = /help/cookies
 footer.privacy.text = Privacy policy
