@@ -64,7 +64,6 @@ error.journeyId.message = The journey could not be found
 error.unauthorised.heading = There was a problem
 error.unauthorised.message = The user is not authenticated
 
-constants.timeoutSignedOut = You're about to be signed out
 constants.timeoutSignYouOut = For your security, we'll sign you out in
 constants.timeoutKeepAlive = Stay signed in
 constants.timeoutSignOut = Sign out

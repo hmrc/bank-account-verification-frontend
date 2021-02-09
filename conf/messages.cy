@@ -64,7 +64,6 @@ error.journeyId.message = Nid oedd modd dod o hyd i’r daith
 error.unauthorised.heading = Mae problem wedi codi
 error.unauthorised.message = Nid yw’r defnyddiwr wedi’i ddilysu
 
-constants.timeoutSignedOut = Rydych ar fin cael eich allgofnodi
 constants.timeoutSignYouOut = Er eich diogelwch, byddwn yn eich allgofnodi cyn pen
 constants.timeoutKeepAlive = W Stay signed in
 constants.timeoutSignOut = W Sign out
