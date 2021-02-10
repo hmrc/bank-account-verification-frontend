@@ -21,9 +21,7 @@ import bankaccountverification.api.FrontendApiController
 import play.api.Logger
 import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrlPolicy.Id
-import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromAllowlist, RedirectUrl, RedirectUrlPolicy}
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 import java.io.File
 import javax.inject.{Inject, Singleton}
@@ -48,8 +46,8 @@ class TimeoutController @Inject()(appConfig: AppConfig,
     )
   }
 
-  val policy: RedirectUrlPolicy[Id] = AbsoluteWithHostnameFromAllowlist(appConfig.allowedHosts)
+  private val policy = new RelativeOrAbsoluteWithHostnameFromWhitelist(appConfig.allowedHosts)
   def timeoutSession(journeyId: String, timeoutUrl: RedirectUrl) = withCustomisations.action(journeyId).async { implicit request =>
-    Future.successful(Redirect(timeoutUrl.get(policy).url))
+    Future.successful(Redirect(policy.url(timeoutUrl)))
   }
 }
