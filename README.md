@@ -28,7 +28,7 @@ case class InitRequest(
 ```
 ```scala
 case class InitRequestTimeoutConfig(timeoutUrl: String, timeoutAmount: Int, timeoutKeepAliveUrl: Option[String])
-// timeoutUrl must be a relative url, a full url will be considered invalid
+// timeoutUrl must be a relative url, or a full url with a host that has been allow-listed
 ```
 
 The init endpoint will respond in the following format:

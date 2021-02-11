@@ -153,7 +153,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
     "return 200" when {
       "when authorised and a valid journey id is provided" in {
         val journeyId = BSONObjectID.generate()
-        val timeoutUrl = "/some-timeout-url"
+        val timeoutUrl = "https://www.tax.service.gov.uk/some-timeout-url"
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.successful("1234"))
@@ -186,7 +186,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
         val result = controller.timeoutSession(journeyId.stringify, RedirectUrl(timeoutUrl)).apply(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some("/some-timeout-url")
+        redirectLocation(result) shouldBe Some("https://www.tax.service.gov.uk/some-timeout-url")
       }
     }
 
