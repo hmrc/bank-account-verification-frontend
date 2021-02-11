@@ -68,12 +68,9 @@ languageSelect: HmrcLanguageSelect, timeoutDialog: HmrcTimeoutDialog, head: Head
 @timeoutScripts = @{
     timeoutConfig.map { tc =>
         timeoutDialog(TimeoutDialog(
-         name = messages("constants.timeoutSignedOut"),
+         language = Some(messages.lang.code),
          countdown = Some(120),
          title = None,
-         message = Some(messages("constants.timeoutSignYouOut")),
-         keepAliveButtonText = Some(messages("constants.timeoutKeepAlive")),
-         signOutButtonText = Some(messages("constants.timeoutSignOut")),
          keepAliveUrl = tc.timeoutKeepAliveUrl.orElse(Some(bankaccountverification.web.routes.TimeoutController.renewSession(journeyId.get).url)),
          timeout = Some(tc.timeoutAmount),
          signOutUrl = Some(bankaccountverification.web.routes.TimeoutController.timeoutSession(journeyId.get, RedirectUrl(timeoutConfig.get.timeoutUrl)).url)
