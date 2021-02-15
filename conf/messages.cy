@@ -50,7 +50,7 @@ error.accountNumber.doesNotExist = Mae’n rhaid i rif y cyfrif berthyn i gyfrif
 error.sortcode.required = Nodwch god didoli
 error.sortcode.invalidLengthError = Mae’n rhaid i’r cod didoli fod yn 6 digid o hyd
 error.sortcode.invalidCharsError = Nodwch god didoli dilys, er enghraifft 309430
-error.sortCode.denyListed = W Accounts with this sort code cannot be used with this service. Enter a different sort code.
+error.sortCode.denyListed = Nodwch god didoli gwahanol. Rydych wedi nodi cod didoli ar gyfer cyfrif CThEM neu un nad yw’n derbyn taliadau awtomataidd, fel debydau uniongyrchol.
 
 error.rollNumber.format = Gall y rhif rôl gynnwys prif lythrennau, digidau, atalnodau neu gysylltnodau yn unig
 error.rollNumber.minLength = Mae’n rhaid i’r rhif rôl fod o leiaf 1 cymeriad o hyd
