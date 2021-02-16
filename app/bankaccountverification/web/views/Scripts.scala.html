@@ -25,16 +25,12 @@
         window.GOVUKFrontend.initAll();
         const backLink = document.getElementById("back");
         backLink.classList.remove("govuk-visually-hidden");
-        window.onpageshow = function(event) {
-         $('button[disabled]').prop('disabled', false);
-        };
-
         const timeoutDialog = document.getElementsByName("hmrc-timeout-dialog").item(0);
         if (timeoutDialog && window.HMRCFrontend.TimeoutDialog) {
-         new window.HMRCFrontend.TimeoutDialog(timeoutDialog).init();
+            new window.HMRCFrontend.TimeoutDialog(timeoutDialog).init();
         }
 </script>
 
-<!-- Google Tag Manager (noscript) →
+    <!-- Google Tag Manager (noscript) →
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NDJKHWK" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 End Google Tag Manager (noscript) -->
