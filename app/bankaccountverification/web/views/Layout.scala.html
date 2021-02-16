@@ -42,13 +42,6 @@ languageSelect: HmrcLanguageSelect, timeoutDialog: HmrcTimeoutDialog, head: Head
       }
     }
 
-    @govukBackLink(BackLink(
-        href="#",
-        content = HtmlContent(messages("label.back")),
-        classes = "govuk-visually-hidden",
-        attributes = Map("id" -> "back", "onclick" -> "javascript:history.back()")
-    ))
-
     @{
         if(welshTranslationsAvailable) {
             languageSelect(LanguageSelect(messages.lang.code match {
@@ -59,6 +52,13 @@ languageSelect: HmrcLanguageSelect, timeoutDialog: HmrcTimeoutDialog, head: Head
             ))
         }
     }
+
+    @govukBackLink(BackLink(
+        href="#",
+        content = HtmlContent(messages("label.back")),
+        classes = "govuk-visually-hidden",
+        attributes = Map("id" -> "back", "onclick" -> "javascript:history.back()")
+    ))
 }
 
 @thePageTitle = {
