@@ -19,8 +19,7 @@
 @import bankaccountverification.TimeoutConfig
 @import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
-@this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, govukPhaseBanner: GovukPhaseBanner,
-languageSelect: HmrcLanguageSelect, timeoutDialog: HmrcTimeoutDialog, head: Head, scripts: Scripts)
+@this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, govukPhaseBanner: GovukPhaseBanner, languageSelect: HmrcLanguageSelect, timeoutDialog: HmrcTimeoutDialog, head: Head, scripts: Scripts)
 
 @(pageTitle: Option[String] = None,
         form: Option[Form[_]] = None,
@@ -65,25 +64,27 @@ languageSelect: HmrcLanguageSelect, timeoutDialog: HmrcTimeoutDialog, head: Head
     @{if(form.isDefined && form.get.hasErrors) pageTitle.map(t => s"${messages("error.pageTitle")}: $t") else pageTitle}
 }
 
-@timeoutScripts = @{
-    timeoutConfig.map { tc =>
+@newHeadBlock = @{
+    headBlock.getOrElse(Html(""))
+    timeoutConfig.map(tc =>
         timeoutDialog(TimeoutDialog(
-         language = Some(messages.lang.code),
-         countdown = Some(120),
-         title = None,
-         keepAliveUrl = tc.timeoutKeepAliveUrl.orElse(Some(bankaccountverification.web.routes.TimeoutController.renewSession(journeyId.get).url)),
-         timeout = Some(tc.timeoutAmount),
-         signOutUrl = Some(bankaccountverification.web.routes.TimeoutController.timeoutSession(journeyId.get, RedirectUrl(timeoutConfig.get.timeoutUrl)).url)
-        ))
-    }
+            language = Some(messages.lang.code),
+            countdown = Some(120),
+            title = None,
+            keepAliveUrl = tc.timeoutKeepAliveUrl.orElse(Some(bankaccountverification.web.routes.TimeoutController.renewSession(journeyId.get).url)),
+            timeout = Some(tc.timeoutAmount),
+            signOutUrl = Some(bankaccountverification.web.routes.TimeoutController.timeoutSession(journeyId.get, RedirectUrl(tc.timeoutUrl)).url)
+            )
+        )
+    )
 }
 
 @govukLayout(
     pageTitle = Some(s"$thePageTitle - ${messages("service.name")} - GOV.UK"),
-    headBlock = Some(head(headBlock)),
+    headBlock = Some(head(newHeadBlock)),
     headerBlock = headerBlock,
     footerBlock = footerBlock,
-    scriptsBlock = Some(scripts(timeoutScripts)),
+    scriptsBlock = Some(scripts()),
     beforeContentBlock = beforeContentBlock.orElse(Some(defaultBeforeContentBlock)),
     footerItems = FooterLinks()
 )(contentBlock)

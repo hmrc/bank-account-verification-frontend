@@ -78,7 +78,10 @@
     <p>
     @help(ReportTechnicalIssue(
         serviceCode = serviceIdentifier,
-        language = Some(messages.lang.language)
+        language = messages.lang.code match {
+        case "en" => En
+        case "cy" => Cy
+        }
     ))
     </p>
 }
