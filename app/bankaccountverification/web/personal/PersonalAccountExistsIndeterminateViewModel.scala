@@ -36,8 +36,15 @@ case class PersonalAccountExistsIndeterminateViewModel(journeyId: String,
         classes = r.classes.replace("govuk-summary-list__row--no-border", "")
           + " account-details-summary-row--last",
         actions = Some(Actions(items = Seq(
-          ActionItem(href = changeUrl, content = HtmlContent(messages("label.change")),
-            visuallyHiddenText = Some(messages("label.accountDetails.heading")))))))
+          ActionItem(
+            href = changeUrl,
+            content = HtmlContent(
+              s"""
+                  <span aria-hidden="true">${messages("label.change")}</span>
+                  <span class="govuk-visually-hidden">${messages("label.change")} ${messages("label.accountDetails.heading")}</span>
+              """
+            )
+          )))))
       case r => r
     }
 }
