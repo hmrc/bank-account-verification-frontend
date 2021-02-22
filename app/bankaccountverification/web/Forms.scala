@@ -37,9 +37,12 @@ object Forms {
   def rollNumberMapping: Mapping[String] = text.verifying(rollNumberConstraint())
 
   def nameConstraint(nameTag: String): Constraint[String] =
-    Constraint[String](Some(s"constraints.$nameTag"), Seq.empty) { input =>
-      if (input.isEmpty) Invalid(ValidationError(s"error.$nameTag.required"))
-      else if (input.length > 70) Invalid(ValidationError(s"error.$nameTag.maxLength"))
+    Constraint[String](Some(s"constraints.$nameTag"), Seq.empty) { (input: String) =>
+      val trimmedInput = input.stripLeadingSpaces().stripTrailingSpaces()
+      if (trimmedInput.isEmpty) Invalid(ValidationError(s"error.$nameTag.required"))
+      else if(trimmedInput.toAscii().length != trimmedInput.length)
+        Invalid(ValidationError(s"error.$nameTag.asciiOnly"))
+      else if (trimmedInput.length > 70) Invalid(ValidationError(s"error.$nameTag.maxLength"))
       else Valid
     }
 

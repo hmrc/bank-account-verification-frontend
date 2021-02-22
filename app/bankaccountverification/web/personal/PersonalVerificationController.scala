@@ -94,9 +94,10 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
       if (form.hasErrors)
         Future.successful(BadRequest(accountDetailsView(
           journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))
-      else
+      else {
+        val verificationRequestFromForm = PersonalVerificationRequest.convertNameToASCII(form.get)
         for {
-          response <- verificationService.assessPersonal(form.get, journey.data.address)
+          response <- verificationService.assessPersonal(verificationRequestFromForm, journey.data.address)
           updatedForm <- verificationService.processPersonalAssessResponse(journey.id, response, form)
         } yield
           updatedForm match {
@@ -109,6 +110,7 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
                 case _ => Redirect(routes.PersonalVerificationController.getConfirmDetails(journeyId))
               }
           }
+      }
     }
 
   def getConfirmDetails(journeyId: String): Action[AnyContent] =

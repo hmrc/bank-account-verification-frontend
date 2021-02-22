@@ -280,7 +280,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       }
     }
 
-    "the remote bars check fails with an 400 Error" should {
+    "the remote bars check fails with an 400 Error because of sort code on deny list" should {
       val mockConnector = mock[BankAccountReputationConnector]
       val mockRepository = mock[JourneyRepository]
       val service = new VerificationService(mockConnector, mockRepository)
@@ -292,7 +292,27 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val updatedForm = service.processPersonalAssessResponse(journeyId, assessResult, form)
 
       "return an invalid form" in {
-        await(updatedForm).hasErrors shouldEqual true
+        val result = await(updatedForm)
+        result.hasErrors shouldEqual true
+        result.error("sortCode").get.messages shouldBe List("error.sortCode.denyListed")
+      }
+    }
+
+    "the remote bars check fails with an 400 Error" should {
+      val mockConnector = mock[BankAccountReputationConnector]
+      val mockRepository = mock[JourneyRepository]
+      val service = new VerificationService(mockConnector, mockRepository)
+
+      val userInput = PersonalVerificationRequest("Bob", "08-32-00", "12345678")
+      val form = PersonalVerificationRequest.form.fillAndValidate(userInput)
+
+      val assessResult = Success(BarsPersonalAssessBadRequestResponse("MALFORMED_JSON", "bad char"))
+      val updatedForm = service.processPersonalAssessResponse(journeyId, assessResult, form)
+
+      "return an invalid form" in {
+        val result = await(updatedForm)
+        result.hasErrors shouldEqual true
+        result.error("").get.messages shouldBe List("error.summaryText")
       }
     }
   }
