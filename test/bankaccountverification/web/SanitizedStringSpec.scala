@@ -38,5 +38,13 @@ class SanitizedStringSpec extends AnyWordSpec with Matchers {
         "1234".leftPadToLength(8, '0') shouldBe "00001234"
       }
     }
+    "given a string that has non-standard ASCII characters" should {
+      "replace those with ASCII equivalents" in {
+        "Câfe Latte glyn".toAscii() shouldBe "Cafe Latte glyn"
+      }
+      "remove where there is no ASCII equivalent" in {
+        "Cßfe Latte glyn".toAscii() shouldBe "Cfe Latte glyn"
+      }
+    }
   }
 }

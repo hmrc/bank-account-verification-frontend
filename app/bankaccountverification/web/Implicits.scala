@@ -16,10 +16,17 @@
 
 package bankaccountverification.web
 
+import java.text.Normalizer
+
 object Implicits {
   implicit class SanitizedString(unwrap: String) {
-    def stripSpaces() = unwrap.replaceAll("""[ ]""", "")
-    def stripSpacesAndDashes() = unwrap.replaceAll("""[ \-]""", "")
-    def leftPadToLength(length: Int, padChar: Char) = unwrap.reverse.padTo(length, padChar).reverse
+    def stripSpaces(): String = unwrap.replaceAll("""[ ]""", "")
+    def stripSpacesAndDashes(): String = unwrap.replaceAll("""[ \-]""", "")
+    def leftPadToLength(length: Int, padChar: Char): String = unwrap.reverse.padTo(length, padChar).reverse
+    def stripLeadingSpaces(): String = unwrap.stripPrefix(" ")
+    def stripTrailingSpaces(): String = unwrap.stripSuffix(" ")
+    def toAscii(): String = {
+      Normalizer.normalize(unwrap, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "")
+    }
   }
 }

@@ -25,8 +25,8 @@ import play.api.data.Forms._
 import play.api.data.validation._
 import play.api.libs.json.Json
 
-case class PersonalVerificationRequest private (accountName: String, sortCode: String, accountNumber: String,
-                                       rollNumber: Option[String] = None)
+case class PersonalVerificationRequest private (accountName: String, sortCode: String, accountNumber: String, rollNumber: Option[String] = None)
+
 object PersonalVerificationRequest {
   def apply(accountName: String, sortCode: String, accountNumber: String,
             rollNumber: Option[String] = None): PersonalVerificationRequest = {
@@ -37,6 +37,10 @@ object PersonalVerificationRequest {
     new PersonalVerificationRequest(accountName, cleanSortCode, cleanAccountNumber, cleanRollNumber)
   }
 
+  def convertNameToASCII(verificationRequest: PersonalVerificationRequest): PersonalVerificationRequest = {
+    verificationRequest.copy(accountName = verificationRequest.accountName.toAscii())
+  }
+
   object formats {
     implicit val bankAccountDetailsReads = Json.reads[PersonalVerificationRequest]
     implicit val bankAccountDetailsWrites = Json.writes[PersonalVerificationRequest]
@@ -45,8 +49,10 @@ object PersonalVerificationRequest {
   implicit class ValidationFormWrapper(form: Form[PersonalVerificationRequest]) {
     def validateUsingBarsPersonalAssessResponse(response: BarsPersonalAssessResponse): Form[PersonalVerificationRequest] =
       response match {
-        case badRequest: BarsPersonalAssessBadRequestResponse =>
+        case badRequest: BarsPersonalAssessBadRequestResponse if badRequest.code == "SORT_CODE_ON_DENY_LIST" =>
           form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
+        case badRequest: BarsPersonalAssessBadRequestResponse =>
+          form.fill(form.get).withError("", "error.summaryText")
         case success: BarsPersonalAssessSuccessResponse =>
           import success._
 
