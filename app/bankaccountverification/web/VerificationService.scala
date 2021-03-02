@@ -42,7 +42,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
       request.accountName,
       request.sortCode,
       request.accountNumber,
-      address.map(a => BarsAddress(a.lines, a.town, a.postcode)).getOrElse(BarsAddress.emptyAddress))
+      address.map(a => BarsAddress(a.lines, a.town, a.postcode)))
 
   def processPersonalAssessResponse(journeyId: BSONObjectID,
                                     assessResponse: Try[BarsPersonalAssessResponse],

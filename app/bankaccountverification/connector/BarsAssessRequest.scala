@@ -56,8 +56,6 @@ case class BarsAddress(lines: List[String], // One to four lines; cumulative len
 object BarsAddress {
   implicit val format: OFormat[BarsAddress] = Json.format[BarsAddress]
 
-  val emptyAddress: BarsAddress = BarsAddress(lines = List(" "), None, None)
-
   def apply(lines: List[String], town: Option[String], postcode: Option[String]): BarsAddress = {
     val validLines = if (lines.forall(_.isEmpty)) List(" ") else lines
 
@@ -81,7 +79,7 @@ case class BarsSubject(
                         firstName: Option[String], // Must be between 1 and 35 characters long
                         lastName: Option[String], // Must be between 1 and 35 characters long
                         dob: Option[String], // date of birth: ISO-8601 YYYY-MM-DD
-                        address: BarsAddress
+                        address: Option[BarsAddress]
                       ) {
   require(
     (name.isEmpty && firstName.isDefined && lastName.isDefined) ||

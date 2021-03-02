@@ -57,7 +57,7 @@ class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig
       }
   }
 
-  def assessPersonal(accountName: String, sortCode: String, accountNumber: String, address: BarsAddress)
+  def assessPersonal(accountName: String, sortCode: String, accountNumber: String, address: Option[BarsAddress])
                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Try[BarsPersonalAssessResponse]] = {
     import BarsPersonalAssessResponse._
     import HttpReads.Implicits.readRaw
