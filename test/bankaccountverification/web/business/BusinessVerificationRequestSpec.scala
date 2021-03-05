@@ -303,7 +303,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     "the response indicates the account does not exist" should {
       val response = BarsBusinessAssessSuccessResponse(
         Yes,
-        No,
+        Yes,
         None,
         No,
         Indeterminate,
@@ -324,7 +324,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     "the response indicates that a roll number is required but none was provided" should {
       val response = BarsBusinessAssessSuccessResponse(
         Yes,
-        Indeterminate,
+        Yes,
         None,
         Indeterminate,
         Indeterminate,
@@ -346,7 +346,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
       val response = BarsBusinessAssessSuccessResponse(
         Yes,
-        Indeterminate,
+        Yes,
         None,
         Indeterminate,
         Indeterminate,
@@ -361,10 +361,33 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
       }
     }
 
+    "the response indicates the sortcode provided is not in EISCD" should {
+      val requestWithNonEISCDSortCode =
+        BusinessVerificationRequest("Joe Blogs", "19-19-19", "12345678", None)
+      val formWithRollNumber = BusinessVerificationRequest.form.fillAndValidate(requestWithNonEISCDSortCode)
+
+      val response = BarsBusinessAssessSuccessResponse(
+        Yes,
+        No,
+        None,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        None
+      )
+      val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response)
+
+      "flag errors" in {
+        updatedForm.hasErrors shouldBe true
+        updatedForm.error("sortCode") shouldBe defined
+      }
+    }
+
     "the response indicates an error occurred" should {
       val response = BarsBusinessAssessSuccessResponse(
         ReputationResponseEnum.Error,
-        ReputationResponseEnum.Error,
+        ReputationResponseEnum.Yes,
         None,
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,

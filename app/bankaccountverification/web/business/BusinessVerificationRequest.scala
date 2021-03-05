@@ -16,7 +16,7 @@
 
 package bankaccountverification.web.business
 
-import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
+import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes, Inapplicable}
 import bankaccountverification.connector.{BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse, BarsBusinessAssessSuccessResponse, ReputationResponseEnum}
 import bankaccountverification.web.Forms._
 import bankaccountverification.web.Implicits.SanitizedString
@@ -52,6 +52,8 @@ object BusinessVerificationRequest {
           import success._
           if (accountNumberWithSortCodeIsValid == No)
             form.fill(form.get).withError("accountNumber", "error.accountNumber.modCheckFailed")
+          else if (sortCodeIsPresentOnEISCD != Yes)
+            form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
           else if (accountExists == No)
             form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")
           else if (nonStandardAccountDetailsRequiredForBacs.getOrElse(No) == Yes && form.get.rollNumber.isEmpty)

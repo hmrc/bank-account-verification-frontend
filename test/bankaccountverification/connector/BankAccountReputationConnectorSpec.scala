@@ -129,6 +129,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
               |  "addressMatches": "indeterminate",
               |  "nonConsented": "indeterminate",
               |  "subjectHasDeceased": "indeterminate",
+              |  "sortCodeIsPresentOnEISCD": "yes",
               |  "nonStandardAccountDetailsRequiredForBacs": "no"
               |}""".stripMargin).withHeaders("Content-Type" -> "application/json"))
         }
@@ -138,7 +139,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
         val response = await(connector.assessPersonal("Mr Joe Bloggs", "20-30-40", "12345678", None))
         response shouldBe Success(
-          BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Some(No), None)
+          BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Yes, Some(No), None)
         )
       }
     }
