@@ -48,7 +48,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     val userInput = PersonalVerificationRequest("Bob", "20-30-40", "12345678")
 
     val assessResult =
-      Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Indeterminate, Indeterminate, Some(No), None))
+      Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Indeterminate, Indeterminate, Yes, Some(No), None))
 
     when(mockConnector.assessPersonal(any(), any(), any(), any())(any(), any())).thenReturn(Future.successful
     (assessResult))
@@ -210,7 +210,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
 
     "the details provided pass the remote bars checks" should {
       val assessResult =
-        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, No, Indeterminate, Indeterminate, Some(No), Some
+        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, No, Indeterminate, Indeterminate, Yes, Some(No), Some
         ("sort-code-bank-name-personal")))
 
       when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))

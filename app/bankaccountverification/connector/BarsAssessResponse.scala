@@ -26,6 +26,7 @@ case class BarsPersonalAssessSuccessResponse(accountNumberWithSortCodeIsValid: R
                                              addressMatches: ReputationResponseEnum,
                                              nonConsented: ReputationResponseEnum,
                                              subjectHasDeceased: ReputationResponseEnum,
+                                             sortCodeIsPresentOnEISCD: ReputationResponseEnum,
                                              nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum],
                                              sortCodeBankName: Option[String]) extends BarsPersonalAssessResponse
 

@@ -279,6 +279,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
+        Indeterminate,
         Some(No),
         None
       )
@@ -291,6 +292,27 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
       }
     }
 
+    "the response indicates the sort code is not in EISCD" should {
+      val response = BarsPersonalAssessSuccessResponse(
+        Yes,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        No,
+        Some(No),
+        None
+      )
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
+
+      "flag an error against the sort code" in {
+        updatedForm.error("sortCode") shouldBe Some(
+          FormError("sortCode", "error.sortCode.denyListed")
+        )
+      }
+    }
+
     "the response indicates the account does not exist" should {
       val response = BarsPersonalAssessSuccessResponse(
         Yes,
@@ -299,6 +321,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
+        Yes,
         Some(No),
         None
       )
@@ -320,6 +343,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
+        Yes,
         Some(Yes),
         None
       )
@@ -341,6 +365,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
+        Yes,
         Some(Yes),
         None
       )
@@ -359,6 +384,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,
+        ReputationResponseEnum.Yes,
         Some(ReputationResponseEnum.Error),
         None
       )

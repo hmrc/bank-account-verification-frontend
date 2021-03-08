@@ -55,7 +55,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
-        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, No, Indeterminate, Some(No), Some("sort-code-bank-name-personal")))))
+        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, No, Indeterminate, Yes, Some(No), Some("sort-code-bank-name-personal")))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
@@ -208,7 +208,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
   "BankAccountVerification with prepopulated account type, skipping account type screen" in {
     when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
-        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, No, Indeterminate, Some(No), Some("sort-code-bank-name-personal")))))
+        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, No, Indeterminate, Yes, Some(No), Some("sort-code-bank-name-personal")))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"

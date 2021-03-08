@@ -16,7 +16,7 @@
 
 package bankaccountverification.web.personal
 
-import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
+import bankaccountverification.connector.ReputationResponseEnum.{Inapplicable, Indeterminate, No, Yes}
 import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse, ReputationResponseEnum}
 import bankaccountverification.web.Forms._
 import bankaccountverification.web.Implicits.SanitizedString
@@ -58,8 +58,10 @@ object PersonalVerificationRequest {
 
           if (accountNumberWithSortCodeIsValid == No)
             form.fill(form.get).withError("accountNumber", "error.accountNumber.modCheckFailed")
+          else if (sortCodeIsPresentOnEISCD != Yes)
+            form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
           else if (accountExists == No)
-            form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")
+          form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")
           else if (nonStandardAccountDetailsRequiredForBacs.getOrElse(No) == Yes && form.get.rollNumber.isEmpty)
             form.fill(form.get).withError("rollNumber", "error.rollNumber.required")
           else form
