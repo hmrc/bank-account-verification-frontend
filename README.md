@@ -9,7 +9,7 @@ An example of a client service can be seen in [bank-account-verification-example
 There are 3 parts to the usage of `BAVFE`:
 1. **Initiate a journey** - Initialises a new journey with a unique id (provided by `BAVFE`) and customisation parameters. 
 1. **Perform the journey** - Hands control to `BAVFE` which progresses the journey to capture, validate and verify bank account details.
-1. **Complete the journey** - The client service calls `BAVFE` to collect the entered data and verification results. Completed journeys will have a sort code, account number and roll number that are valid and appropriately populated, plus an `accountExists` result of `yes`, `indeterminate` or `error`.
+1. **Complete the journey** - The client service calls `BAVFE` to collect the entered data and verification results. Completed journeys will have a sort code, account number and roll number that are valid and appropriately populated, plus an `accountExists` result of `yes`, `indeterminate` or `error`. A result of `error` occurs when there was a problem with the third party API used to populate these fields. Such errors are infrequent, but do occur. In such cases, we recommend the user journey proceed as normal. 
 
 In steps 2 & 3, if an invalid `journeyId` is provided or is missing, a `BadRequest` or `NotFound` is returned respectively.
 
@@ -132,6 +132,9 @@ case class BusinessCompleteResponse(
     sortCodeBankName: Option[String] = None
   )
 ```
+#### Handling error values
+The `ReputationResponseEnum` range of values includes `error`. This occurs when there was a problem with the third party API used to populate these fields. Such errors are infrequent, but do occur. In such cases, we recommend the user journey proceed as normal. 
+
 ### Supporting a 'Check your answers flow'
 At the end of your journey, you may display information provided by the user in a summary screen and allow them to skip back to a specific section in order to amend their answers. You may want to configure this summary to show data gathered by your service as well as the data gathered by BAVFEFE.
 
