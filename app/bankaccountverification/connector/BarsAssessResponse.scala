@@ -27,6 +27,8 @@ case class BarsPersonalAssessSuccessResponse(accountNumberWithSortCodeIsValid: R
                                              nonConsented: ReputationResponseEnum,
                                              subjectHasDeceased: ReputationResponseEnum,
                                              sortCodeIsPresentOnEISCD: ReputationResponseEnum,
+                                             directDebitSupported: ReputationResponseEnum,
+                                             directCreditSupported: ReputationResponseEnum,
                                              nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum],
                                              sortCodeBankName: Option[String]) extends BarsPersonalAssessResponse
 
@@ -50,6 +52,8 @@ case class BarsBusinessAssessSuccessResponse(accountNumberWithSortCodeIsValid: R
                                       companyNameMatches: ReputationResponseEnum,
                                       companyPostCodeMatches: ReputationResponseEnum,
                                       companyRegistrationNumberMatches: ReputationResponseEnum,
+                                      directDebitSupported: ReputationResponseEnum,
+                                      directCreditSupported: ReputationResponseEnum,
                                       nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum]) extends BarsBusinessAssessResponse
 
 case class BarsBusinessAssessBadRequestResponse(code: String, desc: String) extends BarsBusinessAssessResponse

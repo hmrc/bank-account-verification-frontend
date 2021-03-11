@@ -96,7 +96,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
       else
         for {
           response <- verificationService.assessBusiness(form.get, journey.data.address)
-          updatedForm <- verificationService.processBusinessAssessResponse(journey.id, response, form)
+          updatedForm <- verificationService.processBusinessAssessResponse(journey.id, journey.getDirectDebitConstraints, response, form)
         } yield
           updatedForm match {
             case uform if uform.hasErrors =>

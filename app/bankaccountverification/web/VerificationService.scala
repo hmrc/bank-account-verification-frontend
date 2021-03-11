@@ -16,10 +16,12 @@
 
 package bankaccountverification.web
 
+import bankaccountverification.Journey.DirectDebitConstraints
 import bankaccountverification.connector._
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
 import bankaccountverification.{Address, BusinessAccountDetails, JourneyRepository, PersonalAccountDetails}
+
 import javax.inject.Inject
 import play.api.Logger
 import play.api.data.Form
@@ -45,12 +47,14 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
       address.map(a => BarsAddress(a.lines, a.town, a.postcode)))
 
   def processPersonalAssessResponse(journeyId: BSONObjectID,
+                                    directDebitConstraints: DirectDebitConstraints,
                                     assessResponse: Try[BarsPersonalAssessResponse],
                                     form: Form[PersonalVerificationRequest]
                                    )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Form[PersonalVerificationRequest]] = {
 
     val (updatedForm, response) = assessResponse match {
-      case Success(response) => (form.validateUsingBarsPersonalAssessResponse(response), response)
+      case Success(response) =>
+        (form.validateUsingBarsPersonalAssessResponse(response, directDebitConstraints), response)
       case Failure(e) =>
         logger.warn("Received error response from bank-account-reputation.validateBankDetails")
         (form, BarsPersonalAssessErrorResponse())
@@ -77,12 +81,13 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
       address.map(a => BarsAddress(a.lines, a.town, a.postcode)))
 
   def processBusinessAssessResponse(journeyId: BSONObjectID,
+                                    directDebitConstraints: DirectDebitConstraints,
                                     assessResponse: Try[BarsBusinessAssessResponse],
                                     form: Form[BusinessVerificationRequest]
                                    )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Form[BusinessVerificationRequest]] = {
 
     val (updatedForm, response) = assessResponse match {
-      case Success(response) => (form.validateUsingBarsBusinessAssessResponse(response), response)
+      case Success(response) => (form.validateUsingBarsBusinessAssessResponse(response, directDebitConstraints), response)
       case Failure(e) =>
         logger.warn("Received error response from bank-account-reputation.validateBankDetails")
         (form, BarsBusinessAssessErrorResponse())

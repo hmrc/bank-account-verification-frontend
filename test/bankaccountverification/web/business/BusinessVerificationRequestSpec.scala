@@ -16,6 +16,7 @@
 
 package bankaccountverification.web.business
 
+import bankaccountverification.Journey.DirectDebitConstraints
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.connector.{BarsBusinessAssessBadRequestResponse, BarsBusinessAssessErrorResponse, BarsBusinessAssessResponse, BarsBusinessAssessSuccessResponse, ReputationResponseEnum}
 import com.codahale.metrics.SharedMetricRegistries
@@ -289,9 +290,10 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
+        No, No,
         Some(No)
       )
-      val updatedForm = form.validateUsingBarsBusinessAssessResponse(response)
+      val updatedForm = form.validateUsingBarsBusinessAssessResponse(response, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the account number" in {
         updatedForm.error("accountNumber") shouldBe Some(
@@ -309,10 +311,11 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
+        Yes, Yes,
         Some(No)
       )
 
-      val updatedForm = form.validateUsingBarsBusinessAssessResponse(response)
+      val updatedForm = form.validateUsingBarsBusinessAssessResponse(response, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the account number" in {
         updatedForm.error("accountNumber") shouldBe Some(
@@ -330,9 +333,10 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
+        Yes, Yes,
         Some(Yes)
       )
-      val updatedForm = form.validateUsingBarsBusinessAssessResponse(response)
+      val updatedForm = form.validateUsingBarsBusinessAssessResponse(response, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the roll number field" in {
         updatedForm.error("rollNumber") shouldBe Some(FormError("rollNumber", "error.rollNumber.required"))
@@ -352,16 +356,17 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
+        Yes, Yes,
         Some(Yes)
       )
-      val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response)
+      val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true))
 
       "flag no errors" in {
         updatedForm.hasErrors shouldBe false
       }
     }
 
-    "the response indicates the sortcode provided is not in EISCD" should {
+    "the response indicates the sort code provided is not in EISCD" should {
       val requestWithNonEISCDSortCode =
         BusinessVerificationRequest("Joe Blogs", "19-19-19", "12345678", None)
       val formWithRollNumber = BusinessVerificationRequest.form.fillAndValidate(requestWithNonEISCDSortCode)
@@ -374,9 +379,58 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
+        No, No,
         None
       )
-      val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response)
+      val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true))
+
+      "flag errors" in {
+        updatedForm.hasErrors shouldBe true
+        updatedForm.error("sortCode") shouldBe defined
+      }
+    }
+
+    "the response indicates the sort code provided exists in EISCD but does not support direct debit payments" should {
+      val requestWithNonEISCDSortCode =
+        BusinessVerificationRequest("Joe Blogs", "19-19-19", "12345678", None)
+      val formWithRollNumber = BusinessVerificationRequest.form.fillAndValidate(requestWithNonEISCDSortCode)
+
+      val response = BarsBusinessAssessSuccessResponse(
+        Yes,
+        Yes,
+        None,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        No, Yes,
+        None
+      )
+      val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true))
+
+      "flag errors" in {
+        updatedForm.hasErrors shouldBe true
+        updatedForm.error("sortCode") shouldBe defined
+      }
+    }
+
+    "the response indicates the sort code provided exists in EISCD but does not support direct credit payments" should {
+      val requestWithNonEISCDSortCode =
+        BusinessVerificationRequest("Joe Blogs", "19-19-19", "12345678", None)
+      val formWithRollNumber = BusinessVerificationRequest.form.fillAndValidate(requestWithNonEISCDSortCode)
+
+      val response = BarsBusinessAssessSuccessResponse(
+        Yes,
+        Yes,
+        None,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Yes, No,
+        None
+      )
+      val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true))
 
       "flag errors" in {
         updatedForm.hasErrors shouldBe true
@@ -393,10 +447,11 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,
+        Yes, Yes,
         Some(ReputationResponseEnum.Error)
       )
 
-      val updatedForm = form.validateUsingBarsBusinessAssessResponse(response)
+      val updatedForm = form.validateUsingBarsBusinessAssessResponse(response, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true))
 
       "flag no errors so that the journey is not impacted" in {
         updatedForm.hasErrors shouldBe false
@@ -405,7 +460,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
     "the response indicates that the sort code provided was on the deny list" should {
       val response = BarsBusinessAssessBadRequestResponse("SORT_CODE_ON_DENY_LIST", "083200: sort code is in deny list")
-      val updatedForm = form.validateUsingBarsBusinessAssessResponse(response)
+      val updatedForm = form.validateUsingBarsBusinessAssessResponse(response, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the sort code field" in {
         updatedForm.error("sortCode") shouldBe Some(FormError("sortCode", "error.sortCode.denyListed"))

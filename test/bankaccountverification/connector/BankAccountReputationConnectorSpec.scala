@@ -130,6 +130,8 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
               |  "nonConsented": "indeterminate",
               |  "subjectHasDeceased": "indeterminate",
               |  "sortCodeIsPresentOnEISCD": "yes",
+              |  "directDebitSupported": "yes",
+              |  "directCreditSupported": "yes",
               |  "nonStandardAccountDetailsRequiredForBacs": "no"
               |}""".stripMargin).withHeaders("Content-Type" -> "application/json"))
         }
@@ -139,7 +141,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
         val response = await(connector.assessPersonal("Mr Joe Bloggs", "20-30-40", "12345678", None))
         response shouldBe Success(
-          BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Yes, Some(No), None)
+          BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Yes, Yes, Yes, Some(No), None)
         )
       }
     }
@@ -226,6 +228,8 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
             """{
               |  "accountNumberWithSortCodeIsValid": "yes",
               |  "sortCodeIsPresentOnEISCD": "yes",
+              |  "directDebitSupported": "yes",
+              |  "directCreditSupported": "yes",
               |  "sortCodeBankName": "Some Company",
               |  "accountExists": "yes",
               |  "companyNameMatches": "yes",
@@ -240,7 +244,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None))
         response shouldBe Success(
-          BarsBusinessAssessSuccessResponse(Yes, Yes, Some("Some Company"), Yes, Yes, Indeterminate, Indeterminate, Some(No))
+          BarsBusinessAssessSuccessResponse(Yes, Yes, Some("Some Company"), Yes, Yes, Indeterminate, Indeterminate, Yes, Yes, Some(No))
         )
       }
     }

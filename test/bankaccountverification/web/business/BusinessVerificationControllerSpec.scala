@@ -321,7 +321,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessBusiness(any(), any())(any(), any())).thenReturn(Future.successful(Failure(new HttpException("SERVER ON FIRE", 500))))
-        when(mockService.processBusinessAssessResponse(meq(id), any(), any())(any(), any()))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(form))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
@@ -344,7 +344,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         .withError("Error", "a.specific.error")
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
+        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No))
 
       "Render the view and display the errors" in {
         reset(mockAuthConnector)
@@ -360,7 +360,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockService)
         when(mockService.assessBusiness(any(), any())(any(), any()))
           .thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
-        when(mockService.processBusinessAssessResponse(meq(id), any(), any())(any(), any()))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(formWithErrors))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
@@ -381,7 +381,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No))
+        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No))
 
       "Redirect to the confirm view" in {
         reset(mockAuthConnector)
@@ -396,7 +396,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any())(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
-        when(mockService.processBusinessAssessResponse(meq(id), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.stringify}").withJsonBody(Json.toJson(data))
@@ -416,7 +416,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessSuccessResponse(Yes, No, None, Yes, Indeterminate, Indeterminate, Indeterminate, Some(No))
+        BarsBusinessAssessSuccessResponse(Yes, No, None, Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No))
 
       "Redirect to the continueUrl" in {
         reset(mockAuthConnector)
@@ -431,7 +431,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any())(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
-        when(mockService.processBusinessAssessResponse(meq(id), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.stringify}").withJsonBody(Json.toJson(data))

@@ -98,7 +98,7 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
         val verificationRequestFromForm = PersonalVerificationRequest.convertNameToASCII(form.get)
         for {
           response <- verificationService.assessPersonal(verificationRequestFromForm, journey.data.address)
-          updatedForm <- verificationService.processPersonalAssessResponse(journey.id, response, form)
+          updatedForm <- verificationService.processPersonalAssessResponse(journey.id, journey.getDirectDebitConstraints, response, form)
         } yield
           updatedForm match {
             case uform if uform.hasErrors =>

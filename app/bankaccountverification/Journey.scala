@@ -16,8 +16,9 @@
 
 package bankaccountverification
 
-import java.time.{Instant, ZoneOffset, ZonedDateTime}
+import bankaccountverification.Journey.{DirectDebitConstraints, defaultDirectDebitConstraints}
 
+import java.time.{Instant, ZoneOffset, ZonedDateTime}
 import bankaccountverification.connector.ReputationResponseEnum
 import bankaccountverification.web.AccountTypeRequestEnum
 import play.api.libs.functional.syntax._
@@ -27,9 +28,15 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 case class Journey(id: BSONObjectID, authProviderId: Option[String], expiryDate: ZonedDateTime,
                    serviceIdentifier: String, continueUrl: String, data: Session, messages: Option[JsObject] = None,
-                   customisationsUrl: Option[String] = None, timeoutConfig: Option[TimeoutConfig] = None)
+                   customisationsUrl: Option[String] = None, timeoutConfig: Option[TimeoutConfig] = None, directDebitContraints: Option[DirectDebitConstraints] = None) {
+
+  def getDirectDebitConstraints: DirectDebitConstraints = directDebitContraints.getOrElse(defaultDirectDebitConstraints)
+}
 
 object Journey {
+  case class DirectDebitConstraints(directDebitRequired: Boolean, directCreditRequired: Boolean)
+  val defaultDirectDebitConstraints = DirectDebitConstraints(true, true)
+
   def expiryDate = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
 
   def createSession(address: Option[Address], prepopulatedData: Option[PrepopulatedData]): Session = {
@@ -84,6 +91,9 @@ object Journey {
   implicit val timeoutConfigReads: Reads[TimeoutConfig] = Json.reads[TimeoutConfig]
   implicit val timeoutConfigWrites: Writes[TimeoutConfig] = Json.writes[TimeoutConfig]
 
+  implicit val directDebitConstraintsReads: Reads[DirectDebitConstraints] = Json.reads[DirectDebitConstraints]
+  implicit val directDebitConstraintsWrites: Writes[DirectDebitConstraints] = Json.writes[DirectDebitConstraints]
+
   implicit val localDateTimeRead: Reads[ZonedDateTime] =
     (__ \ "$date").read[Long].map { dateTime =>
       ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateTime), ZoneOffset.UTC)
@@ -132,7 +142,8 @@ object Journey {
       .and((__ \ "data").write[Session])
       .and((__ \ "messages").writeNullable[JsObject])
       .and((__ \ "customisationsUrl").writeNullable[String])
-      .and((__ \ "timeoutConfig").writeNullable[TimeoutConfig]) {
+      .and((__ \ "timeoutConfig").writeNullable[TimeoutConfig])
+      .and((__ \ "directDebitConstraints").writeNullable[DirectDebitConstraints]) {
         unlift(Journey.unapply)
       }
 
