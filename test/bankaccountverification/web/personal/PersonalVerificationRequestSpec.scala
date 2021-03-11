@@ -16,7 +16,7 @@
 
 package bankaccountverification.web.personal
 
-import bankaccountverification.Journey.DirectDebitConstraints
+import bankaccountverification.DirectDebitConstraints
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessSuccessResponse, BarsValidationResponse, ReputationResponseEnum}
 import com.codahale.metrics.SharedMetricRegistries

@@ -1,7 +1,9 @@
 package bankaccountverification
 
-import java.time.ZonedDateTime
+import bankaccountverification.DirectDebitConstraints
+import bankaccountverification.api.InitDirectDebitConstraints
 
+import java.time.ZonedDateTime
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.matchers.should.Matchers
@@ -28,7 +30,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
       val journeyId = await(repository.create(Some("1234"), "serviceIndentifier", "continueUrl", None, None,
         Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("HP1 1HP"))),
         Some(PrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))),
-        Some(TimeoutConfig("url", 100, None))))
+        Some(DirectDebitConstraints(true, true)), Some(TimeoutConfig("url", 100, None))))
 
       val journey = await(repository.findById(journeyId))
       val timeoutConfig = journey.flatMap(j => j.timeoutConfig)
@@ -46,7 +48,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
       val journeyId = await(repository.create(Some("1234"), "serviceIndentifier", "continueUrl", None, None,
         Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("HP1 1HP"))),
         Some(PrepopulatedData(Business, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))),
-        Some(TimeoutConfig("url", 100, None))))
+        Some(DirectDebitConstraints(true, true)), Some(TimeoutConfig("url", 100, None))))
 
       val journey = await(repository.findById(journeyId))
       val timeoutConfig = journey.flatMap(j => j.timeoutConfig)

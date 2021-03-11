@@ -16,8 +16,10 @@
 
 package bankaccountverification.api
 
+import bankaccountverification.DirectDebitConstraints
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification._
+
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
@@ -63,6 +65,7 @@ class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerCompo
                         init.customisationsUrl,
                         address = init.address.map(a => Address(a.lines, a.town, a.postcode)),
                         prepopulatedData,
+                        init.directDebitConstraints.map(ddc => DirectDebitConstraints(ddc.directDebitRequired, ddc.directCreditRequired)).orElse(Some(DirectDebitConstraints.defaultDirectDebitConstraints)),
                         init.timeoutConfig.map(tc => TimeoutConfig(tc.timeoutUrl, tc.timeoutAmount, tc.timeoutKeepAliveUrl))
                       )
                       .map { journeyId =>

@@ -16,7 +16,7 @@
 
 package bankaccountverification.web.personal
 
-import bankaccountverification.Journey.DirectDebitConstraints
+import bankaccountverification.DirectDebitConstraints
 import bankaccountverification.connector.ReputationResponseEnum.{Inapplicable, Indeterminate, No, Yes}
 import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse, ReputationResponseEnum}
 import bankaccountverification.web.Forms._

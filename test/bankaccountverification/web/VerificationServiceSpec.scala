@@ -16,7 +16,7 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.Journey.DirectDebitConstraints
+import bankaccountverification.DirectDebitConstraints
 import bankaccountverification.{Address, BusinessAccountDetails, JourneyRepository, PersonalAccountDetails, PersonalSession, Session}
 import bankaccountverification.connector.{BankAccountReputationConnector, BarsAddress, BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse, BarsBusinessAssessSuccessResponse, BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse, BarsValidationRequest, BarsValidationResponse}
 import bankaccountverification.connector.ReputationResponseEnum._

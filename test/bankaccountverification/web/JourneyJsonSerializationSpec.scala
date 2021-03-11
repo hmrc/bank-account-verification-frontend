@@ -16,8 +16,9 @@
 
 package bankaccountverification.web
 
-import java.time.{ZoneOffset, ZonedDateTime}
+import bankaccountverification.DirectDebitConstraints
 
+import java.time.{ZoneOffset, ZonedDateTime}
 import bankaccountverification.connector.ReputationResponseEnum._
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.{BusinessSession, Journey, PersonalSession, Session, TimeoutConfig}
@@ -56,6 +57,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
           )),
           business = None
         ),
+        directDebitConstraints = Some(DirectDebitConstraints(true, false)),
         timeoutConfig = Some(TimeoutConfig("url", 100, Some("keepAlive")))
       )
 
@@ -89,6 +91,9 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         (personalJourneyJsValue \ "data" \ "personal" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name"
 
         (personalJourneyJsValue \ "data" \ "business").isEmpty shouldBe true
+
+        (personalJourneyJsValue \ "directDebitConstraints" \ "directDebitRequired").as[Boolean] shouldBe true
+        (personalJourneyJsValue \ "directDebitConstraints" \ "directCreditRequired").as[Boolean] shouldBe false
 
         (personalJourneyJsValue \ "timeoutConfig" \ "timeoutUrl").as[String] shouldBe "url"
         (personalJourneyJsValue \ "timeoutConfig" \ "timeoutAmount").as[Int] shouldBe 100
@@ -134,6 +139,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
           )),
           personal = None
         ),
+        directDebitConstraints = Some(DirectDebitConstraints(false, true)),
         timeoutConfig = Some(TimeoutConfig("url", 100, Some("keepAlive")))
       )
 
@@ -167,6 +173,9 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         (businessJourneyJsValue \ "data" \ "business" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-business"
 
         (businessJourneyJsValue \ "data" \ "personal").isEmpty shouldBe true
+
+        (businessJourneyJsValue \ "directDebitConstraints" \ "directDebitRequired").as[Boolean] shouldBe false
+        (businessJourneyJsValue \ "directDebitConstraints" \ "directCreditRequired").as[Boolean] shouldBe true
 
         (businessJourneyJsValue \ "timeoutConfig" \ "timeoutUrl").as[String] shouldBe "url"
         (businessJourneyJsValue \ "timeoutConfig" \ "timeoutAmount").as[Int] shouldBe 100

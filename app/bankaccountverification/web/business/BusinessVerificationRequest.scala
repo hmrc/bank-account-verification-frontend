@@ -16,7 +16,7 @@
 
 package bankaccountverification.web.business
 
-import bankaccountverification.Journey.DirectDebitConstraints
+import bankaccountverification.DirectDebitConstraints
 import bankaccountverification.connector.ReputationResponseEnum.{Inapplicable, Indeterminate, No, Yes}
 import bankaccountverification.connector.{BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse,
   BarsBusinessAssessSuccessResponse, ReputationResponseEnum}
