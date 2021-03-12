@@ -35,10 +35,10 @@ hint.rollNumber = You can find it on your card, statement or passbook
 
 error.summaryText = There is a problem
 error.accountName.required = Enter the name on the account
-error.accountName.asciiOnly = The name on the account must only include letters, numbers and common characters
+error.accountName.asciiOnly = Enter the name on the account as it appears on bank statements, do not copy and paste it.
 error.accountName.maxLength = Account name must be 70 characters or shorter
 error.companyName.required = Enter the name on the account
-error.companyName.asciiOnly = The name on the account must only include letters, numbers and common characters
+error.companyName.asciiOnly = Enter the name on the account as it appears on bank statements, do not copy and paste it.
 error.companyName.maxLength = Company name must be 70 characters or shorter
 error.accountType.required = Select an account type
 
