@@ -87,7 +87,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             meq(None),
             meq(Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode")))),
             meq(None),
-            meq(Some(DirectDebitConstraints.defaultDirectDebitConstraints)),
+            meq(Some(DirectDebitRequirements.defaultDirectDebitRequirements)),
             meq(Some(TimeoutConfig("url", 100, None)))
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
@@ -123,7 +123,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             meq(None),
             meq(Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode")))),
             meq(Some(PrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))),
-            meq(Some(DirectDebitConstraints.defaultDirectDebitConstraints)),
+            meq(Some(DirectDebitRequirements.defaultDirectDebitRequirements)),
             meq(Some(TimeoutConfig("url", 100, None)))
           )(any())
         ).thenReturn(Future.successful(newJourneyId))

@@ -143,7 +143,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
       serviceIdentifier = "serviceIdentifier",
       continueUrl = "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-      directDebitConstraints = Some(InitDirectDebitConstraints(true, false)),
+      directDebitRequirements = Some(InitDirectDebitRequirements(true, false)),
       timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
     val initResponse =

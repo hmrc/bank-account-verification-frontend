@@ -21,7 +21,7 @@ import play.api.libs.json.{JsObject, Json, OWrites, Reads}
 
 case class InitRequestTimeoutConfig(timeoutUrl: String, timeoutAmount: Int, timeoutKeepAliveUrl: Option[String])
 
-case class InitDirectDebitConstraints(directDebitRequired: Boolean, directCreditRequired: Boolean)
+case class InitDirectDebitRequirements(directDebitRequired: Boolean, directCreditRequired: Boolean)
 
 case class InitRequest(serviceIdentifier: String,
                        continueUrl: String,
@@ -29,7 +29,7 @@ case class InitRequest(serviceIdentifier: String,
                        address: Option[InitRequestAddress] = None,
                        messages: Option[InitRequestMessages] = None,
                        customisationsUrl: Option[String] = None,
-                       directDebitConstraints: Option[InitDirectDebitConstraints] = None,
+                       directDebitRequirements: Option[InitDirectDebitRequirements] = None,
                        timeoutConfig: Option[InitRequestTimeoutConfig])
 
 case class InitRequestPrepopulatedData(accountType: AccountTypeRequestEnum,
@@ -55,8 +55,8 @@ object InitRequest {
   implicit val timeoutConfigReads: Reads[InitRequestTimeoutConfig] = Json.reads[InitRequestTimeoutConfig]
   implicit val timeoutConfigWrites: OWrites[InitRequestTimeoutConfig] = Json.writes[InitRequestTimeoutConfig]
 
-  implicit val directDebitConstraintsReads: Reads[InitDirectDebitConstraints] = Json.reads[InitDirectDebitConstraints]
-  implicit val directDebitConstraintsWrites: OWrites[InitDirectDebitConstraints] = Json.writes[InitDirectDebitConstraints]
+  implicit val directDebitConstraintsReads: Reads[InitDirectDebitRequirements] = Json.reads[InitDirectDebitRequirements]
+  implicit val directDebitConstraintsWrites: OWrites[InitDirectDebitRequirements] = Json.writes[InitDirectDebitRequirements]
 
   implicit val writes: OWrites[InitRequest] = Json.writes[InitRequest]
   implicit val reads: Reads[InitRequest] = Json.reads[InitRequest]

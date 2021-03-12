@@ -16,7 +16,7 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.DirectDebitConstraints
+import bankaccountverification.DirectDebitRequirements
 import bankaccountverification.{Address, BusinessAccountDetails, JourneyRepository, PersonalAccountDetails, PersonalSession, Session}
 import bankaccountverification.connector.{BankAccountReputationConnector, BarsAddress, BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse, BarsBusinessAssessSuccessResponse, BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse, BarsValidationRequest, BarsValidationResponse}
 import bankaccountverification.connector.ReputationResponseEnum._
@@ -216,7 +216,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
 
       when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
-      val res = await(service.processPersonalAssessResponse(journeyId, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true), assessResult, form))
+      val res = await(service.processPersonalAssessResponse(journeyId, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form))
 
       "persist the details to mongo" in {
         val expectedAccountDetails = PersonalAccountDetails(
@@ -253,7 +253,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val assessResult = Failure(new HttpException("FIRE IN SERVER ROOM", 500))
       when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
-      val res = await(service.processPersonalAssessResponse(journeyId, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true), assessResult, form))
+      val res = await(service.processPersonalAssessResponse(journeyId, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form))
 
       "persist the details to mongo" in {
         val expectedAccountDetails = PersonalAccountDetails(
@@ -287,7 +287,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val form = PersonalVerificationRequest.form.fillAndValidate(userInput)
 
       val assessResult = Success(BarsPersonalAssessBadRequestResponse("SORT_CODE_ON_DENY_LIST", "083200: sort code is in deny list"))
-      val updatedForm = service.processPersonalAssessResponse(journeyId, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true), assessResult, form)
+      val updatedForm = service.processPersonalAssessResponse(journeyId, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form)
 
       "return an invalid form" in {
         val result = await(updatedForm)
@@ -305,7 +305,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val form = PersonalVerificationRequest.form.fillAndValidate(userInput)
 
       val assessResult = Success(BarsPersonalAssessBadRequestResponse("MALFORMED_JSON", "bad char"))
-      val updatedForm = service.processPersonalAssessResponse(journeyId, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true), assessResult, form)
+      val updatedForm = service.processPersonalAssessResponse(journeyId, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form)
 
       "return an invalid form" in {
         val result = await(updatedForm)
@@ -508,7 +508,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       clearInvocations(mockRepository)
       when(mockRepository.updateBusinessAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
-      val updatedForm = await(service.processBusinessAssessResponse(journeyId, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true), assessResult, form))
+      val updatedForm = await(service.processBusinessAssessResponse(journeyId, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form))
 
       "persist the details to mongo" in {
         val expectedAccountDetails = BusinessAccountDetails(
@@ -543,7 +543,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val assessResult = Failure(new HttpException("FIRE IN SERVER ROOM", 500))
       when(mockRepository.updateBusinessAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
-      val updatedForm = service.processBusinessAssessResponse(journeyId, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true), assessResult, form)
+      val updatedForm = service.processBusinessAssessResponse(journeyId, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form)
 
       "persist the details to mongo" in {
         val expectedAccountDetails = BusinessAccountDetails(
@@ -575,7 +575,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val form = BusinessVerificationRequest.form.fillAndValidate(userInput)
 
       val assessResult = Success(BarsBusinessAssessBadRequestResponse("SORT_CODE_ON_DENY_LIST", "083200: sort code is in deny list"))
-      val updatedForm = service.processBusinessAssessResponse(journeyId, DirectDebitConstraints(directDebitRequired = true, directCreditRequired = true), assessResult, form)
+      val updatedForm = service.processBusinessAssessResponse(journeyId, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form)
 
       "return an invalid form" in {
         await(updatedForm).hasErrors shouldEqual true

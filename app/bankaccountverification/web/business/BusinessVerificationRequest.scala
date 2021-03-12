@@ -16,7 +16,7 @@
 
 package bankaccountverification.web.business
 
-import bankaccountverification.DirectDebitConstraints
+import bankaccountverification.DirectDebitRequirements
 import bankaccountverification.connector.ReputationResponseEnum.{Inapplicable, Indeterminate, No, Yes}
 import bankaccountverification.connector.{BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse,
   BarsBusinessAssessSuccessResponse, ReputationResponseEnum}
@@ -47,7 +47,7 @@ object BusinessVerificationRequest {
 
   implicit class ValidationFormWrapper(form: Form[BusinessVerificationRequest]) {
     def validateUsingBarsBusinessAssessResponse(response: BarsBusinessAssessResponse,
-                                                directDebitConstraints: DirectDebitConstraints)
+                                                directDebitConstraints: DirectDebitRequirements)
     : Form[BusinessVerificationRequest] =
       response match {
         case badRequest: BarsBusinessAssessBadRequestResponse =>

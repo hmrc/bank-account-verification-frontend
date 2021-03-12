@@ -16,7 +16,7 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.DirectDebitConstraints
+import bankaccountverification.DirectDebitRequirements
 
 import java.time.{ZoneOffset, ZonedDateTime}
 import bankaccountverification.connector.ReputationResponseEnum._
@@ -57,7 +57,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
           )),
           business = None
         ),
-        directDebitConstraints = Some(DirectDebitConstraints(true, false)),
+        directDebitRequirements = Some(DirectDebitRequirements(true, false)),
         timeoutConfig = Some(TimeoutConfig("url", 100, Some("keepAlive")))
       )
 
@@ -139,7 +139,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
           )),
           personal = None
         ),
-        directDebitConstraints = Some(DirectDebitConstraints(false, true)),
+        directDebitRequirements = Some(DirectDebitRequirements(false, true)),
         timeoutConfig = Some(TimeoutConfig("url", 100, Some("keepAlive")))
       )
 

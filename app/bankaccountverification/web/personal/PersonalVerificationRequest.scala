@@ -16,7 +16,7 @@
 
 package bankaccountverification.web.personal
 
-import bankaccountverification.DirectDebitConstraints
+import bankaccountverification.DirectDebitRequirements
 import bankaccountverification.connector.ReputationResponseEnum.{Inapplicable, Indeterminate, No, Yes}
 import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse, ReputationResponseEnum}
 import bankaccountverification.web.Forms._
@@ -48,7 +48,7 @@ object PersonalVerificationRequest {
   }
 
   implicit class ValidationFormWrapper(form: Form[PersonalVerificationRequest]) {
-    def validateUsingBarsPersonalAssessResponse(response: BarsPersonalAssessResponse, directDebitConstraints: DirectDebitConstraints): Form[PersonalVerificationRequest] =
+    def validateUsingBarsPersonalAssessResponse(response: BarsPersonalAssessResponse, directDebitConstraints: DirectDebitRequirements): Form[PersonalVerificationRequest] =
       response match {
         case badRequest: BarsPersonalAssessBadRequestResponse if badRequest.code == "SORT_CODE_ON_DENY_LIST" =>
           form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
