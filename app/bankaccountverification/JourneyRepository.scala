@@ -66,13 +66,11 @@ class JourneyRepository @Inject()(component: ReactiveMongoComponent)
   def create(authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
              messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
              address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None,
-             timeoutConfig: Option[TimeoutConfig])
-            (implicit ec: ExecutionContext): Future[BSONObjectID] = {
-
+             directDebitConstraints: Option[DirectDebitRequirements], timeoutConfig: Option[TimeoutConfig])(implicit ec: ExecutionContext): Future[BSONObjectID] = {
     val journeyId = BSONObjectID.generate()
 
     insert(Journey.createExpiring(journeyId, authProviderId, serviceIdentifier, continueUrl, messages, customisationsUrl,
-      address, prepopulatedData, timeoutConfig)).map(_ => journeyId)
+      address, prepopulatedData, directDebitConstraints, timeoutConfig)).map(_ => journeyId)
   }
 
   def updatePersonalAccountDetails(id: BSONObjectID, data: PersonalAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {

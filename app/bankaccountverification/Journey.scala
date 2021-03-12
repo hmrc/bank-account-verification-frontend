@@ -16,8 +16,9 @@
 
 package bankaccountverification
 
-import java.time.{Instant, ZoneOffset, ZonedDateTime}
+import bankaccountverification.DirectDebitRequirements.defaultDirectDebitRequirements
 
+import java.time.{Instant, ZoneOffset, ZonedDateTime}
 import bankaccountverification.connector.ReputationResponseEnum
 import bankaccountverification.web.AccountTypeRequestEnum
 import play.api.libs.functional.syntax._
@@ -25,9 +26,19 @@ import play.api.libs.json._
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
+
+case class DirectDebitRequirements(directDebitRequired: Boolean, directCreditRequired: Boolean)
+object DirectDebitRequirements {
+  val defaultDirectDebitRequirements = DirectDebitRequirements(true, true)
+}
+
+
 case class Journey(id: BSONObjectID, authProviderId: Option[String], expiryDate: ZonedDateTime,
                    serviceIdentifier: String, continueUrl: String, data: Session, messages: Option[JsObject] = None,
-                   customisationsUrl: Option[String] = None, timeoutConfig: Option[TimeoutConfig] = None)
+                   customisationsUrl: Option[String] = None, directDebitRequirements: Option[DirectDebitRequirements] = None, timeoutConfig: Option[TimeoutConfig] = None) {
+
+  def getDirectDebitConstraints: DirectDebitRequirements = directDebitRequirements.getOrElse(defaultDirectDebitRequirements)
+}
 
 object Journey {
   def expiryDate = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
@@ -57,9 +68,9 @@ object Journey {
   def createExpiring(id: BSONObjectID, authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
                      messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
                      address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None,
-                     timeoutConfig: Option[TimeoutConfig]): Journey =
+                     directDebitConstraints: Option[DirectDebitRequirements] = None, timeoutConfig: Option[TimeoutConfig]): Journey =
     Journey(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, createSession(address, prepopulatedData),
-      messages, customisationsUrl, timeoutConfig)
+      messages, customisationsUrl, directDebitConstraints, timeoutConfig)
 
   def updatePersonalAccountDetailsExpiring(data: PersonalAccountDetails) =
     PersonalAccountDetailsUpdate(expiryDate, data)
@@ -83,6 +94,9 @@ object Journey {
 
   implicit val timeoutConfigReads: Reads[TimeoutConfig] = Json.reads[TimeoutConfig]
   implicit val timeoutConfigWrites: Writes[TimeoutConfig] = Json.writes[TimeoutConfig]
+
+  implicit val directDebitConstraintsReads: Reads[DirectDebitRequirements] = Json.reads[DirectDebitRequirements]
+  implicit val directDebitConstraintsWrites: Writes[DirectDebitRequirements] = Json.writes[DirectDebitRequirements]
 
   implicit val localDateTimeRead: Reads[ZonedDateTime] =
     (__ \ "$date").read[Long].map { dateTime =>
@@ -108,6 +122,7 @@ object Journey {
       .and((__ \ "data").read[Session])
       .and((__ \ "messages").readNullable[JsObject])
       .and((__ \ "customisationsUrl").readNullable[String])
+      .and((__ \ "directDebitConstraints").readNullable[DirectDebitRequirements])
       .and((__ \ "timeoutConfig").readNullable[TimeoutConfig])(
         (
           id: BSONObjectID,
@@ -118,8 +133,9 @@ object Journey {
           data: Session,
           messages: Option[JsObject],
           customisationsUrl: Option[String],
+          directDebitConstraints: Option[DirectDebitRequirements],
           timeoutConfig: Option[TimeoutConfig]
-        ) => Journey.apply(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, data, messages, customisationsUrl, timeoutConfig)
+        ) => Journey.apply(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, data, messages, customisationsUrl, directDebitConstraints, timeoutConfig)
       )
 
   implicit def defaultWrites: OWrites[Journey] =
@@ -132,6 +148,7 @@ object Journey {
       .and((__ \ "data").write[Session])
       .and((__ \ "messages").writeNullable[JsObject])
       .and((__ \ "customisationsUrl").writeNullable[String])
+      .and((__ \ "directDebitConstraints").writeNullable[DirectDebitRequirements])
       .and((__ \ "timeoutConfig").writeNullable[TimeoutConfig]) {
         unlift(Journey.unapply)
       }

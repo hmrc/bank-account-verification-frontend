@@ -16,6 +16,7 @@
 
 package bankaccountverification.web.personal
 
+import bankaccountverification.DirectDebitRequirements
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessSuccessResponse, BarsValidationResponse, ReputationResponseEnum}
 import com.codahale.metrics.SharedMetricRegistries
@@ -280,10 +281,11 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
+        No, No,
         Some(No),
         None
       )
-      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the account number" in {
         updatedForm.error("accountNumber") shouldBe Some(
@@ -301,10 +303,55 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         No,
+        No, No,
         Some(No),
         None
       )
-      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true))
+
+      "flag an error against the sort code" in {
+        updatedForm.error("sortCode") shouldBe Some(
+          FormError("sortCode", "error.sortCode.denyListed")
+        )
+      }
+    }
+
+    "the response indicates the sort code exists in EISCD but does not support direct debit payments" should {
+      val response = BarsPersonalAssessSuccessResponse(
+        Yes,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Yes,
+        No, Yes,
+        Some(No),
+        None
+      )
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true))
+
+      "flag an error against the sort code" in {
+        updatedForm.error("sortCode") shouldBe Some(
+          FormError("sortCode", "error.sortCode.denyListed")
+        )
+      }
+    }
+
+    "the response indicates the sort code exists in EISCD but does not support direct credit payments" should {
+      val response = BarsPersonalAssessSuccessResponse(
+        Yes,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Indeterminate,
+        Yes,
+        Yes, No,
+        Some(No),
+        None
+      )
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the sort code" in {
         updatedForm.error("sortCode") shouldBe Some(
@@ -322,11 +369,12 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Yes,
+        Yes, Yes,
         Some(No),
         None
       )
 
-      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the account number" in {
         updatedForm.error("accountNumber") shouldBe Some(
@@ -344,10 +392,11 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Yes,
+        Yes, Yes,
         Some(Yes),
         None
       )
-      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the roll number field" in {
         updatedForm.error("rollNumber") shouldBe Some(FormError("rollNumber", "error.rollNumber.required"))
@@ -366,10 +415,11 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Yes,
+        Yes, Yes,
         Some(Yes),
         None
       )
-      val updatedForm = formWithRollNumber.validateUsingBarsPersonalAssessResponse(response)
+      val updatedForm = formWithRollNumber.validateUsingBarsPersonalAssessResponse(response, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag no errors" in {
         updatedForm.hasErrors shouldBe false
@@ -385,11 +435,12 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Yes,
+        Yes, Yes,
         Some(ReputationResponseEnum.Error),
         None
       )
 
-      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag no errors so that the journey is not impacted" in {
         updatedForm.hasErrors shouldBe false
@@ -398,7 +449,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
     "the response indicates that the sort code provided was on the deny list" should {
       val response = BarsPersonalAssessBadRequestResponse("SORT_CODE_ON_DENY_LIST", "083200: sort code is in deny list")
-      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response)
+      val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, DirectDebitRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the sort code field" in {
         updatedForm.error("sortCode") shouldBe Some(FormError("sortCode", "error.sortCode.denyListed"))

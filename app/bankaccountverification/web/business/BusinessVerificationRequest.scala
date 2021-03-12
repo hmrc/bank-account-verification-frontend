@@ -16,8 +16,10 @@
 
 package bankaccountverification.web.business
 
-import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes, Inapplicable}
-import bankaccountverification.connector.{BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse, BarsBusinessAssessSuccessResponse, ReputationResponseEnum}
+import bankaccountverification.DirectDebitRequirements
+import bankaccountverification.connector.ReputationResponseEnum.{Inapplicable, Indeterminate, No, Yes}
+import bankaccountverification.connector.{BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse,
+  BarsBusinessAssessSuccessResponse, ReputationResponseEnum}
 import bankaccountverification.web.Forms._
 import bankaccountverification.web.Implicits.SanitizedString
 import play.api.data.Form
@@ -44,21 +46,29 @@ object BusinessVerificationRequest {
   }
 
   implicit class ValidationFormWrapper(form: Form[BusinessVerificationRequest]) {
-    def validateUsingBarsBusinessAssessResponse(response: BarsBusinessAssessResponse): Form[BusinessVerificationRequest] =
+    def validateUsingBarsBusinessAssessResponse(response: BarsBusinessAssessResponse,
+                                                directDebitConstraints: DirectDebitRequirements)
+    : Form[BusinessVerificationRequest] =
       response match {
         case badRequest: BarsBusinessAssessBadRequestResponse =>
           form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
         case success: BarsBusinessAssessSuccessResponse =>
           import success._
-          if (accountNumberWithSortCodeIsValid == No)
+          if (accountNumberWithSortCodeIsValid == No) {
             form.fill(form.get).withError("accountNumber", "error.accountNumber.modCheckFailed")
-          else if (sortCodeIsPresentOnEISCD != Yes)
+          } else if (sortCodeIsPresentOnEISCD != Yes) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
-          else if (accountExists == No)
+          } else if (directDebitSupported != Yes && directDebitConstraints.directDebitRequired) {
+            form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
+          } else if (directCreditSupported != Yes && directDebitConstraints.directCreditRequired) {
+            form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
+          } else if (accountExists == No) {
             form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")
-          else if (nonStandardAccountDetailsRequiredForBacs.getOrElse(No) == Yes && form.get.rollNumber.isEmpty)
+          } else if (nonStandardAccountDetailsRequiredForBacs.getOrElse(No) == Yes && form.get.rollNumber.isEmpty) {
             form.fill(form.get).withError("rollNumber", "error.rollNumber.required")
-          else form
+          } else {
+            form
+          }
       }
   }
 

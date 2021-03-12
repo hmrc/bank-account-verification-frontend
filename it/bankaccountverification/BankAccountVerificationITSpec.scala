@@ -55,7 +55,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
-        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, No, Indeterminate, Yes, Some(No), Some("sort-code-bank-name-personal")))))
+        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, No, Indeterminate, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal")))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
@@ -132,15 +132,18 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(Success(BarsBusinessAssessSuccessResponse(
-        Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Indeterminate, Indeterminate, Indeterminate, Some(No)))))
+        Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Indeterminate, Indeterminate, Indeterminate, Yes, No, Some(No)))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
 
     val initUrl = s"$baseUrl/api/init"
 
-    val initRequest = InitRequest("serviceIdentifier", "continueUrl",
+    val initRequest = InitRequest(
+      serviceIdentifier = "serviceIdentifier",
+      continueUrl = "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+      directDebitRequirements = Some(InitDirectDebitRequirements(true, false)),
       timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
     val initResponse =
@@ -208,7 +211,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
   "BankAccountVerification with prepopulated account type, skipping account type screen" in {
     when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
-        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, No, Indeterminate, Yes, Some(No), Some("sort-code-bank-name-personal")))))
+        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, No, Indeterminate, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal")))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
