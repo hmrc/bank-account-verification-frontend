@@ -35,10 +35,10 @@ hint.rollNumber = Bydd hwn i’w weld ar eich cerdyn, cyfriflen neu baslyfr
 
 error.summaryText = Mae problem wedi codi
 error.accountName.required = Nodwch yr enw sydd ar y cyfrif
-error.accountName.asciiOnly = WMae’n rhaid i’r enw ar y cyfrif gynnwys llythrennau, rhifau a chymeriadau cyffredin yn unig
+error.accountName.asciiOnly = Nodwch yr enw ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc. Peidiwch â’i gopïo a’i gludo.
 error.accountName.maxLength = Mae’n rhaid i enw’r cyfrif fod yn 70 o gymeriadau neu lai
 error.companyName.required = Nodwch yr enw sydd ar y cyfrif
-error.companyName.asciiOnly = WMae’n rhaid i’r enw ar y cyfrif gynnwys llythrennau, rhifau a chymeriadau cyffredin yn unig
+error.companyName.asciiOnly = Nodwch yr enw ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc. Peidiwch â’i gopïo a’i gludo.
 error.companyName.maxLength = Mae’n rhaid i enw’r cwmni fod yn 70 o gymeriadau neu lai
 error.accountType.required = Dewiswch fath o gyfrif
 
