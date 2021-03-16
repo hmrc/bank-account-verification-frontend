@@ -52,7 +52,7 @@ error.accountNumber.doesNotExist = Mae’n rhaid i rif y cyfrif berthyn i gyfrif
 error.sortcode.required = Nodwch god didoli
 error.sortcode.invalidLengthError = Mae’n rhaid i’r cod didoli fod yn 6 digid o hyd
 error.sortcode.invalidCharsError = Nodwch god didoli dilys, er enghraifft 309430
-error.sortCode.denyListed = W You have entered a sort code that does not accept automated payments, like direct debits. Check the sort code or enter details for a different account
+error.sortCode.denyListed = Rydych wedi nodi cod didoli nad yw’n derbyn taliadau awtomataidd, fel debydau uniongyrchol. Gwiriwch y cod didoli neu nodwch fanylion ar gyfer cyfrif gwahanol
 
 error.rollNumber.format = Gall y rhif rôl gynnwys prif lythrennau, digidau, atalnodau neu gysylltnodau yn unig
 error.rollNumber.minLength = Mae’n rhaid i’r rhif rôl fod o leiaf 1 cymeriad o hyd
