@@ -16,7 +16,7 @@
 
 package bankaccountverification.web.business
 
-import bankaccountverification.DirectDebitRequirements
+import bankaccountverification.BACSRequirements
 import bankaccountverification.connector.ReputationResponseEnum.{Inapplicable, Indeterminate, No, Yes}
 import bankaccountverification.connector.{BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse,
   BarsBusinessAssessSuccessResponse, ReputationResponseEnum}
@@ -47,7 +47,7 @@ object BusinessVerificationRequest {
 
   implicit class ValidationFormWrapper(form: Form[BusinessVerificationRequest]) {
     def validateUsingBarsBusinessAssessResponse(response: BarsBusinessAssessResponse,
-                                                directDebitConstraints: DirectDebitRequirements)
+                                                directDebitConstraints: BACSRequirements)
     : Form[BusinessVerificationRequest] =
       response match {
         case badRequest: BarsBusinessAssessBadRequestResponse =>
@@ -58,9 +58,9 @@ object BusinessVerificationRequest {
             form.fill(form.get).withError("accountNumber", "error.accountNumber.modCheckFailed")
           } else if (sortCodeIsPresentOnEISCD != Yes) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
-          } else if (directDebitSupported != Yes && directDebitConstraints.directDebitRequired) {
+          } else if (sortCodeSupportsDirectDebit != Yes && directDebitConstraints.directDebitRequired) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
-          } else if (directCreditSupported != Yes && directDebitConstraints.directCreditRequired) {
+          } else if (sortCodeSupportsDirectCredit != Yes && directDebitConstraints.directCreditRequired) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
           } else if (accountExists == No) {
             form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")

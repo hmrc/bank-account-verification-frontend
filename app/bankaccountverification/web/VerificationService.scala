@@ -16,7 +16,7 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.DirectDebitRequirements
+import bankaccountverification.BACSRequirements
 import bankaccountverification.connector._
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
@@ -47,7 +47,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
       address.map(a => BarsAddress(a.lines, a.town, a.postcode)))
 
   def processPersonalAssessResponse(journeyId: BSONObjectID,
-                                    directDebitConstraints: DirectDebitRequirements,
+                                    directDebitConstraints: BACSRequirements,
                                     assessResponse: Try[BarsPersonalAssessResponse],
                                     form: Form[PersonalVerificationRequest]
                                    )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Form[PersonalVerificationRequest]] = {
@@ -81,7 +81,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
       address.map(a => BarsAddress(a.lines, a.town, a.postcode)))
 
   def processBusinessAssessResponse(journeyId: BSONObjectID,
-                                    directDebitConstraints: DirectDebitRequirements,
+                                    directDebitConstraints: BACSRequirements,
                                     assessResponse: Try[BarsBusinessAssessResponse],
                                     form: Form[BusinessVerificationRequest]
                                    )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Form[BusinessVerificationRequest]] = {

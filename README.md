@@ -23,7 +23,7 @@ case class InitRequest(
     address: Option[InitRequestAddress] = None,
     messages: Option[InitRequestMessages] = None, 
     customisationsUrl: Option[String] = None,
-    directDebitRequirements: Option[InitDirectDebitRequirements] = None,
+    bacsRequirements: Option[InitBACSRequirements] = None,
     timeoutConfig: Option[InitRequestTimeoutConfig])
 )
 ```
@@ -32,7 +32,7 @@ case class InitRequestTimeoutConfig(timeoutUrl: String, timeoutAmount: Int, time
 // timeoutUrl must be a relative url, or a full url with a host that has been allow-listed
 
 // This is passed to configure direct debit/credit payment support requirements. The default, if not specified, is to require both debit and credit support.
-case class InitDirectDebitRequirements(directDebitRequired: Boolean, directCreditRequired: Boolean)
+case class InitBACSRequirements(directDebitRequired: Boolean, directCreditRequired: Boolean)
 ```
 
 The init endpoint will respond in the following format:
@@ -89,7 +89,7 @@ Once the initiating call has been made and a `journeyId` retrieved, the journey 
 
 Control at this stage passes to `BAVFE` until the journey is complete. At the end of the journey, `BAVFE` calls back to the `continueUrl` (provided in the initiate call) to indicate to the client service that the journey is complete and results can be retrieved.
 
-It should be noted that the `InitDirectDebitRequirements` settings will influence how the form level validation is handled in `BAVFE`. If a requirement is not met, the journey will not be permitted to continue. 
+It should be noted that the `InitBACSRequirements` settings will influence how the form level validation is handled in `BAVFE`. If a requirement is not met, the journey will not be permitted to continue. 
 
 ### Complete the journey
 Once the `continueUrl` has been called by `BAVFE`, a call can be made to `/api/complete/:journeyId` to retrieve the results of the journey. The following data model describes the payload that is returned:

@@ -16,7 +16,7 @@
 
 package bankaccountverification.web.personal
 
-import bankaccountverification.DirectDebitRequirements
+import bankaccountverification.BACSRequirements
 import bankaccountverification.connector.ReputationResponseEnum.{Inapplicable, Indeterminate, No, Yes}
 import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse, ReputationResponseEnum}
 import bankaccountverification.web.Forms._
@@ -48,7 +48,7 @@ object PersonalVerificationRequest {
   }
 
   implicit class ValidationFormWrapper(form: Form[PersonalVerificationRequest]) {
-    def validateUsingBarsPersonalAssessResponse(response: BarsPersonalAssessResponse, directDebitConstraints: DirectDebitRequirements): Form[PersonalVerificationRequest] =
+    def validateUsingBarsPersonalAssessResponse(response: BarsPersonalAssessResponse, directDebitConstraints: BACSRequirements): Form[PersonalVerificationRequest] =
       response match {
         case badRequest: BarsPersonalAssessBadRequestResponse if badRequest.code == "SORT_CODE_ON_DENY_LIST" =>
           form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
@@ -61,9 +61,9 @@ object PersonalVerificationRequest {
             form.fill(form.get).withError("accountNumber", "error.accountNumber.modCheckFailed")
           else if (sortCodeIsPresentOnEISCD != Yes) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
-          } else if(directDebitSupported != Yes && directDebitConstraints.directDebitRequired) {
+          } else if(sortCodeSupportsDirectDebit != Yes && directDebitConstraints.directDebitRequired) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
-          } else if(directCreditSupported != Yes && directDebitConstraints.directCreditRequired) {
+          } else if(sortCodeSupportsDirectCredit != Yes && directDebitConstraints.directCreditRequired) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
           } else if (accountExists == No)
           form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")

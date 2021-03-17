@@ -20,7 +20,7 @@ import bankaccountverification.connector.BarsBusinessAssessSuccessResponse
 import bankaccountverification.connector.ReputationResponseEnum.Yes
 import bankaccountverification.web.business.html.{BusinessAccountDetailsView, BusinessAccountExistsIndeterminate}
 import bankaccountverification.web.{ActionWithCustomisationsProvider, VerificationService}
-import bankaccountverification.{AppConfig, DirectDebitRequirements, RemoteMessagesApiProvider}
+import bankaccountverification.{AppConfig, BACSRequirements, RemoteMessagesApiProvider}
 
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
@@ -97,7 +97,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
       else
         for {
           response <- verificationService.assessBusiness(form.get, journey.data.address)
-          updatedForm <- verificationService.processBusinessAssessResponse(journey.id, journey.directDebitRequirements.getOrElse(DirectDebitRequirements.defaultDirectDebitRequirements), response, form)
+          updatedForm <- verificationService.processBusinessAssessResponse(journey.id, journey.bacsRequirements.getOrElse(BACSRequirements.defaultBACSRequirements), response, form)
         } yield
           updatedForm match {
             case uform if uform.hasErrors =>
