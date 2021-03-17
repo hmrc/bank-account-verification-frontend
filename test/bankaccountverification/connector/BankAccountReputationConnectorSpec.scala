@@ -130,8 +130,8 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
               |  "nonConsented": "indeterminate",
               |  "subjectHasDeceased": "indeterminate",
               |  "sortCodeIsPresentOnEISCD": "yes",
-              |  "directDebitSupported": "yes",
-              |  "directCreditSupported": "yes",
+              |  "sortCodeSupportsDirectDebit": "yes",
+              |  "sortCodeSupportsDirectCredit": "yes",
               |  "nonStandardAccountDetailsRequiredForBacs": "no"
               |}""".stripMargin).withHeaders("Content-Type" -> "application/json"))
         }
@@ -228,8 +228,8 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
             """{
               |  "accountNumberWithSortCodeIsValid": "yes",
               |  "sortCodeIsPresentOnEISCD": "yes",
-              |  "directDebitSupported": "yes",
-              |  "directCreditSupported": "yes",
+              |  "sortCodeSupportsDirectDebit": "yes",
+              |  "sortCodeSupportsDirectCredit": "yes",
               |  "sortCodeBankName": "Some Company",
               |  "accountExists": "yes",
               |  "companyNameMatches": "yes",

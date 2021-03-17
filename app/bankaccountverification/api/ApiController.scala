@@ -16,7 +16,7 @@
 
 package bankaccountverification.api
 
-import bankaccountverification.DirectDebitRequirements
+import bankaccountverification.BACSRequirements
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification._
 
@@ -65,7 +65,7 @@ class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerCompo
                         init.customisationsUrl,
                         address = init.address.map(a => Address(a.lines, a.town, a.postcode)),
                         prepopulatedData,
-                        init.directDebitRequirements.map(ddc => DirectDebitRequirements(ddc.directDebitRequired, ddc.directCreditRequired)).orElse(Some(DirectDebitRequirements.defaultDirectDebitRequirements)),
+                        init.bacsRequirements.map(ddc => BACSRequirements(ddc.directDebitRequired, ddc.directCreditRequired)).orElse(Some(BACSRequirements.defaultBACSRequirements)),
                         init.timeoutConfig.map(tc => TimeoutConfig(tc.timeoutUrl, tc.timeoutAmount, tc.timeoutKeepAliveUrl))
                       )
                       .map { journeyId =>

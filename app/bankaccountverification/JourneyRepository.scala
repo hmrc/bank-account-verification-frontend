@@ -66,7 +66,7 @@ class JourneyRepository @Inject()(component: ReactiveMongoComponent)
   def create(authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
              messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
              address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None,
-             directDebitConstraints: Option[DirectDebitRequirements], timeoutConfig: Option[TimeoutConfig])(implicit ec: ExecutionContext): Future[BSONObjectID] = {
+             directDebitConstraints: Option[BACSRequirements], timeoutConfig: Option[TimeoutConfig])(implicit ec: ExecutionContext): Future[BSONObjectID] = {
     val journeyId = BSONObjectID.generate()
 
     insert(Journey.createExpiring(journeyId, authProviderId, serviceIdentifier, continueUrl, messages, customisationsUrl,

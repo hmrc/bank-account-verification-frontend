@@ -27,8 +27,8 @@ case class BarsPersonalAssessSuccessResponse(accountNumberWithSortCodeIsValid: R
                                              nonConsented: ReputationResponseEnum,
                                              subjectHasDeceased: ReputationResponseEnum,
                                              sortCodeIsPresentOnEISCD: ReputationResponseEnum,
-                                             directDebitSupported: ReputationResponseEnum,
-                                             directCreditSupported: ReputationResponseEnum,
+                                             sortCodeSupportsDirectDebit: ReputationResponseEnum,
+                                             sortCodeSupportsDirectCredit: ReputationResponseEnum,
                                              nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum],
                                              sortCodeBankName: Option[String]) extends BarsPersonalAssessResponse
 
@@ -46,15 +46,15 @@ object BarsPersonalAssessResponse {
 sealed trait BarsBusinessAssessResponse {}
 
 case class BarsBusinessAssessSuccessResponse(accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-                                      sortCodeIsPresentOnEISCD: ReputationResponseEnum,
-                                      sortCodeBankName: Option[String],
-                                      accountExists: ReputationResponseEnum,
-                                      companyNameMatches: ReputationResponseEnum,
-                                      companyPostCodeMatches: ReputationResponseEnum,
-                                      companyRegistrationNumberMatches: ReputationResponseEnum,
-                                      directDebitSupported: ReputationResponseEnum,
-                                      directCreditSupported: ReputationResponseEnum,
-                                      nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum]) extends BarsBusinessAssessResponse
+                                             sortCodeIsPresentOnEISCD: ReputationResponseEnum,
+                                             sortCodeBankName: Option[String],
+                                             accountExists: ReputationResponseEnum,
+                                             companyNameMatches: ReputationResponseEnum,
+                                             companyPostCodeMatches: ReputationResponseEnum,
+                                             companyRegistrationNumberMatches: ReputationResponseEnum,
+                                             sortCodeSupportsDirectDebit: ReputationResponseEnum,
+                                             sortCodeSupportsDirectCredit: ReputationResponseEnum,
+                                             nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum]) extends BarsBusinessAssessResponse
 
 case class BarsBusinessAssessBadRequestResponse(code: String, desc: String) extends BarsBusinessAssessResponse
 
