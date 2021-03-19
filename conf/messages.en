@@ -62,6 +62,8 @@ error.rollNumber.required = Enter a roll number
 error.pageTitle = Error
 error.journeyId.heading = There was a problem
 error.journeyId.message = The journey could not be found
+error.timeoutUrl.heading = There was a problem
+error.timeoutUrl.message = There has been a technical error
 
 error.unauthorised.heading = There was a problem
 error.unauthorised.message = The user is not authenticated

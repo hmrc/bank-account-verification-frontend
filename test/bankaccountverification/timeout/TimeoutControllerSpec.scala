@@ -72,8 +72,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
   val actionWithCustomisationsProvider = app.injector.instanceOf[ActionWithCustomisationsProvider]
 
   private val controller =
-    new TimeoutController(appConfig, stubMessagesControllerComponents(), mockJourneyRepository, mockAuthConnector,
-      actionWithCustomisationsProvider)
+    new TimeoutController(appConfig, stubMessagesControllerComponents(), mockJourneyRepository, mockAuthConnector, app.injector.instanceOf[bankaccountverification.web.views.html.ErrorTemplate], actionWithCustomisationsProvider)
 
   implicit val mat = app.injector.instanceOf[Materializer]
 
@@ -215,6 +214,45 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
         val result = controller.timeoutSession("23", RedirectUrl("/timeout-url")).apply(fakeRequest)
 
         status(result) shouldBe Status.UNAUTHORIZED
+      }
+    }
+
+    "return 404" when {
+      "when authorised and a valid journey id is provided but the timeoutUrl is not-allow-listed" in {
+        val journeyId = BSONObjectID.generate()
+        val timeoutUrl = "https://www.some-other-tax.service.gov.uk/some-timeout-url"
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
+        val returnData = Journey(
+          journeyId,
+          Some("1234"),
+          ZonedDateTime.now(),
+          "serviceIdentifier",
+          "continueUrl",
+          Session(
+            Some(Personal),
+            Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            Some(
+              PersonalSession(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), Some(Yes),
+                Some(Indeterminate), Some(No), Some(Indeterminate), Some(Indeterminate), Some(No), Some
+                ("sort-code-bank-name-personal"))),
+            None
+          ),
+          timeoutConfig = None)
+
+        when(mockJourneyRepository.findById(meq(journeyId), any())(any())).thenReturn(Future.successful(Some
+        (returnData)))
+
+        when(mockJourneyRepository.renewExpiryDate(meq(journeyId))(any())).thenReturn(Future.successful(true))
+
+        val fakeRequest =
+          FakeRequest("GET", s"/bank-account-verification/destroySession?journeyId=&${journeyId.stringify}timeoutUrl=${timeoutUrl}")
+
+        val result = controller.timeoutSession(journeyId.stringify, RedirectUrl(timeoutUrl)).apply(fakeRequest)
+
+        status(result) shouldBe Status.NOT_FOUND
       }
     }
   }
