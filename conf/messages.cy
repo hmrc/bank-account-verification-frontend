@@ -62,6 +62,8 @@ error.rollNumber.required = Nodwch rif rôl
 error.pageTitle = Gwall
 error.journeyId.heading = Roedd yna broblem
 error.journeyId.message = Nid oedd modd dod o hyd i’r daith
+error.timeoutUrl.heading = Roedd yna broblem
+error.timeoutUrl.message = W There has been a technical error
 
 error.unauthorised.heading = Mae problem wedi codi
 error.unauthorised.message = Nid yw’r defnyddiwr wedi’i ddilysu

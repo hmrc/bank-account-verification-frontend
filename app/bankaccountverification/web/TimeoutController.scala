@@ -18,8 +18,10 @@ package bankaccountverification.web
 
 import bankaccountverification._
 import bankaccountverification.api.FrontendApiController
+import bankaccountverification.web.views.html.ErrorTemplate
 import play.api.Logger
-import play.api.mvc.MessagesControllerComponents
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.mvc.{MessagesControllerComponents, Request}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
@@ -27,14 +29,16 @@ import java.io.File
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class TimeoutController @Inject()(appConfig: AppConfig,
                                   mcc: MessagesControllerComponents,
                                   journeyRepository: JourneyRepository,
                                   val authConnector: AuthConnector,
+                                  errorTemplate: ErrorTemplate,
                                   withCustomisations: ActionWithCustomisationsProvider)
-  extends FrontendApiController(mcc) with AuthorisedFunctions {
+  extends FrontendApiController(mcc) with I18nSupport with AuthorisedFunctions {
 
   implicit val config: AppConfig = appConfig
 
@@ -47,7 +51,21 @@ class TimeoutController @Inject()(appConfig: AppConfig,
   }
 
   private val policy = new RelativeOrAbsoluteWithHostnameFromWhitelist(appConfig.allowedHosts)
-  def timeoutSession(journeyId: String, timeoutUrl: RedirectUrl) = withCustomisations.action(journeyId).async { implicit request =>
-    Future.successful(Redirect(policy.url(timeoutUrl)))
+
+  def timeoutSession(journeyId: String, timeoutUrl: RedirectUrl) = withCustomisations.action(journeyId).async {
+    implicit request =>
+    Future.successful {
+      Try(policy.url(timeoutUrl)) match {
+        case Success(url) => Redirect(url)
+        case Failure(e) =>
+          logger.error(s"timeoutUrl '${timeoutUrl.unsafeValue}' is not whitelisted")
+          timeoutUrlError(mcc.messagesApi.preferred(request))
+      }
+    }
+  }
+
+  private def timeoutUrlError(messages: Messages)(implicit request: Request[_]) = {
+    NotFound(
+      errorTemplate(messages("error.pageTitle"), messages("error.timeoutUrl.heading"), messages("error.timeoutUrl.message")))
   }
 }
