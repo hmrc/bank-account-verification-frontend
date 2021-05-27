@@ -24,7 +24,6 @@ import bankaccountverification.{AppConfig, RemoteMessagesApiProvider}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.i18n.Messages
-import play.api.mvc.Results.NotFound
 import play.api.mvc._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
