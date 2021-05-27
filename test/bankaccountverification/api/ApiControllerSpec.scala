@@ -17,7 +17,6 @@
 package bankaccountverification.api
 
 import java.time.ZonedDateTime
-
 import akka.stream.Materializer
 import bankaccountverification.{TimeoutConfig, _}
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
@@ -31,10 +30,12 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.{Configuration, Environment}
+import play.api.{Application, Configuration, Environment}
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
@@ -53,17 +54,22 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
 
   private val serviceConfig = new ServicesConfig(configuration)
   private val appConfig = new AppConfig(configuration, serviceConfig)
-
-  override lazy val app = {
-    SharedMetricRegistries.clear()
-    fakeApplication()
-  }
-
   private lazy val sessionStore = mock[JourneyRepository]
   private lazy val mockAuthConnector = mock[AuthConnector]
 
-  private val controller =
-    new ApiController(appConfig, stubMessagesControllerComponents(), sessionStore, mockAuthConnector)
+  override implicit lazy val app: Application = {
+    SharedMetricRegistries.clear()
+
+    new GuiceApplicationBuilder()
+        .overrides(bind[ServicesConfig].toInstance(serviceConfig))
+        .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
+        .overrides(bind[JourneyRepository].toInstance(sessionStore))
+        .overrides(bind[AppConfig].toInstance(appConfig))
+        .build()
+  }
+
+
+  private val controller = app.injector.instanceOf[ApiController]
 
   implicit val mat = app.injector.instanceOf[Materializer]
 

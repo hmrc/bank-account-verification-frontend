@@ -66,15 +66,13 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
     new GuiceApplicationBuilder()
       .overrides(bind[JourneyRepository].toInstance(mockJourneyRepository))
       .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
+      .overrides(bind[AppConfig].toInstance(appConfig))
       .build()
   }
 
   val actionWithCustomisationsProvider = app.injector.instanceOf[ActionWithCustomisationsProvider]
 
-  private val controller =
-    new TimeoutController(appConfig, stubMessagesControllerComponents(), mockJourneyRepository, mockAuthConnector, app.injector.instanceOf[bankaccountverification.web.views.html.ErrorTemplate], actionWithCustomisationsProvider)
-
-  implicit val mat = app.injector.instanceOf[Materializer]
+  private val controller = app.injector.instanceOf[TimeoutController]
 
   "GET /renewSession" should {
     val newJourneyId = BSONObjectID.generate()
