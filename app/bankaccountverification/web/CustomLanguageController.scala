@@ -26,7 +26,7 @@ class CustomLanguageController @Inject() (
   configuration: Configuration,
   languageUtils: LanguageUtils,
   messagesControllerComponents: MessagesControllerComponents
-) extends LanguageController(configuration, languageUtils, messagesControllerComponents) {
+) extends LanguageController(languageUtils, messagesControllerComponents) {
 
   //This can be from a configuration value. If you are using play-language's html, this should be from the configuration value set below
   override def languageMap: Map[String, Lang] =

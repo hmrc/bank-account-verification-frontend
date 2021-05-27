@@ -16,14 +16,13 @@
 
 package bankaccountverification.web
 
-import uk.gov.hmrc.play.boostrap.binders.AbsoluteWithHostnameFromWhitelist
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
-import uk.gov.hmrc.play.bootstrap.binders.{OnlyRelative, RedirectUrl}
+import uk.gov.hmrc.play.bootstrap.binders.{AbsoluteWithHostnameFromAllowlist, OnlyRelative, RedirectUrl}
 
 import scala.util.{Failure, Success, Try}
 
 class RelativeOrAbsoluteWithHostnameFromWhitelist(private val allowedHosts: Set[String]) {
-  private val absoluteWithHostnameFromWhitelist = AbsoluteWithHostnameFromWhitelist(allowedHosts)
+  private val absoluteWithHostnameFromWhitelist = AbsoluteWithHostnameFromAllowlist(allowedHosts)
   private val relativeUrlsOnly = OnlyRelative
 
   def url(theUrl: RedirectUrl): String = url(theUrl.unsafeValue)
