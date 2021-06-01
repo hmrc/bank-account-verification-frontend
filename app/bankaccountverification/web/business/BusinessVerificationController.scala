@@ -83,7 +83,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
         appConfig.appName,
         "AccountDetailsEntered",
         detail = Map("accountType" -> "business", "trueCallingService" -> journey.serviceIdentifier,
-          "journeyId" -> journey.id.stringify)
+          "journeyId" -> journey.id.toHexString)
           ++ form.data.filterKeys {
           case "csrfToken" | "continue" => false
           case _ => true

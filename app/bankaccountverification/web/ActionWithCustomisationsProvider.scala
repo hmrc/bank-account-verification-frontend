@@ -19,21 +19,19 @@ package bankaccountverification.web
 import bankaccountverification.connector.PartialsConnector
 import bankaccountverification.web.views.html.ErrorTemplate
 import bankaccountverification.{AppConfig, AuthProviderId, Journey, JourneyRepository}
-import javax.inject.Inject
+import org.bson.types.ObjectId
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.Results._
 import play.api.mvc._
 import play.twirl.api.Html
-import reactivemongo.bson.BSONObjectID
-import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders, AuthorisedFunctions}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvider
 import uk.gov.hmrc.play.partials.HtmlPartial
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 class RequestWithCustomisations[A](request: Request[A], val journey: Journey, val headerBlock: Option[Html], val beforeContentBlock: Option[Html], val footerBlock: Option[Html]) extends WrappedRequest[A](request)
 
@@ -59,7 +57,7 @@ class ActionWithCustomisationsProvider @Inject()(val messagesApi: MessagesApi,
         authorised().retrieve(AuthProviderId.retrieval) {
           authProviderId =>
 
-            BSONObjectID.parse(journeyId) match {
+            Try(new ObjectId(journeyId)) match {
               case Success(id) =>
                 journeyRepository.findById(id) flatMap {
                   case Some(journey) if journey.authProviderId.isEmpty || journey.authProviderId.get == authProviderId =>

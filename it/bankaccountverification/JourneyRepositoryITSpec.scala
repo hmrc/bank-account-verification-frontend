@@ -16,20 +16,17 @@
 
 package bankaccountverification
 
-import bankaccountverification.BACSRequirements
-import bankaccountverification.api.InitBACSRequirements
-
-import java.time.ZonedDateTime
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import com.codahale.metrics.SharedMetricRegistries
+import org.bson.types.ObjectId
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
-import reactivemongo.bson.BSONObjectID
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 
+import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneServerPerSuite with MockitoSugar {
@@ -43,7 +40,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
     val repository = app.injector.instanceOf[JourneyRepository]
 
     "Should create the journey and session including the prepopulated data" in {
-      val journeyId = await(repository.create(Some("1234"), "serviceIndentifier", "continueUrl", None, None,
+      val journeyId = await(repository.create(Some("1234"), "serviceIdentifier", "continueUrl", None, None,
         Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("HP1 1HP"))),
         Some(PrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))),
         Some(BACSRequirements(true, true)), Some(TimeoutConfig("url", 100, None))))
@@ -61,7 +58,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
     val repository = app.injector.instanceOf[JourneyRepository]
 
     "Should create the session including the prepopulated data" in {
-      val journeyId = await(repository.create(Some("1234"), "serviceIndentifier", "continueUrl", None, None,
+      val journeyId = await(repository.create(Some("1234"), "serviceIdentifier", "continueUrl", None, None,
         Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("HP1 1HP"))),
         Some(PrepopulatedData(Business, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))),
         Some(BACSRequirements(true, true)), Some(TimeoutConfig("url", 100, None))))
@@ -79,11 +76,11 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
     val repository = app.injector.instanceOf[JourneyRepository]
 
     "handle unsetting the roll number" in {
-      val journeyId = BSONObjectID.generate()
+      val journeyId = ObjectId.get()
 
       val personalSession = PersonalSession(Some("accountName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
       val session = Session(accountType = Some(Personal), address = None, personal = Some(personalSession))
-      val journey = Journey(journeyId, Some("1234"), ZonedDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None, None)
+      val journey = Journey(journeyId, Some("1234"), LocalDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None, None)
       await(repository.insert(journey))
 
       val accountDetails = PersonalAccountDetails(Some("updated accountName"), Some("updated sortCode"), Some("updated accountNumber"), None)
@@ -98,11 +95,11 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
     val repository = app.injector.instanceOf[JourneyRepository]
 
     "handle unsetting the roll number" in {
-      val journeyId = BSONObjectID.generate()
+      val journeyId = ObjectId.get()
 
       val businessSession = BusinessSession(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
       val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
-      val journey = Journey(journeyId, Some("1234"), ZonedDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None, None)
+      val journey = Journey(journeyId, Some("1234"), LocalDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None, None)
       await(repository.insert(journey))
 
       val accountDetails = BusinessAccountDetails(Some("updated companyName"), Some("updated sortCode"), Some("updated accountNumber"), None)

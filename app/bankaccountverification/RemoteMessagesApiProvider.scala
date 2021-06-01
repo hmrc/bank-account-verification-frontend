@@ -16,12 +16,13 @@
 
 package bankaccountverification
 
-import javax.inject.{Inject, Singleton}
 import play.api.http.HttpConfiguration
 import play.api.i18n.Messages.MessageSource
 import play.api.i18n.{DefaultMessagesApi, DefaultMessagesApiProvider, Langs}
-import play.api.libs.json.{JsObject, JsSuccess}
+import play.api.libs.json.JsObject
 import play.api.{Configuration, Environment}
+
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class RemoteMessagesApiProvider @Inject() (

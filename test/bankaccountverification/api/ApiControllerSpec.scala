@@ -16,12 +16,12 @@
 
 package bankaccountverification.api
 
-import java.time.ZonedDateTime
 import akka.stream.Materializer
-import bankaccountverification.{TimeoutConfig, _}
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
+import bankaccountverification.{TimeoutConfig, _}
 import com.codahale.metrics.SharedMetricRegistries
+import org.bson.types.ObjectId
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.OptionValues
@@ -36,15 +36,14 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Environment}
-import reactivemongo.bson.BSONObjectID
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.internalId
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.Try
 
 class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite with OptionValues {
   implicit private val timeout: FiniteDuration = 1 second
@@ -76,7 +75,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
   "POST /init" should {
     import InitRequest._
 
-    val newJourneyId = BSONObjectID.generate()
+    val newJourneyId = ObjectId.get()
 
     "return 200" when {
       "A continueUrl is provided" in {
@@ -108,7 +107,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         val initResponse = contentAsJson(result).as[InitResponse]
 
         status(result) shouldBe Status.OK
-        BSONObjectID.parse(initResponse.journeyId).toOption shouldBe Some(newJourneyId)
+        Try(new ObjectId(initResponse.journeyId)).toOption shouldBe Some(newJourneyId)
 
         initResponse.startUrl shouldBe s"/bank-account-verification/start/${initResponse.journeyId}"
         initResponse.completeUrl shouldBe s"/api/complete/${initResponse.journeyId}"
@@ -146,7 +145,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         val initResponse = contentAsJson(result).as[InitResponse]
 
         status(result) shouldBe Status.OK
-        BSONObjectID.parse(initResponse.journeyId).toOption shouldBe Some(newJourneyId)
+        Try(new ObjectId(initResponse.journeyId)).toOption shouldBe Some(newJourneyId)
 
         initResponse.startUrl shouldBe s"/bank-account-verification/start/${initResponse.journeyId}"
         initResponse.completeUrl shouldBe s"/api/complete/${initResponse.journeyId}"
@@ -214,11 +213,11 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.successful("1234"))
 
-        val journeyId = BSONObjectID.generate()
+        val journeyId = ObjectId.get()
         val returnData = Journey(
           journeyId,
           Some("1234"),
-          ZonedDateTime.now(),
+          LocalDateTime.now,
           "serviceIdentifier",
           "continueUrl",
           Session(
@@ -231,10 +230,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           ),
           timeoutConfig = None)
 
-        when(sessionStore.findById(meq(journeyId), any())(any())).thenReturn(Future.successful(Some(returnData)))
+        when(sessionStore.findById(meq(journeyId))(any())).thenReturn(Future.successful(Some(returnData)))
 
-        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/${journeyId.stringify}")
-        val completeResult = controller.complete(journeyId.stringify).apply(fakeCompleteRequest)
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/${journeyId.toHexString}")
+        val completeResult = controller.complete(journeyId.toHexString).apply(fakeCompleteRequest)
 
         status(completeResult) shouldBe Status.OK
         val json = contentAsJson(completeResult)
@@ -259,11 +258,11 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.successful("1234"))
 
-        val journeyId = BSONObjectID.generate()
+        val journeyId = ObjectId.get()
         val returnData = Journey(
           journeyId,
           Some("1234"),
-          ZonedDateTime.now(),
+          LocalDateTime.now,
           "serviceIdentifier",
           "continueUrl",
           Session(
@@ -276,11 +275,11 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
                 ("sort-code-bank-name-business")))),
           timeoutConfig = None)
 
-        when(sessionStore.findById(meq(journeyId), any())(any()))
+        when(sessionStore.findById(meq(journeyId))(any()))
           .thenReturn(Future.successful(Some(returnData)))
 
-        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/${journeyId.stringify}")
-        val completeResult = controller.complete(journeyId.stringify).apply(fakeCompleteRequest)
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/${journeyId.toHexString}")
+        val completeResult = controller.complete(journeyId.toHexString).apply(fakeCompleteRequest)
 
         status(completeResult) shouldBe Status.OK
         val json = contentAsJson(completeResult)
@@ -305,11 +304,11 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.successful("1234"))
 
-        val nonExistentJourneyId = BSONObjectID.generate()
-        when(sessionStore.findById(meq(nonExistentJourneyId), any())(any())).thenReturn(Future.successful(None))
+        val nonExistentJourneyId = ObjectId.get()
+        when(sessionStore.findById(meq(nonExistentJourneyId))(any())).thenReturn(Future.successful(None))
 
         val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
-        val completeResult = controller.complete(nonExistentJourneyId.stringify).apply(fakeCompleteRequest)
+        val completeResult = controller.complete(nonExistentJourneyId.toHexString).apply(fakeCompleteRequest)
         status(completeResult) shouldBe Status.NOT_FOUND
       }
 
@@ -318,11 +317,11 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.successful("9876"))
 
-        val journeyId = BSONObjectID.generate()
+        val journeyId = ObjectId.get()
         val returnData = Journey(
           journeyId,
           Some("1234"),
-          ZonedDateTime.now(),
+          LocalDateTime.now,
           "serviceIdentifier",
           "continueUrl",
           Session(
@@ -335,11 +334,11 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
                 ("sort-code-bank-name-business")))),
           timeoutConfig = None)
 
-        when(sessionStore.findById(meq(journeyId), any())(any()))
+        when(sessionStore.findById(meq(journeyId))(any()))
           .thenReturn(Future.successful(Some(returnData)))
 
         val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$journeyId")
-        val completeResult = controller.complete(journeyId.stringify).apply(fakeCompleteRequest)
+        val completeResult = controller.complete(journeyId.toHexString).apply(fakeCompleteRequest)
         status(completeResult) shouldBe Status.NOT_FOUND
       }
     }
@@ -363,11 +362,11 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
 
-        val nonExistentJourneyId = BSONObjectID.generate()
-        when(sessionStore.findById(meq(nonExistentJourneyId), any())(any())).thenReturn(Future.successful(None))
+        val nonExistentJourneyId = ObjectId.get()
+        when(sessionStore.findById(meq(nonExistentJourneyId))(any())).thenReturn(Future.successful(None))
 
         val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
-        val completeResult = controller.complete(nonExistentJourneyId.stringify).apply(fakeCompleteRequest)
+        val completeResult = controller.complete(nonExistentJourneyId.toHexString).apply(fakeCompleteRequest)
         status(completeResult) shouldBe Status.UNAUTHORIZED
       }
     }

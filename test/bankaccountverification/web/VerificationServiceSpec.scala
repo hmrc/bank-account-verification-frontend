@@ -16,30 +16,29 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.BACSRequirements
-import bankaccountverification.{Address, BusinessAccountDetails, JourneyRepository, PersonalAccountDetails, PersonalSession, Session}
-import bankaccountverification.connector.{BankAccountReputationConnector, BarsAddress, BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse, BarsBusinessAssessSuccessResponse, BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse, BarsValidationRequest, BarsValidationResponse}
+import bankaccountverification._
 import bankaccountverification.connector.ReputationResponseEnum._
+import bankaccountverification.connector._
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
+import org.bson.types.ObjectId
+import org.mockito.ArgumentMatchers.{eq => meq, _}
+import org.mockito.Mockito._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import org.mockito.ArgumentMatchers.{eq => meq, _}
-import org.mockito.Mockito._
-import reactivemongo.bson.BSONObjectID
-
-import scala.concurrent.Future
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Failure, Success}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.util.{Failure, Success}
+
 class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite {
-  implicit val timeout = 1 second
-  implicit val hc = HeaderCarrier()
+  implicit val timeout: FiniteDuration = 1 second
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   "Assessing personal bank account details provided by the user" when {
     val mockConnector = mock[BankAccountReputationConnector]
@@ -200,7 +199,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
   }
 
   "processing the personal assess response" when {
-    val journeyId = BSONObjectID.generate()
+    val journeyId = ObjectId.get()
 
     val mockConnector = mock[BankAccountReputationConnector]
     val mockRepository = mock[JourneyRepository]
@@ -492,7 +491,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
   }
 
   "processing the business assess response" when {
-    val journeyId = BSONObjectID.generate()
+    val journeyId = ObjectId.get()
 
     val mockConnector = mock[BankAccountReputationConnector]
     val mockRepository = mock[JourneyRepository]

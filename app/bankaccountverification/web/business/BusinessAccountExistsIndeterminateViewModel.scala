@@ -18,7 +18,7 @@ package bankaccountverification.web.business
 
 import bankaccountverification.BusinessSession
 import play.api.i18n.Messages
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{HtmlContent, Text}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist._
 
 case class BusinessAccountExistsIndeterminateViewModel(journeyId: String,

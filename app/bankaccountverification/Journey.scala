@@ -17,23 +17,22 @@
 package bankaccountverification
 
 import bankaccountverification.BACSRequirements.defaultBACSRequirements
-
-import java.time.{Instant, ZoneOffset, ZonedDateTime}
-import bankaccountverification.connector.ReputationResponseEnum
+import bankaccountverification.connector.{Enumerable, ReputationResponseEnum}
 import bankaccountverification.web.AccountTypeRequestEnum
+import org.bson.types.ObjectId
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import reactivemongo.bson.BSONObjectID
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
+import java.time.LocalDateTime
 
 
 case class BACSRequirements(directDebitRequired: Boolean, directCreditRequired: Boolean)
 object BACSRequirements {
-  val defaultBACSRequirements = BACSRequirements(true, true)
+  val defaultBACSRequirements: BACSRequirements = BACSRequirements(directDebitRequired = true, directCreditRequired = true)
 }
 
 
-case class Journey(id: BSONObjectID, authProviderId: Option[String], expiryDate: ZonedDateTime,
+case class Journey(id: ObjectId, authProviderId: Option[String], expiryDate: LocalDateTime,
                    serviceIdentifier: String, continueUrl: String, data: Session, messages: Option[JsObject] = None,
                    customisationsUrl: Option[String] = None, bacsRequirements: Option[BACSRequirements] = None, timeoutConfig: Option[TimeoutConfig] = None) {
 
@@ -41,7 +40,7 @@ case class Journey(id: BSONObjectID, authProviderId: Option[String], expiryDate:
 }
 
 object Journey {
-  def expiryDate = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+  def expiryDate: LocalDateTime = LocalDateTime.now.plusMinutes(60)
 
   def createSession(address: Option[Address], prepopulatedData: Option[PrepopulatedData]): Session = {
     val session = Session(address = address)
@@ -65,22 +64,15 @@ object Journey {
     }
   }
 
-  def createExpiring(id: BSONObjectID, authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
+  def createExpiring(id: ObjectId, authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
                      messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
                      address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None,
                      directDebitConstraints: Option[BACSRequirements] = None, timeoutConfig: Option[TimeoutConfig]): Journey =
     Journey(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, createSession(address, prepopulatedData),
       messages, customisationsUrl, directDebitConstraints, timeoutConfig)
 
-  def updatePersonalAccountDetailsExpiring(data: PersonalAccountDetails) =
-    PersonalAccountDetailsUpdate(expiryDate, data)
-
-  def updateBusinessAccountDetailsExpiring(data: BusinessAccountDetails) =
-    BusinessAccountDetailsUpdate(expiryDate, data)
-
-  def updateAccountTypeExpiring(accountType: AccountTypeRequestEnum) = AccountTypeUpdate(expiryDate, accountType)
-
-  implicit val objectIdFormats: Format[BSONObjectID] = ReactiveMongoFormats.objectIdFormats
+  implicit val objectIdFormats: Format[ObjectId] = MongoFormats.objectIdFormat
+  implicit val datetimeFormat: Format[LocalDateTime] = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.localDateTimeFormat
   implicit val personalSessionDataReads: Reads[PersonalSession] = Json.reads[PersonalSession]
   implicit val personalSessionDataWrites: Writes[PersonalSession] = Json.writes[PersonalSession]
   implicit val businessSessionDataReads: Reads[BusinessSession] = Json.reads[BusinessSession]
@@ -98,25 +90,11 @@ object Journey {
   implicit val directDebitConstraintsReads: Reads[BACSRequirements] = Json.reads[BACSRequirements]
   implicit val directDebitConstraintsWrites: Writes[BACSRequirements] = Json.writes[BACSRequirements]
 
-  implicit val localDateTimeRead: Reads[ZonedDateTime] =
-    (__ \ "$date").read[Long].map { dateTime =>
-      ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateTime), ZoneOffset.UTC)
-    }
-
-  implicit val localDateTimeWrite: Writes[ZonedDateTime] = new Writes[ZonedDateTime] {
-    def writes(dateTime: ZonedDateTime): JsValue =
-      Json.obj(
-        "$date" -> dateTime.toInstant.toEpochMilli
-      )
-  }
-
-  implicit val datetimeFormat: Format[ZonedDateTime] = Format(localDateTimeRead, localDateTimeWrite)
-
   implicit def defaultReads: Reads[Journey] =
     (__ \ "_id")
-      .read[BSONObjectID]
+      .read[ObjectId]
       .and((__ \ "authProviderId").readNullable[String])
-      .and((__ \ "expiryDate").read[ZonedDateTime])
+      .and((__ \ "expiryDate").read[LocalDateTime])
       .and((__ \ "serviceIdentifier").read[String])
       .and((__ \ "continueUrl").read[String])
       .and((__ \ "data").read[Session])
@@ -125,9 +103,9 @@ object Journey {
       .and((__ \ "directDebitConstraints").readNullable[BACSRequirements])
       .and((__ \ "timeoutConfig").readNullable[TimeoutConfig])(
         (
-          id: BSONObjectID,
+          id: ObjectId,
           authProviderId: Option[String],
-          expiryDate: ZonedDateTime,
+          expiryDate: LocalDateTime,
           serviceIdentifier: String,
           continueUrl: String,
           data: Session,
@@ -140,9 +118,9 @@ object Journey {
 
   implicit def defaultWrites: OWrites[Journey] =
     (__ \ "_id")
-      .write[BSONObjectID]
+      .write[ObjectId]
       .and((__ \ "authProviderId").write[Option[String]])
-      .and((__ \ "expiryDate").write[ZonedDateTime])
+      .and((__ \ "expiryDate").write[LocalDateTime])
       .and((__ \ "serviceIdentifier").write[String])
       .and((__ \ "continueUrl").write[String])
       .and((__ \ "data").write[Session])
@@ -154,62 +132,36 @@ object Journey {
       }
 
   implicit def personalAccountDetailsWrites: OWrites[PersonalAccountDetails] =
-    (__ \ "data.personal.accountName")
+    (__ \ "accountName")
       .writeNullable[String]
-      .and((__ \ "data.personal.sortCode").writeNullable[String])
-      .and((__ \ "data.personal.accountNumber").writeNullable[String])
-      .and((__ \ "data.personal.rollNumber").writeOptionWithNull[String])
-      .and((__ \ "data.personal.accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.personal.accountExists").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.personal.nameMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.personal.addressMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.personal.nonConsented").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.personal.subjectHasDeceased").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.personal.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.personal.sortCodeBankName").writeOptionWithNull[String])(
+      .and((__ \ "sortCode").writeNullable[String])
+      .and((__ \ "accountNumber").writeNullable[String])
+      .and((__ \ "rollNumber").writeOptionWithNull[String])
+      .and((__ \ "accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
+      .and((__ \ "accountExists").writeNullable[ReputationResponseEnum])
+      .and((__ \ "nameMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "addressMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "nonConsented").writeNullable[ReputationResponseEnum])
+      .and((__ \ "subjectHasDeceased").writeNullable[ReputationResponseEnum])
+      .and((__ \ "nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
+      .and((__ \ "sortCodeBankName").writeOptionWithNull[String])(
         unlift(PersonalAccountDetails.unapply)
       )
 
   implicit def businessAccountDetailsWrites: OWrites[BusinessAccountDetails] =
-    (__ \ "data.business.companyName")
+    (__ \ "companyName")
       .writeNullable[String]
-      .and((__ \ "data.business.sortCode").writeNullable[String])
-      .and((__ \ "data.business.accountNumber").writeNullable[String])
-      .and((__ \ "data.business.rollNumber").writeOptionWithNull[String])
-      .and((__ \ "data.business.accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.business.nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.business.accountExists").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.business.companyNameMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.business.companyPostCodeMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.business.companyRegistrationNumberMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "data.business.sortCodeBankName").writeOptionWithNull[String])(
+      .and((__ \ "sortCode").writeNullable[String])
+      .and((__ \ "accountNumber").writeNullable[String])
+      .and((__ \ "rollNumber").writeOptionWithNull[String])
+      .and((__ \ "accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
+      .and((__ \ "nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
+      .and((__ \ "accountExists").writeNullable[ReputationResponseEnum])
+      .and((__ \ "companyNameMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "companyPostCodeMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "companyRegistrationNumberMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "sortCodeBankName").writeOptionWithNull[String])(
         unlift(BusinessAccountDetails.unapply)
-      )
-
-  implicit def renewExpiryDateUpdateWrites: OWrites[RenewExpiryDateUpdate] = {
-    (__ \ "$set" \ "expiryDate").write[ZonedDateTime]
-      .contramap[RenewExpiryDateUpdate](u => u.expiryDate)
-  }
-
-  implicit def personalUpdateWrites: OWrites[PersonalAccountDetailsUpdate] = {
-    (__ \ "$set" \ "expiryDate")
-      .write[ZonedDateTime]
-      .and((__ \ "$set").write[PersonalAccountDetails])(
-        unlift(PersonalAccountDetailsUpdate.unapply))
-  }
-
-  implicit def businessUpdateWrites: OWrites[BusinessAccountDetailsUpdate] =
-    (__ \ "$set" \ "expiryDate")
-      .write[ZonedDateTime]
-      .and((__ \ "$set").write[BusinessAccountDetails])(
-        unlift(BusinessAccountDetailsUpdate.unapply)
-      )
-
-  implicit def accountTypeUpdateWrites: OWrites[AccountTypeUpdate] =
-    (__ \ "$set" \ "expiryDate")
-      .write[ZonedDateTime]
-      .and((__ \ "$set" \ "data.accountType").write[AccountTypeRequestEnum])(
-        unlift(AccountTypeUpdate.unapply)
       )
 
   val format: Format[Journey] = Format(defaultReads, defaultWrites)
