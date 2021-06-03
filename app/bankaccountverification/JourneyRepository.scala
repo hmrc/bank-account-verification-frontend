@@ -34,12 +34,16 @@ package bankaccountverification
 
 import bankaccountverification.JourneyRepository.{ExpiryDateIndex, expireAfterSeconds}
 import bankaccountverification.web.AccountTypeRequestEnum
+import org.bson.RawBsonDocument
+import org.bson.codecs.RawBsonDocumentCodec
+import org.bson.codecs.configuration.CodecRegistries
 import org.bson.types.ObjectId
+import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Indexes.ascending
-import org.mongodb.scala.model.{IndexModel, IndexOptions, ReplaceOptions}
 import org.mongodb.scala.model.Updates.{combine, set}
-import play.api.libs.json.{JsObject, OWrites}
+import org.mongodb.scala.model.{IndexModel, IndexOptions}
+import play.api.libs.json.{JsObject, Json, OWrites}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -58,7 +62,11 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
       ),
       replaceIndexes = true
     ) {
-
+  val rawCollection = mongo.database.getCollection[RawBsonDocument](collectionName)
+                          .withCodecRegistry(
+                            CodecRegistries.fromRegistries(
+                              CodecRegistries.fromCodecs(new RawBsonDocumentCodec()),
+                              DEFAULT_CODEC_REGISTRY))
 
   def findById(id: ObjectId)(implicit ec: ExecutionContext): Future[Option[Journey]] = {
     collection.find(filter = equal("_id", id)).toFuture().map(_.headOption)
@@ -71,9 +79,13 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
     ).toFuture().map(_ => true)
   }
 
-  def insert(journey: Journey): Future[ObjectId] = {
-    collection.insertOne(journey).toFuture()
+  // Some messages will have dotted field names, eg 'service.name', causing the normal insert to fail. To avoid this, we use the RawBsonDocument.
+  def insertRaw(journey: Journey): Future[ObjectId] = {
+    val bsonDoc = RawBsonDocument.parse(Json.toJson(journey).toString())
+    rawCollection.insertOne(bsonDoc).toFuture()
               .map(_.getInsertedId.asObjectId().getValue)
+
+    Future.successful(ObjectId.get())
   }
 
   def create(authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
@@ -82,7 +94,7 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
              directDebitConstraints: Option[BACSRequirements], timeoutConfig: Option[TimeoutConfig])(implicit ec: ExecutionContext): Future[ObjectId] = {
     val journeyId = ObjectId.get()
 
-    insert(Journey.createExpiring(journeyId, authProviderId, serviceIdentifier, continueUrl, messages, customisationsUrl,
+    insertRaw(Journey.createExpiring(journeyId, authProviderId, serviceIdentifier, continueUrl, messages, customisationsUrl,
       address, prepopulatedData, directDebitConstraints, timeoutConfig)).map(_ => journeyId)
   }
 
