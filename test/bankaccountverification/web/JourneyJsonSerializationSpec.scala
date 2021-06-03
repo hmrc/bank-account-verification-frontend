@@ -16,22 +16,21 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.BACSRequirements
-
-import java.time.{ZoneOffset, ZonedDateTime}
 import bankaccountverification.connector.ReputationResponseEnum._
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
-import bankaccountverification.{BusinessSession, Journey, PersonalSession, Session, TimeoutConfig}
+import bankaccountverification._
+import org.bson.types.ObjectId
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
-import reactivemongo.bson.BSONObjectID
+
+import java.time.LocalDateTime
 
 class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
   "Journey" when {
     "PersonalAccountDetails" should {
-      val id = BSONObjectID.generate()
-      val theExpiryDate = ZonedDateTime.now(ZoneOffset.UTC)
+      val id = ObjectId.get()
+      val theExpiryDate = LocalDateTime.now
       val personalJourney = Journey(
         id = id,
         Some("1234"),
@@ -57,7 +56,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
           )),
           business = None
         ),
-        bacsRequirements = Some(BACSRequirements(true, false)),
+        bacsRequirements = Some(BACSRequirements(directDebitRequired = true, directCreditRequired = false)),
         timeoutConfig = Some(TimeoutConfig("url", 100, Some("keepAlive")))
       )
 
@@ -67,9 +66,9 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
 
       "serialize to JSON correctly" in {
 
-        (personalJourneyJsValue \ "_id").as[BSONObjectID] shouldBe id
+        (personalJourneyJsValue \ "_id").as[ObjectId] shouldBe id
         (personalJourneyJsValue \ "authProviderId").as[String] shouldBe "1234"
-        (personalJourneyJsValue \ "expiryDate").as[ZonedDateTime] shouldBe theExpiryDate
+        (personalJourneyJsValue \ "expiryDate").as[LocalDateTime] shouldBe theExpiryDate
         (personalJourneyJsValue \ "serviceIdentifier").as[String] shouldBe "some-service"
         (personalJourneyJsValue \ "continueUrl").as[String] shouldBe "some-url"
         (personalJourneyJsValue \ "messages").isEmpty shouldBe true
@@ -112,8 +111,8 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
     }
 
     "BusinessAccountDetails" should {
-      val id = BSONObjectID.generate()
-      val theExpiryDate = ZonedDateTime.now(ZoneOffset.UTC)
+      val id = ObjectId.get()
+      val theExpiryDate = LocalDateTime.now
       val businessJourney = Journey(
         id = id,
         Some("1234"),
@@ -139,7 +138,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
           )),
           personal = None
         ),
-        bacsRequirements = Some(BACSRequirements(false, true)),
+        bacsRequirements = Some(BACSRequirements(directDebitRequired = false, directCreditRequired = true)),
         timeoutConfig = Some(TimeoutConfig("url", 100, Some("keepAlive")))
       )
 
@@ -149,9 +148,9 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
 
       "serialize to JSON correctly" in {
 
-        (businessJourneyJsValue \ "_id").as[BSONObjectID] shouldBe id
+        (businessJourneyJsValue \ "_id").as[ObjectId] shouldBe id
         (businessJourneyJsValue \ "authProviderId").as[String] shouldBe "1234"
-        (businessJourneyJsValue \ "expiryDate").as[ZonedDateTime] shouldBe theExpiryDate
+        (businessJourneyJsValue \ "expiryDate").as[LocalDateTime] shouldBe theExpiryDate
         (businessJourneyJsValue \ "serviceIdentifier").as[String] shouldBe "some-service"
         (businessJourneyJsValue \ "continueUrl").as[String] shouldBe "some-url"
         (businessJourneyJsValue \ "messages").isEmpty shouldBe true

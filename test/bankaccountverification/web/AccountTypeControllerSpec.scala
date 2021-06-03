@@ -16,12 +16,11 @@
 
 package bankaccountverification.web
 
-import java.time.{ZoneOffset, ZonedDateTime}
-
 import akka.stream.Materializer
 import bankaccountverification._
 import bankaccountverification.web.AccountTypeRequestEnum.Personal
 import com.codahale.metrics.SharedMetricRegistries
+import org.bson.types.ObjectId
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.matchers.should.Matchers
@@ -34,11 +33,10 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import reactivemongo.bson.BSONObjectID
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.internalId
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 
+import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -70,8 +68,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
   "GET /start" when {
 
     "the user is not logged in" should {
-      val id = BSONObjectID.generate()
-      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+      val id = ObjectId.get()
+      val expiry = LocalDateTime.now.plusMinutes(60)
 
       "return 401" in {
         reset(mockAuthConnector)
@@ -83,14 +81,14 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(), timeoutConfig = None))))
 
-        val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
-        val result = accountTypeController.getAccountType(id.stringify).apply(fakeRequest)
+        val fakeRequest = FakeRequest("GET", s"/start/${id.toHexString}").withMethod("GET")
+        val result = accountTypeController.getAccountType(id.toHexString).apply(fakeRequest)
         status(result) shouldBe Status.UNAUTHORIZED
       }
     }
 
     "there is no valid journey" should {
-      val id = BSONObjectID.generate()
+      val id = ObjectId.get()
 
       "return 404" in {
         reset(mockAuthConnector)
@@ -100,15 +98,15 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(Future.successful(None))
 
-        val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
-        val result = accountTypeController.getAccountType(id.stringify).apply(fakeRequest)
+        val fakeRequest = FakeRequest("GET", s"/start/${id.toHexString}").withMethod("GET")
+        val result = accountTypeController.getAccountType(id.toHexString).apply(fakeRequest)
         status(result) shouldBe Status.NOT_FOUND
       }
     }
 
     "there is a valid journey but it does not match this user" should {
-      val id = BSONObjectID.generate()
-      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+      val id = ObjectId.get()
+      val expiry = LocalDateTime.now.plusMinutes(60)
 
       "return 404" in {
         reset(mockAuthConnector)
@@ -120,15 +118,15 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(), timeoutConfig = None))))
 
-        val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
-        val result = accountTypeController.getAccountType(id.stringify).apply(fakeRequest)
+        val fakeRequest = FakeRequest("GET", s"/start/${id.toHexString}").withMethod("GET")
+        val result = accountTypeController.getAccountType(id.toHexString).apply(fakeRequest)
         status(result) shouldBe Status.NOT_FOUND
       }
     }
 
     "there is a valid journey and the user is logged in" should {
-      val id = BSONObjectID.generate()
-      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+      val id = ObjectId.get()
+      val expiry = LocalDateTime.now.plusMinutes(60)
 
       "return 200" in {
         reset(mockAuthConnector)
@@ -140,16 +138,16 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(), timeoutConfig = None))))
 
-        val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
-        val result = accountTypeController.getAccountType(id.stringify).apply(fakeRequest)
+        val fakeRequest = FakeRequest("GET", s"/start/${id.toHexString}").withMethod("GET")
+        val result = accountTypeController.getAccountType(id.toHexString).apply(fakeRequest)
         status(result) shouldBe Status.OK
         redirectLocation(result) shouldBe None
       }
     }
 
     "account type is pre-populated" should {
-      val id = BSONObjectID.generate()
-      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+      val id = ObjectId.get()
+      val expiry = LocalDateTime.now.plusMinutes(60)
 
       "render account type view with the prepopulated account type" in {
         reset(mockAuthConnector)
@@ -161,8 +159,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(Some(Personal)), timeoutConfig = None))))
 
-        val fakeRequest = FakeRequest("GET", s"/start/${id.stringify}").withMethod("GET")
-        val result = accountTypeController.getAccountType(id.stringify).apply(fakeRequest)
+        val fakeRequest = FakeRequest("GET", s"/start/${id.toHexString}").withMethod("GET")
+        val result = accountTypeController.getAccountType(id.toHexString).apply(fakeRequest)
         status(result) shouldBe Status.OK
         contentAsString(result) should include regex """value="personal"\p{Space}+checked"""
       }
@@ -171,7 +169,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
   "POST /start" when {
     "the user is not logged in" should {
-      val id = BSONObjectID.generate()
+      val id = ObjectId.get()
 
       "return 401" in {
         reset(mockAuthConnector)
@@ -180,16 +178,16 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(Future.successful(None))
-        val fakeRequest = FakeRequest("POST", s"/start/${id.stringify}")
+        val fakeRequest = FakeRequest("POST", s"/start/${id.toHexString}")
           .withFormUrlEncodedBody("accountType" -> AccountTypeRequestEnum.Personal.toString)
 
-        val result = accountTypeController.postAccountType(id.stringify).apply(fakeRequest)
+        val result = accountTypeController.postAccountType(id.toHexString).apply(fakeRequest)
         status(result) shouldBe Status.UNAUTHORIZED
       }
     }
 
     "there is no valid journey" should {
-      val id = BSONObjectID.generate()
+      val id = ObjectId.get()
 
       "return 404" in {
         reset(mockAuthConnector)
@@ -198,17 +196,17 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(Future.successful(None))
-        val fakeRequest = FakeRequest("POST", s"/start/${id.stringify}")
+        val fakeRequest = FakeRequest("POST", s"/start/${id.toHexString}")
           .withFormUrlEncodedBody("accountType" -> AccountTypeRequestEnum.Personal.toString)
 
-        val result = accountTypeController.postAccountType(id.stringify).apply(fakeRequest)
+        val result = accountTypeController.postAccountType(id.toHexString).apply(fakeRequest)
         status(result) shouldBe Status.NOT_FOUND
       }
     }
 
     "the journey is valid but does not match the current user" should {
-      val id = BSONObjectID.generate()
-      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+      val id = ObjectId.get()
+      val expiry = LocalDateTime.now.plusMinutes(60)
 
       "return 404" in {
         reset(mockAuthConnector)
@@ -220,17 +218,17 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(), timeoutConfig = None))))
 
-        val fakeRequest = FakeRequest("POST", s"/start/${id.stringify}")
+        val fakeRequest = FakeRequest("POST", s"/start/${id.toHexString}")
           .withFormUrlEncodedBody("accountType" -> "")
 
-        val result = accountTypeController.postAccountType(id.stringify).apply(fakeRequest)
+        val result = accountTypeController.postAccountType(id.toHexString).apply(fakeRequest)
         status(result) shouldBe Status.NOT_FOUND
       }
     }
 
     "the journey is valid but there are form errors" should {
-      val id = BSONObjectID.generate()
-      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+      val id = ObjectId.get()
+      val expiry = LocalDateTime.now.plusMinutes(60)
 
       "return 400" in {
         reset(mockAuthConnector)
@@ -242,17 +240,17 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(), timeoutConfig = None))))
 
-        val fakeRequest = FakeRequest("POST", s"/start/${id.stringify}")
+        val fakeRequest = FakeRequest("POST", s"/start/${id.toHexString}")
           .withFormUrlEncodedBody("accountType" -> "")
 
-        val result = accountTypeController.postAccountType(id.stringify).apply(fakeRequest)
+        val result = accountTypeController.postAccountType(id.toHexString).apply(fakeRequest)
         status(result) shouldBe Status.BAD_REQUEST
       }
     }
 
     "the journey and form are valid, personal account type is selected" should {
-      val id = BSONObjectID.generate()
-      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+      val id = ObjectId.get()
+      val expiry = LocalDateTime.now.plusMinutes(60)
 
       "Redirect to the getAccountDetails endpoint" in {
         reset(mockAuthConnector)
@@ -269,19 +267,19 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
           .thenReturn(Future.successful(true))
 
         val fakeRequest =
-          FakeRequest("POST", s"/start/${id.stringify}")
+          FakeRequest("POST", s"/start/${id.toHexString}")
             .withFormUrlEncodedBody("accountType" -> AccountTypeRequestEnum.Personal.toString)
 
-        val result = accountTypeController.postAccountType(id.stringify).apply(fakeRequest)
+        val result = accountTypeController.postAccountType(id.toHexString).apply(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/bank-account-verification/verify/personal/${id.stringify}")
+        redirectLocation(result) shouldBe Some(s"/bank-account-verification/verify/personal/${id.toHexString}")
       }
     }
 
     "the journey and form are valid, business account type is selected" should {
-      val id = BSONObjectID.generate()
-      val expiry = ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(60)
+      val id = ObjectId.get()
+      val expiry = LocalDateTime.now.plusMinutes(60)
 
       "Redirect to the getAccountDetails endpoint" in {
         reset(mockAuthConnector)
@@ -298,13 +296,13 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
           .thenReturn(Future.successful(true))
 
         val fakeRequest =
-          FakeRequest("POST", s"/start/${id.stringify}")
+          FakeRequest("POST", s"/start/${id.toHexString}")
             .withFormUrlEncodedBody("accountType" -> AccountTypeRequestEnum.Business.toString)
 
-        val result = accountTypeController.postAccountType(id.stringify).apply(fakeRequest)
+        val result = accountTypeController.postAccountType(id.toHexString).apply(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/bank-account-verification/verify/business/${id.stringify}")
+        redirectLocation(result) shouldBe Some(s"/bank-account-verification/verify/business/${id.toHexString}")
       }
     }
   }

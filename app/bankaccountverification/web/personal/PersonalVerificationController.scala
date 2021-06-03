@@ -82,7 +82,7 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
         appConfig.appName,
         "AccountDetailsEntered",
         detail = Map("accountType" -> "personal", "trueCallingService" -> journey.serviceIdentifier,
-          "journeyId" -> journey.id.stringify)
+          "journeyId" -> journey.id.toHexString)
           ++ form.data.filterKeys {
           case "csrfToken" | "continue" => false
           case _ => true

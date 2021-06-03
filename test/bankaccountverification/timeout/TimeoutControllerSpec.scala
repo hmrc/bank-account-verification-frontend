@@ -16,12 +16,12 @@
 
 package bankaccountverification.timeout
 
-import akka.stream.Materializer
+import bankaccountverification._
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
-import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
-import bankaccountverification.web.{ActionWithCustomisationsProvider, TimeoutController, VerificationService}
-import bankaccountverification.{TimeoutConfig, _}
+import bankaccountverification.web.AccountTypeRequestEnum.Personal
+import bankaccountverification.web.{ActionWithCustomisationsProvider, TimeoutController}
 import com.codahale.metrics.SharedMetricRegistries
+import org.bson.types.ObjectId
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.OptionValues
@@ -32,18 +32,15 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Environment}
-import reactivemongo.bson.BSONObjectID
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
-import java.time.ZonedDateTime
+import java.time.LocalDateTime
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
@@ -70,16 +67,16 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
       .build()
   }
 
-  val actionWithCustomisationsProvider = app.injector.instanceOf[ActionWithCustomisationsProvider]
+  private val actionWithCustomisationsProvider = app.injector.instanceOf[ActionWithCustomisationsProvider]
 
   private val controller = app.injector.instanceOf[TimeoutController]
 
   "GET /renewSession" should {
-    val newJourneyId = BSONObjectID.generate()
+    val newJourneyId = ObjectId.get()
 
     "return 200" when {
       "when authorised and a valid journey id is provided" in {
-        val journeyId = BSONObjectID.generate()
+        val journeyId = ObjectId.get()
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.successful("1234"))
@@ -87,7 +84,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
         val returnData = Journey(
           journeyId,
           Some("1234"),
-          ZonedDateTime.now(),
+          LocalDateTime.now,
           "serviceIdentifier",
           "continueUrl",
           Session(
@@ -101,16 +98,13 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
           ),
           timeoutConfig = None)
 
-        when(mockJourneyRepository.findById(meq(journeyId), any())(any())).thenReturn(Future.successful(Some
+        when(mockJourneyRepository.findById(meq(journeyId))(any())).thenReturn(Future.successful(Some
         (returnData)))
         when(mockJourneyRepository.renewExpiryDate(meq(journeyId))(any())).thenReturn(Future.successful(true))
 
-        val fakeRequest = FakeRequest("GET", s"/bank-account-verification/renewSession?journeyId=${
-          journeyId
-            .stringify
-        }")
+        val fakeRequest = FakeRequest("GET", s"/bank-account-verification/renewSession?journeyId=${journeyId.toHexString}")
 
-        val result = controller.renewSession(journeyId.stringify).apply(fakeRequest)
+        val result = controller.renewSession(journeyId.toHexString).apply(fakeRequest)
 
         status(result) shouldBe Status.OK
         contentType(result) shouldBe Some("image/jpeg")
@@ -149,7 +143,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
   "GET /destroySession" should {
     "return 200" when {
       "when authorised and a valid journey id is provided" in {
-        val journeyId = BSONObjectID.generate()
+        val journeyId = ObjectId.get()
         val timeoutUrl = "https://www.tax.service.gov.uk/some-timeout-url"
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -158,7 +152,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
         val returnData = Journey(
           journeyId,
           Some("1234"),
-          ZonedDateTime.now(),
+          LocalDateTime.now,
           "serviceIdentifier",
           "continueUrl",
           Session(
@@ -172,15 +166,15 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
           ),
           timeoutConfig = None)
 
-        when(mockJourneyRepository.findById(meq(journeyId), any())(any())).thenReturn(Future.successful(Some
+        when(mockJourneyRepository.findById(meq(journeyId))(any())).thenReturn(Future.successful(Some
         (returnData)))
 
         when(mockJourneyRepository.renewExpiryDate(meq(journeyId))(any())).thenReturn(Future.successful(true))
 
         val fakeRequest =
-          FakeRequest("GET", s"/bank-account-verification/destroySession?journeyId=&${journeyId.stringify}timeoutUrl=${timeoutUrl}")
+          FakeRequest("GET", s"/bank-account-verification/destroySession?journeyId=&${journeyId.toHexString}timeoutUrl=$timeoutUrl")
 
-        val result = controller.timeoutSession(journeyId.stringify, RedirectUrl(timeoutUrl)).apply(fakeRequest)
+        val result = controller.timeoutSession(journeyId.toHexString, RedirectUrl(timeoutUrl)).apply(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some("https://www.tax.service.gov.uk/some-timeout-url")
@@ -217,7 +211,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
 
     "return 404" when {
       "when authorised and a valid journey id is provided but the timeoutUrl is not-allow-listed" in {
-        val journeyId = BSONObjectID.generate()
+        val journeyId = ObjectId.get()
         val timeoutUrl = "https://www.some-other-tax.service.gov.uk/some-timeout-url"
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -226,7 +220,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
         val returnData = Journey(
           journeyId,
           Some("1234"),
-          ZonedDateTime.now(),
+          LocalDateTime.now,
           "serviceIdentifier",
           "continueUrl",
           Session(
@@ -240,15 +234,15 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
           ),
           timeoutConfig = None)
 
-        when(mockJourneyRepository.findById(meq(journeyId), any())(any())).thenReturn(Future.successful(Some
+        when(mockJourneyRepository.findById(meq(journeyId))(any())).thenReturn(Future.successful(Some
         (returnData)))
 
         when(mockJourneyRepository.renewExpiryDate(meq(journeyId))(any())).thenReturn(Future.successful(true))
 
         val fakeRequest =
-          FakeRequest("GET", s"/bank-account-verification/destroySession?journeyId=&${journeyId.stringify}timeoutUrl=${timeoutUrl}")
+          FakeRequest("GET", s"/bank-account-verification/destroySession?journeyId=&${journeyId.toHexString}timeoutUrl=$timeoutUrl")
 
-        val result = controller.timeoutSession(journeyId.stringify, RedirectUrl(timeoutUrl)).apply(fakeRequest)
+        val result = controller.timeoutSession(journeyId.toHexString, RedirectUrl(timeoutUrl)).apply(fakeRequest)
 
         status(result) shouldBe Status.NOT_FOUND
       }

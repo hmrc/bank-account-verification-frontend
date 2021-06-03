@@ -16,20 +16,18 @@
 
 package bankaccountverification.api
 
-import bankaccountverification.BACSRequirements
+import bankaccountverification.{BACSRequirements, _}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
-import bankaccountverification._
-
-import javax.inject.{Inject, Singleton}
+import org.bson.types.ObjectId
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerComponents,
@@ -71,18 +69,18 @@ class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerCompo
                       .map { journeyId =>
                         import bankaccountverification._
 
-                        val startUrl = web.routes.AccountTypeController.getAccountType(journeyId.stringify).url
-                        val completeUrl = api.routes.ApiController.complete(journeyId.stringify).url
+                        val startUrl = web.routes.AccountTypeController.getAccountType(journeyId.toHexString).url
+                        val completeUrl = api.routes.ApiController.complete(journeyId.toHexString).url
 
                         val detailsUrl = prepopulatedData.map {
                           case p if p.accountType == Personal =>
-                            web.personal.routes.PersonalVerificationController.getAccountDetails(journeyId.stringify).url
+                            web.personal.routes.PersonalVerificationController.getAccountDetails(journeyId.toHexString).url
                           case p if p.accountType == Business =>
-                            web.business.routes.BusinessVerificationController.getAccountDetails(journeyId.stringify).url
+                            web.business.routes.BusinessVerificationController.getAccountDetails(journeyId.toHexString).url
                         }
 
                         import InitResponse._
-                        Ok(Json.toJson(InitResponse(journeyId.stringify, startUrl, completeUrl, detailsUrl)))
+                        Ok(Json.toJson(InitResponse(journeyId.toHexString, startUrl, completeUrl, detailsUrl)))
                       }
                   }
                 )
@@ -98,7 +96,7 @@ class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerCompo
     import bankaccountverification.Session
     authorised().retrieve(AuthProviderId.retrieval) {
       authProviderId =>
-        BSONObjectID.parse(journeyId) match {
+        Try(new ObjectId(journeyId)) match {
           case Success(id) =>
             journeyRepository
               .findById(id)

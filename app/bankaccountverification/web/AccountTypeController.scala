@@ -19,15 +19,14 @@ package bankaccountverification.web
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.web.business.{routes => businessRoutes}
 import bankaccountverification.web.personal.{routes => personalRoutes}
-import bankaccountverification.web.views.html.{AccountTypeView, ErrorTemplate}
+import bankaccountverification.web.views.html.AccountTypeView
 import bankaccountverification.{AppConfig, RemoteMessagesApiProvider}
-import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.i18n.Messages
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

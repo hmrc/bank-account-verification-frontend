@@ -32,7 +32,7 @@ package bankaccountverification
  * limitations under the License.
  */
 
-import java.time.ZonedDateTime
+import java.time.LocalDateTime
 
 import bankaccountverification.api.{BusinessCompleteResponse, CompleteResponse, CompleteResponseAddress}
 import bankaccountverification.connector.ReputationResponseEnum.Error
@@ -227,11 +227,3 @@ object BusinessAccountDetails {
           Some(Error), None, Some(Error), Some(Error), Some(Error), Some(Error), None)
     }
 }
-
-case class RenewExpiryDateUpdate(expiryDate: ZonedDateTime)
-
-case class PersonalAccountDetailsUpdate(expiryDate: ZonedDateTime, data: PersonalAccountDetails)
-
-case class BusinessAccountDetailsUpdate(expiryDate: ZonedDateTime, data: BusinessAccountDetails)
-
-case class AccountTypeUpdate(expiryDate: ZonedDateTime, accountType: AccountTypeRequestEnum)

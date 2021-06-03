@@ -32,94 +32,96 @@ package bankaccountverification
  * limitations under the License.
  */
 
-import bankaccountverification.Journey.renewExpiryDateUpdateWrites
+import bankaccountverification.JourneyRepository.{ExpiryDateIndex, expireAfterSeconds}
 import bankaccountverification.web.AccountTypeRequestEnum
+import org.bson.types.ObjectId
+import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.Indexes.ascending
+import org.mongodb.scala.model.{IndexModel, IndexOptions, ReplaceOptions}
+import org.mongodb.scala.model.Updates.set
+import play.api.libs.json.{JsObject, OWrites}
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
+import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
 
+import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.JsonConfiguration.Aux
-import play.api.libs.json.{JsObject, Json, JsonConfiguration, OWrites, OptionHandlers}
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDocument, BSONLong, BSONObjectID}
-import uk.gov.hmrc.mongo.ReactiveRepository
-
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class JourneyRepository @Inject()(component: ReactiveMongoComponent)
-  extends ReactiveRepository[Journey, BSONObjectID](
-    "bank-account-verification-session-store",
-    component.mongoConnector.db,
-    Journey.format
-  ) {
+class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionContext)
+    extends PlayMongoRepository[Journey](
+      mongoComponent = mongo,
+      collectionName = "bank-account-verification-session-store",
+      domainFormat = Journey.format,
+      indexes = Seq(
+        IndexModel(ascending("expiryDate"), IndexOptions().name(ExpiryDateIndex).expireAfter(expireAfterSeconds, TimeUnit.SECONDS))
+      ),
+      replaceIndexes = true
+    ) {
 
-  val expireAfterSeconds: Long = 0
 
-  private lazy val ExpiryDateIndex = "expiryDateIndex"
-  private lazy val OptExpireAfterSeconds = "expireAfterSeconds"
+  def findById(id: ObjectId)(implicit ec: ExecutionContext): Future[Option[Journey]] = {
+    collection.find(filter = equal("_id", id)).toFuture().map(_.headOption)
+  }
 
-  def renewExpiryDate(id: BSONObjectID)(implicit ec: ExecutionContext): Future[Boolean] ={
-    val updateJson = Json.toJsObject(RenewExpiryDateUpdate(Journey.expiryDate))
-    findAndUpdate(_id(id), updateJson).map(r => r.lastError.isDefined)
+  def renewExpiryDate(id: ObjectId)(implicit ec: ExecutionContext): Future[Boolean] = {
+    collection.findOneAndUpdate(
+      filter = equal("_id", id),
+      update = set("expiryDate", Journey.expiryDate)
+    ).toFuture().map(_ => true)
+  }
+
+  def insert(journey: Journey): Future[ObjectId] = {
+    collection.insertOne(journey).toFuture()
+              .map(_.getInsertedId.asObjectId().getValue)
   }
 
   def create(authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
              messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
              address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None,
-             directDebitConstraints: Option[BACSRequirements], timeoutConfig: Option[TimeoutConfig])(implicit ec: ExecutionContext): Future[BSONObjectID] = {
-    val journeyId = BSONObjectID.generate()
+             directDebitConstraints: Option[BACSRequirements], timeoutConfig: Option[TimeoutConfig])(implicit ec: ExecutionContext): Future[ObjectId] = {
+    val journeyId = ObjectId.get()
 
     insert(Journey.createExpiring(journeyId, authProviderId, serviceIdentifier, continueUrl, messages, customisationsUrl,
       address, prepopulatedData, directDebitConstraints, timeoutConfig)).map(_ => journeyId)
   }
 
-  def updatePersonalAccountDetails(id: BSONObjectID, data: PersonalAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {
-    import Journey.personalUpdateWrites
+  def updatePersonalAccountDetails(id: ObjectId, data: PersonalAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {
+    import Journey.personalAccountDetailsWrites
 
-    val updateJson = Json.toJsObject(Journey.updatePersonalAccountDetailsExpiring(data))
-    findAndUpdate(_id(id), updateJson).map(r => r.lastError.isDefined)
+    collection.findOneAndUpdate(
+      filter = equal("_id", id),
+      update = Seq(set("data.personal", Codecs.toBson(data)), set("expiryDate", Journey.expiryDate))).toFuture()
+              .map(_ => true)
   }
 
-  def updateBusinessAccountDetails(id: BSONObjectID, data: BusinessAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {
-    import Journey.businessUpdateWrites
-    val updateJson = Json.toJsObject(Journey.updateBusinessAccountDetailsExpiring(data))
-    findAndUpdate(_id(id), updateJson).map(r => r.lastError.isDefined)
+  def updateBusinessAccountDetails(id: ObjectId, data: BusinessAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {
+    import Journey.businessAccountDetailsWrites
+
+    collection.findOneAndUpdate(
+      filter = equal("_id", id),
+      update = Seq(set("data.business", Codecs.toBson(data)), set("expiryDate", Journey.expiryDate))).toFuture()
+              .map(_ => true)
   }
 
-  def updateAccountType(id: BSONObjectID, accountType: AccountTypeRequestEnum)(implicit ec: ExecutionContext
-  ): Future[Boolean] = {
-    import Journey.accountTypeUpdateWrites
-    val updateJson = Json.toJsObject(Journey.updateAccountTypeExpiring(accountType))
-    findAndUpdate(_id(id), updateJson).map(r => r.lastError.isDefined)
+  // Is there a better way to do this than to copy the Journey?
+  def updateAccountType(id: ObjectId, accountType: AccountTypeRequestEnum)(implicit ec: ExecutionContext): Future[Boolean] = {
+    for {
+      journeyOption <- collection.find(filter = equal("_id", id)).toFuture().map(r => r.headOption)
+      journeyUpdate = journeyOption.map(oj => oj.copy(expiryDate = Journey.expiryDate, data = oj.data.copy(accountType = Some(accountType))))
+      if journeyUpdate.isDefined
+      result <- collection.replaceOne(
+        filter = equal("_id", id),
+        replacement = journeyUpdate.get,
+        options = ReplaceOptions().upsert(true)).toFuture()
+                          .map(_ => true)
+    } yield result
   }
+}
 
-  override def ensureIndexes(implicit ec: ExecutionContext): Future[Seq[Boolean]] = {
-    import reactivemongo.bson.DefaultBSONHandlers._
+object JourneyRepository {
+  val expireAfterSeconds: Long = 0
 
-    val indexes = collection.indexesManager.list()
-    indexes.flatMap { idxs =>
-      val expiry = idxs.find(index =>
-        index.eventualName == ExpiryDateIndex
-          && index.options.getAs[BSONLong](OptExpireAfterSeconds).fold(false)(_.as[Long] != expireAfterSeconds)
-      )
-
-      Future.sequence(Seq(ensureExpiryDateIndex(expiry)))
-    }
-  }
-
-  private def ensureExpiryDateIndex(existingIndex: Option[Index])(implicit ec: ExecutionContext) = {
-    logger.info(s"Creating time to live for entries in ${collection.name} to $expireAfterSeconds seconds")
-
-    existingIndex
-      .fold(Future.successful(0))(idx => collection.indexesManager.drop(idx.eventualName))
-      .flatMap { _ =>
-        collection.indexesManager.ensure(
-          Index(
-            key = Seq("expiryDate" -> IndexType.Ascending),
-            name = Some(ExpiryDateIndex),
-            options = BSONDocument(OptExpireAfterSeconds -> expireAfterSeconds)
-          )
-        )
-      }
-  }
+  private lazy val ExpiryDateIndex = "expiryDateIndex"
 }

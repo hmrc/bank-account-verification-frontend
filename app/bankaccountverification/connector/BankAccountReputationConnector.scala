@@ -27,7 +27,7 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig: AppConfig) {
 
-  @deprecated(message = "Use assessPersonal or assessBusiness")
+  @deprecated(message = "Use assessPersonal or assessBusiness", since = "September 2020")
   def validateBankDetails(
                            bankDetailsModel: BarsValidationRequest
                          )(implicit

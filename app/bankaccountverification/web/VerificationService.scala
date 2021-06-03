@@ -16,25 +16,23 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.BACSRequirements
 import bankaccountverification.connector._
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
-import bankaccountverification.{Address, BusinessAccountDetails, JourneyRepository, PersonalAccountDetails}
-
-import javax.inject.Inject
+import bankaccountverification._
+import org.bson.types.ObjectId
 import play.api.Logger
 import play.api.data.Form
-import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 class VerificationService @Inject()(connector: BankAccountReputationConnector, repository: JourneyRepository) {
   private val logger = Logger(this.getClass)
 
-  def setAccountType(journeyId: BSONObjectID, accountType: AccountTypeRequestEnum)
+  def setAccountType(journeyId: ObjectId, accountType: AccountTypeRequestEnum)
                     (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Boolean] =
     repository.updateAccountType(journeyId, accountType)
 
@@ -46,7 +44,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
       request.accountNumber,
       address.map(a => BarsAddress(a.lines, a.town, a.postcode)))
 
-  def processPersonalAssessResponse(journeyId: BSONObjectID,
+  def processPersonalAssessResponse(journeyId: ObjectId,
                                     directDebitConstraints: BACSRequirements,
                                     assessResponse: Try[BarsPersonalAssessResponse],
                                     form: Form[PersonalVerificationRequest]
@@ -80,7 +78,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
       request.accountNumber,
       address.map(a => BarsAddress(a.lines, a.town, a.postcode)))
 
-  def processBusinessAssessResponse(journeyId: BSONObjectID,
+  def processBusinessAssessResponse(journeyId: ObjectId,
                                     directDebitConstraints: BACSRequirements,
                                     assessResponse: Try[BarsBusinessAssessResponse],
                                     form: Form[BusinessVerificationRequest]

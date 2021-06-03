@@ -17,14 +17,12 @@
 package bankaccountverification.web.business
 
 import bankaccountverification.BACSRequirements
-import bankaccountverification.connector.ReputationResponseEnum.{Inapplicable, Indeterminate, No, Yes}
-import bankaccountverification.connector.{BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse,
-  BarsBusinessAssessSuccessResponse, ReputationResponseEnum}
+import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
+import bankaccountverification.connector.{BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse, BarsBusinessAssessSuccessResponse}
 import bankaccountverification.web.Forms._
 import bankaccountverification.web.Implicits.SanitizedString
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.data.validation._
 import play.api.libs.json.Json
 
 case class BusinessVerificationRequest(companyName: String, sortCode: String, accountNumber: String,
