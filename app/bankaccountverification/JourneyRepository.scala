@@ -42,7 +42,6 @@ import org.mongodb.scala.model.Updates.set
 import play.api.libs.json.{JsObject, OWrites}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
-import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
 
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
@@ -66,7 +65,7 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
   }
 
   def renewExpiryDate(id: ObjectId)(implicit ec: ExecutionContext): Future[Boolean] = {
-    collection.findOneAndUpdate(
+    collection.updateOne(
       filter = equal("_id", id),
       update = set("expiryDate", Journey.expiryDate)
     ).toFuture().map(_ => true)
@@ -90,9 +89,9 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
   def updatePersonalAccountDetails(id: ObjectId, data: PersonalAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {
     import Journey.personalAccountDetailsWrites
 
-    collection.findOneAndUpdate(
+    collection.updateOne(
       filter = equal("_id", id),
-      update = Seq(set("data.personal", Codecs.toBson(data)), set("expiryDate", Journey.expiryDate))).toFuture()
+      update = combine(set("data.personal", Codecs.toBson(data)), set("expiryDate", Journey.expiryDate))).toFuture()
               .map(_ => true)
   }
 
