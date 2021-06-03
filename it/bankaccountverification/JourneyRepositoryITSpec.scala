@@ -110,4 +110,25 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
     }
 
   }
+
+  "Updating account type" should {
+    val repository = app.injector.instanceOf[JourneyRepository]
+
+    "handle changing the account type" in {
+      val journeyId = ObjectId.get()
+
+      val businessSession = BusinessSession(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
+      val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
+      val journey = Journey(journeyId, Some("1234"), LocalDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None, None)
+      await(repository.insert(journey))
+
+      await(repository.updateAccountType(journeyId, Personal))
+
+      val updatedSession = await(repository.findById(journeyId)).map(j => j.data).get
+      updatedSession.accountType shouldBe Some(Personal)
+      updatedSession.business shouldBe Some(businessSession)
+      updatedSession.personal shouldBe None
+    }
+
+  }
 }

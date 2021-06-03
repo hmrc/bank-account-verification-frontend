@@ -98,24 +98,17 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
   def updateBusinessAccountDetails(id: ObjectId, data: BusinessAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {
     import Journey.businessAccountDetailsWrites
 
-    collection.findOneAndUpdate(
+    collection.updateOne(
       filter = equal("_id", id),
       update = combine(set("data.business", Codecs.toBson(data)), set("expiryDate", Journey.expiryDate))).toFuture()
               .map(_ => true)
   }
 
-  // Is there a better way to do this than to copy the Journey?
   def updateAccountType(id: ObjectId, accountType: AccountTypeRequestEnum)(implicit ec: ExecutionContext): Future[Boolean] = {
-    for {
-      journeyOption <- collection.find(filter = equal("_id", id)).toFuture().map(r => r.headOption)
-      journeyUpdate = journeyOption.map(oj => oj.copy(expiryDate = Journey.expiryDate, data = oj.data.copy(accountType = Some(accountType))))
-      if journeyUpdate.isDefined
-      result <- collection.replaceOne(
-        filter = equal("_id", id),
-        replacement = journeyUpdate.get,
-        options = ReplaceOptions().upsert(true)).toFuture()
-                          .map(_ => true)
-    } yield result
+    collection.updateOne(
+      filter = equal("_id", id),
+      update = combine(set("data.accountType", accountType.toString), set("expiryDate", Journey.expiryDate))).toFuture()
+              .map(_ => true)
   }
 }
 
