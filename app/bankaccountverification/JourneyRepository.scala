@@ -38,7 +38,7 @@ import org.bson.types.ObjectId
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{IndexModel, IndexOptions, ReplaceOptions}
-import org.mongodb.scala.model.Updates.set
+import org.mongodb.scala.model.Updates.{combine, set}
 import play.api.libs.json.{JsObject, OWrites}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
@@ -100,7 +100,7 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
 
     collection.findOneAndUpdate(
       filter = equal("_id", id),
-      update = Seq(set("data.business", Codecs.toBson(data)), set("expiryDate", Journey.expiryDate))).toFuture()
+      update = combine(set("data.business", Codecs.toBson(data)), set("expiryDate", Journey.expiryDate))).toFuture()
               .map(_ => true)
   }
 
