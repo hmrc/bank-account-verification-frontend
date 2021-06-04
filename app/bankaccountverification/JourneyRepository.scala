@@ -62,11 +62,11 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
       ),
       replaceIndexes = true
     ) {
-  val rawCollection = mongo.database.getCollection[RawBsonDocument](collectionName)
+  def rawCollection =
+    mongo.database.getCollection[RawBsonDocument](collectionName)
                           .withCodecRegistry(
                             CodecRegistries.fromRegistries(
-                              CodecRegistries.fromCodecs(new RawBsonDocumentCodec()),
-                              DEFAULT_CODEC_REGISTRY))
+                              CodecRegistries.fromCodecs(new RawBsonDocumentCodec())))
 
   def findById(id: ObjectId)(implicit ec: ExecutionContext): Future[Option[Journey]] = {
     collection.find(filter = equal("_id", id)).toFuture().map(_.headOption)
@@ -82,8 +82,7 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
   // Some messages will have dotted field names, eg 'service.name', causing the normal insert to fail. To avoid this, we use the RawBsonDocument.
   def insertRaw(journey: Journey): Future[ObjectId] = {
     val bsonDoc = RawBsonDocument.parse(Json.toJson(journey).toString())
-    rawCollection.insertOne(bsonDoc).toFuture()
-              .map(_.getInsertedId.asObjectId().getValue)
+    rawCollection.insertOne(bsonDoc).toFuture().map(_ => journey.id)
   }
 
   def create(authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
