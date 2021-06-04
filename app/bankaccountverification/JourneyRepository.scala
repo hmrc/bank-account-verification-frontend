@@ -84,8 +84,6 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
     val bsonDoc = RawBsonDocument.parse(Json.toJson(journey).toString())
     rawCollection.insertOne(bsonDoc).toFuture()
               .map(_.getInsertedId.asObjectId().getValue)
-
-    Future.successful(ObjectId.get())
   }
 
   def create(authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
