@@ -23,14 +23,16 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneServerPerSuite with MockitoSugar {
-  override lazy val app = {
+  override lazy val app: Application = {
     SharedMetricRegistries.clear()
     new GuiceApplicationBuilder()
       .build()
@@ -81,7 +83,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
       val personalSession = PersonalSession(Some("accountName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
       val session = Session(accountType = Some(Personal), address = None, personal = Some(personalSession))
       val journey = Journey(journeyId, Some("1234"), LocalDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None, None)
-      await(repository.insert(journey))
+      await(repository.insertRaw(journey))
 
       val accountDetails = PersonalAccountDetails(Some("updated accountName"), Some("updated sortCode"), Some("updated accountNumber"), None)
       await(repository.updatePersonalAccountDetails(journeyId, accountDetails))
@@ -100,7 +102,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
       val businessSession = BusinessSession(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
       val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
       val journey = Journey(journeyId, Some("1234"), LocalDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None, None)
-      await(repository.insert(journey))
+      await(repository.insertRaw(journey))
 
       val accountDetails = BusinessAccountDetails(Some("updated companyName"), Some("updated sortCode"), Some("updated accountNumber"), None)
       await(repository.updateBusinessAccountDetails(journeyId, accountDetails))
@@ -120,7 +122,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
       val businessSession = BusinessSession(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
       val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
       val journey = Journey(journeyId, Some("1234"), LocalDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None, None)
-      await(repository.insert(journey))
+      await(repository.insertRaw(journey))
 
       await(repository.updateAccountType(journeyId, Personal))
 
@@ -129,6 +131,38 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
       updatedSession.business shouldBe Some(businessSession)
       updatedSession.personal shouldBe None
     }
+  }
 
+  "Can store a typical journey" should {
+    val repository = app.injector.instanceOf[JourneyRepository]
+
+    "handle changing the account type" in {
+      val journeyId = ObjectId.get()
+
+      val messages = Json.parse(
+        """{
+          | "en":{
+          |   "service.name":"Your service name here",
+          |   "footer.accessibility.url":"http://localhost:9929/bank-account-verification-example-frontend/accessibility",
+          |   "phaseBanner.tag":"BETA"
+          | },
+          | "cy":{
+          |   "service.name":"W Your service name here",
+          |   "footer.accessibility.url":"http://localhost:9929/bank-account-verification-example-frontend/accessibility",
+          |   "phaseBanner.tag":"BETA"
+          | }
+          |}""".stripMargin).as[JsObject]
+
+      val businessSession = BusinessSession(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
+      val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
+      val journey = Journey(journeyId, Some("1234"), LocalDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, Some(messages), None, None)
+      await(repository.insertRaw(journey))
+
+      await(repository.updateAccountType(journeyId, Personal))
+
+      val updatedSession = await(repository.findById(journeyId)).get
+      updatedSession.id shouldBe journeyId
+      (updatedSession.messages.get \ "en" \ "service.name").as[String] shouldBe  "Your service name here"
+    }
   }
 }
