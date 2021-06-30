@@ -57,7 +57,7 @@ class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig
       }
   }
 
-  def assessPersonal(accountName: String, sortCode: String, accountNumber: String, address: Option[BarsAddress])
+  def assessPersonal(accountName: String, sortCode: String, accountNumber: String, address: Option[BarsAddress], callingClient: String)
                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Try[BarsPersonalAssessResponse]] = {
     import BarsPersonalAssessResponse._
     import HttpReads.Implicits.readRaw
@@ -70,7 +70,8 @@ class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig
     httpClient
       .POST[BarsPersonalAssessRequest, HttpResponse](
         url = appConfig.barsPersonalAssessUrl,
-        body = request
+        body = request,
+        headers = Seq("True-Calling-Client" -> callingClient)
       )
       .map {
         case httpResponse if httpResponse.status == 200 =>
@@ -93,7 +94,7 @@ class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig
   }
 
   def assessBusiness(companyName: String, companyRegistrationNumber: Option[String], sortCode: String,
-                     accountNumber: String, address: Option[BarsAddress])
+                     accountNumber: String, address: Option[BarsAddress], callingClient: String)
                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Try[BarsBusinessAssessResponse]] = {
     import BarsBusinessAssessResponse._
     import HttpReads.Implicits.readRaw
@@ -103,7 +104,8 @@ class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig
       Some(BarsBusiness(companyName = companyName, companyRegistrationNumber = companyRegistrationNumber, address)))
 
     httpClient
-      .POST[BarsBusinessAssessRequest, HttpResponse](url = appConfig.barsBusinessAssessUrl, body = request)
+      .POST[BarsBusinessAssessRequest, HttpResponse](url = appConfig.barsBusinessAssessUrl, body = request,
+        headers = Seq("True-Calling-Client" -> callingClient))
       .map {
         case httpResponse if httpResponse.status == 200 =>
           Json.fromJson[BarsBusinessAssessSuccessResponse](httpResponse.json) match {

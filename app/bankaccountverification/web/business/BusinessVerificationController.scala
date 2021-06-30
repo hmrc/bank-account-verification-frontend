@@ -96,7 +96,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
           journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))
       else
         for {
-          response <- verificationService.assessBusiness(form.get, journey.data.address)
+          response <- verificationService.assessBusiness(form.get, journey.data.address, journey.serviceIdentifier)
           updatedForm <- verificationService.processBusinessAssessResponse(journey.id, journey.bacsRequirements.getOrElse(BACSRequirements.defaultBACSRequirements), response, form)
         } yield
           updatedForm match {

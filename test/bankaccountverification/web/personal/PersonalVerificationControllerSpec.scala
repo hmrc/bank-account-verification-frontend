@@ -311,7 +311,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
                 accountNumber = Some("12345678"))))))))
 
         reset(mockService)
-        when(mockService.assessPersonal(meq(data), any())(any(), any()))
+        when(mockService.assessPersonal(meq(data), any(), meq(serviceIdentifier))(any(), any()))
           .thenReturn(Future.successful(Failure(new HttpException("SERVER ON FIRE", 500))))
         when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(form))
@@ -350,7 +350,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
               accountNumber = Some("12345678"))))))))
 
         reset(mockService)
-        when(mockService.assessPersonal(meq(data), any())(any(), any()))
+        when(mockService.assessPersonal(meq(data), any(), meq(serviceIdentifier))(any(), any()))
           .thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
         when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(formWithErrors))
@@ -388,7 +388,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           )))
 
         reset(mockService)
-        when(mockService.assessPersonal(any(), meq(Some(address)))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
+        when(mockService.assessPersonal(any(), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
         when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
         import PersonalVerificationRequest.formats.bankAccountDetailsWrites
@@ -424,7 +424,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           )))
 
         reset(mockService)
-        when(mockService.assessPersonal(meq(data), meq(Some(address)))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
+        when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
         when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
         import PersonalVerificationRequest.formats.bankAccountDetailsWrites
