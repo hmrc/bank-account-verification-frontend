@@ -36,13 +36,14 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
                     (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Boolean] =
     repository.updateAccountType(journeyId, accountType)
 
-  def assessPersonal(request: PersonalVerificationRequest, address: Option[Address])
+  def assessPersonal(request: PersonalVerificationRequest, address: Option[Address], callingClient: String)
                     (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsPersonalAssessResponse]] =
     connector.assessPersonal(
       request.accountName,
       request.sortCode,
       request.accountNumber,
-      address.map(a => BarsAddress(a.lines, a.town, a.postcode)))
+      address.map(a => BarsAddress(a.lines, a.town, a.postcode)),
+      callingClient)
 
   def processPersonalAssessResponse(journeyId: ObjectId,
                                     directDebitConstraints: BACSRequirements,
@@ -69,14 +70,14 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
     )
   }
 
-  def assessBusiness(request: BusinessVerificationRequest, address: Option[Address])
+  def assessBusiness(request: BusinessVerificationRequest, address: Option[Address], callingClient: String)
                     (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsBusinessAssessResponse]] =
     connector.assessBusiness(
       request.companyName,
       None,
       request.sortCode,
       request.accountNumber,
-      address.map(a => BarsAddress(a.lines, a.town, a.postcode)))
+      address.map(a => BarsAddress(a.lines, a.town, a.postcode)), callingClient)
 
   def processBusinessAssessResponse(journeyId: ObjectId,
                                     directDebitConstraints: BACSRequirements,

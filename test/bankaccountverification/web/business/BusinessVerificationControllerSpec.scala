@@ -316,7 +316,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
               companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))))
 
         reset(mockService)
-        when(mockService.assessBusiness(any(), any())(any(), any())).thenReturn(Future.successful(Failure(new HttpException("SERVER ON FIRE", 500))))
+        when(mockService.assessBusiness(any(), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Failure(new HttpException("SERVER ON FIRE", 500))))
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(form))
 
@@ -354,7 +354,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
               companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))))
 
         reset(mockService)
-        when(mockService.assessBusiness(any(), any())(any(), any()))
+        when(mockService.assessBusiness(any(), any(), meq(serviceIdentifier))(any(), any()))
           .thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(formWithErrors))
@@ -391,7 +391,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
               companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))))
 
         reset(mockService)
-        when(mockService.assessBusiness(meq(data), any())(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
+        when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
@@ -426,7 +426,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
               accountNumber = Some("12345678"))))))))
 
         reset(mockService)
-        when(mockService.assessBusiness(meq(data), any())(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
+        when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
