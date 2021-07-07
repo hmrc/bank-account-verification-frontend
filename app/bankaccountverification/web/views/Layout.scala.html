@@ -79,8 +79,12 @@
     )
 }
 
+@serviceNameTitlePart = @{
+    if (messages("service.name").isEmpty) "" else s" - ${messages("service.name")}"
+}
+
 @govukLayout(
-    pageTitle = Some(s"$thePageTitle - ${messages("service.name")} - GOV.UK"),
+    pageTitle = Some(s"$thePageTitle$serviceNameTitlePart - GOV.UK"),
     headBlock = Some(head(newHeadBlock)),
     headerBlock = headerBlock,
     footerBlock = footerBlock,
