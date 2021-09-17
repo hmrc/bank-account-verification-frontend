@@ -47,7 +47,7 @@ object Journey {
 
     prepopulatedData match {
       case None => session
-      case Some(p) => {
+      case Some(p) =>
         p.accountType match {
           case AccountTypeRequestEnum.Personal =>
             session.copy(
@@ -60,7 +60,6 @@ object Journey {
               business = Some(BusinessSession(companyName = p.name, sortCode = p.sortCode,
                 accountNumber = p.accountNumber, rollNumber = p.rollNumber)))
         }
-      }
     }
   }
 
@@ -144,7 +143,9 @@ object Journey {
       .and((__ \ "nonConsented").writeNullable[ReputationResponseEnum])
       .and((__ \ "subjectHasDeceased").writeNullable[ReputationResponseEnum])
       .and((__ \ "nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
-      .and((__ \ "sortCodeBankName").writeOptionWithNull[String])(
+      .and((__ \ "sortCodeBankName").writeOptionWithNull[String])
+      .and((__ \ "sortCodeSupportsDirectDebit").writeOptionWithNull[ReputationResponseEnum])
+      .and((__ \ "sortCodeSupportsDirectCredit").writeOptionWithNull[ReputationResponseEnum])(
         unlift(PersonalAccountDetails.unapply)
       )
 
@@ -160,7 +161,9 @@ object Journey {
       .and((__ \ "companyNameMatches").writeNullable[ReputationResponseEnum])
       .and((__ \ "companyPostCodeMatches").writeNullable[ReputationResponseEnum])
       .and((__ \ "companyRegistrationNumberMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "sortCodeBankName").writeOptionWithNull[String])(
+      .and((__ \ "sortCodeBankName").writeOptionWithNull[String])
+      .and((__ \ "sortCodeSupportsDirectDebit").writeOptionWithNull[ReputationResponseEnum])
+      .and((__ \ "sortCodeSupportsDirectCredit").writeOptionWithNull[ReputationResponseEnum])(
         unlift(BusinessAccountDetails.unapply)
       )
 

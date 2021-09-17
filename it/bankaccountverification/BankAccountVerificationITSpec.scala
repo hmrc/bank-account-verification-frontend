@@ -29,6 +29,7 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsSuccess, JsValue, Json}
@@ -47,7 +48,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
   private val mockBankAccountReputationConnector = mock[BankAccountReputationConnector]
   private val mockAuthConnector = mock[AuthConnector]
 
-  override lazy val app = {
+  override lazy val app: Application = {
     SharedMetricRegistries.clear()
     new GuiceApplicationBuilder()
       .overrides(bind[BankAccountReputationConnector].toInstance(mockBankAccountReputationConnector))
@@ -60,7 +61,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
       .foldLeft(Seq.empty[(String, Seq[String])]) { (a, f) =>
         f.setAccessible(true)
         a ++ (if (f.getType == classOf[Option[String]])
-          Seq(f.get(cc).asInstanceOf[Option[String]].map(x => f.getName -> Seq(x.toString))).flatten
+          Seq(f.get(cc).asInstanceOf[Option[String]].map(x => f.getName -> Seq(x))).flatten
         else Seq(f.getName -> Seq(f.get(cc).toString)))
       }
       .toMap
@@ -136,7 +137,8 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
             nonConsented = Some(No),
             subjectHasDeceased = Some(Indeterminate),
             nonStandardAccountDetailsRequiredForBacs = Some(No),
-            sortCodeBankName = Some("sort-code-bank-name-personal"))),
+            sortCodeBankName = Some("sort-code-bank-name-personal"),
+            sortCodeSupportsDirectDebit = Some(Yes), sortCodeSupportsDirectCredit = Some(Yes))),
         business = None
       )
     )
@@ -159,7 +161,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
       serviceIdentifier = "serviceIdentifier",
       continueUrl = "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-      bacsRequirements = Some(InitBACSRequirements(true, false)),
+      bacsRequirements = Some(InitBACSRequirements(directDebitRequired = true, directCreditRequired = false)),
       timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
     val initResponse =
@@ -216,7 +218,9 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
             companyPostCodeMatches = Some(Indeterminate),
             companyRegistrationNumberMatches = Some(Indeterminate),
             nonStandardAccountDetailsRequiredForBacs = Some(No),
-            sortCodeBankName = Some("sort-code-bank-name-business")
+            sortCodeBankName = Some("sort-code-bank-name-business"),
+            Some(Yes),
+            Some(No)
           )
         ),
         personal = None
@@ -282,7 +286,9 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
             nonConsented = Some(No),
             subjectHasDeceased = Some(Indeterminate),
             nonStandardAccountDetailsRequiredForBacs = Some(No),
-            sortCodeBankName = Some("sort-code-bank-name-personal"))),
+            sortCodeBankName = Some("sort-code-bank-name-personal"),
+            sortCodeSupportsDirectDebit = Some(Yes),
+            sortCodeSupportsDirectCredit = Some(Yes))),
         business = None
       )
     )
