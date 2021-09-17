@@ -239,7 +239,9 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
           Some(Indeterminate),
           Some(Indeterminate),
           Some(No),
-          Some("sort-code-bank-name-personal")
+          Some("sort-code-bank-name-personal"),
+          Some(Yes),
+          Some(Yes)
         )
 
         verify(mockRepository).updatePersonalAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
@@ -276,7 +278,9 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
           Some(Error),
           Some(Error),
           Some(Error),
-          None
+          None,
+          Some(Error),
+          Some(Error)
         )
         verify(mockRepository).updatePersonalAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
       }
@@ -532,7 +536,9 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
           Some(Yes),
           Some(Indeterminate),
           Some(Indeterminate),
-          Some("sort-code-bank-name-business")
+          Some("sort-code-bank-name-business"),
+          Some(Yes),
+          Some(Yes)
         )
         verify(mockRepository).updateBusinessAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
       }
@@ -565,6 +571,9 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
           None,
           Some(Error),
           Some(Error),
+          Some(Error),
+          Some(Error),
+          None,
           Some(Error),
           Some(Error)
         )
