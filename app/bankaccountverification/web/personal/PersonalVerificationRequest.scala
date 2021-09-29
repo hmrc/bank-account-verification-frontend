@@ -23,15 +23,18 @@ import bankaccountverification.web.Forms._
 import bankaccountverification.web.Implicits.SanitizedString
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OWrites, Reads, Writes}
 
-case class PersonalVerificationRequest private (accountName: String, sortCode: String, accountNumber: String, rollNumber: Option[String] = None)
+case class PersonalVerificationRequest private(accountName: String, sortCode: String, accountNumber: String, rollNumber: Option[String] = None)
 
 object PersonalVerificationRequest {
   def apply(accountName: String, sortCode: String, accountNumber: String,
             rollNumber: Option[String] = None): PersonalVerificationRequest = {
     val cleanSortCode = sortCode.stripSpacesAndDashes()
-    val cleanAccountNumber = accountNumber.stripSpacesAndDashes().leftPadToLength(8, '0')
+    val cleanAccountNumber = {
+      val nsAccountNumber = accountNumber.stripSpacesAndDashes()
+      if (nsAccountNumber.isEmpty) "" else nsAccountNumber.leftPadToLength(8, '0')
+    }
     val cleanRollNumber = rollNumber.map(_.stripSpaces())
 
     new PersonalVerificationRequest(accountName, cleanSortCode, cleanAccountNumber, cleanRollNumber)
@@ -42,8 +45,8 @@ object PersonalVerificationRequest {
   }
 
   object formats {
-    implicit val bankAccountDetailsReads = Json.reads[PersonalVerificationRequest]
-    implicit val bankAccountDetailsWrites = Json.writes[PersonalVerificationRequest]
+    implicit val bankAccountDetailsReads: Reads[PersonalVerificationRequest] = Json.reads[PersonalVerificationRequest]
+    implicit val bankAccountDetailsWrites: Writes[PersonalVerificationRequest] = Json.writes[PersonalVerificationRequest]
   }
 
   implicit class ValidationFormWrapper(form: Form[PersonalVerificationRequest]) {
@@ -51,21 +54,21 @@ object PersonalVerificationRequest {
       response match {
         case badRequest: BarsPersonalAssessBadRequestResponse if badRequest.code == "SORT_CODE_ON_DENY_LIST" =>
           form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
-        case badRequest: BarsPersonalAssessBadRequestResponse =>
+        case badRequest: BarsPersonalAssessBadRequestResponse                                                =>
           form.fill(form.get).withError("", "error.summaryText")
-        case success: BarsPersonalAssessSuccessResponse =>
+        case success: BarsPersonalAssessSuccessResponse                                                      =>
           import success._
 
           if (accountNumberWithSortCodeIsValid == No)
             form.fill(form.get).withError("accountNumber", "error.accountNumber.modCheckFailed")
           else if (sortCodeIsPresentOnEISCD != Yes) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
-          } else if(sortCodeSupportsDirectDebit != Yes && directDebitConstraints.directDebitRequired) {
+          } else if (sortCodeSupportsDirectDebit != Yes && directDebitConstraints.directDebitRequired) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
-          } else if(sortCodeSupportsDirectCredit != Yes && directDebitConstraints.directCreditRequired) {
+          } else if (sortCodeSupportsDirectCredit != Yes && directDebitConstraints.directCreditRequired) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
           } else if (accountExists == No)
-          form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")
+            form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")
           else if (nonStandardAccountDetailsRequiredForBacs.getOrElse(No) == Yes && form.get.rollNumber.isEmpty)
             form.fill(form.get).withError("rollNumber", "error.rollNumber.required")
           else form
