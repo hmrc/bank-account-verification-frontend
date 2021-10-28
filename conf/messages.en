@@ -8,7 +8,7 @@ phaseBanner.content = This is a new service – your <a href='/feedback' class="
 pageTitle.accountExistsIndeterminate = Check the account details
 content.warning = Warning
 content.with = with
-content.accountExistsIndeterminate = We have not been able to check the account details $bankName$. Make sure the details you entered are correct.
+content.accountExistsIndeterminate = We have not been able to check the account details with $bankName$. Make sure the details you entered are correct.
 
 label.accountType = Account type
 label.accountType.heading = What type of account details are you providing?
@@ -36,10 +36,10 @@ hint.rollNumber = You can find it on your card, statement or passbook
 error.summaryText = There is a problem
 error.accountName.required = Enter the name on the account
 error.accountName.asciiOnly = Enter the name on the account as it appears on bank statements, do not copy and paste it.
-error.accountName.maxLength = Account name must be 70 characters or shorter
+error.accountName.maxLength = Account name must be 70 characters or fewer
 error.companyName.required = Enter the name on the account
 error.companyName.asciiOnly = Enter the name on the account as it appears on bank statements, do not copy and paste it.
-error.companyName.maxLength = Company name must be 70 characters or shorter
+error.companyName.maxLength = Company name must be 70 characters or fewer
 error.accountType.required = Select an account type
 
 error.accountNumber.required = Enter an account number
@@ -50,24 +50,24 @@ error.accountNumber.modCheckFailed = Account number must be valid for the given 
 error.accountNumber.doesNotExist = Account number must belong to an active bank account
 
 error.sortcode.required = Enter a sort code
-error.sortcode.invalidLengthError = Sort code must be 6 digits long
+error.sortcode.invalidLengthError = Sort code must be 6 digits
 error.sortcode.invalidCharsError = Enter a valid sort code, for example 309430
-error.sortCode.denyListed = You have entered a sort code that does not accept automated payments, like direct debits. Check the sort code or enter details for a different account
+error.sortCode.denyListed = You have entered a sort code that does not accept automated payments, like direct debits. Check the sort code or enter details for a different account.
 
-error.rollNumber.format = Roll number can only contain uppercase characters, digits, dots or hyphens
-error.rollNumber.minLength = Roll number must be at least 1 character long
+error.rollNumber.format = Roll number must only contain uppercase letters A to Z numbers 0 to 9 - / .
+error.rollNumber.minLength = Roll number must be at least 1 character
 error.rollNumber.maxLength = Roll number must be between 1 and 18 characters
 error.rollNumber.required = Enter a roll number
 
 error.pageTitle = Error
 error.journeyId.heading = There was a problem
-error.journeyId.message = The journey could not be found
+error.journeyId.message = <p>Sorry, we are experiencing technical difficulties.</p><p>This page could not be found.</p>
 
 error.timeoutUrl.heading = There was a problem
-error.timeoutUrl.message = Sorry, we are experiencing technical difficulties
+error.timeoutUrl.message = <p>Sorry, we are experiencing technical difficulties.</p><p>The URL has timed out.</p>
 
 error.unauthorised.heading = There was a problem
-error.unauthorised.message = The user is not authenticated
+error.unauthorised.message = <p>Sorry, we are experiencing technical difficulties.</p><p>User not authenticated.</p>
 
 footer.cookies.text = Cookies
 footer.cookies.url = /help/cookies

@@ -19,5 +19,5 @@
 @(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 @layout(pageTitle = Some(pageTitle), journeyId = None) {
     <h1 class="govuk-heading-xl">@{Text(heading).asHtml}</h1>
-    <p class="govuk-body">@{Text(message).asHtml}</p>
+    <div class="govuk-body">@{HtmlContent(message).asHtml}</div>
 }
