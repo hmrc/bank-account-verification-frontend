@@ -8,7 +8,7 @@ phaseBanner.content = Gwasanaeth newydd yw hwn – bydd eich <a href='/feedback'
 pageTitle.accountExistsIndeterminate = Gwirio manylion y cyfrif
 content.warning = Rhybudd
 content.with = gyda
-content.accountExistsIndeterminate = Nid ydym wedi gallu gwirio manylion y cyfrif $bankName$. Sicrhewch fod y manylion a nodoch yn gywir.
+content.accountExistsIndeterminate = Nid ydym wedi gallu gwirio manylion y cyfrif gyda $bankName$. Sicrhewch fod y manylion a nodoch yn gywir.
 
 label.accountType = Math o gyfrif
 label.accountType.heading = Pa fath o fanylion cyfrif ydych yn eu rhoi?
@@ -35,10 +35,10 @@ hint.rollNumber = Bydd hwn i’w weld ar eich cerdyn, cyfriflen neu baslyfr
 
 error.summaryText = Mae problem wedi codi
 error.accountName.required = Nodwch yr enw sydd ar y cyfrif
-error.accountName.asciiOnly = Nodwch yr enw ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc. Peidiwch â’i gopïo a’i gludo.
+error.accountName.asciiOnly = Nodwch yr enw sydd ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc. Peidiwch â’i gopïo a’i gludo.
 error.accountName.maxLength = Mae’n rhaid i enw’r cyfrif fod yn 70 o gymeriadau neu lai
 error.companyName.required = Nodwch yr enw sydd ar y cyfrif
-error.companyName.asciiOnly = Nodwch yr enw ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc. Peidiwch â’i gopïo a’i gludo.
+error.companyName.asciiOnly = Nodwch yr enw sydd ar y cyfrif fel y mae’n ymddangos ar gyfriflenni banc. Peidiwch â’i gopïo a’i gludo.
 error.companyName.maxLength = Mae’n rhaid i enw’r cwmni fod yn 70 o gymeriadau neu lai
 error.accountType.required = Dewiswch fath o gyfrif
 
@@ -50,24 +50,24 @@ error.accountNumber.modCheckFailed = Mae’n rhaid i rif y cyfrif fod yn ddilys 
 error.accountNumber.doesNotExist = Mae’n rhaid i rif y cyfrif berthyn i gyfrif banc gweithredol
 
 error.sortcode.required = Nodwch god didoli
-error.sortcode.invalidLengthError = Mae’n rhaid i’r cod didoli fod yn 6 digid o hyd
+error.sortcode.invalidLengthError = Mae’n rhaid i’r cod didoli fod yn 6 digid
 error.sortcode.invalidCharsError = Nodwch god didoli dilys, er enghraifft 309430
-error.sortCode.denyListed = Rydych wedi nodi cod didoli nad yw’n derbyn taliadau awtomataidd, fel debydau uniongyrchol. Gwiriwch y cod didoli neu nodwch fanylion ar gyfer cyfrif gwahanol
+error.sortCode.denyListed = Rydych wedi nodi cod didoli nad yw’n derbyn taliadau awtomataidd, fel debydau uniongyrchol. Gwiriwch y cod didoli neu nodwch fanylion ar gyfer cyfrif gwahanol.
 
-error.rollNumber.format = Gall y rhif rôl gynnwys prif lythrennau, digidau, atalnodau neu gysylltnodau yn unig
-error.rollNumber.minLength = Mae’n rhaid i’r rhif rôl fod o leiaf 1 cymeriad o hyd
+error.rollNumber.format = Mae’n rhaid i’r rhif rôl gynnwys y priflythrennau A i Z, y rhifau 0 i 9, a’r nodau - / . yn unig.
+error.rollNumber.minLength = Mae’n rhaid i’r rhif rôl gynnwys o leiaf 1 cymeriad
 error.rollNumber.maxLength = Mae’n rhaid i’r rhif rôl fod rhwng 1 a 18 o gymeriadau
 error.rollNumber.required = Nodwch rif rôl
 
 error.pageTitle = Gwall
-error.journeyId.heading = Roedd yna broblem
-error.journeyId.message = Nid oedd modd dod o hyd i’r daith
+error.journeyId.heading = Mae problem wedi codi
+error.journeyId.message = <p>Mae’n ddrwg gennym – rydym yn cael anawsterau technegol.</p><p>Nid oedd modd dod o hyd i’r dudalen hon.</p>
 
-error.timeoutUrl.heading = Roedd yna broblem
-error.timeoutUrl.message = Mae’n ddrwg gennym. Mae problemau technegol wedi codi
+error.timeoutUrl.heading = Mae problem wedi codi
+error.timeoutUrl.message = <p>Mae’n ddrwg gennym – rydym yn cael anawsterau technegol.</p><p>Mae’r URL wedi dod i ben.</p>
 
 error.unauthorised.heading = Mae problem wedi codi
-error.unauthorised.message = Nid yw’r defnyddiwr wedi’i ddilysu
+error.unauthorised.message = <p>Mae’n ddrwg gennym – rydym yn cael anawsterau technegol.</p><p>Nid yw’r defnyddiwr wedi’i ddilysu.</p>
 
 footer.cookies.text = Cwcis
 footer.cookies.url = /help/cookies
