@@ -20,7 +20,7 @@ import play.api.libs.json.{Json, Reads, Writes}
 
 sealed trait BarsPersonalAssessResponse {}
 
-case class BarsPersonalAssessSuccessResponse(accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+case class BarsPersonalAssessSuccessResponse(accountNumberIsWellFormatted: ReputationResponseEnum,
                                              accountExists: ReputationResponseEnum,
                                              nameMatches: ReputationResponseEnum,
                                              sortCodeIsPresentOnEISCD: ReputationResponseEnum,
@@ -42,11 +42,11 @@ object BarsPersonalAssessResponse {
 
 sealed trait BarsBusinessAssessResponse {}
 
-case class BarsBusinessAssessSuccessResponse(accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+case class BarsBusinessAssessSuccessResponse(accountNumberIsWellFormatted: ReputationResponseEnum,
                                              sortCodeIsPresentOnEISCD: ReputationResponseEnum,
                                              sortCodeBankName: Option[String],
                                              accountExists: ReputationResponseEnum,
-                                             companyNameMatches: ReputationResponseEnum,
+                                             nameMatches: ReputationResponseEnum,
                                              sortCodeSupportsDirectDebit: ReputationResponseEnum,
                                              sortCodeSupportsDirectCredit: ReputationResponseEnum,
                                              nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum]) extends BarsBusinessAssessResponse

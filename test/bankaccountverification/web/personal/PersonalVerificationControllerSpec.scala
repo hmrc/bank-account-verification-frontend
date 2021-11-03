@@ -159,7 +159,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-            Some(PersonalSession(
+            Some(PersonalAccountDetails(
               accountName = Some("account_name"), sortCode = Some("112233"), accountNumber = Some("12092398"))))))))
 
         val fakeRequest = FakeRequest("GET", s"/verify/personal/${id.toHexString}")
@@ -183,7 +183,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             None,
-            Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"),
               accountNumber = Some("12345678"), rollNumber = Some("ROLL.NUMBER"))))))))
         val fakeRequest = FakeRequest("GET", s"/verify/personal/${id.toHexString}")
         val result = controller.getAccountDetails(id.toHexString).apply(fakeRequest)
@@ -251,7 +251,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Session(
               Some(Personal),
               Some(address),
-              Some(bankaccountverification.PersonalSession(accountName = Some("some account name"),
+              Some(bankaccountverification.PersonalAccountDetails(accountName = Some("some account name"),
                 sortCode = Some("112233"), accountNumber = Some("12345678"))))))))
 
         val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}")
@@ -278,7 +278,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Session(
               Some(Personal),
               Some(address),
-              Some(bankaccountverification.PersonalSession(accountName = Some("some account name"),
+              Some(bankaccountverification.PersonalAccountDetails(accountName = Some("some account name"),
                 sortCode = Some("112233"), accountNumber = Some("12345678"))))))))
 
         val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}")
@@ -307,7 +307,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Session(
               Some(Personal),
               Some(address),
-              Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
+              Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"),
                 accountNumber = Some("12345678"))))))))
 
         reset(mockService)
@@ -346,7 +346,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"),
               accountNumber = Some("12345678"))))))))
 
         reset(mockService)
@@ -383,7 +383,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"),
               accountNumber = Some("12345678")))))
           )))
 
@@ -419,7 +419,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"),
               accountNumber = Some("12345678")))))
           )))
 
@@ -529,7 +529,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-            Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"),
               accountNumber = Some("12345678"))))))))
 
         val fakeRequest = FakeRequest("GET", s"/confirm/personal/${id.toHexString}")
@@ -556,7 +556,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-            Some(PersonalSession(accountName = Some("some account name"), sortCode = Some("112233"),
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"),
               accountNumber = Some("12345678"), sortCodeBankName = Some("sort-code-bank-name-personal"))))))))
 
         val fakeRequest = FakeRequest("GET", s"/confirm/personal/${id.toHexString}")

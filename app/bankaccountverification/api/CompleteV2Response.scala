@@ -31,7 +31,7 @@ object CompleteV2Response {
 case class PersonalCompleteV2Response(accountName: String,
                                     sortCode: String,
                                     accountNumber: String,
-                                    accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+                                    accountNumberIsWellFormatted: ReputationResponseEnum,
                                     rollNumber: Option[String] = None,
                                     accountExists: Option[ReputationResponseEnum] = None,
                                     nameMatches: Option[ReputationResponseEnum] = None,
@@ -46,16 +46,16 @@ object PersonalCompleteV2Response {
 }
 
 case class BusinessCompleteV2Response(companyName: String,
-                                    sortCode: String,
-                                    accountNumber: String,
-                                    rollNumber: Option[String] = None,
-                                    accountNumberWithSortCodeIsValid: ReputationResponseEnum,
-                                    accountExists: Option[ReputationResponseEnum] = None,
-                                    companyNameMatches: Option[ReputationResponseEnum],
-                                    nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
-                                    sortCodeBankName: Option[String] = None,
-                                    sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None,
-                                    sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None)
+                                      sortCode: String,
+                                      accountNumber: String,
+                                      rollNumber: Option[String] = None,
+                                      accountNumberIsWellFormatted: ReputationResponseEnum,
+                                      accountExists: Option[ReputationResponseEnum] = None,
+                                      nameMatches: Option[ReputationResponseEnum],
+                                      nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
+                                      sortCodeBankName: Option[String] = None,
+                                      sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None,
+                                      sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None)
 
 object BusinessCompleteV2Response {
   implicit val completeResponseWrites: OWrites[BusinessCompleteV2Response] = Json.writes[BusinessCompleteV2Response]

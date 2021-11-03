@@ -41,7 +41,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         customisationsUrl = None,
         data = Session(
           accountType = Some(Personal),
-          personal = Some(PersonalSession(
+          personal = Some(PersonalAccountDetails(
             accountName = Some("an-account-name"),
             sortCode = Some("123498"),
             accountNumber = Some("98765432"),
@@ -119,14 +119,14 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         customisationsUrl = None,
         data = Session(
           accountType = Some(Business),
-          business = Some(BusinessSession(
+          business = Some(BusinessAccountDetails(
             companyName = Some("a-company-name"),
             sortCode = Some("123498"),
             accountNumber = Some("98765432"),
             rollNumber = Some("A.BC"),
             accountNumberWithSortCodeIsValid = Some(Yes),
             accountExists = Some(Indeterminate),
-            companyNameMatches = Some(No),
+            nameMatches = Some(No),
             nonStandardAccountDetailsRequiredForBacs = Some(Error),
             sortCodeBankName = Some("sort-code-bank-name-business")
           )),

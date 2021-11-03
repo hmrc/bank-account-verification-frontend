@@ -224,8 +224,8 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             Some(
-              PersonalSession(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), Some(Yes),
-                Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"))),
+              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), None,
+                Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"))),
             None
           ),
           timeoutConfig = None)
@@ -270,8 +270,8 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             None,
             Some(
-              BusinessSession(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
-                Some(Yes), Some(No), Some(Indeterminate), None, Some("sort-code-bank-name-business")))),
+              BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
+                Some(Yes), None, Some(No), Some(Indeterminate), Some(Yes), None, Some("sort-code-bank-name-business")))),
           timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId))(any()))
@@ -290,7 +290,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         (json \ "business" \ "accountNumberWithSortCodeIsValid").as[String] shouldBe "yes"
         (json \ "business" \ "accountExists").as[String] shouldBe "no"
         (json \ "business" \ "rollNumber").as[String] shouldBe "roll1"
-        (json \ "business" \ "companyNameMatches").as[String] shouldBe "indeterminate"
+        (json \ "business" \ "companyNameMatches").as[String] shouldBe "yes"
         (json \ "business" \ "companyPostCodeMatches").as[String] shouldBe "indeterminate"
         (json \ "business" \ "companyRegistrationNumberMatches").as[String] shouldBe "indeterminate"
         (json \ "business" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-business"
@@ -328,8 +328,8 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             None,
             Some(
-              BusinessSession(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
-                Some(Yes), Some(No), Some(Indeterminate), None, Some("sort-code-bank-name-business")))),
+              BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
+                Some(Yes), None, Some(No), Some(Indeterminate), None, None, Some("sort-code-bank-name-business")))),
           timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId))(any()))

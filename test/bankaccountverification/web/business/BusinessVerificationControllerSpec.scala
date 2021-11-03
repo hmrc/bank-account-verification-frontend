@@ -122,7 +122,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
               Some(Business),
               Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
               None,
-              Some(BusinessSession(companyName = Some("some company name"), sortCode = Some("112233"),
+              Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"),
                 accountNumber = Some("12345678"))))))))
 
         val fakeRequest = FakeRequest("GET", s"/verify/business/${id.toHexString}")
@@ -167,7 +167,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
               Some(Business),
               Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
               None,
-              Some(BusinessSession(companyName = Some("some company name"), sortCode = Some("112233"),
+              Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"),
                 accountNumber = Some("12345678"))))))))
 
         val fakeRequest = FakeRequest("GET", s"/verify/business/${id.toHexString}")
@@ -192,7 +192,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Some(Business),
             None,
             None,
-            Some(BusinessSession(companyName = Some("some company name"), sortCode = Some("112233"),
+            Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"),
               accountNumber = Some("12345678"), rollNumber = Some("ROLL.NUMBER"))))))))
         val fakeRequest = FakeRequest("GET", s"/verify/business/${id.toHexString}")
         val result = controller.getAccountDetails(id.toHexString).apply(fakeRequest)
@@ -257,7 +257,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(
               accountType = Some(Business),
-              business = Some(BusinessSession(
+              business = Some(BusinessAccountDetails(
                 companyName = Some("some company name"), sortCode = Some("112233"),
                 accountNumber = Some("12345678"))))))))
 
@@ -285,7 +285,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(
               accountType = Some(Business),
-              business = Some(BusinessSession(
+              business = Some(BusinessAccountDetails(
                 companyName = Some("some company name"), sortCode = Some("112233"),
                 accountNumber = Some("12345678"))))))))
 
@@ -312,7 +312,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
-            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(
               companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))))
 
         reset(mockService)
@@ -350,7 +350,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
-            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(
               companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))))
 
         reset(mockService)
@@ -387,7 +387,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
-            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(
               companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"))))))))
 
         reset(mockService)
@@ -422,7 +422,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
-            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessSession(companyName = Some("some company name"), sortCode = Some("112233"),
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"),
               accountNumber = Some("12345678"))))))))
 
         reset(mockService)
@@ -515,7 +515,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
               Some(Business),
               Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
               None,
-              Some(BusinessSession(
+              Some(BusinessAccountDetails(
                 Some("some company name"), Some("SC123456"), Some("112233"), Some("12345678"))))))))
 
         val fakeRequest = FakeRequest("GET", s"/confirm/business/${id.toHexString}")
@@ -544,7 +544,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Some(Business),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             None,
-            Some(BusinessSession(
+            Some(BusinessAccountDetails(
               Some("some company name"), Some("SC123456"), Some("112233"), Some("12345678"), sortCodeBankName = Some("sort-code-bank-name-business"))))))))
 
         val fakeRequest = FakeRequest("GET", s"/confirm/business/${id.toHexString}")

@@ -224,8 +224,8 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             Some(
-              PersonalSession(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), Some(Yes),
-                Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"))),
+              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes),
+                Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"))),
             None
           ),
           timeoutConfig = None)
@@ -242,7 +242,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
         (json \ "personal" \ "accountName").as[String] shouldBe "Bob"
         (json \ "personal" \ "sortCode").as[String] shouldBe "203040"
         (json \ "personal" \ "accountNumber").as[String] shouldBe "12345678"
-        (json \ "personal" \ "accountNumberWithSortCodeIsValid").as[String] shouldBe "yes"
+        (json \ "personal" \ "accountNumberIsWellFormatted").as[String] shouldBe "yes"
         (json \ "personal" \ "accountExists").as[String] shouldBe "yes"
         (json \ "personal" \ "rollNumber").as[String] shouldBe "roll1"
         (json \ "personal" \ "nameMatches").as[String] shouldBe "indeterminate"
@@ -267,8 +267,8 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             None,
             Some(
-              BusinessSession(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
-                Some(Yes), Some(No), Some(Indeterminate), None, Some("sort-code-bank-name-business")))),
+              BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
+                None, Some(Yes), Some(No), Some(Indeterminate), None, Some(Yes), Some("sort-code-bank-name-business")))),
           timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId))(any()))
@@ -284,10 +284,10 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
         (json \ "business" \ "companyName").as[String] shouldBe "Bob Ltd"
         (json \ "business" \ "sortCode").as[String] shouldBe "203040"
         (json \ "business" \ "accountNumber").as[String] shouldBe "12345678"
-        (json \ "business" \ "accountNumberWithSortCodeIsValid").as[String] shouldBe "yes"
+        (json \ "business" \ "accountNumberIsWellFormatted").as[String] shouldBe "yes"
         (json \ "business" \ "accountExists").as[String] shouldBe "no"
         (json \ "business" \ "rollNumber").as[String] shouldBe "roll1"
-        (json \ "business" \ "companyNameMatches").as[String] shouldBe "indeterminate"
+        (json \ "business" \ "nameMatches").as[String] shouldBe "yes"
         (json \ "business" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-business"
       }
     }
@@ -323,8 +323,8 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             None,
             Some(
-              BusinessSession(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
-                Some(Yes), Some(No), Some(Indeterminate), None, Some("sort-code-bank-name-business")))),
+              BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
+                None, Some(Yes), Some(No), Some(Indeterminate), None, None, Some("sort-code-bank-name-business")))),
           timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId))(any()))
