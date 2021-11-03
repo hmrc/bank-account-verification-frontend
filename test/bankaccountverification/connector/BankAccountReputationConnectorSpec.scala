@@ -122,16 +122,13 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case r @ SPOST(p"/personal/v3/assess") =>
+          case r @ SPOST(p"/verify/personal") =>
             r.headers.get("True-Calling-Client") shouldBe Some("example-service")
             Action(Ok(
             """{
               |  "accountNumberWithSortCodeIsValid": "yes",
               |  "accountExists": "yes",
               |  "nameMatches": "yes",
-              |  "addressMatches": "indeterminate",
-              |  "nonConsented": "indeterminate",
-              |  "subjectHasDeceased": "indeterminate",
               |  "sortCodeIsPresentOnEISCD": "yes",
               |  "sortCodeSupportsDirectDebit": "yes",
               |  "sortCodeSupportsDirectCredit": "yes",
@@ -144,7 +141,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
         val response = await(connector.assessPersonal("Mr Joe Bloggs", "20-30-40", "12345678", None, "example-service"))
         response shouldBe Success(
-          BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Yes, Yes, Yes, Some(No), None)
+          BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Yes, Yes, Some(No), None)
         )
       }
     }
@@ -153,7 +150,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/personal/v3/assess") =>
+          case SPOST(p"/verify/personal") =>
             Action(
               Ok(
                 """{
@@ -177,7 +174,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/personal/v3/assess") =>
+          case SPOST(p"/verify/personal") =>
             Action(Ok("NOJSON4U").withHeaders("Content-Type" -> "application/json"))
         }
       } { _ =>
@@ -193,7 +190,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/personal/v3/assess") => Action(BadRequest(
+          case SPOST(p"/verify/personal") => Action(BadRequest(
             """{"code": "SORT_CODE_ON_DENY_LIST", "desc": "083200: sort code is in deny list"}"""))
         }
       } { _ =>
@@ -209,7 +206,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/personal/v3/assess") => Action(InternalServerError)
+          case SPOST(p"/verify/personal") => Action(InternalServerError)
         }
       } { _ =>
         implicit val hc = HeaderCarrier()
@@ -227,7 +224,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case r @ SPOST(p"/business/v2/assess") =>
+          case r @ SPOST(p"/verify/business") =>
             r.headers.get("True-Calling-Client") shouldBe Some("example-service")
             Action(Ok(
             """{
@@ -238,8 +235,6 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
               |  "sortCodeBankName": "Some Company",
               |  "accountExists": "yes",
               |  "companyNameMatches": "yes",
-              |  "companyPostCodeMatches": "indeterminate",
-              |  "companyRegistrationNumberMatches": "indeterminate",
               |  "nonStandardAccountDetailsRequiredForBacs": "no"
               |}""".stripMargin).withHeaders("Content-Type" -> "application/json"))
         }
@@ -249,7 +244,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, "example-service"))
         response shouldBe Success(
-          BarsBusinessAssessSuccessResponse(Yes, Yes, Some("Some Company"), Yes, Yes, Indeterminate, Indeterminate, Yes, Yes, Some(No))
+          BarsBusinessAssessSuccessResponse(Yes, Yes, Some("Some Company"), Yes, Yes, Yes, Yes, Some(No))
         )
       }
     }
@@ -258,7 +253,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/business/v2/assess") =>
+          case SPOST(p"/verify/business") =>
             Action(
               Ok(
                 """{
@@ -282,7 +277,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/business/v2/assess") =>
+          case SPOST(p"/verify/business") =>
             Action(Ok("NOJSON4U").withHeaders("Content-Type" -> "application/json"))
         }
       } { _ =>
@@ -298,7 +293,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/business/v2/assess") => Action(BadRequest(
+          case SPOST(p"/verify/business") => Action(BadRequest(
             """{"code": "SORT_CODE_ON_DENY_LIST", "desc": "083200: sort code is in deny list"}"""))
         }
       } { _ =>
@@ -314,7 +309,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
         import components.{defaultActionBuilder => Action}
         {
-          case SPOST(p"/business/v2/assess") => Action(InternalServerError)
+          case SPOST(p"/verify/business") => Action(InternalServerError)
         }
       } { _ =>
         implicit val hc = HeaderCarrier()

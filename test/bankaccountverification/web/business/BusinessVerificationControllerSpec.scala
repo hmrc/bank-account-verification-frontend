@@ -340,7 +340,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         .withError("Error", "a.specific.error")
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No))
+        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No))
 
       "Render the view and display the errors" in {
         reset(mockAuthConnector)
@@ -377,7 +377,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No))
+        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No))
 
       "Redirect to the confirm view" in {
         reset(mockAuthConnector)
@@ -412,7 +412,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessSuccessResponse(Yes, No, None, Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No))
+        BarsBusinessAssessSuccessResponse(Yes, No, None, Yes, Indeterminate, No, No, Some(No))
 
       "Redirect to the continueUrl" in {
         reset(mockAuthConnector)

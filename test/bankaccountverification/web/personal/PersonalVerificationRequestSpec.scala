@@ -278,9 +278,6 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Indeterminate,
         Indeterminate,
         Indeterminate,
-        Indeterminate,
-        Indeterminate,
-        Indeterminate,
         No, No,
         Some(No),
         None
@@ -297,9 +294,6 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     "the response indicates the sort code is not in EISCD" should {
       val response = BarsPersonalAssessSuccessResponse(
         Yes,
-        Indeterminate,
-        Indeterminate,
-        Indeterminate,
         Indeterminate,
         Indeterminate,
         No,
@@ -321,9 +315,6 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Yes,
         Indeterminate,
         Indeterminate,
-        Indeterminate,
-        Indeterminate,
-        Indeterminate,
         Yes,
         No, Yes,
         Some(No),
@@ -341,9 +332,6 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     "the response indicates the sort code exists in EISCD but does not support direct credit payments" should {
       val response = BarsPersonalAssessSuccessResponse(
         Yes,
-        Indeterminate,
-        Indeterminate,
-        Indeterminate,
         Indeterminate,
         Indeterminate,
         Yes,
@@ -365,9 +353,6 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Yes,
         No,
         Indeterminate,
-        Indeterminate,
-        Indeterminate,
-        Indeterminate,
         Yes,
         Yes, Yes,
         Some(No),
@@ -386,9 +371,6 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     "the response indicates that a roll number is required but none was provided" should {
       val response = BarsPersonalAssessSuccessResponse(
         Yes,
-        Indeterminate,
-        Indeterminate,
-        Indeterminate,
         Indeterminate,
         Indeterminate,
         Yes,
@@ -411,9 +393,6 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         Yes,
         Indeterminate,
         Indeterminate,
-        Indeterminate,
-        Indeterminate,
-        Indeterminate,
         Yes,
         Yes, Yes,
         Some(Yes),
@@ -428,9 +407,6 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
 
     "the response indicates an error occurred" should {
       val response = BarsPersonalAssessSuccessResponse(
-        ReputationResponseEnum.Error,
-        ReputationResponseEnum.Error,
-        ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,

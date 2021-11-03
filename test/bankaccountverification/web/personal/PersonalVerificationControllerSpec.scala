@@ -334,7 +334,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val formWithErrors = PersonalVerificationRequest.form.fillAndValidate(data).withError("Error", "a.specific.error")
 
       val barsPersonalAssessResponse =
-        BarsPersonalAssessSuccessResponse(Yes, No, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Yes, No, No, Some(No), None)
+        BarsPersonalAssessSuccessResponse(Yes, No, Indeterminate, Indeterminate, No, No, Some(No), None)
 
       "Render the view and display the errors" in {
         reset(mockAuthConnector)
@@ -371,7 +371,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val data = PersonalVerificationRequest("Bob", "123456", "12345678")
 
       val form = PersonalVerificationRequest.form.fillAndValidate(data)
-      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Yes, No, No, Some(No), None)
+      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Indeterminate, No, No, Some(No), None)
 
       "Redirect to the continueUrl" in {
         reset(mockAuthConnector)
@@ -407,7 +407,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val data = PersonalVerificationRequest("Bobby", "123456", "12345678")
 
       val form = PersonalVerificationRequest.form.fillAndValidate(data)
-      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Indeterminate, Yes, No, No, Some(No), None)
+      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None)
 
       "Redirect to the confirm view" in {
         reset(mockAuthConnector)

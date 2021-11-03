@@ -139,9 +139,6 @@ object Journey {
       .and((__ \ "accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
       .and((__ \ "accountExists").writeNullable[ReputationResponseEnum])
       .and((__ \ "nameMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "addressMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "nonConsented").writeNullable[ReputationResponseEnum])
-      .and((__ \ "subjectHasDeceased").writeNullable[ReputationResponseEnum])
       .and((__ \ "nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
       .and((__ \ "sortCodeBankName").writeOptionWithNull[String])
       .and((__ \ "sortCodeSupportsDirectDebit").writeOptionWithNull[ReputationResponseEnum])
@@ -159,8 +156,6 @@ object Journey {
       .and((__ \ "nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
       .and((__ \ "accountExists").writeNullable[ReputationResponseEnum])
       .and((__ \ "companyNameMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "companyPostCodeMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "companyRegistrationNumberMatches").writeNullable[ReputationResponseEnum])
       .and((__ \ "sortCodeBankName").writeOptionWithNull[String])
       .and((__ \ "sortCodeSupportsDirectDebit").writeOptionWithNull[ReputationResponseEnum])
       .and((__ \ "sortCodeSupportsDirectCredit").writeOptionWithNull[ReputationResponseEnum])(

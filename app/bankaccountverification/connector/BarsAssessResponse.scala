@@ -23,9 +23,6 @@ sealed trait BarsPersonalAssessResponse {}
 case class BarsPersonalAssessSuccessResponse(accountNumberWithSortCodeIsValid: ReputationResponseEnum,
                                              accountExists: ReputationResponseEnum,
                                              nameMatches: ReputationResponseEnum,
-                                             addressMatches: ReputationResponseEnum,
-                                             nonConsented: ReputationResponseEnum,
-                                             subjectHasDeceased: ReputationResponseEnum,
                                              sortCodeIsPresentOnEISCD: ReputationResponseEnum,
                                              sortCodeSupportsDirectDebit: ReputationResponseEnum,
                                              sortCodeSupportsDirectCredit: ReputationResponseEnum,
@@ -50,8 +47,6 @@ case class BarsBusinessAssessSuccessResponse(accountNumberWithSortCodeIsValid: R
                                              sortCodeBankName: Option[String],
                                              accountExists: ReputationResponseEnum,
                                              companyNameMatches: ReputationResponseEnum,
-                                             companyPostCodeMatches: ReputationResponseEnum,
-                                             companyRegistrationNumberMatches: ReputationResponseEnum,
                                              sortCodeSupportsDirectDebit: ReputationResponseEnum,
                                              sortCodeSupportsDirectCredit: ReputationResponseEnum,
                                              nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum]) extends BarsBusinessAssessResponse

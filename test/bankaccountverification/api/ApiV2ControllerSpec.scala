@@ -45,7 +45,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Try
 
-class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite with OptionValues {
+class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite with OptionValues {
   implicit private val timeout: FiniteDuration = 1 second
 
   private val env = Environment.simple()
@@ -68,7 +68,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
   }
 
 
-  private val controller = app.injector.instanceOf[ApiController]
+  private val controller = app.injector.instanceOf[ApiV2Controller]
 
   implicit val mat = app.injector.instanceOf[Materializer]
 
@@ -246,9 +246,6 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         (json \ "personal" \ "accountExists").as[String] shouldBe "yes"
         (json \ "personal" \ "rollNumber").as[String] shouldBe "roll1"
         (json \ "personal" \ "nameMatches").as[String] shouldBe "indeterminate"
-        (json \ "personal" \ "addressMatches").as[String] shouldBe "indeterminate"
-        (json \ "personal" \ "nonConsented").as[String] shouldBe "indeterminate"
-        (json \ "personal" \ "subjectHasDeceased").as[String] shouldBe "indeterminate"
         (json \ "personal" \ "nonStandardAccountDetailsRequiredForBacs").as[String] shouldBe "no"
         (json \ "personal" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-personal"
       }
@@ -291,8 +288,6 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         (json \ "business" \ "accountExists").as[String] shouldBe "no"
         (json \ "business" \ "rollNumber").as[String] shouldBe "roll1"
         (json \ "business" \ "companyNameMatches").as[String] shouldBe "indeterminate"
-        (json \ "business" \ "companyPostCodeMatches").as[String] shouldBe "indeterminate"
-        (json \ "business" \ "companyRegistrationNumberMatches").as[String] shouldBe "indeterminate"
         (json \ "business" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-business"
       }
     }

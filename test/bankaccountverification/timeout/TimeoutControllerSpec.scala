@@ -92,10 +92,8 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             Some(
               PersonalSession(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), Some(Yes),
-                Some(Indeterminate), Some(No), Some(Indeterminate), Some(Indeterminate), Some(No), Some
-                ("sort-code-bank-name-personal"))),
-            None
-          ),
+                Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"))),
+            None),
           timeoutConfig = None)
 
         when(mockJourneyRepository.findById(meq(journeyId))(any())).thenReturn(Future.successful(Some
@@ -160,8 +158,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             Some(
               PersonalSession(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), Some(Yes),
-                Some(Indeterminate), Some(No), Some(Indeterminate), Some(Indeterminate), Some(No), Some
-                ("sort-code-bank-name-personal"))),
+                Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"))),
             None
           ),
           timeoutConfig = None)
@@ -228,8 +225,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             Some(
               PersonalSession(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), Some(Yes),
-                Some(Indeterminate), Some(No), Some(Indeterminate), Some(Indeterminate), Some(No), Some
-                ("sort-code-bank-name-personal"))),
+                Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"))),
             None
           ),
           timeoutConfig = None)

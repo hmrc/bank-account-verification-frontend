@@ -49,8 +49,6 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
             accountNumberWithSortCodeIsValid = Some(Yes),
             accountExists = Some(Indeterminate),
             nameMatches = Some(No),
-            nonConsented = Some(Indeterminate),
-            subjectHasDeceased = Some(Inapplicable),
             nonStandardAccountDetailsRequiredForBacs = Some(Error),
             sortCodeBankName = Some("sort-code-bank-name")
           )),
@@ -84,8 +82,6 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         (personalJourneyJsValue \ "data" \ "personal" \ "accountNumberWithSortCodeIsValid").as[String] shouldBe "yes"
         (personalJourneyJsValue \ "data" \ "personal" \ "accountExists").as[String] shouldBe "indeterminate"
         (personalJourneyJsValue \ "data" \ "personal" \ "nameMatches").as[String] shouldBe "no"
-        (personalJourneyJsValue \ "data" \ "personal" \ "nonConsented").as[String] shouldBe "indeterminate"
-        (personalJourneyJsValue \ "data" \ "personal" \ "subjectHasDeceased").as[String] shouldBe "inapplicable"
         (personalJourneyJsValue \ "data" \ "personal" \ "nonStandardAccountDetailsRequiredForBacs").as[String] shouldBe "error"
         (personalJourneyJsValue \ "data" \ "personal" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name"
 
@@ -131,8 +127,6 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
             accountNumberWithSortCodeIsValid = Some(Yes),
             accountExists = Some(Indeterminate),
             companyNameMatches = Some(No),
-            companyPostCodeMatches = Some(Indeterminate),
-            companyRegistrationNumberMatches = Some(Inapplicable),
             nonStandardAccountDetailsRequiredForBacs = Some(Error),
             sortCodeBankName = Some("sort-code-bank-name-business")
           )),
@@ -166,8 +160,6 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         (businessJourneyJsValue \ "data" \ "business" \ "accountNumberWithSortCodeIsValid").as[String] shouldBe "yes"
         (businessJourneyJsValue \ "data" \ "business" \ "accountExists").as[String] shouldBe "indeterminate"
         (businessJourneyJsValue \ "data" \ "business" \ "companyNameMatches").as[String] shouldBe "no"
-        (businessJourneyJsValue \ "data" \ "business" \ "companyPostCodeMatches").as[String] shouldBe "indeterminate"
-        (businessJourneyJsValue \ "data" \ "business" \ "companyRegistrationNumberMatches").as[String] shouldBe "inapplicable"
         (businessJourneyJsValue \ "data" \ "business" \ "nonStandardAccountDetailsRequiredForBacs").as[String] shouldBe "error"
         (businessJourneyJsValue \ "data" \ "business" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-business"
 

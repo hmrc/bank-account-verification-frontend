@@ -48,7 +48,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     val userInput = PersonalVerificationRequest("Bob", "20-30-40", "12345678")
 
     val assessResult =
-      Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Indeterminate, Indeterminate, Yes, Yes, Yes, Some(No), None))
+      Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Yes, Yes, Some(No), None))
 
     when(mockConnector.assessPersonal(any(), any(), any(), any(), any())(any(), any())).thenReturn(Future.successful
     (assessResult))
@@ -219,7 +219,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
 
     "the details provided pass the remote bars checks" should {
       val assessResult =
-        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, No, Indeterminate, Indeterminate, Yes, Yes, Yes, Some(No), Some
+        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Yes, Yes, Some(No), Some
         ("sort-code-bank-name-personal")))
 
       when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
@@ -235,9 +235,6 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
           Some(Yes),
           Some(Yes),
           Some(Yes),
-          Some(No),
-          Some(Indeterminate),
-          Some(Indeterminate),
           Some(No),
           Some("sort-code-bank-name-personal"),
           Some(Yes),
@@ -271,9 +268,6 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
           Some("203040"),
           Some("12345678"),
           None,
-          Some(Error),
-          Some(Error),
-          Some(Error),
           Some(Error),
           Some(Error),
           Some(Error),
@@ -335,7 +329,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     val userInput = BusinessVerificationRequest("Bob Company", "20-30-40", "12345678", None)
 
     val assessResult = Future.successful(
-      Success(BarsBusinessAssessSuccessResponse(Yes, Yes, None, Yes, Yes, Indeterminate, Indeterminate, No, No, Some(No))))
+      Success(BarsBusinessAssessSuccessResponse(Yes, Yes, None, Yes, Yes, No, No, Some(No))))
 
     when(mockConnector.assessBusiness(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(assessResult)
 
@@ -516,8 +510,8 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     val form = BusinessVerificationRequest.form.fillAndValidate(userInput)
 
     "the details provided pass the remote bars checks" should {
-      val assessResult = Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Yes, Yes,
-        Indeterminate, Indeterminate, Yes, Yes, Some(No)))
+      val assessResult = Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Yes,
+        Yes, Yes, Yes, Some(No)))
 
       clearInvocations(mockRepository)
       when(mockRepository.updateBusinessAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
@@ -534,8 +528,6 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
           Some(No),
           Some(Yes),
           Some(Yes),
-          Some(Indeterminate),
-          Some(Indeterminate),
           Some("sort-code-bank-name-business"),
           Some(Yes),
           Some(Yes)
@@ -569,8 +561,6 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
           None,
           Some(Error),
           None,
-          Some(Error),
-          Some(Error),
           Some(Error),
           Some(Error),
           None,
