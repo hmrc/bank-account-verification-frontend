@@ -39,12 +39,11 @@ import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import play.api.test._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.internalId
 
 import scala.concurrent.Future
 import scala.util.Success
 
-class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPerSuite with MockitoSugar {
+class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerPerSuite with MockitoSugar {
   private val mockBankAccountReputationConnector = mock[BankAccountReputationConnector]
   private val mockAuthConnector = mock[AuthConnector]
 
@@ -77,7 +76,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
 
-    val initUrl = s"$baseUrl/api/init"
+    val initUrl = s"$baseUrl/api/v2/init"
 
     val initRequest = InitRequest("serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
@@ -118,27 +117,24 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     completeResponse.status shouldBe 200
 
     import bankaccountverification.connector.ReputationResponseEnum._
-    val sessionDataMaybe = Json.fromJson[CompleteResponse](completeResponse.json)
+    val sessionDataMaybe = Json.fromJson[CompleteV2Response](completeResponse.json)
 
-    sessionDataMaybe shouldBe JsSuccess[CompleteResponse](
-      CompleteResponse(
+    sessionDataMaybe shouldBe JsSuccess[CompleteV2Response](
+      CompleteV2Response(
         accountType = Personal,
         personal = Some(
-          PersonalCompleteResponse(
-            Some(CompleteResponseAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+          PersonalCompleteV2Response(
             "some-account-name",
             "121212",
             "12349876",
-            accountNumberWithSortCodeIsValid = Yes,
+            Yes,
             None,
             accountExists = Some(Yes),
             nameMatches = Some(Indeterminate),
-            addressMatches = Some(Indeterminate),
-            nonConsented = Some(Indeterminate),
-            subjectHasDeceased = Some(Indeterminate),
             nonStandardAccountDetailsRequiredForBacs = Some(No),
             sortCodeBankName = Some("sort-code-bank-name-personal"),
-            sortCodeSupportsDirectDebit = Some(Yes), sortCodeSupportsDirectCredit = Some(Yes))),
+            sortCodeSupportsDirectDebit = Some(Yes),
+            sortCodeSupportsDirectCredit = Some(Yes))),
         business = None
       )
     )
@@ -155,7 +151,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
 
-    val initUrl = s"$baseUrl/api/init"
+    val initUrl = s"$baseUrl/api/v2/init"
 
     val initRequest = InitRequest(
       serviceIdentifier = "serviceIdentifier",
@@ -200,23 +196,20 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
       await(wsClient.url(completeUrl).get())
     completeResponse.status shouldBe 200
     import bankaccountverification.connector.ReputationResponseEnum._
-    val sessionDataMaybe = Json.fromJson[CompleteResponse](completeResponse.json)
+    val sessionDataMaybe = Json.fromJson[CompleteV2Response](completeResponse.json)
 
-    sessionDataMaybe shouldBe JsSuccess[CompleteResponse](
-      CompleteResponse(
+    sessionDataMaybe shouldBe JsSuccess[CompleteV2Response](
+      CompleteV2Response(
         accountType = Business,
         business = Some(
-          BusinessCompleteResponse(
-            Some(CompleteResponseAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+          BusinessCompleteV2Response(
             "some-company-name",
             "121212",
             "12349876",
             rollNumber = None,
-            accountNumberWithSortCodeIsValid = Yes,
+            accountNumberIsWellFormatted = Yes,
             accountExists = Some(Indeterminate),
-            companyNameMatches = Some(Indeterminate),
-            companyPostCodeMatches = Some(Indeterminate),
-            companyRegistrationNumberMatches = Some(Indeterminate),
+            nameMatches = Some(Indeterminate),
             nonStandardAccountDetailsRequiredForBacs = Some(No),
             sortCodeBankName = Some("sort-code-bank-name-business"),
             Some(Yes),
@@ -236,7 +229,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
 
-    val initUrl = s"$baseUrl/api/init"
+    val initUrl = s"$baseUrl/api/v2/init"
 
     val initRequest = InitRequest("serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
@@ -267,24 +260,20 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     completeResponse.status shouldBe 200
 
     import bankaccountverification.connector.ReputationResponseEnum._
-    val sessionDataMaybe = Json.fromJson[CompleteResponse](completeResponse.json)
+    val sessionDataMaybe = Json.fromJson[CompleteV2Response](completeResponse.json)
 
-    sessionDataMaybe shouldBe JsSuccess[CompleteResponse](
-      CompleteResponse(
+    sessionDataMaybe shouldBe JsSuccess[CompleteV2Response](
+      CompleteV2Response(
         accountType = Personal,
         personal = Some(
-          PersonalCompleteResponse(
-            Some(CompleteResponseAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+          PersonalCompleteV2Response(
             "some-account-name",
             "121212",
             "12349876",
-            accountNumberWithSortCodeIsValid = Yes,
+            Yes,
             None,
             accountExists = Some(Yes),
             nameMatches = Some(Indeterminate),
-            addressMatches = Some(Indeterminate),
-            nonConsented = Some(Indeterminate),
-            subjectHasDeceased = Some(Indeterminate),
             nonStandardAccountDetailsRequiredForBacs = Some(No),
             sortCodeBankName = Some("sort-code-bank-name-personal"),
             sortCodeSupportsDirectDebit = Some(Yes),

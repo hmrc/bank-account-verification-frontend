@@ -59,7 +59,7 @@ object PersonalVerificationRequest {
         case success: BarsPersonalAssessSuccessResponse                                                      =>
           import success._
 
-          if (accountNumberWithSortCodeIsValid == No)
+          if (accountNumberIsWellFormatted == No)
             form.fill(form.get).withError("accountNumber", "error.accountNumber.modCheckFailed")
           else if (sortCodeIsPresentOnEISCD != Yes) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")

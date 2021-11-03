@@ -29,8 +29,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   val barsBaseUrl                = servicesConfig.baseUrl("bank-account-reputation")
   val barsValidateBankDetailsUrl = s"$barsBaseUrl/v2/validateBankDetails"
-  val barsPersonalAssessUrl      = s"$barsBaseUrl/personal/v3/assess"
-  val barsBusinessAssessUrl      = s"$barsBaseUrl/business/v2/assess"
+  val barsPersonalAssessUrl      = s"$barsBaseUrl/verify/personal"
+  val barsBusinessAssessUrl      = s"$barsBaseUrl/verify/business"
 
   val contactFormServiceIdentifier = "bank-account-verification"
   val appName: String = config.get[String]("appName")

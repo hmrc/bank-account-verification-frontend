@@ -45,7 +45,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Try
 
-class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite with OptionValues {
+class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite with OptionValues {
   implicit private val timeout: FiniteDuration = 1 second
 
   private val env = Environment.simple()
@@ -68,7 +68,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
   }
 
 
-  private val controller = app.injector.instanceOf[ApiController]
+  private val controller = app.injector.instanceOf[ApiV2Controller]
 
   implicit val mat = app.injector.instanceOf[Materializer]
 
@@ -101,7 +101,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
           timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))))
 
-        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
+        val fakeRequest = FakeRequest("POST", "/api/v2/init").withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
         val initResponse = contentAsJson(result).as[InitResponse]
@@ -110,7 +110,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         Try(new ObjectId(initResponse.journeyId)).toOption shouldBe Some(newJourneyId)
 
         initResponse.startUrl shouldBe s"/bank-account-verification/start/${initResponse.journeyId}"
-        initResponse.completeUrl shouldBe s"/api/complete/${initResponse.journeyId}"
+        initResponse.completeUrl shouldBe s"/api/v2/complete/${initResponse.journeyId}"
         initResponse.detailsUrl shouldBe None
       }
 
@@ -139,7 +139,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))
         ))
 
-        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
+        val fakeRequest = FakeRequest("POST", "/api/v2/init").withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
         val initResponse = contentAsJson(result).as[InitResponse]
@@ -148,7 +148,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         Try(new ObjectId(initResponse.journeyId)).toOption shouldBe Some(newJourneyId)
 
         initResponse.startUrl shouldBe s"/bank-account-verification/start/${initResponse.journeyId}"
-        initResponse.completeUrl shouldBe s"/api/complete/${initResponse.journeyId}"
+        initResponse.completeUrl shouldBe s"/api/v2/complete/${initResponse.journeyId}"
         initResponse.detailsUrl shouldBe Some(s"/bank-account-verification/verify/personal/${initResponse.journeyId}")
       }
     }
@@ -184,7 +184,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             |    }
             |}""".stripMargin)
 
-        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
+        val fakeRequest = FakeRequest("POST", "/api/v2/init").withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
 
@@ -198,7 +198,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
 
-        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(Json.parse("{}"))
+        val fakeRequest = FakeRequest("POST", "/api/v2/init").withJsonBody(Json.parse("{}"))
         val result = controller.init().apply(fakeRequest)
 
         status(result) shouldBe Status.UNAUTHORIZED
@@ -224,7 +224,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             Some(
-              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), None,
+              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes),
                 Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"))),
             None
           ),
@@ -232,7 +232,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
 
         when(sessionStore.findById(meq(journeyId))(any())).thenReturn(Future.successful(Some(returnData)))
 
-        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/${journeyId.toHexString}")
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/v2/complete/${journeyId.toHexString}")
         val completeResult = controller.complete(journeyId.toHexString).apply(fakeCompleteRequest)
 
         status(completeResult) shouldBe Status.OK
@@ -242,13 +242,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         (json \ "personal" \ "accountName").as[String] shouldBe "Bob"
         (json \ "personal" \ "sortCode").as[String] shouldBe "203040"
         (json \ "personal" \ "accountNumber").as[String] shouldBe "12345678"
-        (json \ "personal" \ "accountNumberWithSortCodeIsValid").as[String] shouldBe "yes"
+        (json \ "personal" \ "accountNumberIsWellFormatted").as[String] shouldBe "yes"
         (json \ "personal" \ "accountExists").as[String] shouldBe "yes"
         (json \ "personal" \ "rollNumber").as[String] shouldBe "roll1"
         (json \ "personal" \ "nameMatches").as[String] shouldBe "indeterminate"
-        (json \ "personal" \ "addressMatches").as[String] shouldBe "indeterminate"
-        (json \ "personal" \ "nonConsented").as[String] shouldBe "indeterminate"
-        (json \ "personal" \ "subjectHasDeceased").as[String] shouldBe "indeterminate"
         (json \ "personal" \ "nonStandardAccountDetailsRequiredForBacs").as[String] shouldBe "no"
         (json \ "personal" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-personal"
       }
@@ -271,13 +268,13 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             None,
             Some(
               BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
-                Some(Yes), None, Some(No), Some(Yes), None, None, Some("sort-code-bank-name-business")))),
+                None, Some(Yes), Some(No), None, Some(Yes), Some(Yes), Some("sort-code-bank-name-business")))),
           timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId))(any()))
           .thenReturn(Future.successful(Some(returnData)))
 
-        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/${journeyId.toHexString}")
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/v2/complete/${journeyId.toHexString}")
         val completeResult = controller.complete(journeyId.toHexString).apply(fakeCompleteRequest)
 
         status(completeResult) shouldBe Status.OK
@@ -287,12 +284,10 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         (json \ "business" \ "companyName").as[String] shouldBe "Bob Ltd"
         (json \ "business" \ "sortCode").as[String] shouldBe "203040"
         (json \ "business" \ "accountNumber").as[String] shouldBe "12345678"
-        (json \ "business" \ "accountNumberWithSortCodeIsValid").as[String] shouldBe "yes"
+        (json \ "business" \ "accountNumberIsWellFormatted").as[String] shouldBe "yes"
         (json \ "business" \ "accountExists").as[String] shouldBe "no"
         (json \ "business" \ "rollNumber").as[String] shouldBe "roll1"
-        (json \ "business" \ "companyNameMatches").as[String] shouldBe "yes"
-        (json \ "business" \ "companyPostCodeMatches").as[String] shouldBe "indeterminate"
-        (json \ "business" \ "companyRegistrationNumberMatches").as[String] shouldBe "indeterminate"
+        (json \ "business" \ "nameMatches").as[String] shouldBe "yes"
         (json \ "business" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-business"
       }
     }
@@ -306,7 +301,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         val nonExistentJourneyId = ObjectId.get()
         when(sessionStore.findById(meq(nonExistentJourneyId))(any())).thenReturn(Future.successful(None))
 
-        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/v2/complete/$nonExistentJourneyId")
         val completeResult = controller.complete(nonExistentJourneyId.toHexString).apply(fakeCompleteRequest)
         status(completeResult) shouldBe Status.NOT_FOUND
       }
@@ -329,13 +324,13 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             None,
             Some(
               BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
-                Some(Yes), None, Some(No), Some(Indeterminate), None, None, Some("sort-code-bank-name-business")))),
+                None, Some(Yes), Some(No), Some(Indeterminate), None, None, Some("sort-code-bank-name-business")))),
           timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId))(any()))
           .thenReturn(Future.successful(Some(returnData)))
 
-        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$journeyId")
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/v2/complete/$journeyId")
         val completeResult = controller.complete(journeyId.toHexString).apply(fakeCompleteRequest)
         status(completeResult) shouldBe Status.NOT_FOUND
       }
@@ -348,7 +343,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           .thenReturn(Future.successful("1234"))
 
         val nonExistentJourneyId = "invalid-journey-id"
-        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/v2/complete/$nonExistentJourneyId")
         val completeResult = controller.complete(nonExistentJourneyId).apply(fakeCompleteRequest)
         status(completeResult) shouldBe Status.BAD_REQUEST
       }
@@ -363,7 +358,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         val nonExistentJourneyId = ObjectId.get()
         when(sessionStore.findById(meq(nonExistentJourneyId))(any())).thenReturn(Future.successful(None))
 
-        val fakeCompleteRequest = FakeRequest("GET", s"/api/complete/$nonExistentJourneyId")
+        val fakeCompleteRequest = FakeRequest("GET", s"/api/v2/complete/$nonExistentJourneyId")
         val completeResult = controller.complete(nonExistentJourneyId.toHexString).apply(fakeCompleteRequest)
         status(completeResult) shouldBe Status.UNAUTHORIZED
       }

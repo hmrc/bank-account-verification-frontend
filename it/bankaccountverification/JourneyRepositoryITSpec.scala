@@ -52,7 +52,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
       timeoutConfig shouldBe Some(TimeoutConfig("url", 100, None))
 
       val personalSession = journey.flatMap(j => j.data.personal)
-      personalSession shouldBe Some(PersonalSession(Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))
+      personalSession shouldBe Some(PersonalAccountDetails(Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))
     }
   }
 
@@ -70,7 +70,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
       timeoutConfig shouldBe Some(TimeoutConfig("url", 100, None))
 
       val businessSession = journey.flatMap(j => j.data.business)
-      businessSession shouldBe Some(BusinessSession(Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))
+      businessSession shouldBe Some(BusinessAccountDetails(Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))
     }
   }
 
@@ -80,7 +80,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
     "handle unsetting the roll number" in {
       val journeyId = ObjectId.get()
 
-      val personalSession = PersonalSession(Some("accountName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
+      val personalSession = PersonalAccountDetails(Some("accountName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
       val session = Session(accountType = Some(Personal), address = None, personal = Some(personalSession))
       val journey = Journey(journeyId, Some("1234"), LocalDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None, None)
       await(repository.insertRaw(journey))
@@ -99,7 +99,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
     "handle unsetting the roll number" in {
       val journeyId = ObjectId.get()
 
-      val businessSession = BusinessSession(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
+      val businessSession = BusinessAccountDetails(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
       val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
       val journey = Journey(journeyId, Some("1234"), LocalDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None, None)
       await(repository.insertRaw(journey))
@@ -119,7 +119,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
     "handle changing the account type" in {
       val journeyId = ObjectId.get()
 
-      val businessSession = BusinessSession(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
+      val businessSession = BusinessAccountDetails(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
       val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
       val journey = Journey(journeyId, Some("1234"), LocalDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, None, None, None)
       await(repository.insertRaw(journey))
@@ -153,7 +153,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
           | }
           |}""".stripMargin).as[JsObject]
 
-      val businessSession = BusinessSession(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
+      val businessSession = BusinessAccountDetails(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"))
       val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
       val journey = Journey(journeyId, Some("1234"), LocalDateTime.now.plusHours(1), "serviceIdentifier", "continueUrl", session, Some(messages), None, None)
       await(repository.insertRaw(journey))

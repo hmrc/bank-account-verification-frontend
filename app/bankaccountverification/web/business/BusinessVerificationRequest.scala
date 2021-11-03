@@ -52,7 +52,7 @@ object BusinessVerificationRequest {
           form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
         case success: BarsBusinessAssessSuccessResponse =>
           import success._
-          if (accountNumberWithSortCodeIsValid == No) {
+          if (accountNumberIsWellFormatted == No) {
             form.fill(form.get).withError("accountNumber", "error.accountNumber.modCheckFailed")
           } else if (sortCodeIsPresentOnEISCD != Yes) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")

@@ -288,9 +288,8 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         None,
         Indeterminate,
         Indeterminate,
-        Indeterminate,
-        Indeterminate,
-        No, No,
+        No,
+        No,
         Some(No)
       )
       val updatedForm = form.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
@@ -309,9 +308,8 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         None,
         No,
         Indeterminate,
-        Indeterminate,
-        Indeterminate,
-        Yes, Yes,
+        Yes,
+        Yes,
         Some(No)
       )
 
@@ -331,9 +329,8 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         None,
         Indeterminate,
         Indeterminate,
-        Indeterminate,
-        Indeterminate,
-        Yes, Yes,
+        Yes,
+        Yes,
         Some(Yes)
       )
       val updatedForm = form.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
@@ -354,9 +351,8 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         None,
         Indeterminate,
         Indeterminate,
-        Indeterminate,
-        Indeterminate,
-        Yes, Yes,
+        Yes,
+        Yes,
         Some(Yes)
       )
       val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
@@ -377,9 +373,8 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         None,
         Indeterminate,
         Indeterminate,
-        Indeterminate,
-        Indeterminate,
-        No, No,
+        No,
+        No,
         None
       )
       val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
@@ -401,9 +396,8 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         None,
         Indeterminate,
         Indeterminate,
-        Indeterminate,
-        Indeterminate,
-        No, Yes,
+        No,
+        Yes,
         None
       )
       val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
@@ -425,9 +419,8 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         None,
         Indeterminate,
         Indeterminate,
-        Indeterminate,
-        Indeterminate,
-        Yes, No,
+        Yes,
+        No,
         None
       )
       val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
@@ -445,9 +438,8 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         None,
         ReputationResponseEnum.Error,
         ReputationResponseEnum.Error,
-        ReputationResponseEnum.Error,
-        ReputationResponseEnum.Error,
-        Yes, Yes,
+        Yes,
+        Yes,
         Some(ReputationResponseEnum.Error)
       )
 

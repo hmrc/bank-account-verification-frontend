@@ -20,12 +20,9 @@ import play.api.libs.json.{Json, Reads, Writes}
 
 sealed trait BarsPersonalAssessResponse {}
 
-case class BarsPersonalAssessSuccessResponse(accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+case class BarsPersonalAssessSuccessResponse(accountNumberIsWellFormatted: ReputationResponseEnum,
                                              accountExists: ReputationResponseEnum,
                                              nameMatches: ReputationResponseEnum,
-                                             addressMatches: ReputationResponseEnum,
-                                             nonConsented: ReputationResponseEnum,
-                                             subjectHasDeceased: ReputationResponseEnum,
                                              sortCodeIsPresentOnEISCD: ReputationResponseEnum,
                                              sortCodeSupportsDirectDebit: ReputationResponseEnum,
                                              sortCodeSupportsDirectCredit: ReputationResponseEnum,
@@ -45,13 +42,11 @@ object BarsPersonalAssessResponse {
 
 sealed trait BarsBusinessAssessResponse {}
 
-case class BarsBusinessAssessSuccessResponse(accountNumberWithSortCodeIsValid: ReputationResponseEnum,
+case class BarsBusinessAssessSuccessResponse(accountNumberIsWellFormatted: ReputationResponseEnum,
                                              sortCodeIsPresentOnEISCD: ReputationResponseEnum,
                                              sortCodeBankName: Option[String],
                                              accountExists: ReputationResponseEnum,
-                                             companyNameMatches: ReputationResponseEnum,
-                                             companyPostCodeMatches: ReputationResponseEnum,
-                                             companyRegistrationNumberMatches: ReputationResponseEnum,
+                                             nameMatches: ReputationResponseEnum,
                                              sortCodeSupportsDirectDebit: ReputationResponseEnum,
                                              sortCodeSupportsDirectCredit: ReputationResponseEnum,
                                              nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum]) extends BarsBusinessAssessResponse
