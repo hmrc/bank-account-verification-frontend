@@ -124,7 +124,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
             sortCode = Some("123498"),
             accountNumber = Some("98765432"),
             rollNumber = Some("A.BC"),
-            accountNumberWithSortCodeIsValid = Some(Yes),
+            accountNumberIsWellFormatted = Some(Yes),
             accountExists = Some(Indeterminate),
             nameMatches = Some(No),
             nonStandardAccountDetailsRequiredForBacs = Some(Error),
@@ -157,9 +157,9 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         (businessJourneyJsValue \ "data" \ "business" \ "sortCode").as[String] shouldBe "123498"
         (businessJourneyJsValue \ "data" \ "business" \ "accountNumber").as[String] shouldBe "98765432"
         (businessJourneyJsValue \ "data" \ "business" \ "rollNumber").as[String] shouldBe "A.BC"
-        (businessJourneyJsValue \ "data" \ "business" \ "accountNumberWithSortCodeIsValid").as[String] shouldBe "yes"
+        (businessJourneyJsValue \ "data" \ "business" \ "accountNumberIsWellFormatted").as[String] shouldBe "yes"
         (businessJourneyJsValue \ "data" \ "business" \ "accountExists").as[String] shouldBe "indeterminate"
-        (businessJourneyJsValue \ "data" \ "business" \ "companyNameMatches").as[String] shouldBe "no"
+        (businessJourneyJsValue \ "data" \ "business" \ "nameMatches").as[String] shouldBe "no"
         (businessJourneyJsValue \ "data" \ "business" \ "nonStandardAccountDetailsRequiredForBacs").as[String] shouldBe "error"
         (businessJourneyJsValue \ "data" \ "business" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-business"
 

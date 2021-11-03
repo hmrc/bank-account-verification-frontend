@@ -271,7 +271,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             None,
             Some(
               BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
-                Some(Yes), None, Some(No), Some(Indeterminate), Some(Yes), None, Some("sort-code-bank-name-business")))),
+                Some(Yes), None, Some(No), Some(Yes), None, None, Some("sort-code-bank-name-business")))),
           timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId))(any()))

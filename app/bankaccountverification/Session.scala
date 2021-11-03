@@ -178,10 +178,10 @@ case class BusinessAccountDetails(companyName: Option[String],
                                   rollNumber: Option[String] = None,
                                   accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
                                   accountNumberIsWellFormatted: Option[ReputationResponseEnum] = None,
-                                  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
                                   accountExists: Option[ReputationResponseEnum] = None,
                                   companyNameMatches: Option[ReputationResponseEnum] = None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
                                   nameMatches: Option[ReputationResponseEnum] = None,
+                                  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
                                   sortCodeBankName: Option[String] = None,
                                   sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None,
                                   sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None)
@@ -226,10 +226,10 @@ object BusinessAccountDetails {
       rollNumber,
       maybeAccountNumberWithSortCodeIsValid,
       maybeAccountNumberIsWellFormatted,
-      nonStandardAccountDetailsRequiredForBacs,
       accountExists,
       companyNameMatches,
       nameMatches,
+      nonStandardAccountDetailsRequiredForBacs,
       sortCodeBankName,
       sortCodeSupportsDirectDebit,
       sortCodeSupportsDirectCredit))
@@ -265,10 +265,10 @@ object BusinessAccountDetails {
       rollNumber,
       maybeAccountNumberWithSortCodeIsValid,
       maybeAccountNumberIsWellFormatted,
-      nonStandardAccountDetailsRequiredForBacs,
       accountExists,
       companyNameMatches,
       nameMatches,
+      nonStandardAccountDetailsRequiredForBacs,
       sortCodeBankName,
       sortCodeSupportsDirectDebit,
       sortCodeSupportsDirectCredit))
