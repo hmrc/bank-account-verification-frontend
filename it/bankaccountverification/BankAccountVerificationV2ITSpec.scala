@@ -76,7 +76,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
 
-    val initUrl = s"$baseUrl/api/init"
+    val initUrl = s"$baseUrl/api/v2/init"
 
     val initRequest = InitRequest("serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
@@ -151,7 +151,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
 
-    val initUrl = s"$baseUrl/api/init"
+    val initUrl = s"$baseUrl/api/v2/init"
 
     val initRequest = InitRequest(
       serviceIdentifier = "serviceIdentifier",
@@ -229,7 +229,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
 
-    val initUrl = s"$baseUrl/api/init"
+    val initUrl = s"$baseUrl/api/v2/init"
 
     val initRequest = InitRequest("serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),

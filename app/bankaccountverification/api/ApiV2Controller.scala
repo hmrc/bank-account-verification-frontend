@@ -70,7 +70,7 @@ class ApiV2Controller @Inject()(appConfig: AppConfig, mcc: MessagesControllerCom
                         import bankaccountverification._
 
                         val startUrl = web.routes.AccountTypeController.getAccountType(journeyId.toHexString).url
-                        val completeUrl = api.routes.ApiController.complete(journeyId.toHexString).url
+                        val completeUrl = api.routes.ApiV2Controller.complete(journeyId.toHexString).url
 
                         val detailsUrl = prepopulatedData.map {
                           case p if p.accountType == Personal =>

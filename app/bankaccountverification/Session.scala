@@ -197,19 +197,20 @@ object BusinessAccountDetails {
           request.rollNumber,
           None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
           Some(success.accountNumberIsWellFormatted),
-          success.nonStandardAccountDetailsRequiredForBacs,
           Some(success.accountExists),
           None,
           Some(success.nameMatches),
+          success.nonStandardAccountDetailsRequiredForBacs,
           success.sortCodeBankName,
           Some(success.sortCodeSupportsDirectDebit),
           Some(success.sortCodeSupportsDirectCredit))
       case _ =>
         BusinessAccountDetails(
           Some(request.companyName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber,
-          None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
-          Some(Error), None, Some(Error),
-          None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
+          accountNumberWithSortCodeIsValid = None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
+          Some(Error), Some(Error),
+          companyNameMatches = None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
+          Some(Error),
           Some(Error), None, Some(Error), Some(Error))
     }
 

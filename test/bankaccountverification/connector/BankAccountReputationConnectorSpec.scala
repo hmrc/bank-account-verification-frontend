@@ -70,7 +70,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         {
           case SPOST(p"/v2/validateBankDetails") => Action(Ok(
             """{
-              |    "accountNumberWithSortCodeIsValid": "yes",
+              |    "accountNumberIsWellFormatted": "yes",
               |    "OWAITWHATISTHIS": "no",
               |    "sortCodeIsPresentMEGALOLSOnEISCD": "error"
               |}""".stripMargin).withHeaders("Content-Type" -> "application/json"))
@@ -126,7 +126,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
             r.headers.get("True-Calling-Client") shouldBe Some("example-service")
             Action(Ok(
             """{
-              |  "accountNumberWithSortCodeIsValid": "yes",
+              |  "accountNumberIsWellFormatted": "yes",
               |  "accountExists": "yes",
               |  "nameMatches": "yes",
               |  "sortCodeIsPresentOnEISCD": "yes",
@@ -154,7 +154,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
             Action(
               Ok(
                 """{
-                  |    "accountNumberWithSortCodeIsValid": "yes",
+                  |    "accountNumberIsWellFormatted": "yes",
                   |    "OWAITWHATISTHIS": "no",
                   |    "sortCodeIsPresentMEGALOLSOnEISCD": "error"
                   |}""".stripMargin)
@@ -228,13 +228,13 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
             r.headers.get("True-Calling-Client") shouldBe Some("example-service")
             Action(Ok(
             """{
-              |  "accountNumberWithSortCodeIsValid": "yes",
+              |  "accountNumberIsWellFormatted": "yes",
               |  "sortCodeIsPresentOnEISCD": "yes",
               |  "sortCodeSupportsDirectDebit": "yes",
               |  "sortCodeSupportsDirectCredit": "yes",
               |  "sortCodeBankName": "Some Company",
               |  "accountExists": "yes",
-              |  "companyNameMatches": "yes",
+              |  "nameMatches": "yes",
               |  "nonStandardAccountDetailsRequiredForBacs": "no"
               |}""".stripMargin).withHeaders("Content-Type" -> "application/json"))
         }
@@ -257,7 +257,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
             Action(
               Ok(
                 """{
-                  |    "accountNumberWithSortCodeIsValid": "yes",
+                  |    "accountNumberIsWellFormatted": "yes",
                   |    "OWAITWHATISTHIS": "no",
                   |    "sortCodeIsPresentMEGALOLSOnEISCD": "error"
                   |}""".stripMargin)
