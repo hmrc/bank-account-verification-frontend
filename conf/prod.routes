@@ -2,6 +2,8 @@
 + nocsrf
 POST        /api/init                       bankaccountverification.api.ApiController.init
 GET         /api/complete/:journeyId        bankaccountverification.api.ApiController.complete(journeyId)
+POST        /api/v2/init                    bankaccountverification.api.ApiV2Controller.init
+GET         /api/v2/complete/:journeyId     bankaccountverification.api.ApiV2Controller.complete(journeyId)
 
 ->          /bank-account-verification      app.Routes
 ->          /                               health.Routes

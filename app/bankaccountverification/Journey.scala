@@ -52,12 +52,12 @@ object Journey {
           case AccountTypeRequestEnum.Personal =>
             session.copy(
               accountType = Some(p.accountType),
-              personal = Some(PersonalSession(accountName = p.name, sortCode = p.sortCode,
+              personal = Some(PersonalAccountDetails(accountName = p.name, sortCode = p.sortCode,
                 accountNumber = p.accountNumber, rollNumber = p.rollNumber)))
           case AccountTypeRequestEnum.Business =>
             session.copy(
               accountType = Some(p.accountType),
-              business = Some(BusinessSession(companyName = p.name, sortCode = p.sortCode,
+              business = Some(BusinessAccountDetails(companyName = p.name, sortCode = p.sortCode,
                 accountNumber = p.accountNumber, rollNumber = p.rollNumber)))
         }
     }
@@ -72,16 +72,9 @@ object Journey {
 
   implicit val objectIdFormats: Format[ObjectId] = MongoFormats.objectIdFormat
   implicit val datetimeFormat: Format[LocalDateTime] = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.localDateTimeFormat
-  implicit val personalSessionDataReads: Reads[PersonalSession] = Json.reads[PersonalSession]
-  implicit val personalSessionDataWrites: Writes[PersonalSession] = Json.writes[PersonalSession]
-  implicit val businessSessionDataReads: Reads[BusinessSession] = Json.reads[BusinessSession]
-  implicit val businessSessionDataWrites: Writes[BusinessSession] = Json.writes[BusinessSession]
 
   implicit val sessionAddressReads: Reads[Address] = Json.reads[Address]
   implicit val sessionAddressWrites: Writes[Address] = Json.writes[Address]
-
-  implicit val sessionReads: Reads[Session] = Json.reads[Session]
-  implicit val sessionWrites: Writes[Session] = Json.writes[Session]
 
   implicit val timeoutConfigReads: Reads[TimeoutConfig] = Json.reads[TimeoutConfig]
   implicit val timeoutConfigWrites: Writes[TimeoutConfig] = Json.writes[TimeoutConfig]
@@ -137,16 +130,31 @@ object Journey {
       .and((__ \ "accountNumber").writeNullable[String])
       .and((__ \ "rollNumber").writeOptionWithNull[String])
       .and((__ \ "accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
+      .and((__ \ "accountNumberIsWellFormatted").writeNullable[ReputationResponseEnum])
       .and((__ \ "accountExists").writeNullable[ReputationResponseEnum])
       .and((__ \ "nameMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "addressMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "nonConsented").writeNullable[ReputationResponseEnum])
-      .and((__ \ "subjectHasDeceased").writeNullable[ReputationResponseEnum])
       .and((__ \ "nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
       .and((__ \ "sortCodeBankName").writeOptionWithNull[String])
       .and((__ \ "sortCodeSupportsDirectDebit").writeOptionWithNull[ReputationResponseEnum])
       .and((__ \ "sortCodeSupportsDirectCredit").writeOptionWithNull[ReputationResponseEnum])(
         unlift(PersonalAccountDetails.unapply)
+      )
+
+  implicit def personalAccountDetailsReads: Reads[PersonalAccountDetails] =
+    (__ \ "accountName")
+      .readNullable[String]
+      .and((__ \ "sortCode").readNullable[String])
+      .and((__ \ "accountNumber").readNullable[String])
+      .and((__ \ "rollNumber").readNullable[String])
+      .and((__ \ "accountNumberWithSortCodeIsValid").readNullable[ReputationResponseEnum])
+      .and((__ \ "accountNumberIsWellFormatted").readNullable[ReputationResponseEnum])
+      .and((__ \ "accountExists").readNullable[ReputationResponseEnum])
+      .and((__ \ "nameMatches").readNullable[ReputationResponseEnum])
+      .and((__ \ "nonStandardAccountDetailsRequiredForBacs").readNullable[ReputationResponseEnum])
+      .and((__ \ "sortCodeBankName").readNullable[String])
+      .and((__ \ "sortCodeSupportsDirectDebit").readNullable[ReputationResponseEnum])
+      .and((__ \ "sortCodeSupportsDirectCredit").readNullable[ReputationResponseEnum])(
+        PersonalAccountDetails.apply(_, _, _, _, _, _, _, _, _, _, _, _)
       )
 
   implicit def businessAccountDetailsWrites: OWrites[BusinessAccountDetails] =
@@ -156,16 +164,37 @@ object Journey {
       .and((__ \ "accountNumber").writeNullable[String])
       .and((__ \ "rollNumber").writeOptionWithNull[String])
       .and((__ \ "accountNumberWithSortCodeIsValid").writeNullable[ReputationResponseEnum])
-      .and((__ \ "nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
+      .and((__ \ "accountNumberIsWellFormatted").writeNullable[ReputationResponseEnum])
       .and((__ \ "accountExists").writeNullable[ReputationResponseEnum])
       .and((__ \ "companyNameMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "companyPostCodeMatches").writeNullable[ReputationResponseEnum])
-      .and((__ \ "companyRegistrationNumberMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "nameMatches").writeNullable[ReputationResponseEnum])
+      .and((__ \ "nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
       .and((__ \ "sortCodeBankName").writeOptionWithNull[String])
       .and((__ \ "sortCodeSupportsDirectDebit").writeOptionWithNull[ReputationResponseEnum])
       .and((__ \ "sortCodeSupportsDirectCredit").writeOptionWithNull[ReputationResponseEnum])(
         unlift(BusinessAccountDetails.unapply)
       )
+
+  implicit def businessAccountDetailsReads: Reads[BusinessAccountDetails] =
+    (__ \ "companyName")
+      .readNullable[String]
+      .and((__ \ "sortCode").readNullable[String])
+      .and((__ \ "accountNumber").readNullable[String])
+      .and((__ \ "rollNumber").readNullable[String])
+      .and((__ \ "accountNumberWithSortCodeIsValid").readNullable[ReputationResponseEnum])
+      .and((__ \ "accountNumberIsWellFormatted").readNullable[ReputationResponseEnum])
+      .and((__ \ "accountExists").readNullable[ReputationResponseEnum])
+      .and((__ \ "companyNameMatches").readNullable[ReputationResponseEnum])
+      .and((__ \ "nameMatches").readNullable[ReputationResponseEnum])
+      .and((__ \ "nonStandardAccountDetailsRequiredForBacs").readNullable[ReputationResponseEnum])
+      .and((__ \ "sortCodeBankName").readNullable[String])
+      .and((__ \ "sortCodeSupportsDirectDebit").readNullable[ReputationResponseEnum])
+      .and((__ \ "sortCodeSupportsDirectCredit").readNullable[ReputationResponseEnum])(
+       BusinessAccountDetails.apply(_, _, _, _, _, _, _, _, _, _, _, _, _)
+      )
+
+  implicit val sessionReads: Reads[Session] = Json.reads[Session]
+  implicit val sessionWrites: Writes[Session] = Json.writes[Session]
 
   val format: Format[Journey] = Format(defaultReads, defaultWrites)
 }

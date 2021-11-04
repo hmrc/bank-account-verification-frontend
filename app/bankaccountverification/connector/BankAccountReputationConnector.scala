@@ -101,7 +101,7 @@ class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig
 
     val request = BarsBusinessAssessRequest(
       BarsAccount(sortCode = sortCode, accountNumber = accountNumber),
-      Some(BarsBusiness(companyName = companyName, companyRegistrationNumber = companyRegistrationNumber, address)))
+      Some(BarsBusiness(companyName = companyName, address)))
 
     httpClient
       .POST[BarsBusinessAssessRequest, HttpResponse](url = appConfig.barsBusinessAssessUrl, body = request,

@@ -32,7 +32,6 @@ object BarsBusinessAssessRequest {
 
 case class BarsBusiness(
                          companyName: String, // Must be between 1 and 70 characters long
-                         companyRegistrationNumber: Option[String],
                          address: Option[BarsAddress]
                        )
 

@@ -16,13 +16,13 @@
 
 package bankaccountverification.web.personal
 
-import bankaccountverification.PersonalSession
+import bankaccountverification.PersonalAccountDetails
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist._
 
 case class PersonalAccountExistsIndeterminateViewModel(journeyId: String,
-                                                       session: PersonalSession,
+                                                       session: PersonalAccountDetails,
                                                        serviceIdentifier: String,
                                                        continueUrl: String,
                                                        welshTranslationsAvailable: Boolean) {
