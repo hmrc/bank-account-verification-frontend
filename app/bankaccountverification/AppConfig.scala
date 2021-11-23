@@ -16,10 +16,11 @@
 
 package bankaccountverification
 
-import javax.inject.{Inject, Singleton}
+import access.AccessChecker.{accessControlAllowListAbsoluteKey, accessControlEnabledKey}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import javax.inject.{Inject, Singleton}
 import scala.collection.JavaConverters.asScalaBufferConverter
 
 @Singleton
@@ -34,6 +35,14 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   val contactFormServiceIdentifier = "bank-account-verification"
   val appName: String = config.get[String]("appName")
+
+  val checkAllowList: Boolean = servicesConfig.getConfString(accessControlEnabledKey, "false").toBoolean
+  val allowedClients: Set[String] = {
+    val _allowedClients = config.getOptional[Seq[String]](accessControlAllowListAbsoluteKey)
+    if(checkAllowList && _allowedClients.isEmpty) throw new RuntimeException(s"Could not find config $accessControlAllowListAbsoluteKey")
+    else _allowedClients.getOrElse(Seq()).toSet
+  }
+
 }
 
 case class BankAccountReputationConfig(validateBankDetailsUrl: String)

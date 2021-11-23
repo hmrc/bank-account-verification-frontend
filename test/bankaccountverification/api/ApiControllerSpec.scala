@@ -29,7 +29,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.http.Status
+import play.api.http.{HeaderNames, Status}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -60,6 +60,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
     SharedMetricRegistries.clear()
 
     new GuiceApplicationBuilder()
+        .configure("microservice.services.access-control.allow-list" -> List("test-user-agent"))
         .overrides(bind[ServicesConfig].toInstance(serviceConfig))
         .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
         .overrides(bind[JourneyRepository].toInstance(sessionStore))
@@ -101,7 +102,9 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
           timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))))
 
-        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
+        val fakeRequest = FakeRequest("POST", "/api/init")
+            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+            .withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
         val initResponse = contentAsJson(result).as[InitResponse]
@@ -139,7 +142,9 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))
         ))
 
-        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
+        val fakeRequest = FakeRequest("POST", "/api/init")
+            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+            .withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
         val initResponse = contentAsJson(result).as[InitResponse]
@@ -160,7 +165,9 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           .thenReturn(Future.successful("1234"))
 
         val json = Json.parse("{}")
-        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
+        val fakeRequest = FakeRequest("POST", "/api/init")
+            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+            .withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
 
@@ -184,7 +191,9 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             |    }
             |}""".stripMargin)
 
-        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
+        val fakeRequest = FakeRequest("POST", "/api/init")
+            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+            .withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
 
@@ -198,10 +207,27 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
           .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
 
-        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(Json.parse("{}"))
+        val fakeRequest = FakeRequest("POST", "/api/init")
+            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+            .withJsonBody(Json.parse("{}"))
         val result = controller.init().apply(fakeRequest)
 
         status(result) shouldBe Status.UNAUTHORIZED
+      }
+    }
+
+    "return 403" when {
+      "The calling service has not been registered" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
+
+        val fakeRequest = FakeRequest("POST", "/api/init")
+            .withHeaders(HeaderNames.USER_AGENT -> "non-registered-user-agent")
+            .withJsonBody(Json.parse("{}"))
+        val result = controller.init().apply(fakeRequest)
+
+        status(result) shouldBe Status.FORBIDDEN
       }
     }
   }

@@ -16,6 +16,7 @@
 
 package bankaccountverification.api
 
+import access.AccessChecker
 import bankaccountverification.{BACSRequirements, _}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import org.bson.types.ObjectId
@@ -30,9 +31,12 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerComponents,
+class ApiController @Inject()(appConfig: AppConfig,
+                              accessChecker: AccessChecker,
+                              mcc: MessagesControllerComponents,
                               journeyRepository: JourneyRepository,
-                              val authConnector: AuthConnector) extends FrontendApiController(mcc) with AuthorisedFunctions {
+                              val authConnector: AuthConnector)
+    extends FrontendApiController(mcc) with AuthorisedFunctions {
 
   implicit val config: AppConfig = appConfig
 
@@ -42,7 +46,8 @@ class ApiController @Inject()(appConfig: AppConfig, mcc: MessagesControllerCompo
     Action.async { implicit request =>
       import InitRequest._
 
-      authorised().retrieve(AuthProviderId.retrieval) {
+      if(!accessChecker.isClientAllowed()) Future.successful(Forbidden)
+      else authorised().retrieve(AuthProviderId.retrieval) {
         authProviderId =>
           request.body.asJson match {
             case Some(json) =>

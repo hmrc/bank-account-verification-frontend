@@ -29,7 +29,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.http.Status
+import play.api.http.{HeaderNames, Status}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -60,6 +60,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
     SharedMetricRegistries.clear()
 
     new GuiceApplicationBuilder()
+        .configure("microservice.services.access-control.allow-list" -> List("test-user-agent"))
         .overrides(bind[ServicesConfig].toInstance(serviceConfig))
         .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
         .overrides(bind[JourneyRepository].toInstance(sessionStore))
@@ -81,7 +82,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
       "A continueUrl is provided" in {
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
-          .thenReturn(Future.successful("1234"))
+            .thenReturn(Future.successful("1234"))
 
         when(
           sessionStore.create(
@@ -101,7 +102,9 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
           timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))))
 
-        val fakeRequest = FakeRequest("POST", "/api/v2/init").withJsonBody(json)
+        val fakeRequest = FakeRequest("POST", "/api/v2/init")
+            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+            .withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
         val initResponse = contentAsJson(result).as[InitResponse]
@@ -117,7 +120,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
       "prepopulated data is provided" in {
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
-          .thenReturn(Future.successful("1234"))
+            .thenReturn(Future.successful("1234"))
 
         when(
           sessionStore.create(
@@ -139,7 +142,9 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
           timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))
         ))
 
-        val fakeRequest = FakeRequest("POST", "/api/v2/init").withJsonBody(json)
+        val fakeRequest = FakeRequest("POST", "/api/v2/init")
+            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+            .withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
         val initResponse = contentAsJson(result).as[InitResponse]
@@ -157,10 +162,12 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
       "A continueUrl is not provided" in {
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
-          .thenReturn(Future.successful("1234"))
+            .thenReturn(Future.successful("1234"))
 
         val json = Json.parse("{}")
-        val fakeRequest = FakeRequest("POST", "/api/init").withJsonBody(json)
+        val fakeRequest = FakeRequest("POST", "/api/v2/init")
+            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+            .withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
 
@@ -172,7 +179,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
       "Prepopulated data is present but account type is not provided" in {
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
-          .thenReturn(Future.successful("1234"))
+            .thenReturn(Future.successful("1234"))
 
         val json = Json.parse(
           """{
@@ -184,7 +191,9 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
             |    }
             |}""".stripMargin)
 
-        val fakeRequest = FakeRequest("POST", "/api/v2/init").withJsonBody(json)
+        val fakeRequest = FakeRequest("POST", "/api/v2/init")
+            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+            .withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
 
@@ -196,12 +205,29 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
       "The user is not logged in" in {
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
-          .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
+            .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
 
-        val fakeRequest = FakeRequest("POST", "/api/v2/init").withJsonBody(Json.parse("{}"))
+        val fakeRequest = FakeRequest("POST", "/api/v2/init")
+            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+            .withJsonBody(Json.parse("{}"))
         val result = controller.init().apply(fakeRequest)
 
         status(result) shouldBe Status.UNAUTHORIZED
+      }
+    }
+
+    "return 403" when {
+      "The calling service has not been registered" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+            .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
+
+        val fakeRequest = FakeRequest("POST", "/api/v2/init")
+            .withHeaders(HeaderNames.USER_AGENT -> "not-registered-user-agent")
+            .withJsonBody(Json.parse("{}"))
+        val result = controller.init().apply(fakeRequest)
+
+        status(result) shouldBe Status.FORBIDDEN
       }
     }
   }
@@ -211,7 +237,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
       "a valid journeyId is provided with a personal response" in {
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
-          .thenReturn(Future.successful("1234"))
+            .thenReturn(Future.successful("1234"))
 
         val journeyId = ObjectId.get()
         val returnData = Journey(
@@ -253,7 +279,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
       "a valid journeyId is provided with a business response" in {
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
-          .thenReturn(Future.successful("1234"))
+            .thenReturn(Future.successful("1234"))
 
         val journeyId = ObjectId.get()
         val returnData = Journey(
@@ -272,7 +298,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
           timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId))(any()))
-          .thenReturn(Future.successful(Some(returnData)))
+            .thenReturn(Future.successful(Some(returnData)))
 
         val fakeCompleteRequest = FakeRequest("GET", s"/api/v2/complete/${journeyId.toHexString}")
         val completeResult = controller.complete(journeyId.toHexString).apply(fakeCompleteRequest)
@@ -296,7 +322,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
       "a non-existent journeyId is provided" in {
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
-          .thenReturn(Future.successful("1234"))
+            .thenReturn(Future.successful("1234"))
 
         val nonExistentJourneyId = ObjectId.get()
         when(sessionStore.findById(meq(nonExistentJourneyId))(any())).thenReturn(Future.successful(None))
@@ -309,7 +335,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
       "a journey is found but it belongs to another user" in {
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
-          .thenReturn(Future.successful("9876"))
+            .thenReturn(Future.successful("9876"))
 
         val journeyId = ObjectId.get()
         val returnData = Journey(
@@ -328,7 +354,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
           timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId))(any()))
-          .thenReturn(Future.successful(Some(returnData)))
+            .thenReturn(Future.successful(Some(returnData)))
 
         val fakeCompleteRequest = FakeRequest("GET", s"/api/v2/complete/$journeyId")
         val completeResult = controller.complete(journeyId.toHexString).apply(fakeCompleteRequest)
@@ -340,7 +366,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
       "an invalid journeyId is provided" in {
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
-          .thenReturn(Future.successful("1234"))
+            .thenReturn(Future.successful("1234"))
 
         val nonExistentJourneyId = "invalid-journey-id"
         val fakeCompleteRequest = FakeRequest("GET", s"/api/v2/complete/$nonExistentJourneyId")
@@ -353,7 +379,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
       "The user is not logged in" in {
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
-          .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
+            .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
 
         val nonExistentJourneyId = ObjectId.get()
         when(sessionStore.findById(meq(nonExistentJourneyId))(any())).thenReturn(Future.successful(None))

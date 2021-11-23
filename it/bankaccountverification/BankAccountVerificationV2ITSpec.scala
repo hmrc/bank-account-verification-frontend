@@ -30,6 +30,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
+import play.api.http.HeaderNames
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsSuccess, JsValue, Json}
@@ -50,7 +51,8 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
   override lazy val app: Application = {
     SharedMetricRegistries.clear()
     new GuiceApplicationBuilder()
-      .overrides(bind[BankAccountReputationConnector].toInstance(mockBankAccountReputationConnector))
+        .configure("microservice.services.access-control.allow-list" -> List("test-user-agent"))
+        .overrides(bind[BankAccountReputationConnector].toInstance(mockBankAccountReputationConnector))
       .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
       .build()
   }
@@ -82,7 +84,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
       timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
-    val initResponse = await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
+    val initResponse = await(wsClient.url(initUrl).withHttpHeaders(HeaderNames.USER_AGENT -> "test-user-agent").post[JsValue](Json.toJson(initRequest)))
 
     initResponse.status shouldBe 200
     val response = initResponse.json.as[InitResponse]
@@ -161,7 +163,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
       timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
     val initResponse =
-      await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
+      await(wsClient.url(initUrl).withHttpHeaders(HeaderNames.USER_AGENT -> "test-user-agent").post[JsValue](Json.toJson(initRequest)))
 
     initResponse.status shouldBe 200
     val response = initResponse.json.as[InitResponse]
@@ -236,7 +238,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
       prepopulatedData = Some(InitRequestPrepopulatedData(Personal)),
       timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
-    val initResponse = await(wsClient.url(initUrl).post[JsValue](Json.toJson(initRequest)))
+    val initResponse = await(wsClient.url(initUrl).withHttpHeaders(HeaderNames.USER_AGENT -> "test-user-agent").post[JsValue](Json.toJson(initRequest)))
 
     initResponse.status shouldBe 200
     val response = initResponse.json.as[InitResponse]
