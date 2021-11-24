@@ -60,7 +60,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
     SharedMetricRegistries.clear()
 
     new GuiceApplicationBuilder()
-        .configure("microservice.services.access-control.allow-list" -> List("test-user-agent"))
+        .configure("microservice.services.access-control.allow-list.1" -> "test-user-agent")
         .overrides(bind[ServicesConfig].toInstance(serviceConfig))
         .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
         .overrides(bind[JourneyRepository].toInstance(sessionStore))
