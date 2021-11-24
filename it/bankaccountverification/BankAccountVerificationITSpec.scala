@@ -52,7 +52,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
   override lazy val app: Application = {
     SharedMetricRegistries.clear()
     new GuiceApplicationBuilder()
-        .configure("microservice.services.access-control.allow-list" -> List("test-user-agent"))
+        .configure("microservice.services.access-control.allow-list.1" -> "test-user-agent")
         .overrides(bind[BankAccountReputationConnector].toInstance(mockBankAccountReputationConnector))
         .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
         .build()
