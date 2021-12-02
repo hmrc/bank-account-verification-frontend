@@ -5,8 +5,6 @@ It provides mechanisms to customise messaging, eg page titles, element labels, e
 
 An example of a client service can be seen in [bank-account-verification-example-frontend](https://github.com/hmrc/bank-account-verification-example-frontend) (`BAVEFE`).
 
-**Please note**, you are viewing documentation for the latest version of the `BAVFE` API (v2). [You can view the readme for the old version of the API here.](https://github.com/hmrc/bank-account-verification-example-frontend/README-v1.md)
-
 ## Flow
 There are 3 parts to the usage of `BAVFE`:
 1. **Initiate a journey** - Initialises a new journey with a unique id (provided by `BAVFE`) and customisation parameters. 
@@ -16,7 +14,7 @@ There are 3 parts to the usage of `BAVFE`:
 In steps 2 & 3, if an invalid `journeyId` is provided or is missing, a `BadRequest` or `NotFound` is returned respectively.
 
 ### Initiate a journey
-To initiate a journey a `POST` call must be made to `/api/v2/init` with a payload that has the following data model:
+To initiate a journey a `POST` call must be made to `/api/init` with a payload that has the following data model:
 ```scala
 case class InitRequest(
     serviceIdentifier: String, 
@@ -94,7 +92,7 @@ Control at this stage passes to `BAVFE` until the journey is complete. At the en
 It should be noted that the `InitBACSRequirements` settings will influence how the form level validation is handled in `BAVFE`. If a requirement is not met, the journey will not be permitted to continue. 
 
 ### Complete the journey
-Once the `continueUrl` has been called by `BAVFE`, a call can be made to `/api/v2/complete/:journeyId` to retrieve the results of the journey. The following data model describes the payload that is returned:
+Once the `continueUrl` has been called by `BAVFE`, a call can be made to `/api/complete/:journeyId` to retrieve the results of the journey. The following data model describes the payload that is returned:
 
 ```scala
 case class CompleteResponse(
@@ -113,10 +111,13 @@ case class PersonalCompleteResponse(
     accountName: String,
     sortCode: String,
     accountNumber: String,
-    accountNumberIsWellFormatted: ReputationResponseEnum,
+    accountNumberWithSortCodeIsValid: ReputationResponseEnum,
     rollNumber: Option[String] = None,
     accountExists: Option[ReputationResponseEnum] = None,
     nameMatches: Option[ReputationResponseEnum] = None,
+    addressMatches: Option[ReputationResponseEnum] = None,
+    nonConsented: Option[ReputationResponseEnum] = None,
+    subjectHasDeceased: Option[ReputationResponseEnum] = None,
     nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
     sortCodeBankName: Option[String] = None
 )
@@ -129,9 +130,11 @@ case class BusinessCompleteResponse(
     sortCode: String,
     accountNumber: String,
     rollNumber: Option[String] = None,
-    accountNumberIsWellFormatted: ReputationResponseEnum,
+    accountNumberWithSortCodeIsValid: ReputationResponseEnum,
     accountExists: Option[ReputationResponseEnum] = None,
     companyNameMatches: Option[ReputationResponseEnum],
+    companyPostCodeMatches: Option[ReputationResponseEnum],
+    companyRegistrationNumberMatches: Option[ReputationResponseEnum],
     nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
     sortCodeBankName: Option[String] = None
   )
