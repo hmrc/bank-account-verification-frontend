@@ -21,7 +21,15 @@
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, errorSummary: GovukErrorSummary, help: HmrcReportTechnicalIssue)
 @(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, detailsForm: Form[BusinessVerificationRequest])(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
-@layout(pageTitle = Some(messages("label.accountDetails.heading")), Some(detailsForm), welshTranslationsAvailable,
+@businessMessage(key: String) = @{
+    if (messages.isDefinedAt(s"$key.business"))
+        messages(s"$key.business")
+    else
+        messages(key)
+}
+
+
+@layout(pageTitle = Some(businessMessage("label.accountDetails.heading")), Some(detailsForm), welshTranslationsAvailable,
     Some(journeyId), request.journey.timeoutConfig, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
     @if(detailsForm.hasErrors) {
         @errorSummary(ErrorSummary(title = HtmlContent(messages("error.summaryText")),
@@ -31,34 +39,34 @@
             }))
     }
 
-    <h1 class="govuk-heading-xl">@messages("label.accountDetails.heading")</h1>
+    <h1 class="govuk-heading-xl">@businessMessage("label.accountDetails.heading")</h1>
 
     @form(bankaccountverification.web.business.routes.BusinessVerificationController.postAccountDetails(journeyId)) {
         @input(Input(value = detailsForm("companyName").value,
-            label = Label(content = HtmlContent(messages("label.accountName"))),
+            label = Label(content = HtmlContent(businessMessage("label.accountName"))),
             formGroupClasses = "form-field-group",
             name = detailsForm("companyName").name, id = detailsForm("companyName").name,
             errorMessage = detailsForm("companyName").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("sortCode").value,
-            label = Label(content = HtmlContent(messages("label.sortCode"))),
+            label = Label(content = HtmlContent(businessMessage("label.sortCode"))),
             autocomplete = Some("off"),
-            formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(messages("hint.sortCode")))),
+            formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(businessMessage("hint.sortCode")))),
             name = detailsForm("sortCode").name, id = detailsForm("sortCode").name, classes = "govuk-input--width-5",
             pattern=Some("[0-9]*"), inputmode=Some("numeric"),
             errorMessage = detailsForm("sortCode").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("accountNumber").value,
-            label = Label(content = HtmlContent(messages("label.accountNumber"))),
+            label = Label(content = HtmlContent(businessMessage("label.accountNumber"))),
             autocomplete = Some("off"),
-            formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(messages("hint.accountNumber")))),
+            formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(businessMessage("hint.accountNumber")))),
             name = detailsForm("accountNumber").name, id = detailsForm("accountNumber").name, classes = "govuk-input--width-10",
             pattern=Some("[0-9]*"), inputmode=Some("numeric"),
             errorMessage = detailsForm("accountNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("rollNumber").value,
-            label = Label(content = HtmlContent(messages("label.rollNumber.optional"))),
-            formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(messages("hint.rollNumber")))),
+            label = Label(content = HtmlContent(businessMessage("label.rollNumber.optional"))),
+            formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(businessMessage("hint.rollNumber")))),
             name = detailsForm("rollNumber").name, id = detailsForm("rollNumber").name, classes = "govuk-input--width-20",
             errorMessage = detailsForm("rollNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
 

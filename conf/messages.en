@@ -16,11 +16,25 @@ label.accountType.personal = Personal bank account
 label.accountType.business = Business bank account
 
 label.accountDetails.heading = Bank or building society account details
+#label.accountDetails.heading.business =
+#label.accountDetails.heading.personal =
 
 label.accountName = Name on the account
+#label.accountName.business =
+#label.accountName.personal =
+
 label.sortCode = Sort code
+#label.sortCode.business =
+#label.sortCode.personal =
+
 label.accountNumber = Account number
+#label.accountNumber.business =
+#label.accountNumber.personal =
+
 label.rollNumber.optional = Building society roll number (if you have one)
+#label.rollNumber.optional.business =
+#label.rollNumber.optional.personal =
+
 label.rollNumber = Building society roll number
 
 label.companyName = Company name
@@ -30,8 +44,16 @@ label.back = Back
 label.change = Change
 
 hint.sortCode = Must be 6 digits long
+#hint.sortCode.business =
+#hint.sortCode.personal =
+
 hint.accountNumber = Must be between 6 and 8 digits long
+#hint.accountNumber.business =
+#hint.accountNumber.personal =
+
 hint.rollNumber = You can find it on your card, statement or passbook
+#hint.rollNumber.business =
+#hint.rollNumber.personal =
 
 error.summaryText = There is a problem
 error.accountName.required = Enter the name on the account
