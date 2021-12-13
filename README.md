@@ -86,6 +86,17 @@ case class InitRequestMessages(
 
 All messages contained in [message.en](https://github.com/hmrc/bank-account-verification-frontend/blob/master/conf/messages.en) can be customised. If the client service supports Welsh translations, then Welsh customisations should be provided for every English equivalent.
 
+Messages that appear on the account details screen by default are used for both personal and business account flows. In order to customise these per account type, you can append ".business" or ".personal" and these will take precedence in the appropriate journey, e.g:
+
+```
+InitRequestMessages(
+    en = Json.obj(
+      "service.name" -> "My service"
+      "label.accountDetails.heading.business" -> "Business bank or building society account details",
+      "label.accountDetails.heading.personal" -> "Personal bank or building society account details",
+    ))
+```
+
 ### Perform the journey
 Once the initiating call has been made and a `journeyId` retrieved, the journey can be started with a call to `/bank-account-verification/start/:journeyId` where `:journeyId` is that returned by the `initiate` call.
 
