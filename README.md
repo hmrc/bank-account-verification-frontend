@@ -88,7 +88,7 @@ All messages contained in [message.en](https://github.com/hmrc/bank-account-veri
 
 Messages that appear on the account details screen by default are used for both personal and business account flows. In order to customise these per account type, you can append ".business" or ".personal" and these will take precedence in the appropriate journey, e.g:
 
-```
+```scala
 InitRequestMessages(
     en = Json.obj(
       "service.name" -> "My service"
