@@ -18,29 +18,36 @@
 @import bankaccountverification.web.views.FooterLinks
 @import bankaccountverification.TimeoutConfig
 @import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardHeader
 
-@this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, govukPhaseBanner: GovukPhaseBanner, languageSelect: HmrcLanguageSelect, timeoutDialog: HmrcTimeoutDialog, head: Head, scripts: Scripts)
+@this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, govukPhaseBanner: GovukPhaseBanner,
+        languageSelect: HmrcLanguageSelect, hmrcStandardHeader: HmrcStandardHeader, timeoutDialog: HmrcTimeoutDialog,
+        head: Head, scripts: Scripts)
 
 @(pageTitle: Option[String] = None,
         form: Option[Form[_]] = None,
         welshTranslationsAvailable: Boolean = false,
         journeyId: Option[String],
         timeoutConfig: Option[TimeoutConfig] = None,
+        signOutUrl: Option[String] = None,
         headerBlock: Option[Html] = None,
         beforeContentBlock: Option[Html] = None,
         footerBlock: Option[Html] = None,
         headBlock: Option[Html] = None
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@defaultBeforeContentBlock = {
-    @{
-      if(messages.isDefinedAt("phaseBanner.tag")) {
-        govukPhaseBanner(PhaseBanner(
+@defaultHeaderBlock = {
+    @hmrcStandardHeader(
+        serviceUrl = if (messages.isDefinedAt("service.homePageUrl")) Some(messages("service.homePageUrl")) else None,
+        signOutUrl = signOutUrl,
+        serviceName = Some(messages("service.name")),
+        phaseBanner = if(messages.isDefinedAt("phaseBanner.tag")) Some(PhaseBanner(
             tag = Some(Tag(content = HtmlContent(messages("phaseBanner.tag")))),
-            content = HtmlContent(messages("phaseBanner.content"))))
-      }
-    }
+            content = HtmlContent(messages("phaseBanner.content")))) else None
+    )
+}
 
+@defaultBeforeContentBlock = {
     @{
         if(welshTranslationsAvailable) {
             languageSelect(LanguageSelect(messages.lang.code match {
@@ -86,9 +93,9 @@
 @govukLayout(
     pageTitle = Some(s"$thePageTitle$serviceNameTitlePart - GOV.UK"),
     headBlock = Some(head(newHeadBlock)),
-    headerBlock = headerBlock,
+    headerBlock = headerBlock.orElse(Some(defaultHeaderBlock)),
     footerBlock = footerBlock,
     scriptsBlock = Some(scripts()),
     beforeContentBlock = beforeContentBlock.orElse(Some(defaultBeforeContentBlock)),
-    footerItems = FooterLinks()
+    footerItems = FooterLinks(),
 )(contentBlock)

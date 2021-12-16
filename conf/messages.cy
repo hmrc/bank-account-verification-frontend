@@ -3,6 +3,7 @@ service.homePageUrl =
 service.header =
 service.text =
 
+header.signOut = Allgofnodi
 phaseBanner.content = Gwasanaeth newydd yw hwn – bydd eich <a href='/feedback' class="govuk-link">adborth</a> yn ein helpu i’w wella.
 
 pageTitle.accountExistsIndeterminate = Gwirio manylion y cyfrif

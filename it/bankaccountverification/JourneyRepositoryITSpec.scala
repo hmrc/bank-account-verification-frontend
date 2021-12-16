@@ -45,7 +45,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
       val journeyId = await(repository.create(Some("1234"), "serviceIdentifier", "continueUrl", None, None,
         Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("HP1 1HP"))),
         Some(PrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))),
-        Some(BACSRequirements(true, true)), Some(TimeoutConfig("url", 100, None))))
+        Some(BACSRequirements(true, true)), Some(TimeoutConfig("url", 100, None)), Some("/signout")))
 
       val journey = await(repository.findById(journeyId))
       val timeoutConfig = journey.flatMap(j => j.timeoutConfig)
@@ -63,7 +63,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
       val journeyId = await(repository.create(Some("1234"), "serviceIdentifier", "continueUrl", None, None,
         Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("HP1 1HP"))),
         Some(PrepopulatedData(Business, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))),
-        Some(BACSRequirements(true, true)), Some(TimeoutConfig("url", 100, None))))
+        Some(BACSRequirements(true, true)), Some(TimeoutConfig("url", 100, None)), Some("/signout")))
 
       val journey = await(repository.findById(journeyId))
       val timeoutConfig = journey.flatMap(j => j.timeoutConfig)
