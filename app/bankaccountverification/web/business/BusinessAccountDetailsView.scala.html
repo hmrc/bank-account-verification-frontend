@@ -30,7 +30,7 @@
 
 
 @layout(pageTitle = Some(businessMessage("label.accountDetails.heading")), Some(detailsForm), welshTranslationsAvailable,
-    Some(journeyId), request.journey.timeoutConfig, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
+    Some(journeyId), request.journey.timeoutConfig, request.journey.signOutUrl, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
     @if(detailsForm.hasErrors) {
         @errorSummary(ErrorSummary(title = HtmlContent(messages("error.summaryText")),
             errorList = detailsForm.errors.map { error ⇒

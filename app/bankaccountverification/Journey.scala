@@ -34,7 +34,8 @@ object BACSRequirements {
 
 case class Journey(id: ObjectId, authProviderId: Option[String], expiryDate: LocalDateTime,
                    serviceIdentifier: String, continueUrl: String, data: Session, messages: Option[JsObject] = None,
-                   customisationsUrl: Option[String] = None, bacsRequirements: Option[BACSRequirements] = None, timeoutConfig: Option[TimeoutConfig] = None) {
+                   customisationsUrl: Option[String] = None, bacsRequirements: Option[BACSRequirements] = None,
+                   timeoutConfig: Option[TimeoutConfig] = None, signOutUrl: Option[String] = None) {
 
   def getBACSRequirements: BACSRequirements = bacsRequirements.getOrElse(defaultBACSRequirements)
 }
@@ -66,9 +67,10 @@ object Journey {
   def createExpiring(id: ObjectId, authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
                      messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
                      address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None,
-                     directDebitConstraints: Option[BACSRequirements] = None, timeoutConfig: Option[TimeoutConfig]): Journey =
+                     directDebitConstraints: Option[BACSRequirements] = None, timeoutConfig: Option[TimeoutConfig],
+                     signOutUrl: Option[String]): Journey =
     Journey(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, createSession(address, prepopulatedData),
-      messages, customisationsUrl, directDebitConstraints, timeoutConfig)
+      messages, customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl)
 
   implicit val objectIdFormats: Format[ObjectId] = MongoFormats.objectIdFormat
   implicit val datetimeFormat: Format[LocalDateTime] = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.localDateTimeFormat
@@ -93,7 +95,8 @@ object Journey {
       .and((__ \ "messages").readNullable[JsObject])
       .and((__ \ "customisationsUrl").readNullable[String])
       .and((__ \ "directDebitConstraints").readNullable[BACSRequirements])
-      .and((__ \ "timeoutConfig").readNullable[TimeoutConfig])(
+      .and((__ \ "timeoutConfig").readNullable[TimeoutConfig])
+      .and((__ \ "signOutUrl").readNullable[String])(
         (
           id: ObjectId,
           authProviderId: Option[String],
@@ -104,8 +107,9 @@ object Journey {
           messages: Option[JsObject],
           customisationsUrl: Option[String],
           directDebitConstraints: Option[BACSRequirements],
-          timeoutConfig: Option[TimeoutConfig]
-        ) => Journey.apply(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, data, messages, customisationsUrl, directDebitConstraints, timeoutConfig)
+          timeoutConfig: Option[TimeoutConfig],
+          signOutUrl: Option[String]
+        ) => Journey.apply(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, data, messages, customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl)
       )
 
   implicit def defaultWrites: OWrites[Journey] =
@@ -119,7 +123,8 @@ object Journey {
       .and((__ \ "messages").writeNullable[JsObject])
       .and((__ \ "customisationsUrl").writeNullable[String])
       .and((__ \ "directDebitConstraints").writeNullable[BACSRequirements])
-      .and((__ \ "timeoutConfig").writeNullable[TimeoutConfig]) {
+      .and((__ \ "timeoutConfig").writeNullable[TimeoutConfig])
+      .and((__ \ "signOutUrl").writeNullable[String]) {
         unlift(Journey.unapply)
       }
 

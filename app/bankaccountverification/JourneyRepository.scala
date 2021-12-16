@@ -88,11 +88,12 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
   def create(authProviderId: Option[String], serviceIdentifier: String, continueUrl: String,
              messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
              address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None,
-             directDebitConstraints: Option[BACSRequirements], timeoutConfig: Option[TimeoutConfig])(implicit ec: ExecutionContext): Future[ObjectId] = {
+             directDebitConstraints: Option[BACSRequirements], timeoutConfig: Option[TimeoutConfig],
+             signOutUrl: Option[String])(implicit ec: ExecutionContext): Future[ObjectId] = {
     val journeyId = ObjectId.get()
 
     insertRaw(Journey.createExpiring(journeyId, authProviderId, serviceIdentifier, continueUrl, messages, customisationsUrl,
-      address, prepopulatedData, directDebitConstraints, timeoutConfig)).map(_ => journeyId)
+      address, prepopulatedData, directDebitConstraints, timeoutConfig, signOutUrl)).map(_ => journeyId)
   }
 
   def updatePersonalAccountDetails(id: ObjectId, data: PersonalAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {

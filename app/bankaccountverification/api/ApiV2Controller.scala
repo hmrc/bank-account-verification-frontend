@@ -64,7 +64,8 @@ class ApiV2Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
                         address = init.address.map(a => Address(a.lines, a.town, a.postcode)),
                         prepopulatedData,
                         init.bacsRequirements.map(ddc => BACSRequirements(ddc.directDebitRequired, ddc.directCreditRequired)).orElse(Some(BACSRequirements.defaultBACSRequirements)),
-                        init.timeoutConfig.map(tc => TimeoutConfig(tc.timeoutUrl, tc.timeoutAmount, tc.timeoutKeepAliveUrl))
+                        init.timeoutConfig.map(tc => TimeoutConfig(tc.timeoutUrl, tc.timeoutAmount, tc.timeoutKeepAliveUrl)),
+                        init.signOutUrl
                       )
                       .map { journeyId =>
                         import bankaccountverification._

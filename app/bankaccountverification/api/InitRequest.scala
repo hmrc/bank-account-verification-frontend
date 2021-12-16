@@ -30,7 +30,8 @@ case class InitRequest(serviceIdentifier: String,
                        messages: Option[InitRequestMessages] = None,
                        customisationsUrl: Option[String] = None,
                        bacsRequirements: Option[InitBACSRequirements] = None,
-                       timeoutConfig: Option[InitRequestTimeoutConfig])
+                       timeoutConfig: Option[InitRequestTimeoutConfig] = None,
+                       signOutUrl: Option[String] = None)
 
 case class InitRequestPrepopulatedData(accountType: AccountTypeRequestEnum,
                                        name: Option[String] = None,
