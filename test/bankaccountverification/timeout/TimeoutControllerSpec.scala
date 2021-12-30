@@ -52,7 +52,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
   private val configuration = Configuration.load(env)
 
   private val serviceConfig = new ServicesConfig(configuration)
-  private val appConfig = new AppConfig(configuration, serviceConfig)
+  private val appConfig = new AppConfig(configuration, serviceConfig, env)
 
   private val mockJourneyRepository = mock[JourneyRepository]
   private val mockAuthConnector = mock[AuthConnector]

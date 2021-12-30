@@ -17,14 +17,14 @@
 package bankaccountverification
 
 import access.AccessChecker.{accessControlAllowListAbsoluteKey, accessControlEnabledKey}
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
 import scala.collection.JavaConverters.asScalaBufferConverter
 
 @Singleton
-class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
+class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig, val environment: Environment) {
   val allowedHosts: Set[String] = config.underlying.getStringList("microservice.hosts.allowList").asScala.toSet
   val footerLinkItems: Seq[String] = config.getOptional[Seq[String]]("footerLinkItems").getOrElse(Seq())
 

@@ -22,15 +22,17 @@ package access
  */
 
 import bankaccountverification.AppConfig
-import play.api.Configuration
 import play.api.http.HeaderNames
 import play.api.mvc.Request
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AccessChecker @Inject()(config: Configuration, servicesConfig: ServicesConfig) extends AppConfig(config, servicesConfig) {
+class AccessChecker @Inject()(config: Configuration, servicesConfig: ServicesConfig, environment: Environment)
+  extends AppConfig(config, servicesConfig, environment) {
+
   def isClientAllowed()(implicit request: Request[_]): Boolean = !checkAllowList || {
     val userAgent = request.headers.get(HeaderNames.USER_AGENT)
 

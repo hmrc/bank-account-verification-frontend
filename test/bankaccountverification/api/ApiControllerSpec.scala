@@ -52,7 +52,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
   private val configuration = Configuration.load(env)
 
   private val serviceConfig = new ServicesConfig(configuration)
-  private val appConfig = new AppConfig(configuration, serviceConfig)
+  private val appConfig = new AppConfig(configuration, serviceConfig, env)
   private lazy val sessionStore = mock[JourneyRepository]
   private lazy val mockAuthConnector = mock[AuthConnector]
 
@@ -60,12 +60,12 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
     SharedMetricRegistries.clear()
 
     new GuiceApplicationBuilder()
-        .configure("microservice.services.access-control.allow-list.1" -> "test-user-agent")
-        .overrides(bind[ServicesConfig].toInstance(serviceConfig))
-        .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
-        .overrides(bind[JourneyRepository].toInstance(sessionStore))
-        .overrides(bind[AppConfig].toInstance(appConfig))
-        .build()
+      .configure("microservice.services.access-control.allow-list.1" -> "test-user-agent")
+      .overrides(bind[ServicesConfig].toInstance(serviceConfig))
+      .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
+      .overrides(bind[JourneyRepository].toInstance(sessionStore))
+      .overrides(bind[AppConfig].toInstance(appConfig))
+      .build()
   }
 
 
@@ -95,17 +95,18 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             meq(None),
             meq(Some(BACSRequirements.defaultBACSRequirements)),
             meq(Some(TimeoutConfig("url", 100, None))),
-            meq(None)
+            meq(Some("/sign-out"))
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
-        val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
-          address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-          timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))))
+        val json = Json.toJson(
+          InitRequest("serviceIdentifier", "continueUrl",
+            address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)), signOutUrl = Some("/sign-out")))
 
         val fakeRequest = FakeRequest("POST", "/api/init")
-            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
-            .withJsonBody(json)
+          .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+          .withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
         val initResponse = contentAsJson(result).as[InitResponse]
@@ -145,8 +146,8 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         ))
 
         val fakeRequest = FakeRequest("POST", "/api/init")
-            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
-            .withJsonBody(json)
+          .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+          .withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
         val initResponse = contentAsJson(result).as[InitResponse]
@@ -168,16 +169,14 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
 
         val json = Json.parse("{}")
         val fakeRequest = FakeRequest("POST", "/api/init")
-            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
-            .withJsonBody(json)
+          .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+          .withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
 
         status(result) shouldBe Status.BAD_REQUEST
       }
-    }
 
-    "return 400" when {
       "Prepopulated data is present but account type is not provided" in {
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -194,8 +193,28 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             |}""".stripMargin)
 
         val fakeRequest = FakeRequest("POST", "/api/init")
-            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
-            .withJsonBody(json)
+          .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+          .withJsonBody(json)
+
+        val result = controller.init().apply(fakeRequest)
+
+        status(result) shouldBe Status.BAD_REQUEST
+      }
+
+      "A signout url is provided that violates the security policy" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
+        val json = Json.toJson(
+          InitRequest("serviceIdentifier", "continueUrl",
+            address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)),
+            signOutUrl = Some("www.google.com")))
+
+        val fakeRequest = FakeRequest("POST", "/api/init")
+          .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+          .withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
 
@@ -210,8 +229,8 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
 
         val fakeRequest = FakeRequest("POST", "/api/init")
-            .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
-            .withJsonBody(Json.parse("{}"))
+          .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+          .withJsonBody(Json.parse("{}"))
         val result = controller.init().apply(fakeRequest)
 
         status(result) shouldBe Status.UNAUTHORIZED
@@ -225,8 +244,8 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           .thenReturn(Future.failed(AuthorisationException.fromString("MissingBearerToken")))
 
         val fakeRequest = FakeRequest("POST", "/api/init")
-            .withHeaders(HeaderNames.USER_AGENT -> "non-registered-user-agent")
-            .withJsonBody(Json.parse("{}"))
+          .withHeaders(HeaderNames.USER_AGENT -> "non-registered-user-agent")
+          .withJsonBody(Json.parse("{}"))
         val result = controller.init().apply(fakeRequest)
 
         status(result) shouldBe Status.FORBIDDEN

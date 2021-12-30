@@ -52,7 +52,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
   private val configuration = Configuration.load(env)
 
   private val serviceConfig = new ServicesConfig(configuration)
-  private val appConfig = new AppConfig(configuration, serviceConfig)
+  private val appConfig = new AppConfig(configuration, serviceConfig, env)
   private lazy val sessionStore = mock[JourneyRepository]
   private lazy val mockAuthConnector = mock[AuthConnector]
 
@@ -175,9 +175,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
 
         status(result) shouldBe Status.BAD_REQUEST
       }
-    }
 
-    "return 400" when {
       "Prepopulated data is present but account type is not provided" in {
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -196,6 +194,26 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
         val fakeRequest = FakeRequest("POST", "/api/v2/init")
             .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
             .withJsonBody(json)
+
+        val result = controller.init().apply(fakeRequest)
+
+        status(result) shouldBe Status.BAD_REQUEST
+      }
+
+      "A signout url is provided that violates the security policy" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
+        val json = Json.toJson(
+          InitRequest("serviceIdentifier", "continueUrl",
+            address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)),
+            signOutUrl = Some("www.google.com")))
+
+        val fakeRequest = FakeRequest("POST", "/api/init")
+          .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+          .withJsonBody(json)
 
         val result = controller.init().apply(fakeRequest)
 
