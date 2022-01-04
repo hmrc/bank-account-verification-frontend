@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
         val response = await(connector.assessPersonal("Mr Joe Bloggs", "20-30-40", "12345678", None, "example-service"))
         response shouldBe Success(
-          BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Yes, Yes, Some(No), None)
+          BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Yes, Yes, Some(No), None, None)
         )
       }
     }
@@ -244,7 +244,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, "example-service"))
         response shouldBe Success(
-          BarsBusinessAssessSuccessResponse(Yes, Yes, Some("Some Company"), Yes, Yes, Yes, Yes, Some(No))
+          BarsBusinessAssessSuccessResponse(Yes, Yes, Some("Some Company"), Yes, Yes, Yes, Yes, Some(No), None)
         )
       }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,7 @@ import play.api.libs.json.{Json, Reads, Writes}
 
 sealed trait BarsPersonalAssessResponse {}
 
-case class BarsPersonalAssessSuccessResponse(accountNumberIsWellFormatted: ReputationResponseEnum,
-                                             accountExists: ReputationResponseEnum,
-                                             nameMatches: ReputationResponseEnum,
-                                             sortCodeIsPresentOnEISCD: ReputationResponseEnum,
-                                             sortCodeSupportsDirectDebit: ReputationResponseEnum,
-                                             sortCodeSupportsDirectCredit: ReputationResponseEnum,
-                                             nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum],
-                                             sortCodeBankName: Option[String]) extends BarsPersonalAssessResponse
+case class BarsPersonalAssessSuccessResponse(accountNumberIsWellFormatted: ReputationResponseEnum, accountExists: ReputationResponseEnum, nameMatches: ReputationResponseEnum, sortCodeIsPresentOnEISCD: ReputationResponseEnum, sortCodeSupportsDirectDebit: ReputationResponseEnum, sortCodeSupportsDirectCredit: ReputationResponseEnum, nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum], sortCodeBankName: Option[String], iban: Option[String]) extends BarsPersonalAssessResponse
 
 case class BarsPersonalAssessBadRequestResponse(code: String, desc: String) extends BarsPersonalAssessResponse
 
@@ -42,14 +35,7 @@ object BarsPersonalAssessResponse {
 
 sealed trait BarsBusinessAssessResponse {}
 
-case class BarsBusinessAssessSuccessResponse(accountNumberIsWellFormatted: ReputationResponseEnum,
-                                             sortCodeIsPresentOnEISCD: ReputationResponseEnum,
-                                             sortCodeBankName: Option[String],
-                                             accountExists: ReputationResponseEnum,
-                                             nameMatches: ReputationResponseEnum,
-                                             sortCodeSupportsDirectDebit: ReputationResponseEnum,
-                                             sortCodeSupportsDirectCredit: ReputationResponseEnum,
-                                             nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum]) extends BarsBusinessAssessResponse
+case class BarsBusinessAssessSuccessResponse(accountNumberIsWellFormatted: ReputationResponseEnum, sortCodeIsPresentOnEISCD: ReputationResponseEnum, sortCodeBankName: Option[String], accountExists: ReputationResponseEnum, nameMatches: ReputationResponseEnum, sortCodeSupportsDirectDebit: ReputationResponseEnum, sortCodeSupportsDirectCredit: ReputationResponseEnum, nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum], iban: Option[String]) extends BarsBusinessAssessResponse
 
 case class BarsBusinessAssessBadRequestResponse(code: String, desc: String) extends BarsBusinessAssessResponse
 

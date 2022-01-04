@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -334,7 +334,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val formWithErrors = PersonalVerificationRequest.form.fillAndValidate(data).withError("Error", "a.specific.error")
 
       val barsPersonalAssessResponse =
-        BarsPersonalAssessSuccessResponse(Yes, No, Indeterminate, Indeterminate, No, No, Some(No), None)
+        BarsPersonalAssessSuccessResponse(Yes, No, Indeterminate, Indeterminate, No, No, Some(No), None, None)
 
       "Render the view and display the errors" in {
         reset(mockAuthConnector)
@@ -371,7 +371,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val data = PersonalVerificationRequest("Bob", "123456", "12345678")
 
       val form = PersonalVerificationRequest.form.fillAndValidate(data)
-      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Indeterminate, No, No, Some(No), None)
+      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Indeterminate, No, No, Some(No), None, None)
 
       "Redirect to the continueUrl" in {
         reset(mockAuthConnector)
@@ -407,7 +407,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val data = PersonalVerificationRequest("Bobby", "123456", "12345678")
 
       val form = PersonalVerificationRequest.form.fillAndValidate(data)
-      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None)
+      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None, None)
 
       "Redirect to the confirm view" in {
         reset(mockAuthConnector)
