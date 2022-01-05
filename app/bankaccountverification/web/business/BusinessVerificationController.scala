@@ -97,11 +97,13 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
       else
         for {
           response <- verificationService.assessBusiness(form.get, journey.data.address, journey.serviceIdentifier)
-          updatedForm <- verificationService.processBusinessAssessResponse(journey.id, journey.bacsRequirements.getOrElse(BACSRequirements.defaultBACSRequirements), response, form)
+          updatedForm <- verificationService.processBusinessAssessResponse(journey.id,
+            journey.bacsRequirements.getOrElse(BACSRequirements.defaultBACSRequirements), response, form)
         } yield
           updatedForm match {
             case uform if uform.hasErrors =>
-              BadRequest(businessAccountDetailsView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable, uform))
+              BadRequest(businessAccountDetailsView(journeyId, journey.serviceIdentifier,
+                welshTranslationsAvailable, uform))
             case _ =>
               response match {
                 case Success(success: BarsBusinessAssessSuccessResponse) if success.accountExists == Yes =>

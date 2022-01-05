@@ -53,13 +53,11 @@ object Journey {
           case AccountTypeRequestEnum.Personal =>
             session.copy(
               accountType = Some(p.accountType),
-              personal = Some(PersonalAccountDetails(accountName = p.name, sortCode = p.sortCode,
-                accountNumber = p.accountNumber, rollNumber = p.rollNumber)))
+              personal = Some(PersonalAccountDetails(accountName = p.name, sortCode = p.sortCode, accountNumber = p.accountNumber, rollNumber = p.rollNumber, iban = None)))
           case AccountTypeRequestEnum.Business =>
             session.copy(
               accountType = Some(p.accountType),
-              business = Some(BusinessAccountDetails(companyName = p.name, sortCode = p.sortCode,
-                accountNumber = p.accountNumber, rollNumber = p.rollNumber)))
+              business = Some(BusinessAccountDetails(companyName = p.name, sortCode = p.sortCode, accountNumber = p.accountNumber, rollNumber = p.rollNumber, iban = None)))
         }
     }
   }
@@ -141,7 +139,8 @@ object Journey {
       .and((__ \ "nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
       .and((__ \ "sortCodeBankName").writeOptionWithNull[String])
       .and((__ \ "sortCodeSupportsDirectDebit").writeOptionWithNull[ReputationResponseEnum])
-      .and((__ \ "sortCodeSupportsDirectCredit").writeOptionWithNull[ReputationResponseEnum])(
+      .and((__ \ "sortCodeSupportsDirectCredit").writeOptionWithNull[ReputationResponseEnum])
+      .and((__ \ "iban").writeOptionWithNull[String])(
         unlift(PersonalAccountDetails.unapply)
       )
 
@@ -158,8 +157,9 @@ object Journey {
       .and((__ \ "nonStandardAccountDetailsRequiredForBacs").readNullable[ReputationResponseEnum])
       .and((__ \ "sortCodeBankName").readNullable[String])
       .and((__ \ "sortCodeSupportsDirectDebit").readNullable[ReputationResponseEnum])
-      .and((__ \ "sortCodeSupportsDirectCredit").readNullable[ReputationResponseEnum])(
-        PersonalAccountDetails.apply(_, _, _, _, _, _, _, _, _, _, _, _)
+      .and((__ \ "sortCodeSupportsDirectCredit").readNullable[ReputationResponseEnum])
+      .and((__ \ "iban").readNullable[String])(
+        PersonalAccountDetails.apply(_, _, _, _, _, _, _, _, _, _, _, _, _)
       )
 
   implicit def businessAccountDetailsWrites: OWrites[BusinessAccountDetails] =
@@ -176,7 +176,8 @@ object Journey {
       .and((__ \ "nonStandardAccountDetailsRequiredForBacs").writeNullable[ReputationResponseEnum])
       .and((__ \ "sortCodeBankName").writeOptionWithNull[String])
       .and((__ \ "sortCodeSupportsDirectDebit").writeOptionWithNull[ReputationResponseEnum])
-      .and((__ \ "sortCodeSupportsDirectCredit").writeOptionWithNull[ReputationResponseEnum])(
+      .and((__ \ "sortCodeSupportsDirectCredit").writeOptionWithNull[ReputationResponseEnum])
+      .and((__ \ "iban").writeOptionWithNull[String])(
         unlift(BusinessAccountDetails.unapply)
       )
 
@@ -194,8 +195,9 @@ object Journey {
       .and((__ \ "nonStandardAccountDetailsRequiredForBacs").readNullable[ReputationResponseEnum])
       .and((__ \ "sortCodeBankName").readNullable[String])
       .and((__ \ "sortCodeSupportsDirectDebit").readNullable[ReputationResponseEnum])
-      .and((__ \ "sortCodeSupportsDirectCredit").readNullable[ReputationResponseEnum])(
-       BusinessAccountDetails.apply(_, _, _, _, _, _, _, _, _, _, _, _, _)
+      .and((__ \ "sortCodeSupportsDirectCredit").readNullable[ReputationResponseEnum])
+      .and((__ \ "iban").readNullable[String])(
+        BusinessAccountDetails.apply(_, _, _, _, _, _, _, _, _, _, _, _, _, _)
       )
 
   implicit val sessionReads: Reads[Session] = Json.reads[Session]

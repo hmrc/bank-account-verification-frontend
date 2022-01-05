@@ -33,7 +33,11 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-class RequestWithCustomisations[A](request: Request[A], val journey: Journey, val headerBlock: Option[Html], val beforeContentBlock: Option[Html], val footerBlock: Option[Html]) extends WrappedRequest[A](request)
+class RequestWithCustomisations[A](request: Request[A],
+                                   val journey: Journey,
+                                   val headerBlock: Option[Html],
+                                   val beforeContentBlock: Option[Html],
+                                   val footerBlock: Option[Html]) extends WrappedRequest[A](request)
 
 class ActionWithCustomisationsProvider @Inject()(val messagesApi: MessagesApi,
                                                  val authConnector: AuthConnector,
@@ -74,7 +78,8 @@ class ActionWithCustomisationsProvider @Inject()(val messagesApi: MessagesApi,
       }
     }
 
-  private def getCustomisations(journey: Journey)(implicit ec: ExecutionContext, request: Request[_]): Future[(Option[Html], Option[Html], Option[Html])] =
+  private def getCustomisations(journey: Journey)(implicit ec: ExecutionContext,
+                                                  request: Request[_]): Future[(Option[Html], Option[Html], Option[Html])] =
     for {
       header <- partialsConnector.header(journey.customisationsUrl)
       beforeContent <- partialsConnector.beforeContent(journey.customisationsUrl)
