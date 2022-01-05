@@ -125,18 +125,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
       CompleteV2Response(
         accountType = Personal,
         personal = Some(
-          PersonalCompleteV2Response(
-            "some-account-name",
-            "121212",
-            "12349876",
-            Yes,
-            None,
-            accountExists = Some(Yes),
-            nameMatches = Some(Indeterminate),
-            nonStandardAccountDetailsRequiredForBacs = Some(No),
-            sortCodeBankName = Some("sort-code-bank-name-personal"),
-            sortCodeSupportsDirectDebit = Some(Yes),
-            sortCodeSupportsDirectCredit = Some(Yes))),
+          PersonalCompleteV2Response("some-account-name", "121212", "12349876", Yes, None, accountExists = Some(Yes), nameMatches = Some(Indeterminate), nonStandardAccountDetailsRequiredForBacs = Some(No), sortCodeBankName = Some("sort-code-bank-name-personal"), sortCodeSupportsDirectDebit = Some(Yes), sortCodeSupportsDirectCredit = Some(Yes), iban = Some("iban"))),
         business = None
       )
     )
@@ -203,19 +192,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
       CompleteV2Response(
         accountType = Business,
         business = Some(
-          BusinessCompleteV2Response(
-            "some-company-name",
-            "121212",
-            "12349876",
-            rollNumber = None,
-            accountNumberIsWellFormatted = Yes,
-            accountExists = Some(Indeterminate),
-            nameMatches = Some(Indeterminate),
-            nonStandardAccountDetailsRequiredForBacs = Some(No),
-            sortCodeBankName = Some("sort-code-bank-name-business"),
-            Some(Yes),
-            Some(No)
-          )
+          BusinessCompleteV2Response("some-company-name", "121212", "12349876", rollNumber = None, accountNumberIsWellFormatted = Yes, accountExists = Some(Indeterminate), nameMatches = Some(Indeterminate), nonStandardAccountDetailsRequiredForBacs = Some(No), sortCodeBankName = Some("sort-code-bank-name-business"), Some(Yes), Some(No), None)
         ),
         personal = None
       )
@@ -267,18 +244,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
       CompleteV2Response(
         accountType = Personal,
         personal = Some(
-          PersonalCompleteV2Response(
-            "some-account-name",
-            "121212",
-            "12349876",
-            Yes,
-            None,
-            accountExists = Some(Yes),
-            nameMatches = Some(Indeterminate),
-            nonStandardAccountDetailsRequiredForBacs = Some(No),
-            sortCodeBankName = Some("sort-code-bank-name-personal"),
-            sortCodeSupportsDirectDebit = Some(Yes),
-            sortCodeSupportsDirectCredit = Some(Yes))),
+          PersonalCompleteV2Response("some-account-name", "121212", "12349876", Yes, None, accountExists = Some(Yes), nameMatches = Some(Indeterminate), nonStandardAccountDetailsRequiredForBacs = Some(No), sortCodeBankName = Some("sort-code-bank-name-personal"), sortCodeSupportsDirectDebit = Some(Yes), sortCodeSupportsDirectCredit = Some(Yes), Some("iban"))),
         business = None
       )
     )

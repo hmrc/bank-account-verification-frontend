@@ -65,41 +65,15 @@ object Session {
     }
 }
 
-case class PersonalAccountDetails(accountName: Option[String],
-                                  sortCode: Option[String],
-                                  accountNumber: Option[String],
-                                  rollNumber: Option[String] = None,
-                                  accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
-                                  accountNumberIsWellFormatted: Option[ReputationResponseEnum] = None,
-                                  accountExists: Option[ReputationResponseEnum] = None,
-                                  nameMatches: Option[ReputationResponseEnum] = None,
-                                  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
-                                  sortCodeBankName: Option[String] = None,
-                                  sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None,
-                                  sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None)
+case class PersonalAccountDetails(accountName: Option[String], sortCode: Option[String], accountNumber: Option[String], rollNumber: Option[String] = None, accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None, accountNumberIsWellFormatted: Option[ReputationResponseEnum] = None, accountExists: Option[ReputationResponseEnum] = None, nameMatches: Option[ReputationResponseEnum] = None, nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None, sortCodeBankName: Option[String] = None, sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None, sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None, iban: Option[String])
 
 object PersonalAccountDetails {
   def apply(request: PersonalVerificationRequest, response: BarsPersonalAssessResponse): PersonalAccountDetails =
     response match {
       case success: BarsPersonalAssessSuccessResponse =>
-        PersonalAccountDetails(
-          Some(request.accountName),
-          Some(request.sortCode),
-          Some(request.accountNumber),
-          request.rollNumber,
-          None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
-          Some(success.accountNumberIsWellFormatted),
-          Some(success.accountExists),
-          Some(success.nameMatches),
-          success.nonStandardAccountDetailsRequiredForBacs,
-          success.sortCodeBankName,
-          Some(success.sortCodeSupportsDirectDebit),
-          Some(success.sortCodeSupportsDirectCredit))
+        PersonalAccountDetails(Some(request.accountName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber, None, Some(success.accountNumberIsWellFormatted), Some(success.accountExists), Some(success.nameMatches), success.nonStandardAccountDetailsRequiredForBacs, success.sortCodeBankName, Some(success.sortCodeSupportsDirectDebit), Some(success.sortCodeSupportsDirectCredit), success.iban)
       case _ =>
-        PersonalAccountDetails(
-          Some(request.accountName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber,
-          None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
-          Some(Error), Some(Error), Some(Error), Some(Error), None, Some(Error), Some(Error))
+        PersonalAccountDetails(Some(request.accountName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber, None, Some(Error), Some(Error), Some(Error), Some(Error), None, Some(Error), Some(Error), None)
     }
 
   def toCompleteResponse(session: Session): Option[CompleteResponse] =
@@ -119,7 +93,8 @@ object PersonalAccountDetails {
       nonStandardAccountDetailsRequiredForBacs,
       sortCodeBankName,
       sortCodeSupportsDirectDebit,
-      sortCodeSupportsDirectCredit)),
+      sortCodeSupportsDirectCredit,
+      iban)),
       _
       ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
         Some(
@@ -155,63 +130,29 @@ object PersonalAccountDetails {
       nonStandardAccountDetailsRequiredForBacs,
       sortCodeBankName,
       sortCodeSupportsDirectDebit,
-      sortCodeSupportsDirectCredit)),
+      sortCodeSupportsDirectCredit,
+      iban)),
       _
       ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
         Some(
           CompleteV2Response(
             Personal,
             Some(
-              api.PersonalCompleteV2Response(
-                accountName, sortCode, accountNumber,
-                maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get,
-                rollNumber, accountExists, nameMatches, nonStandardAccountDetailsRequiredForBacs, sortCodeBankName,
-                sortCodeSupportsDirectDebit, sortCodeSupportsDirectCredit)),
+              api.PersonalCompleteV2Response(accountName, sortCode, accountNumber, maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get, rollNumber, accountExists, nameMatches, nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit, sortCodeSupportsDirectCredit, iban)),
             None))
       case _ => None
     }
 }
 
-case class BusinessAccountDetails(companyName: Option[String],
-                                  sortCode: Option[String],
-                                  accountNumber: Option[String],
-                                  rollNumber: Option[String] = None,
-                                  accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
-                                  accountNumberIsWellFormatted: Option[ReputationResponseEnum] = None,
-                                  accountExists: Option[ReputationResponseEnum] = None,
-                                  companyNameMatches: Option[ReputationResponseEnum] = None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
-                                  nameMatches: Option[ReputationResponseEnum] = None,
-                                  nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
-                                  sortCodeBankName: Option[String] = None,
-                                  sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None,
-                                  sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None)
+case class BusinessAccountDetails(companyName: Option[String], sortCode: Option[String], accountNumber: Option[String], rollNumber: Option[String] = None, accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None, accountNumberIsWellFormatted: Option[ReputationResponseEnum] = None, accountExists: Option[ReputationResponseEnum] = None, companyNameMatches: Option[ReputationResponseEnum] = None, nameMatches: Option[ReputationResponseEnum] = None, nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None, sortCodeBankName: Option[String] = None, sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None, sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None, iban: Option[String])
 
 object BusinessAccountDetails {
   def apply(request: BusinessVerificationRequest, response: BarsBusinessAssessResponse): BusinessAccountDetails =
     response match {
       case success: BarsBusinessAssessSuccessResponse =>
-        BusinessAccountDetails(
-          Some(request.companyName),
-          Some(request.sortCode),
-          Some(request.accountNumber),
-          request.rollNumber,
-          None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
-          Some(success.accountNumberIsWellFormatted),
-          Some(success.accountExists),
-          None,
-          Some(success.nameMatches),
-          success.nonStandardAccountDetailsRequiredForBacs,
-          success.sortCodeBankName,
-          Some(success.sortCodeSupportsDirectDebit),
-          Some(success.sortCodeSupportsDirectCredit))
+        BusinessAccountDetails(Some(request.companyName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber, None, Some(success.accountNumberIsWellFormatted), Some(success.accountExists), None, Some(success.nameMatches), success.nonStandardAccountDetailsRequiredForBacs, success.sortCodeBankName, Some(success.sortCodeSupportsDirectDebit), Some(success.sortCodeSupportsDirectCredit), success.iban)
       case _ =>
-        BusinessAccountDetails(
-          Some(request.companyName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber,
-          accountNumberWithSortCodeIsValid = None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
-          Some(Error), Some(Error),
-          companyNameMatches = None, // This property to be removed once all BARS sessions are in the new format (TAV-458)
-          Some(Error),
-          Some(Error), None, Some(Error), Some(Error))
+        BusinessAccountDetails(Some(request.companyName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber, accountNumberWithSortCodeIsValid = None, Some(Error), Some(Error), companyNameMatches = None, Some(Error), Some(Error), None, Some(Error), Some(Error), None)
     }
 
   def toCompleteResponse(session: Session): Option[CompleteResponse] =
@@ -233,7 +174,8 @@ object BusinessAccountDetails {
       nonStandardAccountDetailsRequiredForBacs,
       sortCodeBankName,
       sortCodeSupportsDirectDebit,
-      sortCodeSupportsDirectCredit))
+      sortCodeSupportsDirectCredit,
+      iban))
       ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
         Some(
           CompleteResponse(
@@ -272,20 +214,15 @@ object BusinessAccountDetails {
       nonStandardAccountDetailsRequiredForBacs,
       sortCodeBankName,
       sortCodeSupportsDirectDebit,
-      sortCodeSupportsDirectCredit))
+      sortCodeSupportsDirectCredit,
+      iban))
       ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
         Some(
           CompleteV2Response(
             Business,
             None,
             Some(
-              BusinessCompleteV2Response(
-                companyName, sortCode, accountNumber, rollNumber,
-                maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get,
-                accountExists,
-                nameMatches.orElse(companyNameMatches),
-                nonStandardAccountDetailsRequiredForBacs, sortCodeBankName,
-                sortCodeSupportsDirectDebit, sortCodeSupportsDirectCredit))))
+              BusinessCompleteV2Response(companyName, sortCode, accountNumber, rollNumber, maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get, accountExists, nameMatches.orElse(companyNameMatches), nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit, sortCodeSupportsDirectCredit, iban))))
       case _ =>
         None
     }

@@ -25,7 +25,10 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.{Json, OWrites, Reads, Writes}
 
-case class PersonalVerificationRequest private(accountName: String, sortCode: String, accountNumber: String, rollNumber: Option[String] = None)
+case class PersonalVerificationRequest private(accountName: String,
+                                               sortCode: String,
+                                               accountNumber: String,
+                                               rollNumber: Option[String] = None)
 
 object PersonalVerificationRequest {
   def apply(accountName: String, sortCode: String, accountNumber: String,
@@ -50,7 +53,8 @@ object PersonalVerificationRequest {
   }
 
   implicit class ValidationFormWrapper(form: Form[PersonalVerificationRequest]) {
-    def validateUsingBarsPersonalAssessResponse(response: BarsPersonalAssessResponse, directDebitConstraints: BACSRequirements): Form[PersonalVerificationRequest] =
+    def validateUsingBarsPersonalAssessResponse(response: BarsPersonalAssessResponse,
+                                                directDebitConstraints: BACSRequirements): Form[PersonalVerificationRequest] =
       response match {
         case badRequest: BarsPersonalAssessBadRequestResponse if badRequest.code == "SORT_CODE_ON_DENY_LIST" =>
           form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")

@@ -271,8 +271,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             Some(
-              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), None,
-                Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"))),
+              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), None, Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = None)),
             None
           ),
           timeoutConfig = None)
@@ -298,6 +297,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         (json \ "personal" \ "subjectHasDeceased").as[String] shouldBe "indeterminate"
         (json \ "personal" \ "nonStandardAccountDetailsRequiredForBacs").as[String] shouldBe "no"
         (json \ "personal" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-personal"
+        (json \ "personal" \ "iban").asOpt[String] shouldBe None
       }
 
       "a valid journeyId is provided with a business response" in {
@@ -317,8 +317,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             None,
             Some(
-              BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
-                Some(Yes), None, Some(No), Some(Yes), None, None, Some("sort-code-bank-name-business")))),
+              BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), None, Some(No), Some(Yes), None, None, Some("sort-code-bank-name-business"), iban = Some("some-iban")))),
           timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId))(any()))
@@ -341,6 +340,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         (json \ "business" \ "companyPostCodeMatches").as[String] shouldBe "indeterminate"
         (json \ "business" \ "companyRegistrationNumberMatches").as[String] shouldBe "indeterminate"
         (json \ "business" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-business"
+        (json \ "business" \ "iban").asOpt[String] shouldBe None
       }
     }
 
@@ -375,8 +375,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             None,
             Some(
-              BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"),
-                Some(Yes), None, Some(No), Some(Indeterminate), None, None, Some("sort-code-bank-name-business")))),
+              BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), None, Some(No), Some(Indeterminate), None, None, Some("sort-code-bank-name-business"), iban = None))),
           timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId))(any()))

@@ -25,7 +25,9 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
 
-case class BusinessVerificationRequest(companyName: String, sortCode: String, accountNumber: String,
+case class BusinessVerificationRequest(companyName: String,
+                                       sortCode: String,
+                                       accountNumber: String,
                                        rollNumber: Option[String])
 
 object BusinessVerificationRequest {
