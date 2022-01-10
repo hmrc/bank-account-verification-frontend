@@ -129,7 +129,8 @@ case class PersonalCompleteResponse(
     accountExists: Option[ReputationResponseEnum] = None,
     nameMatches: Option[ReputationResponseEnum] = None,
     nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
-    sortCodeBankName: Option[String] = None
+    sortCodeBankName: Option[String] = None,
+    iban: Option[String] = None
 )
 ```
 `business` has the following data model:
@@ -144,7 +145,8 @@ case class BusinessCompleteResponse(
     accountExists: Option[ReputationResponseEnum] = None,
     companyNameMatches: Option[ReputationResponseEnum],
     nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
-    sortCodeBankName: Option[String] = None
+    sortCodeBankName: Option[String] = None,
+    iban: Option[String] = None
   )
 ```
 #### Handling error values
