@@ -27,36 +27,6 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig: AppConfig) {
 
-  @deprecated(message = "Use assessPersonal or assessBusiness", since = "September 2020")
-  def validateBankDetails(
-                           bankDetailsModel: BarsValidationRequest
-                         )(implicit
-                           hc: HeaderCarrier,
-                           ec: ExecutionContext
-                         ): Future[Try[BarsValidationResponse]] = {
-    import BarsValidationResponse._
-    import HttpReads.Implicits.readRaw
-
-    httpClient
-      .POST[BarsValidationRequest, HttpResponse](
-        url = appConfig.barsValidateBankDetailsUrl,
-        body = bankDetailsModel
-      )
-      .map {
-        case httpResponse if httpResponse.status == 200 =>
-          Json.fromJson[BarsValidationResponse](httpResponse.json) match {
-            case JsSuccess(result, _) =>
-              Success(result)
-            case JsError(errors) =>
-              Failure(new HttpException("Could not parse Json response from BARs", httpResponse.status))
-          }
-        case httpResponse => Failure(new HttpException(httpResponse.body, httpResponse.status))
-      }
-      .recoverWith {
-        case t: Throwable => Future.successful(Failure(t))
-      }
-  }
-
   def assessPersonal(accountName: String, sortCode: String, accountNumber: String, address: Option[BarsAddress], callingClient: String)
                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Try[BarsPersonalAssessResponse]] = {
     import BarsPersonalAssessResponse._
