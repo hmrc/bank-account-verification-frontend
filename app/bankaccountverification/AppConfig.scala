@@ -29,7 +29,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val footerLinkItems: Seq[String] = config.getOptional[Seq[String]]("footerLinkItems").getOrElse(Seq())
 
   val barsBaseUrl                = servicesConfig.baseUrl("bank-account-reputation")
-  val barsValidateBankDetailsUrl = s"$barsBaseUrl/v2/validateBankDetails"
   val barsPersonalAssessUrl      = s"$barsBaseUrl/verify/personal"
   val barsBusinessAssessUrl      = s"$barsBaseUrl/verify/business"
 
@@ -42,7 +41,4 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     if(checkAllowList && _allowedClients.isEmpty) throw new RuntimeException(s"Could not find config $accessControlAllowListAbsoluteKey")
     else _allowedClients.getOrElse(Seq()).toSet
   }
-
 }
-
-case class BankAccountReputationConfig(validateBankDetailsUrl: String)

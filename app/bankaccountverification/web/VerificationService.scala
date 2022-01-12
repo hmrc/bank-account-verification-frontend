@@ -56,7 +56,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
       case Success(response) =>
         (form.validateUsingBarsPersonalAssessResponse(response, directDebitConstraints), response)
       case Failure(e) =>
-        logger.warn("Received error response from bank-account-reputation.validateBankDetails")
+        logger.warn("Received error response from bank-account-reputation.assess.personal")
         (form, BarsPersonalAssessErrorResponse())
     }
 
@@ -90,7 +90,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
     val (updatedForm, response) = assessResponse match {
       case Success(response) => (form.validateUsingBarsBusinessAssessResponse(response, directDebitConstraints), response)
       case Failure(e) =>
-        logger.warn("Received error response from bank-account-reputation.validateBankDetails")
+        logger.warn("Received error response from bank-account-reputation.assess.business")
         (form, BarsBusinessAssessErrorResponse())
     }
 
