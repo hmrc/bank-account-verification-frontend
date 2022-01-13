@@ -18,7 +18,7 @@ package bankaccountverification.web.personal
 
 import bankaccountverification.BACSRequirements
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
-import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessSuccessResponse, BarsValidationResponse, ReputationResponseEnum}
+import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse, BarsValidationResponse, ReputationResponseEnum}
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -164,6 +164,19 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
         error shouldNot be(None)
         error.get.message shouldBe "error.accountNumber.digitsOnly"
+      }
+
+      "account number is for business account" in {
+        import PersonalVerificationRequest.ValidationFormWrapper
+        val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "123456", "123FOOO78")
+        val formToValidate = PersonalVerificationRequest.form.fill(bankAccountDetails)
+        val barsPersonalAssessSuccessResponse = BarsPersonalAssessSuccessResponse(accountNumberIsWellFormatted = Yes, accountExists = No, nameMatches = Yes, sortCodeIsPresentOnEISCD = Yes, sortCodeSupportsDirectDebit = Yes, sortCodeSupportsDirectCredit = Yes, nonStandardAccountDetailsRequiredForBacs = None, sortCodeBankName = Some("BANKNAME"), iban = None)
+        val bankAccountDetailsForm = formToValidate.validateUsingBarsPersonalAssessResponse(barsPersonalAssessSuccessResponse, BACSRequirements(true, true))
+        bankAccountDetailsForm.hasErrors shouldBe true
+
+        val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
+        error shouldNot be(None)
+        error.get.message shouldBe "error.accountNumber.wrongBankAccountType"
       }
     }
 
