@@ -49,6 +49,7 @@ error.accountNumber.minLength = Mae’n rhaid i rif y cyfrif fod rhwng 6 ac 8 di
 error.accountNumber.maxLength = Mae’n rhaid i rif y cyfrif fod rhwng 6 ac 8 digid
 error.accountNumber.modCheckFailed = Mae’n rhaid i rif y cyfrif fod yn ddilys ar gyfer y cod didoli a roddir
 error.accountNumber.doesNotExist = Mae’n rhaid i rif y cyfrif berthyn i gyfrif banc gweithredol
+error.accountNumber.wrongBankAccountType = W Account number must be for a personal bank account
 
 error.sortcode.required = Nodwch god didoli
 error.sortcode.invalidLengthError = Mae’n rhaid i’r cod didoli fod yn 6 digid

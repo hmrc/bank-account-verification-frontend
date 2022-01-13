@@ -71,6 +71,8 @@ object PersonalVerificationRequest {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
           } else if (sortCodeSupportsDirectCredit != Yes && directDebitConstraints.directCreditRequired) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
+          } else if (accountExists == No && nameMatches == Yes) {
+            form.fill(form.get).withError("accountNumber", "error.accountNumber.wrongBankAccountType")
           } else if (accountExists == No)
             form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")
           else if (nonStandardAccountDetailsRequiredForBacs.getOrElse(No) == Yes && form.get.rollNumber.isEmpty)

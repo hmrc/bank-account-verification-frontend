@@ -71,6 +71,7 @@ error.accountNumber.minLength = Account number must be between 6 and 8 digits
 error.accountNumber.maxLength = Account number must be between 6 and 8 digits
 error.accountNumber.modCheckFailed = Account number must be valid for the given sort code
 error.accountNumber.doesNotExist = Account number must belong to an active bank account
+error.accountNumber.wrongBankAccountType = Account number must be for a personal bank account
 
 error.sortcode.required = Enter a sort code
 error.sortcode.invalidLengthError = Sort code must be 6 digits
