@@ -86,11 +86,10 @@ class ApiV2Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
         prepopulatedData,
         init.bacsRequirements.map(ddc => BACSRequirements(ddc.directDebitRequired, ddc.directCreditRequired)).orElse(Some(BACSRequirements.defaultBACSRequirements)),
         init.timeoutConfig.map(tc => TimeoutConfig(tc.timeoutUrl, tc.timeoutAmount, tc.timeoutKeepAliveUrl)),
-        init.signOutUrl
+        init.signOutUrl,
+        init.maxAssessRequestsForJourney
       )
       .map { journeyId =>
-
-
         val startUrl = web.routes.AccountTypeController.getAccountType(journeyId.toHexString).url
         val completeUrl = api.routes.ApiV2Controller.complete(journeyId.toHexString).url
 
@@ -100,7 +99,9 @@ class ApiV2Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
           case p if p.accountType == Business =>
             web.business.routes.BusinessVerificationController.getAccountDetails(journeyId.toHexString).url
         }
+
         Ok(Json.toJson(InitResponse(journeyId.toHexString, startUrl, completeUrl, detailsUrl)))
+          .withSession(Journey.assessAttemptsSessionKey -> "0")
       }
   }
 

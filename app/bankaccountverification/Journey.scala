@@ -35,12 +35,16 @@ object BACSRequirements {
 case class Journey(id: ObjectId, authProviderId: Option[String], expiryDate: LocalDateTime,
                    serviceIdentifier: String, continueUrl: String, data: Session, messages: Option[JsObject] = None,
                    customisationsUrl: Option[String] = None, bacsRequirements: Option[BACSRequirements] = None,
-                   timeoutConfig: Option[TimeoutConfig] = None, signOutUrl: Option[String] = None) {
+                   timeoutConfig: Option[TimeoutConfig] = None, signOutUrl: Option[String] = None,
+                   maxAssessRequestsForJourneyCount: Option[Int] = None,
+                   maxAssessRequestsForJourneyRedirectUrl: Option[String] = None) {
 
   def getBACSRequirements: BACSRequirements = bacsRequirements.getOrElse(defaultBACSRequirements)
 }
 
 object Journey {
+  def assessAttemptsSessionKey = "assessAttempts"
+
   def expiryDate: LocalDateTime = LocalDateTime.now.plusMinutes(60)
 
   def createSession(address: Option[Address], prepopulatedData: Option[PrepopulatedData]): Session = {
@@ -66,9 +70,9 @@ object Journey {
                      messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
                      address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None,
                      directDebitConstraints: Option[BACSRequirements] = None, timeoutConfig: Option[TimeoutConfig],
-                     signOutUrl: Option[String]): Journey =
+                     signOutUrl: Option[String], maxAssessRequestsForJourney: Option[Int]): Journey =
     Journey(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, createSession(address, prepopulatedData),
-      messages, customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl)
+      messages, customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl, maxAssessRequestsForJourney)
 
   implicit val objectIdFormats: Format[ObjectId] = MongoFormats.objectIdFormat
   implicit val datetimeFormat: Format[LocalDateTime] = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.localDateTimeFormat
@@ -122,7 +126,9 @@ object Journey {
       .and((__ \ "customisationsUrl").writeNullable[String])
       .and((__ \ "directDebitConstraints").writeNullable[BACSRequirements])
       .and((__ \ "timeoutConfig").writeNullable[TimeoutConfig])
-      .and((__ \ "signOutUrl").writeNullable[String]) {
+      .and((__ \ "signOutUrl").writeNullable[String])
+      .and((__ \ "maxAssessRequestsForJourneyCount").writeNullable[Int])
+      .and((__ \ "maxAssessRequestsForJourneyRedirectUrl").writeNullable[String]) {
         unlift(Journey.unapply)
       }
 

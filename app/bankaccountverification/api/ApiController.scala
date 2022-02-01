@@ -121,7 +121,8 @@ class ApiController @Inject()(appConfig: AppConfig,
         prepopulatedData,
         init.bacsRequirements.map(ddc => BACSRequirements(ddc.directDebitRequired, ddc.directCreditRequired)).orElse(Some(BACSRequirements.defaultBACSRequirements)),
         init.timeoutConfig.map(tc => TimeoutConfig(tc.timeoutUrl, tc.timeoutAmount, tc.timeoutKeepAliveUrl)),
-        init.signOutUrl
+        init.signOutUrl,
+        init.maxAssessRequestsForJourney
       )
       .map { journeyId =>
         import bankaccountverification._
@@ -137,7 +138,7 @@ class ApiController @Inject()(appConfig: AppConfig,
         }
 
         import InitResponse._
-        Ok(Json.toJson(InitResponse(journeyId.toHexString, startUrl, completeUrl, detailsUrl)))
+        Ok(Json.toJson(InitResponse(journeyId.toHexString, startUrl, completeUrl, detailsUrl))).withSession(Journey.assessAttemptsSessionKey -> "0")
       }
   }
 }

@@ -20,9 +20,7 @@ import bankaccountverification.connector.BarsBusinessAssessSuccessResponse
 import bankaccountverification.connector.ReputationResponseEnum.Yes
 import bankaccountverification.web.business.html.{BusinessAccountDetailsView, BusinessAccountExistsIndeterminate}
 import bankaccountverification.web.{ActionWithCustomisationsProvider, VerificationService}
-import bankaccountverification.{AppConfig, BACSRequirements, RemoteMessagesApiProvider}
-
-import javax.inject.{Inject, Singleton}
+import bankaccountverification.{AppConfig, BACSRequirements, Journey, RemoteMessagesApiProvider}
 import play.api.Logger
 import play.api.i18n.Messages
 import play.api.mvc._
@@ -30,9 +28,10 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.Success
+import scala.util.{Success, Try}
 
 @Singleton
 class BusinessVerificationController @Inject()(val appConfig: AppConfig,
@@ -91,26 +90,36 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
 
       auditConnector.sendEvent(dataEvent)
 
-      if (form.hasErrors)
-        Future.successful(BadRequest(businessAccountDetailsView(
-          journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))
-      else
-        for {
-          response <- verificationService.assessBusiness(form.get, journey.data.address, journey.serviceIdentifier)
-          updatedForm <- verificationService.processBusinessAssessResponse(journey.id,
-            journey.bacsRequirements.getOrElse(BACSRequirements.defaultBACSRequirements), response, form)
-        } yield
-          updatedForm match {
-            case uform if uform.hasErrors =>
-              BadRequest(businessAccountDetailsView(journeyId, journey.serviceIdentifier,
-                welshTranslationsAvailable, uform))
-            case _ =>
-              response match {
-                case Success(success: BarsBusinessAssessSuccessResponse) if success.accountExists == Yes =>
-                  SeeOther(s"${journey.continueUrl}/$journeyId")
-                case _ => Redirect(routes.BusinessVerificationController.getConfirmDetails(journeyId))
+      val assessCount = request.session.get(Journey.assessAttemptsSessionKey)
+        .flatMap(s => Try(s.toInt).toOption).getOrElse(0)
+
+      journey.maxAssessRequestsForJourneyCount match {
+        case Some(x) if assessCount > x =>
+          Future.successful(SeeOther(s"${journey.maxAssessRequestsForJourneyRedirectUrl}/$journeyId"))
+        case _ =>
+          if (form.hasErrors)
+            Future.successful(BadRequest(businessAccountDetailsView(
+              journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))
+          else
+            for {
+              response <- verificationService.assessBusiness(form.get, journey.data.address, journey.serviceIdentifier)
+              updatedForm <- verificationService.processBusinessAssessResponse(journey.id,
+                journey.bacsRequirements.getOrElse(BACSRequirements.defaultBACSRequirements), response, form)
+            } yield
+              updatedForm match {
+                case uform if uform.hasErrors =>
+                  BadRequest(businessAccountDetailsView(journeyId, journey.serviceIdentifier,
+                    welshTranslationsAvailable, uform))
+                case _ =>
+                  response match {
+                    case Success(success: BarsBusinessAssessSuccessResponse) if success.accountExists == Yes =>
+                      SeeOther(s"${journey.continueUrl}/$journeyId")
+                        .withSession(Journey.assessAttemptsSessionKey -> (assessCount + 1).toString)
+                    case _ => Redirect(routes.BusinessVerificationController.getConfirmDetails(journeyId))
+                      .withSession(Journey.assessAttemptsSessionKey -> (assessCount + 1).toString)
+                  }
               }
-          }
+      }
     }
 
   def getConfirmDetails(journeyId: String): Action[AnyContent] =
@@ -125,7 +134,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
         Future.successful(Ok(
           businessAccountExistsIndeterminate(
             BusinessAccountExistsIndeterminateViewModel(journeyId, journey.data.business.get, journey.serviceIdentifier,
-            s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable))))
+              s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable))))
 
       }
       else Future.successful(NotFound(withCustomisations.journeyIdError(request)))
