@@ -96,14 +96,15 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
             meq(Some(BACSRequirements.defaultBACSRequirements)),
             meq(Some(TimeoutConfig("url", 100, None))),
             meq(Some("/sign-out")),
-            meq(Some(5))
+            meq(Some(5)),
+            meq(Some("/too-many-requests"))
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
         val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
           timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)), signOutUrl = Some("/sign-out"),
-          maxAssessRequestsForJourney = Some(5)))
+          maxCallCount = Some(5), maxCallCountRedirectUrl = Some("/too-many-requests")))
 
         val fakeRequest = FakeRequest("POST", "/api/v2/init")
             .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
@@ -136,6 +137,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
             meq(Some(PrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123")))),
             meq(Some(BACSRequirements.defaultBACSRequirements)),
             meq(Some(TimeoutConfig("url", 100, None))),
+            meq(None),
             meq(None),
             meq(None)
           )(any())

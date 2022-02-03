@@ -87,7 +87,8 @@ class ApiV2Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
         init.bacsRequirements.map(ddc => BACSRequirements(ddc.directDebitRequired, ddc.directCreditRequired)).orElse(Some(BACSRequirements.defaultBACSRequirements)),
         init.timeoutConfig.map(tc => TimeoutConfig(tc.timeoutUrl, tc.timeoutAmount, tc.timeoutKeepAliveUrl)),
         init.signOutUrl,
-        init.maxAssessRequestsForJourney
+        init.maxCallCount,
+        init.maxCallCountRedirectUrl
       )
       .map { journeyId =>
         val startUrl = web.routes.AccountTypeController.getAccountType(journeyId.toHexString).url
@@ -101,7 +102,6 @@ class ApiV2Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
         }
 
         Ok(Json.toJson(InitResponse(journeyId.toHexString, startUrl, completeUrl, detailsUrl)))
-          .withSession(Journey.assessAttemptsSessionKey -> "0")
       }
   }
 

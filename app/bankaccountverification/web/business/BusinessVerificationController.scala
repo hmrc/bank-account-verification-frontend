@@ -78,10 +78,17 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
       implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
       val form = BusinessVerificationRequest.form.bindFromRequest()
+      val callCount = request.session.get(Journey.callCountSessionKey)
+        .flatMap(s => Try(s.toInt).toOption).getOrElse(0) + 1
+
       val dataEvent = DataEvent(
         appConfig.appName,
         "AccountDetailsEntered",
-        detail = Map("accountType" -> "business", "trueCallingService" -> journey.serviceIdentifier,
+        detail = Map(
+          "accountType" -> "business",
+          "trueCallingService" -> journey.serviceIdentifier,
+          "callCount" -> callCount.toString,
+          "maxCallCount" -> journey.maxCallCount.map(_.toString).getOrElse(""),
           "journeyId" -> journey.id.toHexString)
           ++ form.data.filterKeys {
           case "csrfToken" | "continue" => false
@@ -90,36 +97,40 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
 
       auditConnector.sendEvent(dataEvent)
 
-      val assessCount = request.session.get(Journey.assessAttemptsSessionKey)
-        .flatMap(s => Try(s.toInt).toOption).getOrElse(0)
-
-      journey.maxAssessRequestsForJourneyCount match {
-        case Some(x) if assessCount > x =>
-          Future.successful(SeeOther(s"${journey.maxAssessRequestsForJourneyRedirectUrl}/$journeyId"))
-        case _ =>
-          if (form.hasErrors)
-            Future.successful(BadRequest(businessAccountDetailsView(
-              journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))
-          else
-            for {
-              response <- verificationService.assessBusiness(form.get, journey.data.address, journey.serviceIdentifier)
-              updatedForm <- verificationService.processBusinessAssessResponse(journey.id,
-                journey.bacsRequirements.getOrElse(BACSRequirements.defaultBACSRequirements), response, form)
-            } yield
-              updatedForm match {
-                case uform if uform.hasErrors =>
-                  BadRequest(businessAccountDetailsView(journeyId, journey.serviceIdentifier,
-                    welshTranslationsAvailable, uform))
+      if (form.hasErrors)
+        Future.successful(BadRequest(businessAccountDetailsView(
+          journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))
+      else
+        for {
+          response <- verificationService.assessBusiness(form.get, journey.data.address, journey.serviceIdentifier)
+          updatedForm <- verificationService.processBusinessAssessResponse(journey.id,
+            journey.bacsRequirements.getOrElse(BACSRequirements.defaultBACSRequirements), response, form)
+        } yield
+          updatedForm match {
+            case uform if uform.hasErrors =>
+              journey.maxCallCount match {
+                case Some(max) if callCount == max =>
+                  SeeOther(s"${journey.maxCallCountRedirectUrl.get}/$journeyId")
                 case _ =>
-                  response match {
-                    case Success(success: BarsBusinessAssessSuccessResponse) if success.accountExists == Yes =>
-                      SeeOther(s"${journey.continueUrl}/$journeyId")
-                        .withSession(Journey.assessAttemptsSessionKey -> (assessCount + 1).toString)
-                    case _ => Redirect(routes.BusinessVerificationController.getConfirmDetails(journeyId))
-                      .withSession(Journey.assessAttemptsSessionKey -> (assessCount + 1).toString)
+                  BadRequest(businessAccountDetailsView(journeyId, journey.serviceIdentifier,
+                    welshTranslationsAvailable, uform)).withSession(request.session + (Journey.callCountSessionKey -> callCount.toString))
+              }
+            case _ =>
+              response match {
+                case Success(success: BarsBusinessAssessSuccessResponse) if success.accountExists == Yes =>
+                  SeeOther(s"${journey.continueUrl}/$journeyId")
+                    .withSession(request.session + (Journey.callCountSessionKey -> callCount.toString))
+                case _ =>
+                  journey.maxCallCount match {
+                    case Some(x) if callCount == x =>
+                      SeeOther(s"${journey.maxCallCountRedirectUrl.get}/$journeyId")
+                    case _ =>
+                      Redirect(routes.BusinessVerificationController.getConfirmDetails(journeyId))
+                        .withSession(request.session + (Journey.callCountSessionKey -> callCount.toString))
                   }
               }
-      }
+
+          }
     }
 
   def getConfirmDetails(journeyId: String): Action[AnyContent] =

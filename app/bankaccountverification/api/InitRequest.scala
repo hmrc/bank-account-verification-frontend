@@ -32,7 +32,8 @@ case class InitRequest(serviceIdentifier: String,
                        bacsRequirements: Option[InitBACSRequirements] = None,
                        timeoutConfig: Option[InitRequestTimeoutConfig] = None,
                        signOutUrl: Option[String] = None,
-                       maxAssessRequestsForJourney: Option[Int] = None)
+                       maxCallCount: Option[Int] = None,
+                       maxCallCountRedirectUrl: Option[String] = None)
 
 case class InitRequestPrepopulatedData(accountType: AccountTypeRequestEnum,
                                        name: Option[String] = None,

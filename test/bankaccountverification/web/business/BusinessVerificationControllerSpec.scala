@@ -427,6 +427,159 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         redirectLocation(result) shouldBe Some(s"$continueUrl/${id.toHexString}")
       }
     }
+
+    "the maximum number of backend calls has been configured on the init call" should {
+      val id = ObjectId.get()
+      val expiry = LocalDateTime.now.plusMinutes(60)
+      val data = BusinessVerificationRequest("some company name 2", "123456", "12345678", None)
+
+      val form = BusinessVerificationRequest.form.fillAndValidate(data)
+
+      "Render the view and display the errors while the max call count is not met and the BARS checks indicate an issue" in {
+        val barsBusinessAssessResponse =
+          BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None)
+
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
+        reset(mockRepository)
+        when(mockRepository.findById(id))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(
+              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
+          ))))
+
+        reset(mockService)
+        when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
+
+        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data)).withSession(Journey.callCountSessionKey -> "0")
+
+        val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
+
+        status(result) shouldBe Status.BAD_REQUEST
+        contentAsString(result) should include("a.specific.error")
+      }
+
+      "Redirect to the maxCallCountRedirectUrl when the max call count is met and the BARS checks indicate an issue" in {
+        val barsBusinessAssessResponse =
+          BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None)
+
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
+        reset(mockRepository)
+        when(mockRepository.findById(id))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(
+              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
+          ))))
+
+        reset(mockService)
+        when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
+
+        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data)).withSession(Journey.callCountSessionKey -> "1")
+
+        val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/too-many-requests/${id.toHexString}")
+      }
+
+      "Redirect to the confirm view while the max call count is not met and an indeterminate response is received" in {
+        val barsBusinessAssessResponse =
+          BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None)
+
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
+        reset(mockRepository)
+        when(mockRepository.findById(id))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(
+              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
+          ))))
+
+        reset(mockService)
+        when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+
+        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data)).withSession(Journey.callCountSessionKey -> "0")
+
+        val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/bank-account-verification/confirm/business/${id.toHexString}")
+      }
+
+      "Redirect to the maxCallCountRedirectUrl when the max call count is met and an indeterminate response is received" in {
+        val barsBusinessAssessResponse =
+          BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None)
+
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
+        reset(mockRepository)
+        when(mockRepository.findById(id))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(
+              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
+          ))))
+
+        reset(mockService)
+        when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+
+        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data)).withSession(Journey.callCountSessionKey -> "1")
+
+        val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/too-many-requests/${id.toHexString}")
+      }
+
+      "Redirect to the continueUrl when the max call count is met but a yes response is received" in {
+        val barsBusinessAssessResponse =
+          BarsBusinessAssessSuccessResponse(Yes, No, None, Yes, Indeterminate, No, No, Some(No), None)
+
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
+        reset(mockRepository)
+        when(mockRepository.findById(id))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(
+              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
+          ))))
+
+        reset(mockService)
+        when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+
+        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data)).withSession(Journey.callCountSessionKey -> "1")
+
+        val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
+
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"$continueUrl/${id.toHexString}")
+      }
+    }
   }
 
   "GET /confirm/business" when {

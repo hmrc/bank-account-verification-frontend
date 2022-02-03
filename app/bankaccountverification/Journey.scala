@@ -36,14 +36,14 @@ case class Journey(id: ObjectId, authProviderId: Option[String], expiryDate: Loc
                    serviceIdentifier: String, continueUrl: String, data: Session, messages: Option[JsObject] = None,
                    customisationsUrl: Option[String] = None, bacsRequirements: Option[BACSRequirements] = None,
                    timeoutConfig: Option[TimeoutConfig] = None, signOutUrl: Option[String] = None,
-                   maxAssessRequestsForJourneyCount: Option[Int] = None,
-                   maxAssessRequestsForJourneyRedirectUrl: Option[String] = None) {
+                   maxCallCount: Option[Int] = None,
+                   maxCallCountRedirectUrl: Option[String] = None) {
 
   def getBACSRequirements: BACSRequirements = bacsRequirements.getOrElse(defaultBACSRequirements)
 }
 
 object Journey {
-  def assessAttemptsSessionKey = "assessAttempts"
+  def callCountSessionKey = "callCount"
 
   def expiryDate: LocalDateTime = LocalDateTime.now.plusMinutes(60)
 
@@ -70,9 +70,9 @@ object Journey {
                      messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
                      address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None,
                      directDebitConstraints: Option[BACSRequirements] = None, timeoutConfig: Option[TimeoutConfig],
-                     signOutUrl: Option[String], maxAssessRequestsForJourney: Option[Int]): Journey =
+                     signOutUrl: Option[String], maxCallCount: Option[Int], maxCallCountRedirectUrl: Option[String]): Journey =
     Journey(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, createSession(address, prepopulatedData),
-      messages, customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl, maxAssessRequestsForJourney)
+      messages, customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl, maxCallCount, maxCallCountRedirectUrl)
 
   implicit val objectIdFormats: Format[ObjectId] = MongoFormats.objectIdFormat
   implicit val datetimeFormat: Format[LocalDateTime] = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.localDateTimeFormat
@@ -98,7 +98,9 @@ object Journey {
       .and((__ \ "customisationsUrl").readNullable[String])
       .and((__ \ "directDebitConstraints").readNullable[BACSRequirements])
       .and((__ \ "timeoutConfig").readNullable[TimeoutConfig])
-      .and((__ \ "signOutUrl").readNullable[String])(
+      .and((__ \ "signOutUrl").readNullable[String])
+      .and((__ \ "maxCallCount").readNullable[Int])
+      .and((__ \ "maxCallCountRedirectUrl").readNullable[String])(
         (
           id: ObjectId,
           authProviderId: Option[String],
@@ -110,8 +112,11 @@ object Journey {
           customisationsUrl: Option[String],
           directDebitConstraints: Option[BACSRequirements],
           timeoutConfig: Option[TimeoutConfig],
-          signOutUrl: Option[String]
-        ) => Journey.apply(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, data, messages, customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl)
+          signOutUrl: Option[String],
+          maxCallCount: Option[Int],
+          maxCallCountRedirectUrl: Option[String]
+        ) => Journey.apply(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, data, messages,
+          customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl, maxCallCount, maxCallCountRedirectUrl)
       )
 
   implicit def defaultWrites: OWrites[Journey] =
@@ -127,8 +132,8 @@ object Journey {
       .and((__ \ "directDebitConstraints").writeNullable[BACSRequirements])
       .and((__ \ "timeoutConfig").writeNullable[TimeoutConfig])
       .and((__ \ "signOutUrl").writeNullable[String])
-      .and((__ \ "maxAssessRequestsForJourneyCount").writeNullable[Int])
-      .and((__ \ "maxAssessRequestsForJourneyRedirectUrl").writeNullable[String]) {
+      .and((__ \ "maxCallCount").writeNullable[Int])
+      .and((__ \ "maxCallCountRedirectUrl").writeNullable[String]) {
         unlift(Journey.unapply)
       }
 

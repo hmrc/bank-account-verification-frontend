@@ -20,8 +20,7 @@ import bankaccountverification.connector.BarsPersonalAssessSuccessResponse
 import bankaccountverification.connector.ReputationResponseEnum.Yes
 import bankaccountverification.web.personal.html.{PersonalAccountDetailsView, PersonalAccountExistsIndeterminate}
 import bankaccountverification.web.{ActionWithCustomisationsProvider, VerificationService}
-import bankaccountverification.{AppConfig, RemoteMessagesApiProvider}
-import javax.inject.{Inject, Singleton}
+import bankaccountverification.{AppConfig, Journey, RemoteMessagesApiProvider}
 import play.api.Logger
 import play.api.i18n.Messages
 import play.api.mvc._
@@ -29,9 +28,10 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.Success
+import scala.util.{Success, Try}
 
 
 @Singleton
@@ -78,10 +78,17 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
       implicit val messages: Messages = remoteMessagesApi.preferred(request)
 
       val form = PersonalVerificationRequest.form.bindFromRequest()
+      val callCount = request.session.get(Journey.callCountSessionKey)
+        .flatMap(s => Try(s.toInt).toOption).getOrElse(0) + 1
+
       val dataEvent = DataEvent(
         appConfig.appName,
         "AccountDetailsEntered",
-        detail = Map("accountType" -> "personal", "trueCallingService" -> journey.serviceIdentifier,
+        detail = Map(
+          "accountType" -> "personal",
+          "trueCallingService" -> journey.serviceIdentifier,
+          "callCount" -> callCount.toString,
+          "maxCallCount" -> journey.maxCallCount.map(_.toString).getOrElse(""),
           "journeyId" -> journey.id.toHexString)
           ++ form.data.filterKeys {
           case "csrfToken" | "continue" => false
@@ -103,12 +110,25 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
         } yield
           updatedForm match {
             case uform if uform.hasErrors =>
-              BadRequest(accountDetailsView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable, uform))
+              journey.maxCallCount match {
+                case Some(max) if callCount == max =>
+                  SeeOther(s"${journey.maxCallCountRedirectUrl.get}/$journeyId")
+                case _ =>
+                  BadRequest(accountDetailsView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable, uform))
+                    .withSession(request.session + (Journey.callCountSessionKey -> callCount.toString))
+              }
             case _ =>
               response match {
                 case Success(success: BarsPersonalAssessSuccessResponse) if success.accountExists == Yes =>
                   SeeOther(s"${journey.continueUrl}/$journeyId")
-                case _ => Redirect(routes.PersonalVerificationController.getConfirmDetails(journeyId))
+                case _ =>
+                  journey.maxCallCount match {
+                    case Some(x) if callCount == x =>
+                      SeeOther(s"${journey.maxCallCountRedirectUrl.get}/$journeyId")
+                    case _ =>
+                      Redirect(routes.PersonalVerificationController.getConfirmDetails(journeyId))
+                        .withSession(request.session + (Journey.callCountSessionKey -> callCount.toString))
+                  }
               }
           }
       }
