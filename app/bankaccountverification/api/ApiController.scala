@@ -122,8 +122,8 @@ class ApiController @Inject()(appConfig: AppConfig,
         init.bacsRequirements.map(ddc => BACSRequirements(ddc.directDebitRequired, ddc.directCreditRequired)).orElse(Some(BACSRequirements.defaultBACSRequirements)),
         init.timeoutConfig.map(tc => TimeoutConfig(tc.timeoutUrl, tc.timeoutAmount, tc.timeoutKeepAliveUrl)),
         init.signOutUrl,
-        init.maxCallCount,
-        init.maxCallCountRedirectUrl
+        init.maxCallConfig.map(mcc => mcc.count),
+        init.maxCallConfig.map(mcc => mcc.redirectUrl)
       )
       .map { journeyId =>
         import bankaccountverification._

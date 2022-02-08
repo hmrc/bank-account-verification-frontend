@@ -32,7 +32,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.{HeaderNames, Status}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Environment}
@@ -104,7 +104,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
         val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
           timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)), signOutUrl = Some("/sign-out"),
-          maxCallCount = Some(5), maxCallCountRedirectUrl = Some("/too-many-requests")))
+          maxCallConfig = Some(InitRequestMaxCallConfig(count = 5, redirectUrl = "/too-many-requests"))))
 
         val fakeRequest = FakeRequest("POST", "/api/v2/init")
             .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
@@ -215,6 +215,46 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
             address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)),
             signOutUrl = Some("www.google.com")))
+
+        val fakeRequest = FakeRequest("POST", "/api/init")
+          .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+          .withJsonBody(json)
+
+        val result = controller.init().apply(fakeRequest)
+
+        status(result) shouldBe Status.BAD_REQUEST
+      }
+
+      "A maxCallConfig is provided with a count but without a redirectUrl" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
+        val json = Json.toJson(
+          InitRequest("serviceIdentifier", "continueUrl",
+            address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))))
+          .as[JsObject] + ("maxCallConfig" -> JsObject(Seq("count" -> Json.toJson(5))))
+
+        val fakeRequest = FakeRequest("POST", "/api/init")
+          .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
+          .withJsonBody(json)
+
+        val result = controller.init().apply(fakeRequest)
+
+        status(result) shouldBe Status.BAD_REQUEST
+      }
+
+      "A maxCallConfig is provided with a redirectUrl but without a count" in {
+        reset(mockAuthConnector)
+        when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
+          .thenReturn(Future.successful("1234"))
+
+        val json = Json.toJson(
+          InitRequest("serviceIdentifier", "continueUrl",
+            address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
+            timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))))
+          .as[JsObject] + ("maxCallConfig" -> JsObject(Seq("redirectUrl" -> Json.toJson("/too-many-requests"))))
 
         val fakeRequest = FakeRequest("POST", "/api/init")
           .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")

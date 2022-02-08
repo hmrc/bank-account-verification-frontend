@@ -23,6 +23,8 @@ case class InitRequestTimeoutConfig(timeoutUrl: String, timeoutAmount: Int, time
 
 case class InitBACSRequirements(directDebitRequired: Boolean, directCreditRequired: Boolean)
 
+case class InitRequestMaxCallConfig(count: Int, redirectUrl: String)
+
 case class InitRequest(serviceIdentifier: String,
                        continueUrl: String,
                        prepopulatedData: Option[InitRequestPrepopulatedData] = None,
@@ -32,8 +34,7 @@ case class InitRequest(serviceIdentifier: String,
                        bacsRequirements: Option[InitBACSRequirements] = None,
                        timeoutConfig: Option[InitRequestTimeoutConfig] = None,
                        signOutUrl: Option[String] = None,
-                       maxCallCount: Option[Int] = None,
-                       maxCallCountRedirectUrl: Option[String] = None)
+                       maxCallConfig: Option[InitRequestMaxCallConfig] = None)
 
 case class InitRequestPrepopulatedData(accountType: AccountTypeRequestEnum,
                                        name: Option[String] = None,
@@ -57,6 +58,9 @@ object InitRequest {
 
   implicit val timeoutConfigReads: Reads[InitRequestTimeoutConfig] = Json.reads[InitRequestTimeoutConfig]
   implicit val timeoutConfigWrites: OWrites[InitRequestTimeoutConfig] = Json.writes[InitRequestTimeoutConfig]
+
+  implicit val maxCallConfigReads: Reads[InitRequestMaxCallConfig] = Json.reads[InitRequestMaxCallConfig]
+  implicit val maxCallConfigWrites: OWrites[InitRequestMaxCallConfig] = Json.writes[InitRequestMaxCallConfig]
 
   implicit val directDebitConstraintsReads: Reads[InitBACSRequirements] = Json.reads[InitBACSRequirements]
   implicit val directDebitConstraintsWrites: OWrites[InitBACSRequirements] = Json.writes[InitBACSRequirements]
