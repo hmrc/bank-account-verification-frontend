@@ -53,8 +53,10 @@ class ApiV2Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
                   err => Future.successful(BadRequest(Json.obj("errors" -> err.flatMap { case (_, e) => e.map(_.message) }))),
                   init => {
                     val signoutPolicyResult = init.signOutUrl.map { url => Try(policy.url(url)) }
-                    signoutPolicyResult match {
-                      case Some(Failure(_)) => Future.successful(
+                    val maxCallCountRedirectPolicyResult = init.maxCallConfig.map { mc => Try(policy.url(mc.redirectUrl)) }
+
+                    (signoutPolicyResult, maxCallCountRedirectPolicyResult) match {
+                      case (Some(Failure(_)), _) | (_, Some(Failure(_))) => Future.successful(
                         BadRequest(Json.obj("error" -> "Config only allows relative or allow listed urls")))
                       case _ => beginJourney(authProviderId, init)
                     }
