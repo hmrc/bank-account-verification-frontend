@@ -26,7 +26,9 @@ case class InitRequest(
     messages: Option[InitRequestMessages] = None, 
     customisationsUrl: Option[String] = None,
     bacsRequirements: Option[InitBACSRequirements] = None,
-    timeoutConfig: Option[InitRequestTimeoutConfig])
+    timeoutConfig: Option[InitRequestTimeoutConfig], 
+    signOutUrl: Option[String] = None,
+    maxCallConfig: Option[InitRequestMaxCallConfig] = None)
 )
 ```
 ```scala
@@ -35,6 +37,10 @@ case class InitRequestTimeoutConfig(timeoutUrl: String, timeoutAmount: Int, time
 
 // This is passed to configure direct debit/credit payment support requirements. The default, if not specified, is to require both debit and credit support.
 case class InitBACSRequirements(directDebitRequired: Boolean, directCreditRequired: Boolean)
+
+// This is passed to limit the number of attempts a user has to enter valid account details. The default, if not specified, is to allow infinite attempts.
+// If they enter invalid details ${count} times, they will be sent back to the ${redirectUrl}
+case class InitRequestMaxCallConfig(count: Int, redirectUrl: String)
 ```
 
 The init endpoint will respond in the following format:
