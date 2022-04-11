@@ -41,7 +41,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         customisationsUrl = None,
         data = Session(
           accountType = Some(Personal),
-          personal = Some(PersonalAccountDetails(accountName = Some("an-account-name"), sortCode = Some("123498"), accountNumber = Some("98765432"), rollNumber = Some("A.BC"), accountNumberWithSortCodeIsValid = Some(Yes), accountExists = Some(Indeterminate), nameMatches = Some(No), nonStandardAccountDetailsRequiredForBacs = Some(Error), sortCodeBankName = Some("sort-code-bank-name"), iban = Some("some-iban"))),
+          personal = Some(PersonalAccountDetails(accountName = Some("an-account-name"), sortCode = Some("123498"), accountNumber = Some("98765432"), rollNumber = Some("A.BC"), accountNumberWithSortCodeIsValid = Some(Yes), accountExists = Some(Indeterminate), nameMatches = Some(No), nonStandardAccountDetailsRequiredForBacs = Some(Error), sortCodeBankName = Some("sort-code-bank-name"), iban = Some("some-iban"), matchedAccountName = None)),
           business = None
         ),
         bacsRequirements = Some(BACSRequirements(directDebitRequired = true, directCreditRequired = false)),
@@ -109,7 +109,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         customisationsUrl = None,
         data = Session(
           accountType = Some(Business),
-          business = Some(BusinessAccountDetails(companyName = Some("a-company-name"), sortCode = Some("123498"), accountNumber = Some("98765432"), rollNumber = Some("A.BC"), accountNumberIsWellFormatted = Some(Yes), accountExists = Some(Indeterminate), nameMatches = Some(No), nonStandardAccountDetailsRequiredForBacs = Some(Error), sortCodeBankName = Some("sort-code-bank-name-business"), iban = Some("some-iban"))),
+          business = Some(BusinessAccountDetails(companyName = Some("a-company-name"), sortCode = Some("123498"), accountNumber = Some("98765432"), rollNumber = Some("A.BC"), accountNumberIsWellFormatted = Some(Yes), accountExists = Some(Indeterminate), nameMatches = Some(No), nonStandardAccountDetailsRequiredForBacs = Some(Error), sortCodeBankName = Some("sort-code-bank-name-business"), iban = Some("some-iban"), matchedAccountName = None)),
           personal = None
         ),
         bacsRequirements = Some(BACSRequirements(directDebitRequired = false, directCreditRequired = true)),

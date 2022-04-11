@@ -159,7 +159,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-            Some(PersonalAccountDetails(accountName = Some("account_name"), sortCode = Some("112233"), accountNumber = Some("12092398"), iban = Some("some-iban"))))))))
+            Some(PersonalAccountDetails(accountName = Some("account_name"), sortCode = Some("112233"), accountNumber = Some("12092398"), iban = Some("some-iban"), matchedAccountName = None)))))))
 
         val fakeRequest = FakeRequest("GET", s"/verify/personal/${id.toHexString}")
         val result = controller.getAccountDetails(id.toHexString).apply(fakeRequest)
@@ -182,7 +182,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             None,
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), rollNumber = Some("ROLL.NUMBER"), iban = None)))))))
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), rollNumber = Some("ROLL.NUMBER"), iban = None, matchedAccountName = None)))))))
         val fakeRequest = FakeRequest("GET", s"/verify/personal/${id.toHexString}")
         val result = controller.getAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -249,7 +249,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Session(
               Some(Personal),
               Some(address),
-              Some(bankaccountverification.PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None)))))))
+              Some(bankaccountverification.PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None)))))))
 
         val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}")
           .withBody(data)
@@ -275,7 +275,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Session(
               Some(Personal),
               Some(address),
-              Some(bankaccountverification.PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None)))))))
+              Some(bankaccountverification.PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None)))))))
 
         val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}")
           .withBody(data)
@@ -303,7 +303,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Session(
               Some(Personal),
               Some(address),
-              Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None)))))))
+              Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None)))))))
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), any(), meq(serviceIdentifier))(any(), any()))
@@ -329,7 +329,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val formWithErrors = PersonalVerificationRequest.form.fillAndValidate(data).withError("Error", "a.specific.error")
 
       val barsPersonalAssessResponse =
-        BarsPersonalAssessSuccessResponse(Yes, No, Indeterminate, Indeterminate, No, No, Some(No), None, None)
+        BarsPersonalAssessSuccessResponse(Yes, No, Indeterminate, Indeterminate, No, No, Some(No), None, None, None)
 
       "Render the view and display the errors" in {
         reset(mockAuthConnector)
@@ -341,7 +341,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None)))))))
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None)))))))
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), any(), meq(serviceIdentifier))(any(), any()))
@@ -365,7 +365,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val data = PersonalVerificationRequest("Bob", "123456", "12345678")
 
       val form = PersonalVerificationRequest.form.fillAndValidate(data)
-      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Indeterminate, No, No, Some(No), None, None)
+      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Indeterminate, No, No, Some(No), None, None, None)
 
       "Redirect to the continueUrl" in {
         reset(mockAuthConnector)
@@ -377,7 +377,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))))
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))))
           )))
 
         reset(mockService)
@@ -400,7 +400,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val data = PersonalVerificationRequest("Bobby", "123456", "12345678")
 
       val form = PersonalVerificationRequest.form.fillAndValidate(data)
-      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None, None)
+      val barsPersonalAssessResponse = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None, None, None)
 
       "Redirect to the confirm view" in {
         reset(mockAuthConnector)
@@ -412,7 +412,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))))
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))))
           )))
 
         reset(mockService)
@@ -439,7 +439,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Render the view and display the errors while the max call count is not met and the BARS checks indicate an issue" in {
         val barsPersonalAssessResponse =
-          BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None, None)
+          BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None, None, None)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -450,7 +450,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
             maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
@@ -470,7 +470,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Redirect to the maxCallCountRedirectUrl when the max call count is met and the BARS checks indicate an issue" in {
         val barsPersonalAssessResponse =
-          BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None, None)
+          BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None, None, None)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -481,7 +481,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
             maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
@@ -501,7 +501,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Redirect to the confirm view while the max call count is not met and an indeterminate response is received" in {
         val barsPersonalAssessResponse =
-          BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None, None)
+          BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None, None, None)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -512,7 +512,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
             maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
@@ -532,7 +532,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Redirect to the maxCallCountRedirectUrl when the max call count is met and an indeterminate response is received" in {
         val barsPersonalAssessResponse =
-          BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None, None)
+          BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None, None, None)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -543,7 +543,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
             maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
@@ -563,7 +563,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Redirect to the continueUrl when the max call count is met but a yes response is received" in {
         val barsPersonalAssessResponse =
-          BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Indeterminate, No, No, Some(No), None, None)
+          BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Indeterminate, No, No, Some(No), None, None, None)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -574,7 +574,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
             maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
@@ -685,7 +685,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"))))))))
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None)))))))
 
         val fakeRequest = FakeRequest("GET", s"/confirm/personal/${id.toHexString}")
 
@@ -711,7 +711,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), sortCodeBankName = Some("sort-code-bank-name-personal"), iban = Some("some-iban"))))))))
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), sortCodeBankName = Some("sort-code-bank-name-personal"), iban = Some("some-iban"), matchedAccountName = None)))))))
 
         val fakeRequest = FakeRequest("GET", s"/confirm/personal/${id.toHexString}")
 

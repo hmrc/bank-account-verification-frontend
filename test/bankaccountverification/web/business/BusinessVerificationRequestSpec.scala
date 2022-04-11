@@ -282,7 +282,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     val form    = BusinessVerificationRequest.form.fillAndValidate(request)
 
     "the response indicates the sort code and account number combination is not valid" should {
-      val response = BarsBusinessAssessSuccessResponse(No, Indeterminate, None, Indeterminate, Indeterminate, No, No, Some(No), None)
+      val response = BarsBusinessAssessSuccessResponse(No, Indeterminate, None, Indeterminate, Indeterminate, No, No, Some(No), None, None)
       val updatedForm = form.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the account number" in {
@@ -293,7 +293,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates the account does not exist" should {
-      val response = BarsBusinessAssessSuccessResponse(Yes, Yes, None, No, Indeterminate, Yes, Yes, Some(No), None)
+      val response = BarsBusinessAssessSuccessResponse(Yes, Yes, None, No, Indeterminate, Yes, Yes, Some(No), None, None)
 
       val updatedForm = form.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
@@ -305,7 +305,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates that a roll number is required but none was provided" should {
-      val response = BarsBusinessAssessSuccessResponse(Yes, Yes, None, Indeterminate, Indeterminate, Yes, Yes, Some(Yes), Some("iban"))
+      val response = BarsBusinessAssessSuccessResponse(Yes, Yes, None, Indeterminate, Indeterminate, Yes, Yes, Some(Yes), Some("iban"), None)
       val updatedForm = form.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the roll number field" in {
@@ -318,7 +318,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         BusinessVerificationRequest("Joe Blogs", "10-10-10", "12345678", Some("ROLL1"))
       val formWithRollNumber = BusinessVerificationRequest.form.fillAndValidate(requestWithRollNumber)
 
-      val response = BarsBusinessAssessSuccessResponse(Yes, Yes, None, Indeterminate, Indeterminate, Yes, Yes, Some(Yes), Some("iban"))
+      val response = BarsBusinessAssessSuccessResponse(Yes, Yes, None, Indeterminate, Indeterminate, Yes, Yes, Some(Yes), Some("iban"), None)
       val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag no errors" in {
@@ -331,7 +331,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         BusinessVerificationRequest("Joe Blogs", "19-19-19", "12345678", None)
       val formWithRollNumber = BusinessVerificationRequest.form.fillAndValidate(requestWithNonEISCDSortCode)
 
-      val response = BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, None, None)
+      val response = BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, None, None, None)
       val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag errors" in {
@@ -345,7 +345,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         BusinessVerificationRequest("Joe Blogs", "19-19-19", "12345678", None)
       val formWithRollNumber = BusinessVerificationRequest.form.fillAndValidate(requestWithNonEISCDSortCode)
 
-      val response = BarsBusinessAssessSuccessResponse(Yes, Yes, None, Indeterminate, Indeterminate, No, Yes, None, None)
+      val response = BarsBusinessAssessSuccessResponse(Yes, Yes, None, Indeterminate, Indeterminate, No, Yes, None, None, None)
       val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag errors" in {
@@ -359,7 +359,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         BusinessVerificationRequest("Joe Blogs", "19-19-19", "12345678", None)
       val formWithRollNumber = BusinessVerificationRequest.form.fillAndValidate(requestWithNonEISCDSortCode)
 
-      val response = BarsBusinessAssessSuccessResponse(Yes, Yes, None, Indeterminate, Indeterminate, Yes, No, None, None)
+      val response = BarsBusinessAssessSuccessResponse(Yes, Yes, None, Indeterminate, Indeterminate, Yes, No, None, None, None)
       val updatedForm = formWithRollNumber.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag errors" in {
@@ -369,7 +369,7 @@ class BusinessVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates an error occurred" should {
-      val response = BarsBusinessAssessSuccessResponse(ReputationResponseEnum.Error, ReputationResponseEnum.Yes, None, ReputationResponseEnum.Error, ReputationResponseEnum.Error, Yes, Yes, Some(ReputationResponseEnum.Error), None)
+      val response = BarsBusinessAssessSuccessResponse(ReputationResponseEnum.Error, ReputationResponseEnum.Yes, None, ReputationResponseEnum.Error, ReputationResponseEnum.Error, Yes, Yes, Some(ReputationResponseEnum.Error), None, None)
 
       val updatedForm = form.validateUsingBarsBusinessAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 

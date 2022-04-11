@@ -44,7 +44,8 @@ case class PersonalCompleteResponse(address: Option[CompleteResponseAddress],
                                     nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
                                     sortCodeBankName: Option[String] = None,
                                     sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None,
-                                    sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None)
+                                    sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None,
+                                    matchedAccountName: Option[String] = None)
 
 object PersonalCompleteResponse {
   implicit val completeResponseAddressWrites: OWrites[CompleteResponseAddress] = Json.writes[CompleteResponseAddress]
@@ -67,7 +68,8 @@ case class BusinessCompleteResponse(address: Option[CompleteResponseAddress],
                                     nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None,
                                     sortCodeBankName: Option[String] = None,
                                     sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None,
-                                    sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None)
+                                    sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None,
+                                    matchedAccountName: Option[String] = None)
 
 object BusinessCompleteResponse {
   implicit val completeResponseAddressWrites: OWrites[CompleteResponseAddress] = Json.writes[CompleteResponseAddress]

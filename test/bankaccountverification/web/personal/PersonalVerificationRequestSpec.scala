@@ -17,7 +17,7 @@
 package bankaccountverification.web.personal
 
 import bankaccountverification.BACSRequirements
-import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
+import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Partial, Yes}
 import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse, BarsValidationResponse, ReputationResponseEnum}
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.matchers.should.Matchers
@@ -170,7 +170,20 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         import PersonalVerificationRequest.ValidationFormWrapper
         val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "123456", "123FOOO78")
         val formToValidate = PersonalVerificationRequest.form.fill(bankAccountDetails)
-        val barsPersonalAssessSuccessResponse = BarsPersonalAssessSuccessResponse(accountNumberIsWellFormatted = Yes, accountExists = No, nameMatches = Yes, sortCodeIsPresentOnEISCD = Yes, sortCodeSupportsDirectDebit = Yes, sortCodeSupportsDirectCredit = Yes, nonStandardAccountDetailsRequiredForBacs = None, sortCodeBankName = Some("BANKNAME"), iban = None)
+        val barsPersonalAssessSuccessResponse = BarsPersonalAssessSuccessResponse(accountNumberIsWellFormatted = Yes, accountExists = No, nameMatches = Yes, sortCodeIsPresentOnEISCD = Yes, sortCodeSupportsDirectDebit = Yes, sortCodeSupportsDirectCredit = Yes, nonStandardAccountDetailsRequiredForBacs = None, sortCodeBankName = Some("BANKNAME"), iban = None, accountName = None)
+        val bankAccountDetailsForm = formToValidate.validateUsingBarsPersonalAssessResponse(barsPersonalAssessSuccessResponse, BACSRequirements(true, true))
+        bankAccountDetailsForm.hasErrors shouldBe true
+
+        val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
+        error shouldNot be(None)
+        error.get.message shouldBe "error.accountNumber.wrongBankAccountType"
+      }
+
+      "account number is for business account with partial match" in {
+        import PersonalVerificationRequest.ValidationFormWrapper
+        val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "123456", "123FOOO78")
+        val formToValidate = PersonalVerificationRequest.form.fill(bankAccountDetails)
+        val barsPersonalAssessSuccessResponse = BarsPersonalAssessSuccessResponse(accountNumberIsWellFormatted = Yes, accountExists = No, nameMatches = Partial, sortCodeIsPresentOnEISCD = Yes, sortCodeSupportsDirectDebit = Yes, sortCodeSupportsDirectCredit = Yes, nonStandardAccountDetailsRequiredForBacs = None, sortCodeBankName = Some("BANKNAME"), iban = None, accountName = Some("J Bloggs"))
         val bankAccountDetailsForm = formToValidate.validateUsingBarsPersonalAssessResponse(barsPersonalAssessSuccessResponse, BACSRequirements(true, true))
         bankAccountDetailsForm.hasErrors shouldBe true
 
@@ -286,7 +299,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     val form    = PersonalVerificationRequest.form.fillAndValidate(request)
 
     "the response indicates the sort code and account number combination is not valid" should {
-      val response = BarsPersonalAssessSuccessResponse(No, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None, None)
+      val response = BarsPersonalAssessSuccessResponse(No, Indeterminate, Indeterminate, Indeterminate, No, No, Some(No), None, None, None)
       val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the account number" in {
@@ -297,7 +310,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates the sort code is not in EISCD" should {
-      val response = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, No, No, No, Some(No), None, None)
+      val response = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, No, No, No, Some(No), None, None, None)
       val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the sort code" in {
@@ -308,7 +321,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates the sort code exists in EISCD but does not support direct debit payments" should {
-      val response = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Yes, No, Yes, Some(No), None, None)
+      val response = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Yes, No, Yes, Some(No), None, None, None)
       val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the sort code" in {
@@ -319,7 +332,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates the sort code exists in EISCD but does not support direct credit payments" should {
-      val response = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Yes, Yes, No, Some(No), None, None)
+      val response = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Yes, Yes, No, Some(No), None, None, None)
       val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the sort code" in {
@@ -330,7 +343,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates the account does not exist" should {
-      val response = BarsPersonalAssessSuccessResponse(Yes, No, Indeterminate, Yes, Yes, Yes, Some(No), None, None)
+      val response = BarsPersonalAssessSuccessResponse(Yes, No, Indeterminate, Yes, Yes, Yes, Some(No), None, None, None)
 
       val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
@@ -342,7 +355,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates that a roll number is required but none was provided" should {
-      val response = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Yes, Yes, Yes, Some(Yes), None, None)
+      val response = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Yes, Yes, Yes, Some(Yes), None, None, None)
       val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag an error against the roll number field" in {
@@ -354,7 +367,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
       val requestWithRollNumber = PersonalVerificationRequest("Joe Blogs", "10-10-10", "12345678", Some("ROLL1"))
       val formWithRollNumber    = PersonalVerificationRequest.form.fillAndValidate(requestWithRollNumber)
 
-      val response = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Yes, Yes, Yes, Some(Yes), None, None)
+      val response = BarsPersonalAssessSuccessResponse(Yes, Indeterminate, Indeterminate, Yes, Yes, Yes, Some(Yes), None, None, None)
       val updatedForm = formWithRollNumber.validateUsingBarsPersonalAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 
       "flag no errors" in {
@@ -363,7 +376,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
     }
 
     "the response indicates an error occurred" should {
-      val response = BarsPersonalAssessSuccessResponse(ReputationResponseEnum.Error, ReputationResponseEnum.Error, ReputationResponseEnum.Error, ReputationResponseEnum.Yes, Yes, Yes, Some(ReputationResponseEnum.Error), None, None)
+      val response = BarsPersonalAssessSuccessResponse(ReputationResponseEnum.Error, ReputationResponseEnum.Error, ReputationResponseEnum.Error, ReputationResponseEnum.Yes, Yes, Yes, Some(ReputationResponseEnum.Error), None, None, None)
 
       val updatedForm = form.validateUsingBarsPersonalAssessResponse(response, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
 

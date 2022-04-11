@@ -91,7 +91,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             Some(
-              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = Some("some-iban"))),
+              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = Some("some-iban"), matchedAccountName = None)),
             None),
           timeoutConfig = None)
 
@@ -156,7 +156,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             Some(
-              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = Some("some-iban"))),
+              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = Some("some-iban"), matchedAccountName = None)),
             None
           ),
           timeoutConfig = None)
@@ -222,7 +222,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             Some(
-              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = None)),
+              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = None, matchedAccountName = None)),
             None
           ),
           timeoutConfig = None)

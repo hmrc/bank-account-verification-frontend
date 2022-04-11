@@ -74,7 +74,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
-        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban")))))
+        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban"), None))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
@@ -153,7 +153,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
         .thenReturn(Future.successful("1234"))
 
     when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
-      Future.successful(Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Indeterminate, Yes, No, Some(No), None))))
+      Future.successful(Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Indeterminate, Yes, No, Some(No), None, None))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
@@ -236,7 +236,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
   "BankAccountVerification with prepopulated account type, skipping account type screen" in {
     when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
-        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban")))))
+        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban"), None))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"

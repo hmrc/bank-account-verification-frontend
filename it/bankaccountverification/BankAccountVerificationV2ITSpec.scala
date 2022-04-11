@@ -17,7 +17,7 @@
 package bankaccountverification
 
 import bankaccountverification.api._
-import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
+import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Partial, Yes}
 import bankaccountverification.connector.{BankAccountReputationConnector, BarsBusinessAssessSuccessResponse, BarsPersonalAssessSuccessResponse}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.web.business.BusinessVerificationRequest
@@ -73,7 +73,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
 
     when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
-        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban")))))
+        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Partial, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban"), Some("some-account")))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
@@ -125,7 +125,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
       CompleteV2Response(
         accountType = Personal,
         personal = Some(
-          PersonalCompleteV2Response("some-account-name", "121212", "12349876", Yes, None, accountExists = Some(Yes), nameMatches = Some(Indeterminate), nonStandardAccountDetailsRequiredForBacs = Some(No), sortCodeBankName = Some("sort-code-bank-name-personal"), sortCodeSupportsDirectDebit = Some(Yes), sortCodeSupportsDirectCredit = Some(Yes), iban = Some("iban"))),
+          PersonalCompleteV2Response("some-account-name", "121212", "12349876", Yes, None, accountExists = Some(Yes), nameMatches = Some(Partial), nonStandardAccountDetailsRequiredForBacs = Some(No), sortCodeBankName = Some("sort-code-bank-name-personal"), sortCodeSupportsDirectDebit = Some(Yes), sortCodeSupportsDirectCredit = Some(Yes), iban = Some("iban"), Some("some-account"))),
         business = None
       )
     )
@@ -136,7 +136,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
       .thenReturn(Future.successful("1234"))
 
     when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
-      Future.successful(Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Indeterminate, Yes, No, Some(No), None))))
+      Future.successful(Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Partial, Yes, No, Some(No), None, Some("some-company")))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
@@ -192,7 +192,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
       CompleteV2Response(
         accountType = Business,
         business = Some(
-          BusinessCompleteV2Response("some-company-name", "121212", "12349876", rollNumber = None, accountNumberIsWellFormatted = Yes, accountExists = Some(Indeterminate), nameMatches = Some(Indeterminate), nonStandardAccountDetailsRequiredForBacs = Some(No), sortCodeBankName = Some("sort-code-bank-name-business"), Some(Yes), Some(No), None)
+          BusinessCompleteV2Response("some-company-name", "121212", "12349876", rollNumber = None, accountNumberIsWellFormatted = Yes, accountExists = Some(Indeterminate), nameMatches = Some(Partial), nonStandardAccountDetailsRequiredForBacs = Some(No), sortCodeBankName = Some("sort-code-bank-name-business"), Some(Yes), Some(No), None, Some("some-company"))
         ),
         personal = None
       )
@@ -202,7 +202,7 @@ class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerP
   "BankAccountVerification with prepopulated account type, skipping account type screen" in {
     when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
-        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban")))))
+        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban"), None))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"

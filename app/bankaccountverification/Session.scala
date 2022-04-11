@@ -65,15 +65,15 @@ object Session {
     }
 }
 
-case class PersonalAccountDetails(accountName: Option[String], sortCode: Option[String], accountNumber: Option[String], rollNumber: Option[String] = None, accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None, accountNumberIsWellFormatted: Option[ReputationResponseEnum] = None, accountExists: Option[ReputationResponseEnum] = None, nameMatches: Option[ReputationResponseEnum] = None, nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None, sortCodeBankName: Option[String] = None, sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None, sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None, iban: Option[String])
+case class PersonalAccountDetails(accountName: Option[String], sortCode: Option[String], accountNumber: Option[String], rollNumber: Option[String] = None, accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None, accountNumberIsWellFormatted: Option[ReputationResponseEnum] = None, accountExists: Option[ReputationResponseEnum] = None, nameMatches: Option[ReputationResponseEnum] = None, nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None, sortCodeBankName: Option[String] = None, sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None, sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None, iban: Option[String], matchedAccountName: Option[String])
 
 object PersonalAccountDetails {
   def apply(request: PersonalVerificationRequest, response: BarsPersonalAssessResponse): PersonalAccountDetails =
     response match {
       case success: BarsPersonalAssessSuccessResponse =>
-        PersonalAccountDetails(Some(request.accountName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber, None, Some(success.accountNumberIsWellFormatted), Some(success.accountExists), Some(success.nameMatches), success.nonStandardAccountDetailsRequiredForBacs, success.sortCodeBankName, Some(success.sortCodeSupportsDirectDebit), Some(success.sortCodeSupportsDirectCredit), success.iban)
+        PersonalAccountDetails(Some(request.accountName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber, None, Some(success.accountNumberIsWellFormatted), Some(success.accountExists), Some(success.nameMatches), success.nonStandardAccountDetailsRequiredForBacs, success.sortCodeBankName, Some(success.sortCodeSupportsDirectDebit), Some(success.sortCodeSupportsDirectCredit), success.iban, success.accountName)
       case _ =>
-        PersonalAccountDetails(Some(request.accountName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber, None, Some(Error), Some(Error), Some(Error), Some(Error), None, Some(Error), Some(Error), None)
+        PersonalAccountDetails(Some(request.accountName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber, None, Some(Error), Some(Error), Some(Error), Some(Error), None, Some(Error), Some(Error), None, None)
     }
 
   def toCompleteResponse(session: Session): Option[CompleteResponse] =
@@ -94,7 +94,8 @@ object PersonalAccountDetails {
       sortCodeBankName,
       sortCodeSupportsDirectDebit,
       sortCodeSupportsDirectCredit,
-      iban)),
+      iban,
+      matchedAccountName)),
       _
       ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
         Some(
@@ -108,7 +109,7 @@ object PersonalAccountDetails {
                 rollNumber, accountExists, nameMatches,
                 Some(Indeterminate), Some(Indeterminate), Some(Indeterminate), // Hardcode these to be indeterminate (TAV-458)
                 nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit,
-                sortCodeSupportsDirectCredit)),
+                sortCodeSupportsDirectCredit, matchedAccountName)),
             None))
       case _ => None
     }
@@ -131,28 +132,29 @@ object PersonalAccountDetails {
       sortCodeBankName,
       sortCodeSupportsDirectDebit,
       sortCodeSupportsDirectCredit,
-      iban)),
+      iban,
+      matchedAccountName)),
       _
       ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
         Some(
           CompleteV2Response(
             Personal,
             Some(
-              api.PersonalCompleteV2Response(accountName, sortCode, accountNumber, maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get, rollNumber, accountExists, nameMatches, nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit, sortCodeSupportsDirectCredit, iban)),
+              api.PersonalCompleteV2Response(accountName, sortCode, accountNumber, maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get, rollNumber, accountExists, nameMatches, nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit, sortCodeSupportsDirectCredit, iban, matchedAccountName)),
             None))
       case _ => None
     }
 }
 
-case class BusinessAccountDetails(companyName: Option[String], sortCode: Option[String], accountNumber: Option[String], rollNumber: Option[String] = None, accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None, accountNumberIsWellFormatted: Option[ReputationResponseEnum] = None, accountExists: Option[ReputationResponseEnum] = None, companyNameMatches: Option[ReputationResponseEnum] = None, nameMatches: Option[ReputationResponseEnum] = None, nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None, sortCodeBankName: Option[String] = None, sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None, sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None, iban: Option[String])
+case class BusinessAccountDetails(companyName: Option[String], sortCode: Option[String], accountNumber: Option[String], rollNumber: Option[String] = None, accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None, accountNumberIsWellFormatted: Option[ReputationResponseEnum] = None, accountExists: Option[ReputationResponseEnum] = None, companyNameMatches: Option[ReputationResponseEnum] = None, nameMatches: Option[ReputationResponseEnum] = None, nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None, sortCodeBankName: Option[String] = None, sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None, sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None, iban: Option[String], matchedAccountName: Option[String])
 
 object BusinessAccountDetails {
   def apply(request: BusinessVerificationRequest, response: BarsBusinessAssessResponse): BusinessAccountDetails =
     response match {
       case success: BarsBusinessAssessSuccessResponse =>
-        BusinessAccountDetails(Some(request.companyName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber, None, Some(success.accountNumberIsWellFormatted), Some(success.accountExists), None, Some(success.nameMatches), success.nonStandardAccountDetailsRequiredForBacs, success.sortCodeBankName, Some(success.sortCodeSupportsDirectDebit), Some(success.sortCodeSupportsDirectCredit), success.iban)
+        BusinessAccountDetails(Some(request.companyName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber, None, Some(success.accountNumberIsWellFormatted), Some(success.accountExists), None, Some(success.nameMatches), success.nonStandardAccountDetailsRequiredForBacs, success.sortCodeBankName, Some(success.sortCodeSupportsDirectDebit), Some(success.sortCodeSupportsDirectCredit), success.iban, success.accountName)
       case _ =>
-        BusinessAccountDetails(Some(request.companyName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber, accountNumberWithSortCodeIsValid = None, Some(Error), Some(Error), companyNameMatches = None, Some(Error), Some(Error), None, Some(Error), Some(Error), None)
+        BusinessAccountDetails(Some(request.companyName), Some(request.sortCode), Some(request.accountNumber), request.rollNumber, accountNumberWithSortCodeIsValid = None, Some(Error), Some(Error), companyNameMatches = None, Some(Error), Some(Error), None, Some(Error), Some(Error), None, None)
     }
 
   def toCompleteResponse(session: Session): Option[CompleteResponse] =
@@ -175,7 +177,8 @@ object BusinessAccountDetails {
       sortCodeBankName,
       sortCodeSupportsDirectDebit,
       sortCodeSupportsDirectCredit,
-      iban))
+      iban,
+      matchedAccountName))
       ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
         Some(
           CompleteResponse(
@@ -190,7 +193,7 @@ object BusinessAccountDetails {
                 nameMatches.orElse(companyNameMatches),
                 Some(Indeterminate), Some(Indeterminate), // Hardcode these to be indeterminate (TAV-458)
                 nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit,
-                sortCodeSupportsDirectCredit))))
+                sortCodeSupportsDirectCredit, matchedAccountName))))
       case _ =>
         None
     }
@@ -215,14 +218,15 @@ object BusinessAccountDetails {
       sortCodeBankName,
       sortCodeSupportsDirectDebit,
       sortCodeSupportsDirectCredit,
-      iban))
+      iban,
+      matchedAccountName))
       ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
         Some(
           CompleteV2Response(
             Business,
             None,
             Some(
-              BusinessCompleteV2Response(companyName, sortCode, accountNumber, rollNumber, maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get, accountExists, nameMatches.orElse(companyNameMatches), nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit, sortCodeSupportsDirectCredit, iban))))
+              BusinessCompleteV2Response(companyName, sortCode, accountNumber, rollNumber, maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get, accountExists, nameMatches.orElse(companyNameMatches), nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit, sortCodeSupportsDirectCredit, iban, matchedAccountName))))
       case _ =>
         None
     }

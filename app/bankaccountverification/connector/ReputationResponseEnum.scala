@@ -21,12 +21,13 @@ sealed trait ReputationResponseEnum
 object ReputationResponseEnum extends Enumerable.Implicits {
 
   case object Yes extends WithName("yes") with ReputationResponseEnum
+  case object Partial extends WithName("partial") with ReputationResponseEnum
   case object No extends WithName("no") with ReputationResponseEnum
   case object Indeterminate extends WithName("indeterminate") with ReputationResponseEnum
   case object Inapplicable extends WithName("inapplicable") with ReputationResponseEnum
   case object Error extends WithName("error") with ReputationResponseEnum
 
-  val values: Seq[ReputationResponseEnum] = Seq(Yes, No, Indeterminate, Inapplicable, Error)
+  val values: Seq[ReputationResponseEnum] = Seq(Yes, Partial, No, Indeterminate, Inapplicable, Error)
 
   implicit val enumerable: Enumerable[ReputationResponseEnum] =
     Enumerable(values.map(v => v.toString -> v): _*)

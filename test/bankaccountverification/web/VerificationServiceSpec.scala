@@ -48,7 +48,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     val userInput = PersonalVerificationRequest("Bob", "20-30-40", "12345678")
 
     val assessResult =
-      Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Yes, Yes, Some(No), None, None))
+      Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Yes, Yes, Some(No), None, None, None))
 
     when(mockConnector.assessPersonal(any(), any(), any(), any(), any())(any(), any())).thenReturn(Future.successful
     (assessResult))
@@ -219,15 +219,15 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
 
     "the details provided pass the remote bars checks" should {
       val assessResult =
-        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Yes, Yes, Some(No), Some
-                ("sort-code-bank-name-personal"), Some("some-iban")))
+        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Partial, Yes, Yes, Yes, Some(No), Some
+                ("sort-code-bank-name-personal"), Some("some-iban"), Some("Robert")))
 
       when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
 
       val res = await(service.processPersonalAssessResponse(journeyId, BACSRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form))
 
       "persist the details to mongo" in {
-        val expectedAccountDetails = PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), None, None, Some(Yes), Some(Yes), Some(Yes), Some(No), Some("sort-code-bank-name-personal"), Some(Yes), Some(Yes), Some("some-iban"))
+        val expectedAccountDetails = PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), None, None, Some(Yes), Some(Yes), Some(Partial), Some(No), Some("sort-code-bank-name-personal"), Some(Yes), Some(Yes), Some("some-iban"), Some("Robert"))
 
         verify(mockRepository).updatePersonalAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
       }
@@ -251,7 +251,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val res = await(service.processPersonalAssessResponse(journeyId, BACSRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form))
 
       "persist the details to mongo" in {
-        val expectedAccountDetails = PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), None, None, Some(Error), Some(Error), Some(Error), Some(Error), None, Some(Error), Some(Error), None)
+        val expectedAccountDetails = PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), None, None, Some(Error), Some(Error), Some(Error), Some(Error), None, Some(Error), Some(Error), None, None)
         verify(mockRepository).updatePersonalAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
       }
 
@@ -305,7 +305,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     val userInput = BusinessVerificationRequest("Bob Company", "20-30-40", "12345678", None)
 
     val assessResult = Future.successful(
-      Success(BarsBusinessAssessSuccessResponse(Yes, Yes, None, Yes, Yes, No, No, Some(No), None)))
+      Success(BarsBusinessAssessSuccessResponse(Yes, Yes, None, Yes, Yes, No, No, Some(No), None, None)))
 
     when(mockConnector.assessBusiness(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(assessResult)
 
@@ -486,7 +486,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     val form = BusinessVerificationRequest.form.fillAndValidate(userInput)
 
     "the details provided pass the remote bars checks" should {
-      val assessResult = Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Yes, Yes, Yes, Yes, Some(No), Some("some-iban")))
+      val assessResult = Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Yes, Partial, Yes, Yes, Some(No), Some("some-iban"), Some("Bob Co.")))
 
       clearInvocations(mockRepository)
       when(mockRepository.updateBusinessAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
@@ -494,7 +494,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val updatedForm = await(service.processBusinessAssessResponse(journeyId, BACSRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form))
 
       "persist the details to mongo" in {
-        val expectedAccountDetails = BusinessAccountDetails(Some("Bob Company"), Some("203040"), Some("12345678"), None, None, Some(Yes), Some(Yes), None, Some(Yes), Some(No), Some("sort-code-bank-name-business"), Some(Yes), Some(Yes), Some("some-iban"))
+        val expectedAccountDetails = BusinessAccountDetails(Some("Bob Company"), Some("203040"), Some("12345678"), None, None, Some(Yes), Some(Yes), None, Some(Partial), Some(No), Some("sort-code-bank-name-business"), Some(Yes), Some(Yes), Some("some-iban"), Some("Bob Co."))
         verify(mockRepository).updateBusinessAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
       }
 
@@ -517,7 +517,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val updatedForm = service.processBusinessAssessResponse(journeyId, BACSRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form)
 
       "persist the details to mongo" in {
-        val expectedAccountDetails = BusinessAccountDetails(Some("Bob Company"), Some("203040"), Some("12345678"), None, None, Some(Error), Some(Error), None, Some(Error), Some(Error), None, Some(Error), Some(Error), None)
+        val expectedAccountDetails = BusinessAccountDetails(Some("Bob Company"), Some("203040"), Some("12345678"), None, None, Some(Error), Some(Error), None, Some(Error), Some(Error), None, Some(Error), Some(Error), None, None)
         verify(mockRepository).updateBusinessAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
       }
 

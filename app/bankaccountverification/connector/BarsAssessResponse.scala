@@ -28,7 +28,8 @@ case class BarsPersonalAssessSuccessResponse(accountNumberIsWellFormatted: Reput
                                              sortCodeSupportsDirectCredit: ReputationResponseEnum,
                                              nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum],
                                              sortCodeBankName: Option[String],
-                                             iban: Option[String]) extends BarsPersonalAssessResponse
+                                             iban: Option[String],
+                                             accountName: Option[String]) extends BarsPersonalAssessResponse
 
 case class BarsPersonalAssessBadRequestResponse(code: String, desc: String) extends BarsPersonalAssessResponse
 
@@ -51,7 +52,8 @@ case class BarsBusinessAssessSuccessResponse(accountNumberIsWellFormatted: Reput
                                              sortCodeSupportsDirectDebit: ReputationResponseEnum,
                                              sortCodeSupportsDirectCredit: ReputationResponseEnum,
                                              nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum],
-                                             iban: Option[String]) extends BarsBusinessAssessResponse
+                                             iban: Option[String],
+                                             accountName: Option[String]) extends BarsBusinessAssessResponse
 
 case class BarsBusinessAssessBadRequestResponse(code: String, desc: String) extends BarsBusinessAssessResponse
 

@@ -122,7 +122,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
               Some(Business),
               Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
               None,
-              Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"))))))))
+              Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None)))))))
 
         val fakeRequest = FakeRequest("GET", s"/verify/business/${id.toHexString}")
         val result = controller.getAccountDetails(id.toHexString).apply(fakeRequest)
@@ -166,7 +166,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
               Some(Business),
               Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
               None,
-              Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"))))))))
+              Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None)))))))
 
         val fakeRequest = FakeRequest("GET", s"/verify/business/${id.toHexString}")
         val result = controller.getAccountDetails(id.toHexString).apply(fakeRequest)
@@ -190,7 +190,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Some(Business),
             None,
             None,
-            Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), rollNumber = Some("ROLL.NUMBER"), iban = None)))))))
+            Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), rollNumber = Some("ROLL.NUMBER"), iban = None, matchedAccountName = None)))))))
         val fakeRequest = FakeRequest("GET", s"/verify/business/${id.toHexString}")
         val result = controller.getAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -254,7 +254,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(
               accountType = Some(Business),
-              business = Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"))))))))
+              business = Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None)))))))
 
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withBody(data)
@@ -280,7 +280,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(
               accountType = Some(Business),
-              business = Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None)))))))
+              business = Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None)))))))
 
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withBody(data)
@@ -305,7 +305,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
-            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"))))))))
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None)))))))
 
         reset(mockService)
         when(mockService.assessBusiness(any(), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Failure(new HttpException("SERVER ON FIRE", 500))))
@@ -332,7 +332,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         .withError("Error", "a.specific.error")
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None)
+        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None, None)
 
       "Render the view and display the errors" in {
         reset(mockAuthConnector)
@@ -342,7 +342,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
-            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"))))))))
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None)))))))
 
         reset(mockService)
         when(mockService.assessBusiness(any(), any(), meq(serviceIdentifier))(any(), any()))
@@ -368,7 +368,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None)
+        BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None, None)
 
       "Redirect to the confirm view" in {
         reset(mockAuthConnector)
@@ -378,7 +378,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
-            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"))))))))
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None)))))))
 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
@@ -402,7 +402,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
 
       val barsBusinessAssessResponse =
-        BarsBusinessAssessSuccessResponse(Yes, No, None, Yes, Indeterminate, No, No, Some(No), None)
+        BarsBusinessAssessSuccessResponse(Yes, No, None, Yes, Indeterminate, No, No, Some(No), None, None)
 
       "Redirect to the continueUrl" in {
         reset(mockAuthConnector)
@@ -412,7 +412,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockRepository)
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
-            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"))))))))
+            Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None)))))))
 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
@@ -437,7 +437,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Render the view and display the errors while the max call count is not met and the BARS checks indicate an issue" in {
         val barsBusinessAssessResponse =
-          BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None)
+          BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None, None)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -447,7 +447,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(
-              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
             maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
@@ -466,7 +466,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Redirect to the maxCallCountRedirectUrl when the max call count is met and the BARS checks indicate an issue" in {
         val barsBusinessAssessResponse =
-          BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None)
+          BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None, None)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -476,7 +476,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(
-              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
             maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
@@ -495,7 +495,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Redirect to the confirm view while the max call count is not met and an indeterminate response is received" in {
         val barsBusinessAssessResponse =
-          BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None)
+          BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None, None)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -505,7 +505,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(
-              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
             maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
@@ -524,7 +524,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Redirect to the maxCallCountRedirectUrl when the max call count is met and an indeterminate response is received" in {
         val barsBusinessAssessResponse =
-          BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None)
+          BarsBusinessAssessSuccessResponse(Yes, No, None, Indeterminate, Indeterminate, No, No, Some(No), None, None)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -534,7 +534,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(
-              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
             maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
@@ -553,7 +553,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "Redirect to the continueUrl when the max call count is met but a yes response is received" in {
         val barsBusinessAssessResponse =
-          BarsBusinessAssessSuccessResponse(Yes, No, None, Yes, Indeterminate, No, No, Some(No), None)
+          BarsBusinessAssessSuccessResponse(Yes, No, None, Yes, Indeterminate, No, No, Some(No), None, None)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -563,7 +563,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockRepository.findById(id))
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl,
             Session(accountType = Some(Business), business = Some(bankaccountverification.BusinessAccountDetails(
-              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban")))),
+              companyName = Some("some company name 2"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
             maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
@@ -657,7 +657,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
               Some(Business),
               Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
               None,
-              Some(BusinessAccountDetails(Some("some company name"), Some("SC123456"), Some("112233"), Some("12345678"), iban = Some("some-iban"))))))))
+              Some(BusinessAccountDetails(Some("some company name"), Some("SC123456"), Some("112233"), Some("12345678"), iban = Some("some-iban"), matchedAccountName = None)))))))
 
         val fakeRequest = FakeRequest("GET", s"/confirm/business/${id.toHexString}")
 
@@ -685,7 +685,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Some(Business),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             None,
-            Some(BusinessAccountDetails(Some("some company name"), Some("SC123456"), Some("112233"), Some("12345678"), sortCodeBankName = Some("sort-code-bank-name-business"), iban = Some("some-iban"))))))))
+            Some(BusinessAccountDetails(Some("some company name"), Some("SC123456"), Some("112233"), Some("12345678"), sortCodeBankName = Some("sort-code-bank-name-business"), iban = Some("some-iban"), matchedAccountName = None)))))))
 
         val fakeRequest = FakeRequest("GET", s"/confirm/business/${id.toHexString}")
 

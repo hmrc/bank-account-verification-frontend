@@ -16,7 +16,7 @@
 
 package bankaccountverification.connector
 
-import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
+import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Partial, Yes}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
@@ -53,7 +53,8 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
             """{
               |  "accountNumberIsWellFormatted": "yes",
               |  "accountExists": "yes",
-              |  "nameMatches": "yes",
+              |  "nameMatches": "partial",
+              |  "accountName": "Mr J Bloggs",
               |  "sortCodeIsPresentOnEISCD": "yes",
               |  "sortCodeSupportsDirectDebit": "yes",
               |  "sortCodeSupportsDirectCredit": "yes",
@@ -66,7 +67,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
         val response = await(connector.assessPersonal("Mr Joe Bloggs", "20-30-40", "12345678", None, "example-service"))
         response shouldBe Success(
-          BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Yes, Yes, Some(No), None, None)
+          BarsPersonalAssessSuccessResponse(Yes, Yes, Partial, Yes, Yes, Yes, Some(No), None, None, Some("Mr J Bloggs"))
         )
       }
     }
@@ -157,9 +158,10 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
               |  "sortCodeIsPresentOnEISCD": "yes",
               |  "sortCodeSupportsDirectDebit": "yes",
               |  "sortCodeSupportsDirectCredit": "yes",
-              |  "sortCodeBankName": "Some Company",
+              |  "sortCodeBankName": "Some Bank",
               |  "accountExists": "yes",
-              |  "nameMatches": "yes",
+              |  "nameMatches": "partial",
+              |  "accountName": "Some Co.",
               |  "nonStandardAccountDetailsRequiredForBacs": "no"
               |}""".stripMargin).withHeaders("Content-Type" -> "application/json"))
         }
@@ -169,7 +171,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, "example-service"))
         response shouldBe Success(
-          BarsBusinessAssessSuccessResponse(Yes, Yes, Some("Some Company"), Yes, Yes, Yes, Yes, Some(No), None)
+          BarsBusinessAssessSuccessResponse(Yes, Yes, Some("Some Bank"), Yes, Partial, Yes, Yes, Some(No), None, Some("Some Co."))
         )
       }
     }

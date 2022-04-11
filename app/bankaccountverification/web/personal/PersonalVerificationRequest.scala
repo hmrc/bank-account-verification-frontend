@@ -17,7 +17,7 @@
 package bankaccountverification.web.personal
 
 import bankaccountverification.BACSRequirements
-import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
+import bankaccountverification.connector.ReputationResponseEnum.{No, Partial, Yes}
 import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse}
 import bankaccountverification.web.Forms._
 import bankaccountverification.web.Implicits.SanitizedString
@@ -71,7 +71,7 @@ object PersonalVerificationRequest {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
           } else if (sortCodeSupportsDirectCredit != Yes && directDebitConstraints.directCreditRequired) {
             form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
-          } else if (accountExists == No && nameMatches == Yes) {
+          } else if (accountExists == No && (nameMatches == Yes || nameMatches == Partial)) {
             form.fill(form.get).withError("accountNumber", "error.accountNumber.wrongBankAccountType")
           } else if (accountExists == No)
             form.fill(form.get).withError("accountNumber", "error.accountNumber.doesNotExist")
