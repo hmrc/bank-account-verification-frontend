@@ -17,7 +17,7 @@
 package bankaccountverification
 
 import bankaccountverification.api._
-import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
+import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Partial, Yes}
 import bankaccountverification.connector.{BankAccountReputationConnector, BarsBusinessAssessSuccessResponse, BarsPersonalAssessSuccessResponse}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.web.business.BusinessVerificationRequest
@@ -74,7 +74,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
 
     when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
-        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban"), None))))
+        Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Partial, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban"), Some("account-name")))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
@@ -136,7 +136,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
             accountNumberWithSortCodeIsValid = Yes,
             None,
             accountExists = Some(Yes),
-            nameMatches = Some(Indeterminate),
+            nameMatches = Some(Yes),
             addressMatches = Some(Indeterminate),
             nonConsented = Some(Indeterminate),
             subjectHasDeceased = Some(Indeterminate),
@@ -153,7 +153,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
         .thenReturn(Future.successful("1234"))
 
     when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
-      Future.successful(Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Indeterminate, Yes, No, Some(No), None, None))))
+      Future.successful(Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Partial, Yes, No, Some(No), None, Some("account-name")))))
 
     val wsClient = app.injector.instanceOf[WSClient]
     val baseUrl = s"http://localhost:$port"
@@ -219,7 +219,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
             rollNumber = None,
             accountNumberWithSortCodeIsValid = Yes,
             accountExists = Some(Indeterminate),
-            companyNameMatches = Some(Indeterminate),
+            companyNameMatches = Some(Yes),
             companyPostCodeMatches = Some(Indeterminate),
             companyRegistrationNumberMatches = Some(Indeterminate),
             nonStandardAccountDetailsRequiredForBacs = Some(No),

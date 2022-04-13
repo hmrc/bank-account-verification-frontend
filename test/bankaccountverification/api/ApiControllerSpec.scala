@@ -17,7 +17,7 @@
 package bankaccountverification.api
 
 import akka.stream.Materializer
-import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
+import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Partial, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.{TimeoutConfig, _}
 import com.codahale.metrics.SharedMetricRegistries
@@ -316,7 +316,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             Some(
-              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), None, Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = None, matchedAccountName = None)),
+              PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), None, Some(Yes), Some(Partial), Some(No), Some("sort-code-bank-name-personal"), iban = None, matchedAccountName = Some("account-name"))),
             None
           ),
           timeoutConfig = None)
@@ -336,7 +336,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         (json \ "personal" \ "accountNumberWithSortCodeIsValid").as[String] shouldBe "yes"
         (json \ "personal" \ "accountExists").as[String] shouldBe "yes"
         (json \ "personal" \ "rollNumber").as[String] shouldBe "roll1"
-        (json \ "personal" \ "nameMatches").as[String] shouldBe "indeterminate"
+        (json \ "personal" \ "nameMatches").as[String] shouldBe "yes"
         (json \ "personal" \ "addressMatches").as[String] shouldBe "indeterminate"
         (json \ "personal" \ "nonConsented").as[String] shouldBe "indeterminate"
         (json \ "personal" \ "subjectHasDeceased").as[String] shouldBe "indeterminate"
@@ -362,7 +362,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             None,
             Some(
-              BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), None, Some(No), Some(Yes), None, None, Some("sort-code-bank-name-business"), iban = Some("some-iban"), matchedAccountName = None))),
+              BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"), Some(Yes), None, Some(No), Some(Partial), None, None, Some("sort-code-bank-name-business"), iban = Some("some-iban"), matchedAccountName = Some("account-name")))),
           timeoutConfig = None)
 
         when(sessionStore.findById(meq(journeyId))(any()))

@@ -335,8 +335,8 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
         (json \ "personal" \ "accountNumberIsWellFormatted").as[String] shouldBe "yes"
         (json \ "personal" \ "accountExists").as[String] shouldBe "yes"
         (json \ "personal" \ "rollNumber").as[String] shouldBe "roll1"
-        (json \ "personal" \ "nameMatches").as[String] shouldBe "partial"
-        (json \ "personal" \ "matchedAccountName").as[String] shouldBe "Robert"
+        (json \ "personal" \ "nameMatches").as[String] shouldBe "yes"
+        (json \ "personal" \ "matchedAccountName").isDefined shouldBe false
         (json \ "personal" \ "nonStandardAccountDetailsRequiredForBacs").as[String] shouldBe "no"
         (json \ "personal" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-personal"
         (json \ "personal" \ "iban").asOpt[String] shouldBe Some("some-iban")
@@ -378,8 +378,8 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
         (json \ "business" \ "accountNumberIsWellFormatted").as[String] shouldBe "yes"
         (json \ "business" \ "accountExists").as[String] shouldBe "no"
         (json \ "business" \ "rollNumber").as[String] shouldBe "roll1"
-        (json \ "business" \ "nameMatches").as[String] shouldBe "partial"
-        (json \ "business" \ "matchedAccountName").as[String] shouldBe "Robert Ltd"
+        (json \ "business" \ "nameMatches").as[String] shouldBe "yes"
+        (json \ "business" \ "matchedAccountName").isDefined shouldBe false
         (json \ "business" \ "sortCodeBankName").as[String] shouldBe "sort-code-bank-name-business"
         (json \ "business" \ "iban").asOpt[String] shouldBe Some("some-iban")
       }

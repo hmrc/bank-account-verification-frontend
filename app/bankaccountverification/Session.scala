@@ -33,7 +33,7 @@ package bankaccountverification
  */
 
 import bankaccountverification.api._
-import bankaccountverification.connector.ReputationResponseEnum.{Error, Indeterminate}
+import bankaccountverification.connector.ReputationResponseEnum.{Error, Indeterminate, Partial, Yes}
 import bankaccountverification.connector._
 import bankaccountverification.web.AccountTypeRequestEnum
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
@@ -106,10 +106,11 @@ object PersonalAccountDetails {
                 address.map(a => CompleteResponseAddress(a.lines, a.town, a.postcode)),
                 accountName, sortCode, accountNumber,
                 maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get,
-                rollNumber, accountExists, nameMatches,
+                rollNumber, accountExists,
+                nameMatches.map(nm => if (nm == Partial) Yes else nm),
                 Some(Indeterminate), Some(Indeterminate), Some(Indeterminate), // Hardcode these to be indeterminate (TAV-458)
                 nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit,
-                sortCodeSupportsDirectCredit, matchedAccountName)),
+                sortCodeSupportsDirectCredit, None)),
             None))
       case _ => None
     }
@@ -140,7 +141,12 @@ object PersonalAccountDetails {
           CompleteV2Response(
             Personal,
             Some(
-              api.PersonalCompleteV2Response(accountName, sortCode, accountNumber, maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get, rollNumber, accountExists, nameMatches, nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit, sortCodeSupportsDirectCredit, iban, matchedAccountName)),
+              api.PersonalCompleteV2Response(accountName, sortCode, accountNumber,
+                maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get,
+                rollNumber, accountExists,
+                nameMatches.map(nm => if (nm == Partial) Yes else nm),
+                nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit,
+                sortCodeSupportsDirectCredit, iban, None)),
             None))
       case _ => None
     }
@@ -190,10 +196,10 @@ object BusinessAccountDetails {
                 companyName, sortCode, accountNumber, rollNumber,
                 maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get,
                 accountExists,
-                nameMatches.orElse(companyNameMatches),
+                nameMatches.orElse(companyNameMatches).map(nm => if (nm == Partial) Yes else nm),
                 Some(Indeterminate), Some(Indeterminate), // Hardcode these to be indeterminate (TAV-458)
                 nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit,
-                sortCodeSupportsDirectCredit, matchedAccountName))))
+                sortCodeSupportsDirectCredit, None))))
       case _ =>
         None
     }
@@ -226,7 +232,11 @@ object BusinessAccountDetails {
             Business,
             None,
             Some(
-              BusinessCompleteV2Response(companyName, sortCode, accountNumber, rollNumber, maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get, accountExists, nameMatches.orElse(companyNameMatches), nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit, sortCodeSupportsDirectCredit, iban, matchedAccountName))))
+              BusinessCompleteV2Response(companyName, sortCode, accountNumber, rollNumber,
+                maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get, accountExists,
+                nameMatches.orElse(companyNameMatches).map(nm => if (nm == Partial) Yes else nm),
+                nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit,
+                sortCodeSupportsDirectCredit, iban, None))))
       case _ =>
         None
     }
