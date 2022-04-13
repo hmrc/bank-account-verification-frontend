@@ -20,15 +20,15 @@ import bankaccountverification.connector.ReputationResponseEnum
 import bankaccountverification.web.AccountTypeRequestEnum
 import play.api.libs.json.{Json, OWrites, Reads}
 
-case class CompleteV2Response(accountType: AccountTypeRequestEnum, personal: Option[PersonalCompleteV2Response],
-                            business: Option[BusinessCompleteV2Response])
+case class CompleteV3Response(accountType: AccountTypeRequestEnum, personal: Option[PersonalCompleteV3Response],
+                            business: Option[BusinessCompleteV3Response])
 
-object CompleteV2Response {
-  implicit val completeResponseWrites: OWrites[CompleteV2Response] = Json.writes[CompleteV2Response]
-  implicit val completeResponseReads: Reads[CompleteV2Response] = Json.reads[CompleteV2Response]
+object CompleteV3Response {
+  implicit val completeResponseWrites: OWrites[CompleteV3Response] = Json.writes[CompleteV3Response]
+  implicit val completeResponseReads: Reads[CompleteV3Response] = Json.reads[CompleteV3Response]
 }
 
-case class PersonalCompleteV2Response(accountName: String,
+case class PersonalCompleteV3Response(accountName: String,
                                       sortCode: String,
                                       accountNumber: String,
                                       accountNumberIsWellFormatted: ReputationResponseEnum,
@@ -39,14 +39,15 @@ case class PersonalCompleteV2Response(accountName: String,
                                       sortCodeBankName: Option[String] = None,
                                       sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None,
                                       sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None,
-                                      iban: Option[String] = None)
+                                      iban: Option[String] = None,
+                                      matchedAccountName: Option[String] = None)
 
-object PersonalCompleteV2Response {
-  implicit val completeResponseWrites: OWrites[PersonalCompleteV2Response] = Json.writes[PersonalCompleteV2Response]
-  implicit val completeResponseReads: Reads[PersonalCompleteV2Response] = Json.reads[PersonalCompleteV2Response]
+object PersonalCompleteV3Response {
+  implicit val completeResponseWrites: OWrites[PersonalCompleteV3Response] = Json.writes[PersonalCompleteV3Response]
+  implicit val completeResponseReads: Reads[PersonalCompleteV3Response] = Json.reads[PersonalCompleteV3Response]
 }
 
-case class BusinessCompleteV2Response(companyName: String,
+case class BusinessCompleteV3Response(companyName: String,
                                       sortCode: String,
                                       accountNumber: String,
                                       rollNumber: Option[String] = None,
@@ -57,9 +58,10 @@ case class BusinessCompleteV2Response(companyName: String,
                                       sortCodeBankName: Option[String] = None,
                                       sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None,
                                       sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None,
-                                      iban: Option[String] = None)
+                                      iban: Option[String] = None,
+                                      matchedAccountName: Option[String] = None)
 
-object BusinessCompleteV2Response {
-  implicit val completeResponseWrites: OWrites[BusinessCompleteV2Response] = Json.writes[BusinessCompleteV2Response]
-  implicit val completeResponseReads: Reads[BusinessCompleteV2Response] = Json.reads[BusinessCompleteV2Response]
+object BusinessCompleteV3Response {
+  implicit val completeResponseWrites: OWrites[BusinessCompleteV3Response] = Json.writes[BusinessCompleteV3Response]
+  implicit val completeResponseReads: Reads[BusinessCompleteV3Response] = Json.reads[BusinessCompleteV3Response]
 }

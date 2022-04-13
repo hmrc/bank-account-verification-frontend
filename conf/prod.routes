@@ -5,6 +5,9 @@ GET         /api/complete/:journeyId        bankaccountverification.api.ApiContr
 + nocsrf
 POST        /api/v2/init                    bankaccountverification.api.ApiV2Controller.init
 GET         /api/v2/complete/:journeyId     bankaccountverification.api.ApiV2Controller.complete(journeyId)
++ nocsrf
+POST        /api/v3/init                    bankaccountverification.api.ApiV3Controller.init
+GET         /api/v3/complete/:journeyId     bankaccountverification.api.ApiV3Controller.complete(journeyId)
 
 ->          /bank-account-verification      app.Routes
 ->          /                               health.Routes

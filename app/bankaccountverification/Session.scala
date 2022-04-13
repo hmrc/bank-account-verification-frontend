@@ -63,6 +63,12 @@ object Session {
       case Some(AccountTypeRequestEnum.Personal) => PersonalAccountDetails.toCompleteV2Response(session).map(Json.toJson(_))
       case Some(AccountTypeRequestEnum.Business) => BusinessAccountDetails.toCompleteV2Response(session).map(Json.toJson(_))
     }
+
+  def toCompleteV3ResponseJson(session: Session): Option[JsValue] =
+    session.accountType match {
+      case Some(AccountTypeRequestEnum.Personal) => PersonalAccountDetails.toCompleteV3Response(session).map(Json.toJson(_))
+      case Some(AccountTypeRequestEnum.Business) => BusinessAccountDetails.toCompleteV3Response(session).map(Json.toJson(_))
+    }
 }
 
 case class PersonalAccountDetails(accountName: Option[String], sortCode: Option[String], accountNumber: Option[String], rollNumber: Option[String] = None, accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None, accountNumberIsWellFormatted: Option[ReputationResponseEnum] = None, accountExists: Option[ReputationResponseEnum] = None, nameMatches: Option[ReputationResponseEnum] = None, nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None, sortCodeBankName: Option[String] = None, sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None, sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None, iban: Option[String], matchedAccountName: Option[String])
@@ -110,7 +116,7 @@ object PersonalAccountDetails {
                 nameMatches.map(nm => if (nm == Partial) Yes else nm),
                 Some(Indeterminate), Some(Indeterminate), Some(Indeterminate), // Hardcode these to be indeterminate (TAV-458)
                 nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit,
-                sortCodeSupportsDirectCredit, None)),
+                sortCodeSupportsDirectCredit)),
             None))
       case _ => None
     }
@@ -146,7 +152,43 @@ object PersonalAccountDetails {
                 rollNumber, accountExists,
                 nameMatches.map(nm => if (nm == Partial) Yes else nm),
                 nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit,
-                sortCodeSupportsDirectCredit, iban, None)),
+                sortCodeSupportsDirectCredit, iban)),
+            None))
+      case _ => None
+    }
+
+  def toCompleteV3Response(session: Session): Option[CompleteV3Response] =
+    session match {
+      case Session(
+      _,
+      address,
+      Some(PersonalAccountDetails(
+      Some(accountName),
+      Some(sortCode),
+      Some(accountNumber),
+      rollNumber,
+      maybeAccountNumberWithSortCodeIsValid,
+      maybeAccountNumberIsWellFormatted,
+      accountExists,
+      nameMatches,
+      nonStandardAccountDetailsRequiredForBacs,
+      sortCodeBankName,
+      sortCodeSupportsDirectDebit,
+      sortCodeSupportsDirectCredit,
+      iban,
+      matchedAccountName)),
+      _
+      ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
+        Some(
+          CompleteV3Response(
+            Personal,
+            Some(
+              api.PersonalCompleteV3Response(accountName, sortCode, accountNumber,
+                maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get,
+                rollNumber, accountExists,
+                nameMatches,
+                nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit,
+                sortCodeSupportsDirectCredit, iban, matchedAccountName)),
             None))
       case _ => None
     }
@@ -199,7 +241,7 @@ object BusinessAccountDetails {
                 nameMatches.orElse(companyNameMatches).map(nm => if (nm == Partial) Yes else nm),
                 Some(Indeterminate), Some(Indeterminate), // Hardcode these to be indeterminate (TAV-458)
                 nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit,
-                sortCodeSupportsDirectCredit, None))))
+                sortCodeSupportsDirectCredit))))
       case _ =>
         None
     }
@@ -236,7 +278,44 @@ object BusinessAccountDetails {
                 maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get, accountExists,
                 nameMatches.orElse(companyNameMatches).map(nm => if (nm == Partial) Yes else nm),
                 nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit,
-                sortCodeSupportsDirectCredit, iban, None))))
+                sortCodeSupportsDirectCredit, iban))))
+      case _ =>
+        None
+    }
+
+  def toCompleteV3Response(session: Session): Option[CompleteV3Response] =
+    session match {
+      case Session(
+      _,
+      address,
+      _,
+      Some(BusinessAccountDetails(
+      Some(companyName),
+      Some(sortCode),
+      Some(accountNumber),
+      rollNumber,
+      maybeAccountNumberWithSortCodeIsValid,
+      maybeAccountNumberIsWellFormatted,
+      accountExists,
+      companyNameMatches,
+      nameMatches,
+      nonStandardAccountDetailsRequiredForBacs,
+      sortCodeBankName,
+      sortCodeSupportsDirectDebit,
+      sortCodeSupportsDirectCredit,
+      iban,
+      matchedAccountName))
+      ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
+        Some(
+          CompleteV3Response(
+            Business,
+            None,
+            Some(
+              BusinessCompleteV3Response(companyName, sortCode, accountNumber, rollNumber,
+                maybeAccountNumberIsWellFormatted.orElse(maybeAccountNumberWithSortCodeIsValid).get, accountExists,
+                nameMatches.orElse(companyNameMatches),
+                nonStandardAccountDetailsRequiredForBacs, sortCodeBankName, sortCodeSupportsDirectDebit,
+                sortCodeSupportsDirectCredit, iban, matchedAccountName))))
       case _ =>
         None
     }
