@@ -24,13 +24,15 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 
-import java.time.LocalDateTime
+import java.time.{Instant, LocalDateTime, ZoneId}
 
 class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
+  val clock = java.time.Clock.tickMillis(ZoneId.systemDefault())
+
   "Journey" when {
     "PersonalAccountDetails" should {
       val id = ObjectId.get()
-      val theExpiryDate = LocalDateTime.now
+      val theExpiryDate = LocalDateTime.ofInstant(Instant.now(clock), clock.getZone)
       val personalJourney = Journey(
         id = id,
         Some("1234"),
@@ -98,7 +100,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
 
     "BusinessAccountDetails" should {
       val id = ObjectId.get()
-      val theExpiryDate = LocalDateTime.now
+      val theExpiryDate = LocalDateTime.ofInstant(Instant.now(clock), clock.getZone)
       val businessJourney = Journey(
         id = id,
         Some("1234"),
