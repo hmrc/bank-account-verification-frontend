@@ -29,8 +29,7 @@ import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
 @Singleton
@@ -42,7 +41,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
                                                verificationService: VerificationService,
                                                withCustomisations: ActionWithCustomisationsProvider,
                                                auditConnector: AuditConnector
-                                              ) extends FrontendController(mcc) {
+                                              )(implicit ec: ExecutionContext) extends FrontendController(mcc) {
   private val logger = Logger(this.getClass)
 
   implicit val config: AppConfig = appConfig

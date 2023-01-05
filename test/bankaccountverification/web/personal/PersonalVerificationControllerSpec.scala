@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import play.api.Application
 import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
@@ -44,8 +43,9 @@ import uk.gov.hmrc.http.HttpException
 
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.language.postfixOps
 import scala.util.{Failure, Success}
 
 class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite {
@@ -64,6 +64,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
       .overrides(bind[JourneyRepository].toInstance(mockRepository))
       .overrides(bind[VerificationService].toInstance(mockService))
       .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
+      .overrides(bind[ExecutionContext].toInstance(implicitly[ExecutionContext]))
       .build()
   }
 
@@ -311,8 +312,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(form))
 
-        import PersonalVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}").withJsonBody(Json.toJson(data))
+        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
+          .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq : _*)
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -349,8 +350,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(formWithErrors))
 
-        import PersonalVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}").withJsonBody(Json.toJson(data))
+        val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}")
+          .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -384,8 +385,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.assessPersonal(any(), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
         when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
-        import PersonalVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}").withJsonBody(Json.toJson(data))
+        val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}")
+          .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -419,8 +420,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
         when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
-        import PersonalVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}").withJsonBody(Json.toJson(data))
+        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
+          .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -458,8 +459,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
         when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
 
-        import PersonalVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}").withJsonBody(Json.toJson(data))
+        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
+          .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
           .withSession(Journey.callCountSessionKey -> "0")
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
@@ -489,8 +490,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
         when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
 
-        import PersonalVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}").withJsonBody(Json.toJson(data))
+        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
+          .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
           .withSession(Journey.callCountSessionKey -> "1")
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
@@ -520,8 +521,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
         when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
-        import PersonalVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}").withJsonBody(Json.toJson(data))
+        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
+          .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
           .withSession(Journey.callCountSessionKey -> "0")
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
@@ -551,8 +552,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
         when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
-        import PersonalVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}").withJsonBody(Json.toJson(data))
+        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
+          .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
           .withSession(Journey.callCountSessionKey -> "1")
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
@@ -582,8 +583,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
         when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
-        import PersonalVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}").withJsonBody(Json.toJson(data))
+        val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
+          .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
           .withSession(Journey.callCountSessionKey -> "1")
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)

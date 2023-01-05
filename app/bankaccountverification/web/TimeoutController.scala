@@ -27,8 +27,7 @@ import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 import java.io.File
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton
@@ -37,7 +36,7 @@ class TimeoutController @Inject()(appConfig: AppConfig,
                                   journeyRepository: JourneyRepository,
                                   val authConnector: AuthConnector,
                                   errorTemplate: ErrorTemplate,
-                                  withCustomisations: ActionWithCustomisationsProvider)
+                                  withCustomisations: ActionWithCustomisationsProvider)(implicit ec: ExecutionContext)
   extends FrontendApiController(mcc) with I18nSupport with AuthorisedFunctions {
 
   implicit val config: AppConfig = appConfig

@@ -74,7 +74,9 @@ class ActionWithCustomisationsProvider @Inject()(val messagesApi: MessagesApi,
 
               case Failure(_) => Future.successful(Left(BadRequest))
             }
-        } recoverWith { case _ => Future.successful(Left(Unauthorized(unauthorisedError(request)))) }
+        } recoverWith { case _ =>
+          Future.successful(Left(Unauthorized(unauthorisedError(request))))
+        }
       }
     }
 
