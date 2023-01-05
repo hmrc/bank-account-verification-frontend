@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,9 @@ import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite {
   implicit val timeout: FiniteDuration = 1 second
@@ -58,6 +59,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
       .overrides(bind[JourneyRepository].toInstance(mockRepository))
       .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
       .overrides(bind[VerificationService].toInstance(mockService))
+      .overrides(bind[ExecutionContext].toInstance(implicitly[ExecutionContext]))
       .build()
   }
 

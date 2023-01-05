@@ -27,8 +27,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton
@@ -36,7 +35,7 @@ class ApiController @Inject()(appConfig: AppConfig,
                               accessChecker: AccessChecker,
                               mcc: MessagesControllerComponents,
                               journeyRepository: JourneyRepository,
-                              val authConnector: AuthConnector)
+                              val authConnector: AuthConnector)(implicit ec: ExecutionContext)
     extends FrontendApiController(mcc) with AuthorisedFunctions {
 
   implicit val config: AppConfig = appConfig

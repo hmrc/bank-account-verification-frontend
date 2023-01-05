@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import play.api.Application
 import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
@@ -44,8 +43,9 @@ import uk.gov.hmrc.http.HttpException
 
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
 import scala.util.{Failure, Success}
 
 class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite {
@@ -64,6 +64,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
       .overrides(bind[JourneyRepository].toInstance(mockRepository))
       .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
       .overrides(bind[VerificationService].toInstance(mockService))
+      .overrides(bind[ExecutionContext].toInstance(implicitly[ExecutionContext]))
       .build()
   }
 
@@ -257,7 +258,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
               business = Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None)))))))
 
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
-          .withBody(data)
+          .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
         status(result) shouldBe Status.NOT_FOUND
@@ -283,7 +284,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
               business = Some(BusinessAccountDetails(companyName = Some("some company name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None)))))))
 
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
-          .withBody(data)
+          .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
         status(result) shouldBe Status.BAD_REQUEST
@@ -312,8 +313,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(form))
 
-        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data))
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
+          .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -351,7 +352,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(formWithErrors))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data))
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
+          .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -385,7 +387,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data))
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
+          .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -419,7 +422,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data))
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
+          .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -456,7 +460,9 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data)).withSession(Journey.callCountSessionKey -> "0")
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
+          .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
+          .withSession(Journey.callCountSessionKey -> "0")
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -485,7 +491,9 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data)).withSession(Journey.callCountSessionKey -> "1")
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
+          .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
+          .withSession(Journey.callCountSessionKey -> "1")
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -514,7 +522,9 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data)).withSession(Journey.callCountSessionKey -> "0")
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
+          .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
+          .withSession(Journey.callCountSessionKey -> "0")
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -543,7 +553,9 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data)).withSession(Journey.callCountSessionKey -> "1")
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
+          .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
+          .withSession(Journey.callCountSessionKey -> "1")
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -572,7 +584,9 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
 
         import BusinessVerificationRequest.formats.bankAccountDetailsWrites
-        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}").withJsonBody(Json.toJson(data)).withSession(Journey.callCountSessionKey -> "1")
+        val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
+          .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
+          .withSession(Journey.callCountSessionKey -> "1")
 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 

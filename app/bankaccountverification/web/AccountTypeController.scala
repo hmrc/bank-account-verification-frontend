@@ -27,8 +27,7 @@ import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AccountTypeController @Inject()(val appConfig: AppConfig,
@@ -37,7 +36,7 @@ class AccountTypeController @Inject()(val appConfig: AppConfig,
                                       accountTypeView: AccountTypeView,
                                       verificationService: VerificationService,
                                       withCustomisations: ActionWithCustomisationsProvider
-                                     ) extends FrontendController(mcc) {
+                                     )(implicit ec: ExecutionContext) extends FrontendController(mcc) {
 
   private val logger = Logger(this.getClass)
 

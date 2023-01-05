@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,10 @@ import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 
 import java.time.{Instant, LocalDateTime, ZoneId}
+import scala.language.postfixOps
 
 class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
-  val clock = java.time.Clock.tickMillis(ZoneId.systemDefault())
+  val clock = java.time.Clock.tickSeconds(ZoneId.systemDefault())
 
   "Journey" when {
     "PersonalAccountDetails" should {
