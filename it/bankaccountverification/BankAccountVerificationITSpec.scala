@@ -40,7 +40,6 @@ import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import play.api.test._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.internalId
 
 import scala.concurrent.Future
 import scala.util.Success
@@ -72,7 +71,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
         .thenReturn(Future.successful("1234"))
 
-    when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any(), any())(any(), any())).thenReturn(
+    when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
         Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Partial, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban"), Some("account-name")))))
 
@@ -152,7 +151,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
     when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
         .thenReturn(Future.successful("1234"))
 
-    when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
+    when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Partial, Yes, No, Some(No), None, Some("account-name")))))
 
     val wsClient = app.injector.instanceOf[WSClient]
@@ -234,7 +233,7 @@ class BankAccountVerificationITSpec() extends AnyWordSpec with GuiceOneServerPer
   }
 
   "BankAccountVerification with prepopulated account type, skipping account type screen" in {
-    when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any(), any())(any(), any())).thenReturn(
+    when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
         Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban"), None))))
 

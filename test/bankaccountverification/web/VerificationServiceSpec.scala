@@ -51,7 +51,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     val assessResult =
       Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Yes, Yes, Yes, Yes, Some(No), None, None, None))
 
-    when(mockConnector.assessPersonal(any(), any(), any(), any(), any())(any(), any())).thenReturn(Future.successful
+    when(mockConnector.assessPersonal(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(Future.successful
     (assessResult))
 
     "a valid address is provided" should {
@@ -61,7 +61,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       "strip the dashes from the sort code and pass address as is" in {
         await(service.assessPersonal(userInput, Some(inputAddress), "example-service"))
 
-        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"),
+        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"), meq(None),
           meq(Some(expectedBarsAddress)), meq("example-service"))(any(), any())
       }
     }
@@ -73,7 +73,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       "modify the address to one with a single non-empty line" in {
         await(service.assessPersonal(userInput, Some(inputAddress), "example-service"))
 
-        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"),
+        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"), meq(None),
           meq(Some(expectedBarsAddress)), meq("example-service"))(any(), any())
       }
     }
@@ -85,7 +85,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       "modify the address to one with a single non-empty line" in {
         await(service.assessPersonal(userInput, Some(inputAddress), "example-service"))
 
-        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"),
+        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"), meq(None),
           meq(Some(expectedBarsAddress)), meq("example-service"))(any(), any())
       }
     }
@@ -98,7 +98,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         clearInvocations(mockConnector)
         await(service.assessPersonal(userInput, Some(inputAddress), "example-service"))
 
-        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"),
+        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"), meq(None),
           meq(Some(expectedBarsAddress)), meq("example-service"))(any(), any())
       }
     }
@@ -111,7 +111,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         clearInvocations(mockConnector)
         await(service.assessPersonal(userInput, Some(inputAddress), "example-service"))
 
-        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"),
+        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"), meq(None),
           meq(Some(expectedBarsAddress)), meq("example-service"))(any(), any())
       }
     }
@@ -124,7 +124,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         clearInvocations(mockConnector)
         await(service.assessPersonal(userInput, Some(inputAddress), "example-service"))
 
-        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"),
+        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"), meq(None),
           meq(Some(expectedBarsAddress)), meq("example-service"))(any(), any())
       }
     }
@@ -146,6 +146,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         verify(mockConnector).assessPersonal(meq("Bob"),
           meq("203040"),
           meq("12345678"),
+          meq(None),
           meq(Some(expectedBarsAddress)), meq("example-service"))(any(), any())
       }
     }
@@ -166,6 +167,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         verify(mockConnector).assessPersonal(meq("Bob"),
           meq("203040"),
           meq("12345678"),
+          meq(None),
           meq(Some(expectedBarsAddress)), meq("example-service"))(any(), any())
       }
     }
@@ -178,7 +180,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         clearInvocations(mockConnector)
         await(service.assessPersonal(userInput, Some(inputAddress), "example-service"))
 
-        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"),
+        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"), meq(None),
           meq(Some(expectedBarsAddress)), meq("example-service"))(any(), any())
       }
     }
@@ -193,7 +195,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         clearInvocations(mockConnector)
         await(service.assessPersonal(userInput, Some(inputAddress), "example-service"))
 
-        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"),
+        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"), meq(None),
           meq(Some(expectedBarsAddress)), meq("example-service"))(any(), any())
       }
     }
@@ -202,7 +204,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       "modify the address to one with a single non-empty line" in {
         await(service.assessPersonal(userInput, None, "example-service"))
 
-        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"),
+        verify(mockConnector).assessPersonal(meq("Bob"), meq("203040"), meq("12345678"), meq(None),
           meq(None), meq("example-service"))(any(), any())
       }
     }
@@ -308,7 +310,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
     val assessResult = Future.successful(
       Success(BarsBusinessAssessSuccessResponse(Yes, Yes, None, Yes, Yes, No, No, Some(No), None, None)))
 
-    when(mockConnector.assessBusiness(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(assessResult)
+    when(mockConnector.assessBusiness(any(), any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(assessResult)
 
     "a valid address is provided" should {
       val inputAddress = Some(Address(List("line1", "line2"), Some("town"), Some("postcode")))
@@ -319,7 +321,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         await(service.assessBusiness(userInput, inputAddress,"example-service"))
 
         verify(mockConnector).assessBusiness(meq("Bob Company"), meq(None), meq("203040"), meq
-        ("12345678"), meq(expectedBarsAddress), meq("example-service"))(any(), any())
+        ("12345678"), meq(None), meq(expectedBarsAddress), meq("example-service"))(any(), any())
       }
     }
 
@@ -331,8 +333,8 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         clearInvocations(mockConnector)
         await(service.assessBusiness(userInput, inputAddress,"example-service"))
 
-        verify(mockConnector).assessBusiness(meq("Bob Company"), meq(None), meq("203040"), meq
-        ("12345678"), meq(expectedBarsAddress), meq("example-service"))(any(), any())
+        verify(mockConnector).assessBusiness(meq("Bob Company"), meq(None), meq("203040"), meq("12345678"), meq(None),
+          meq(expectedBarsAddress), meq("example-service"))(any(), any())
       }
     }
 
@@ -345,7 +347,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         await(service.assessBusiness(userInput, inputAddress,"example-service"))
 
         verify(mockConnector).assessBusiness(meq("Bob Company"), meq(None), meq("203040"), meq
-        ("12345678"), meq(expectedBarsAddress), meq("example-service"))(any(), any())
+        ("12345678"), meq(None), meq(expectedBarsAddress), meq("example-service"))(any(), any())
       }
     }
 
@@ -360,7 +362,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         await(service.assessBusiness(userInput, inputAddress,"example-service"))
 
         verify(mockConnector).assessBusiness(meq("Bob Company"), meq(None), meq("203040"), meq
-        ("12345678"), meq(expectedBarsAddress), meq("example-service"))(any(), any())
+        ("12345678"), meq(None), meq(expectedBarsAddress), meq("example-service"))(any(), any())
       }
     }
 
@@ -373,7 +375,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         await(service.assessBusiness(userInput, inputAddress,"example-service"))
 
         verify(mockConnector).assessBusiness(meq("Bob Company"), meq(None), meq("203040"), meq
-        ("12345678"), meq(expectedBarsAddress), meq("example-service"))(any(), any())
+        ("12345678"), meq(None), meq(expectedBarsAddress), meq("example-service"))(any(), any())
       }
     }
 
@@ -386,7 +388,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         await(service.assessBusiness(userInput, inputAddress,"example-service"))
 
         verify(mockConnector).assessBusiness(meq("Bob Company"), meq(None), meq("203040"), meq
-        ("12345678"), meq(expectedBarsAddress), meq("example-service"))(any(), any())
+        ("12345678"), meq(None), meq(expectedBarsAddress), meq("example-service"))(any(), any())
       }
     }
 
@@ -408,6 +410,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
           meq(None),
           meq("203040"),
           meq("12345678"),
+          meq(None),
           meq(expectedBarsAddress),
           meq("example-service"))(any(), any())
       }
@@ -430,6 +433,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
           meq(None),
           meq("203040"),
           meq("12345678"),
+          meq(None),
           meq(expectedBarsAddress),
           meq("example-service"))(any(), any())
       }
@@ -444,7 +448,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         await(service.assessBusiness(userInput, inputAddress,"example-service"))
 
         verify(mockConnector).assessBusiness(meq("Bob Company"), meq(None), meq("203040"), meq
-        ("12345678"), meq(expectedBarsAddress), meq("example-service"))(any(), any())
+        ("12345678"), meq(None), meq(expectedBarsAddress), meq("example-service"))(any(), any())
       }
     }
 
@@ -459,7 +463,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         await(service.assessBusiness(userInput, inputAddress,"example-service"))
 
         verify(mockConnector).assessBusiness(meq("Bob Company"), meq(None), meq("203040"), meq
-        ("12345678"), meq(expectedBarsAddress), meq("example-service"))(any(), any())
+        ("12345678"), meq(None), meq(expectedBarsAddress), meq("example-service"))(any(), any())
       }
     }
 
@@ -471,7 +475,7 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         await(service.assessBusiness(userInput, inputAddress,"example-service"))
 
         verify(mockConnector).assessBusiness(meq("Bob Company"), meq(None), meq("203040"), meq
-        ("12345678"), meq(expectedBarsAddress), meq("example-service"))(any(), any())
+        ("12345678"), meq(None), meq(expectedBarsAddress), meq("example-service"))(any(), any())
       }
     }
   }

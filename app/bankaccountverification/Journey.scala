@@ -17,7 +17,7 @@
 package bankaccountverification
 
 import bankaccountverification.BACSRequirements.defaultBACSRequirements
-import bankaccountverification.connector.{Enumerable, ReputationResponseEnum}
+import bankaccountverification.connector.ReputationResponseEnum
 import bankaccountverification.web.AccountTypeRequestEnum
 import org.bson.types.ObjectId
 import play.api.libs.functional.syntax._

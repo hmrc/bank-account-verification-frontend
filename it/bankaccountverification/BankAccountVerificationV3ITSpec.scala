@@ -71,7 +71,7 @@ class BankAccountVerificationV3ITSpec() extends AnyWordSpec with GuiceOneServerP
     when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
       .thenReturn(Future.successful("1234"))
 
-    when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any(), any())(any(), any())).thenReturn(
+    when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
         Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Partial, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban"), Some("some-account")))))
 
@@ -135,7 +135,7 @@ class BankAccountVerificationV3ITSpec() extends AnyWordSpec with GuiceOneServerP
     when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
       .thenReturn(Future.successful("1234"))
 
-    when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
+    when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Partial, Yes, No, Some(No), None, Some("some-company")))))
 
     val wsClient = app.injector.instanceOf[WSClient]
@@ -168,8 +168,8 @@ class BankAccountVerificationV3ITSpec() extends AnyWordSpec with GuiceOneServerP
           .post(atformData))
 
     val bankAccountDetails =
-      BusinessVerificationRequest("some-company-name", "12-12-12", "12349876", None)
-    val formData = getCCParams(bankAccountDetails) ++ Map("rollNumber" -> Seq())
+      BusinessVerificationRequest("some-company-name", "12-12-12", "12349876", Some("AB123"))
+    val formData = getCCParams(bankAccountDetails) ++ Map("rollNumber" -> Seq("AB123"))
     val verifyUrl = s"$baseUrl/bank-account-verification/verify/business/${response.journeyId}"
 
     val request = FakeRequest().withCSRFToken
@@ -192,7 +192,7 @@ class BankAccountVerificationV3ITSpec() extends AnyWordSpec with GuiceOneServerP
       CompleteV3Response(
         accountType = Business,
         business = Some(
-          BusinessCompleteV3Response("some-company-name", "121212", "12349876", rollNumber = None, accountNumberIsWellFormatted = Yes, accountExists = Some(Indeterminate), nameMatches = Some(Partial), nonStandardAccountDetailsRequiredForBacs = Some(No), sortCodeBankName = Some("sort-code-bank-name-business"), Some(Yes), Some(No), None, Some("some-company"))
+          BusinessCompleteV3Response("some-company-name", "121212", "12349876", rollNumber = Some("AB123"), accountNumberIsWellFormatted = Yes, accountExists = Some(Indeterminate), nameMatches = Some(Partial), nonStandardAccountDetailsRequiredForBacs = Some(No), sortCodeBankName = Some("sort-code-bank-name-business"), Some(Yes), Some(No), None, Some("some-company"))
         ),
         personal = None
       )
@@ -200,7 +200,7 @@ class BankAccountVerificationV3ITSpec() extends AnyWordSpec with GuiceOneServerP
   }
 
   "BankAccountVerification with prepopulated account type, skipping account type screen" in {
-    when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any(), any())(any(), any())).thenReturn(
+    when(mockBankAccountReputationConnector.assessPersonal(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(
         Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Indeterminate, Yes, Yes, Yes, Some(No), Some("sort-code-bank-name-personal"), Some("iban"), None))))
 
