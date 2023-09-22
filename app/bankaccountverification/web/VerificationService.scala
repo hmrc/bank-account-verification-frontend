@@ -42,6 +42,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
       request.accountName,
       request.sortCode,
       request.accountNumber,
+      request.rollNumber,
       address.map(a => BarsAddress(a.lines, a.town, a.postcode)),
       callingClient)
 
@@ -78,6 +79,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
       None,
       request.sortCode,
       request.accountNumber,
+      request.rollNumber,
       address.map(a => BarsAddress(a.lines, a.town, a.postcode)), callingClient)
 
   def processBusinessAssessResponse(journeyId: ObjectId,

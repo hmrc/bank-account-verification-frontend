@@ -41,7 +41,8 @@ object BarsBusiness {
 
 case class BarsAccount(
                         sortCode: String, // The bank sort code, 6 characters long (whitespace and/or dashes should be removed)
-                        accountNumber: String // The bank account number, 8 characters long
+                        accountNumber: String, // The bank account number, 8 characters long,
+                        rollNumber: Option[String]
                       )
 
 object BarsAccount {

@@ -65,7 +65,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         implicit val hc = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
-        val response = await(connector.assessPersonal("Mr Joe Bloggs", "20-30-40", "12345678", None, "example-service"))
+        val response = await(connector.assessPersonal("Mr Joe Bloggs", "20-30-40", "12345678", None, None, "example-service"))
         response shouldBe Success(
           BarsPersonalAssessSuccessResponse(Yes, Yes, Partial, Yes, Yes, Yes, Some(No), None, None, Some("Mr J Bloggs"))
         )
@@ -91,7 +91,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         implicit val hc = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
-        val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", None, "example-service"))
+        val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", None, None, "example-service"))
         response shouldBe a[Failure[_]]
       }
     }
@@ -107,7 +107,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         implicit val hc = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
-        val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", None, "example-service"))
+        val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", None, None, "example-service"))
         response shouldBe a[Failure[_]]
       }
     }
@@ -123,7 +123,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         implicit val hc = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
-        val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", None, "example-service"))
+        val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", None, None, "example-service"))
         response shouldBe a[Success[BarsPersonalAssessBadRequestResponse]]
       }
     }
@@ -138,7 +138,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         implicit val hc = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
-        val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", None, "example-service"))
+        val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", None, None, "example-service"))
         response shouldBe a[Failure[_]]
       }
     }
@@ -169,7 +169,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         implicit val hc = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
-        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, "example-service"))
+        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, None, "example-service"))
         response shouldBe Success(
           BarsBusinessAssessSuccessResponse(Yes, Yes, Some("Some Bank"), Yes, Partial, Yes, Yes, Some(No), None, Some("Some Co."))
         )
@@ -195,7 +195,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         implicit val hc = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
-        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, "example-service"))
+        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, None, "example-service"))
         response shouldBe a[Failure[_]]
       }
     }
@@ -211,7 +211,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         implicit val hc = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
-        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, "example-service"))
+        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, None, "example-service"))
         response shouldBe a[Failure[_]]
       }
     }
@@ -227,7 +227,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         implicit val hc = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
-        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, "example-service"))
+        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, None, "example-service"))
         response shouldBe a[Success[BarsBusinessAssessBadRequestResponse]]
       }
     }
@@ -242,7 +242,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
         implicit val hc = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
-        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, "example-service"))
+        val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, None, "example-service"))
         response shouldBe a[Failure[_]]
       }
     }
