@@ -16,7 +16,7 @@
 
 package bankaccountverification.api
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Partial, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.{TimeoutConfig, _}
@@ -40,7 +40,7 @@ import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.time.LocalDateTime
+import java.time.{Instant, LocalDateTime}
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Try
@@ -309,7 +309,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
         val returnData = Journey(
           journeyId,
           Some("1234"),
-          LocalDateTime.now,
+          Instant.now,
           "serviceIdentifier",
           "continueUrl",
           Session(
@@ -352,7 +352,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
         val returnData = Journey(
           journeyId,
           Some("1234"),
-          LocalDateTime.now,
+          Instant.now,
           "serviceIdentifier",
           "continueUrl",
           Session(
@@ -409,7 +409,7 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
         val returnData = Journey(
           journeyId,
           Some("1234"),
-          LocalDateTime.now,
+          Instant.now,
           "serviceIdentifier",
           "continueUrl",
           Session(

@@ -16,7 +16,7 @@
 
 package bankaccountverification.web
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import bankaccountverification._
 import bankaccountverification.web.AccountTypeRequestEnum.Personal
 import com.codahale.metrics.SharedMetricRegistries
@@ -36,7 +36,8 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 
-import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.time.{Instant, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -71,7 +72,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
     "the user is not logged in" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "return 401" in {
         reset(mockAuthConnector)
@@ -108,7 +109,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
     "there is a valid journey but it does not match this user" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "return 404" in {
         reset(mockAuthConnector)
@@ -128,7 +129,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
     "there is a valid journey and the user is logged in" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "return 200" in {
         reset(mockAuthConnector)
@@ -149,7 +150,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
     "account type is pre-populated" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "render account type view with the prepopulated account type" in {
         reset(mockAuthConnector)
@@ -208,7 +209,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
     "the journey is valid but does not match the current user" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "return 404" in {
         reset(mockAuthConnector)
@@ -230,7 +231,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
     "the journey is valid but there are form errors" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "return 400" in {
         reset(mockAuthConnector)
@@ -252,7 +253,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
     "the journey and form are valid, personal account type is selected" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "Redirect to the getAccountDetails endpoint" in {
         reset(mockAuthConnector)
@@ -281,7 +282,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
 
     "the journey and form are valid, business account type is selected" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "Redirect to the getAccountDetails endpoint" in {
         reset(mockAuthConnector)

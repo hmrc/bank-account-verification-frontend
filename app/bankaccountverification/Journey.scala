@@ -23,7 +23,9 @@ import org.bson.types.ObjectId
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
-import java.time.LocalDateTime
+
+import java.time.temporal.ChronoUnit
+import java.time.{Instant, LocalDateTime}
 
 
 case class BACSRequirements(directDebitRequired: Boolean, directCreditRequired: Boolean)
@@ -32,7 +34,7 @@ object BACSRequirements {
 }
 
 
-case class Journey(id: ObjectId, authProviderId: Option[String], expiryDate: LocalDateTime,
+case class Journey(id: ObjectId, authProviderId: Option[String], expiryDate: Instant,
                    serviceIdentifier: String, continueUrl: String, data: Session, messages: Option[JsObject] = None,
                    customisationsUrl: Option[String] = None, bacsRequirements: Option[BACSRequirements] = None,
                    timeoutConfig: Option[TimeoutConfig] = None, signOutUrl: Option[String] = None,
@@ -45,7 +47,7 @@ case class Journey(id: ObjectId, authProviderId: Option[String], expiryDate: Loc
 object Journey {
   def callCountSessionKey = "callCount"
 
-  def expiryDate: LocalDateTime = LocalDateTime.now.plusMinutes(60)
+  def expiryDate: Instant = Instant.now.plus(60, ChronoUnit.MINUTES)
 
   def createSession(address: Option[Address], prepopulatedData: Option[PrepopulatedData]): Session = {
     val session = Session(address = address)
@@ -75,7 +77,7 @@ object Journey {
       messages, customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl, maxCallCount, maxCallCountRedirectUrl)
 
   implicit val objectIdFormats: Format[ObjectId] = MongoFormats.objectIdFormat
-  implicit val datetimeFormat: Format[LocalDateTime] = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.localDateTimeFormat
+  implicit val datetimeFormat: Format[Instant] = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
 
   implicit val sessionAddressReads: Reads[Address] = Json.reads[Address]
   implicit val sessionAddressWrites: Writes[Address] = Json.writes[Address]
@@ -90,7 +92,7 @@ object Journey {
     (__ \ "_id")
       .read[ObjectId]
       .and((__ \ "authProviderId").readNullable[String])
-      .and((__ \ "expiryDate").read[LocalDateTime])
+      .and((__ \ "expiryDate").read[Instant])
       .and((__ \ "serviceIdentifier").read[String])
       .and((__ \ "continueUrl").read[String])
       .and((__ \ "data").read[Session])
@@ -104,7 +106,7 @@ object Journey {
         (
           id: ObjectId,
           authProviderId: Option[String],
-          expiryDate: LocalDateTime,
+          expiryDate: Instant,
           serviceIdentifier: String,
           continueUrl: String,
           data: Session,
@@ -123,7 +125,7 @@ object Journey {
     (__ \ "_id")
       .write[ObjectId]
       .and((__ \ "authProviderId").write[Option[String]])
-      .and((__ \ "expiryDate").write[LocalDateTime])
+      .and((__ \ "expiryDate").write[Instant])
       .and((__ \ "serviceIdentifier").write[String])
       .and((__ \ "continueUrl").write[String])
       .and((__ \ "data").write[Session])

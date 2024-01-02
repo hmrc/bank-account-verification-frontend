@@ -11,5 +11,3 @@ GET         /api/v3/complete/:journeyId     bankaccountverification.api.ApiV3Con
 
 ->          /bank-account-verification      app.Routes
 ->          /                               health.Routes
-
-GET         /admin/metrics                  com.kenshoo.play.metrics.MetricsController.metrics

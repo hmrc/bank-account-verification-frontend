@@ -16,7 +16,7 @@
 
 package bankaccountverification.web.personal
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import bankaccountverification._
 import bankaccountverification.connector.BarsPersonalAssessSuccessResponse
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
@@ -41,7 +41,8 @@ import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.http.HttpException
 
-import java.time.LocalDateTime
+import java.time.{Instant, LocalDateTime}
+import java.time.temporal.ChronoUnit
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -109,7 +110,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "there is a valid journey but for a different user" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "return 404" in {
         reset(mockAuthConnector)
@@ -128,7 +129,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "there is a valid journey but account type has not yet been selected" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "redirect to the account type screen" in {
         reset(mockAuthConnector)
@@ -148,7 +149,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "there is a valid journey" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "return 200" in {
         reset(mockAuthConnector)
@@ -171,7 +172,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "pre-populated data has been provided" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "the account details view should be pre-filled with this data" in {
         reset(mockAuthConnector)
@@ -236,7 +237,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "there is a valid journey but for a different user" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
       val data = PersonalVerificationRequest("", "", "")
 
       "return 404" in {
@@ -262,7 +263,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "the journey is valid but there are form errors" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
       val data = PersonalVerificationRequest("", "", "")
 
       "return 400" in {
@@ -288,7 +289,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "the journey is valid, a valid form is posted and the bars checks fail" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
       val data = PersonalVerificationRequest("Bob", "123456", "12345678")
 
       val form = PersonalVerificationRequest.form.fillAndValidate(data)
@@ -324,7 +325,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "the journey is valid, a valid form is posted and the bars checks indicate an issue" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
       val data = PersonalVerificationRequest("Bob", "123456", "12345678")
 
       val formWithErrors = PersonalVerificationRequest.form.fillAndValidate(data).withError("Error", "a.specific.error")
@@ -362,7 +363,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "the journey is valid, a valid form is posted and the bars checks pass and the account exists" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
       val data = PersonalVerificationRequest("Bob", "123456", "12345678")
 
       val form = PersonalVerificationRequest.form.fillAndValidate(data)
@@ -397,7 +398,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "the journey is valid, a valid form is posted and the bars checks pass but the account existence is indeterminate" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
       val data = PersonalVerificationRequest("Bobby", "123456", "12345678")
 
       val form = PersonalVerificationRequest.form.fillAndValidate(data)
@@ -433,7 +434,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
     "the maximum number of backend calls has been configured on the init call" should {
 
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
       val data = PersonalVerificationRequest("Bob", "123456", "12345678")
 
       val form = PersonalVerificationRequest.form.fillAndValidate(data)
@@ -635,7 +636,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
     "there is a valid journey but for a different user" should {
       "return a 404" in {
         val id = ObjectId.get()
-        val expiry = LocalDateTime.now.plusMinutes(60)
+        val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -654,7 +655,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
     "there is a valid journey but account details have not yet been entered" should {
       "return a 404" in {
         val id = ObjectId.get()
-        val expiry = LocalDateTime.now.plusMinutes(60)
+        val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -675,7 +676,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
     "there is a valid journey" should {
       "confirmation view is rendered correctly without a bank name" in {
         val id = ObjectId.get()
-        val expiry = LocalDateTime.now.plusMinutes(60)
+        val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -701,7 +702,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "confirmation view is rendered correctly with a bank name" in {
         val id = ObjectId.get()
-        val expiry = LocalDateTime.now.plusMinutes(60)
+        val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))

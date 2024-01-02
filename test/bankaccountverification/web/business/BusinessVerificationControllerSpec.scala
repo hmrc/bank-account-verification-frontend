@@ -16,7 +16,7 @@
 
 package bankaccountverification.web.business
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import bankaccountverification._
 import bankaccountverification.connector.BarsBusinessAssessSuccessResponse
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
@@ -41,7 +41,8 @@ import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.http.HttpException
 
-import java.time.LocalDateTime
+import java.time.{Instant, LocalDateTime}
+import java.time.temporal.ChronoUnit
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -75,7 +76,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
   "GET /verify/business" when {
     "the user is not logged in" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "return 401" in {
         reset(mockAuthConnector)
@@ -109,7 +110,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "there is a valid journey but for a different user" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "return 404" in {
         reset(mockAuthConnector)
@@ -133,7 +134,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "there is a valid journey but account type has not yet been selected" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "redirect to the account type screen" in {
         reset(mockAuthConnector)
@@ -153,7 +154,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "there is a valid journey" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "return 200" in {
         reset(mockAuthConnector)
@@ -178,7 +179,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "pre-populated data has been provided" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "the account details view should be pre-filled with this data" in {
         reset(mockAuthConnector)
@@ -241,7 +242,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "the journey is valid but for a different user" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       val data = BusinessVerificationRequest("", "", "", None)
 
@@ -267,7 +268,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "the journey is valid but there are form errors" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       val data = BusinessVerificationRequest("", "", "", None)
 
@@ -293,7 +294,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "the journey is valid, a valid form is posted and the bars call fails" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
       val data = BusinessVerificationRequest("some company name", "123456", "12345678", None)
 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
@@ -325,7 +326,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "the journey is valid, a valid form is posted and the bars checks indicate an issue" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
       val data = BusinessVerificationRequest("some company name", "123456", "12345678", None)
 
       val formWithErrors = BusinessVerificationRequest.form
@@ -364,7 +365,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "the journey is valid, a valid form is posted and the bars checks pass and the account existence is indeterminate" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
       val data = BusinessVerificationRequest("some company name 2", "123456", "12345678", None)
 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
@@ -399,7 +400,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "the journey is valid, a valid form is posted and the bars checks pass and the account exists" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
       val data = BusinessVerificationRequest("some company name", "123456", "12345678", None)
 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
@@ -434,7 +435,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
     "the maximum number of backend calls has been configured on the init call" should {
       val id = ObjectId.get()
-      val expiry = LocalDateTime.now.plusMinutes(60)
+      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
       val data = BusinessVerificationRequest("some company name 2", "123456", "12345678", None)
 
       val form = BusinessVerificationRequest.form.fillAndValidate(data)
@@ -639,7 +640,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
     "there is a valid journey but account details have not yet been entered" should {
       "return a 404" in {
         val id = ObjectId.get()
-        val expiry = LocalDateTime.now.plusMinutes(60)
+        val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -659,7 +660,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
     "there is a valid journey" should {
       "confirmation view is rendered correctly without a bank name" in {
         val id = ObjectId.get()
-        val expiry = LocalDateTime.now.plusMinutes(60)
+        val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
@@ -687,7 +688,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
       "confirmation view is rendered correctly with a bank name" in {
         val id = ObjectId.get()
-        val expiry = LocalDateTime.now.plusMinutes(60)
+        val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
         reset(mockAuthConnector)
         when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
