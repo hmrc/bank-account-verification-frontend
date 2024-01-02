@@ -1,5 +1,4 @@
 import uk.gov.hmrc.DefaultBuildSettings
-import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
 
 ThisBuild / scalaVersion := "2.13.12"
 ThisBuild / majorVersion := 0
@@ -23,4 +22,4 @@ lazy val microservice = Project(appName, file("."))
 lazy val it = project.in(file("it"))
   .enablePlugins(play.sbt.PlayScala)
   .dependsOn(microservice % "test->test")
-  .settings(DefaultBuildSettings.itSettings)
+  .settings(DefaultBuildSettings.itSettings())
