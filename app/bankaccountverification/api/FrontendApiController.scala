@@ -18,8 +18,8 @@ package bankaccountverification.api
 
 import play.api.mvc.{MessagesBaseController, MessagesControllerComponents, RequestHeader}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.controller.{Utf8MimeTypes, WithJsonBody}
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 trait FrontendApiBaseController
   extends MessagesBaseController
@@ -32,5 +32,5 @@ abstract class FrontendApiController(override val controllerComponents: Messages
 
 trait FrontendApiHeaderCarrierProvider {
   implicit protected def hc(implicit request: RequestHeader): HeaderCarrier =
-    HeaderCarrierConverter.fromHeadersAndSessionAndRequest(request.headers, None, Some(request))
+    HeaderCarrierConverter.fromRequest(request)
 }

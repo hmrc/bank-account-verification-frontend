@@ -72,7 +72,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
 
   private val controller = app.injector.instanceOf[ApiController]
 
-  implicit val mat = app.injector.instanceOf[Materializer]
+  implicit val mat: Materializer = app.injector.instanceOf[Materializer]
 
   "POST /init" should {
     import InitRequest._

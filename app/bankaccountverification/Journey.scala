@@ -24,8 +24,8 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
 
+import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.time.{Instant, LocalDateTime}
 
 
 case class BACSRequirements(directDebitRequired: Boolean, directCreditRequired: Boolean)
@@ -49,7 +49,7 @@ object Journey {
 
   def expiryDate: Instant = Instant.now.plus(60, ChronoUnit.MINUTES)
 
-  def createSession(address: Option[Address], prepopulatedData: Option[PrepopulatedData]): Session = {
+  private def createSession(address: Option[Address], prepopulatedData: Option[PrepopulatedData]): Session = {
     val session = Session(address = address)
 
     prepopulatedData match {

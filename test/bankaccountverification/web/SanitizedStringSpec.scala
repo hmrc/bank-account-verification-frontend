@@ -40,10 +40,10 @@ class SanitizedStringSpec extends AnyWordSpec with Matchers {
     }
     "given a string that has non-standard ASCII characters" should {
       "replace those with ASCII equivalents" in {
-        "Câfe Latte glyn".toAscii() shouldBe "Cafe Latte glyn"
+        "Câfe Latte glyn".toAscii shouldBe "Cafe Latte glyn"
       }
       "remove where there is no ASCII equivalent" in {
-        "Cßfe Latte glyn".toAscii() shouldBe "Cfe Latte glyn"
+        "Cßfe Latte glyn".toAscii shouldBe "Cfe Latte glyn"
       }
     }
   }

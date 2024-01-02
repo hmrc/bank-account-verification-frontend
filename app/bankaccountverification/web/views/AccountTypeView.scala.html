@@ -43,17 +43,17 @@
             items = Seq(
                 RadioItem(content = HtmlContent(messages("label.accountType.business")),
                     value = Some("business"),
-                    checked = accountTypeForm("accountType").value == Some("business")),
+                    checked = accountTypeForm("accountType").value.contains("business")),
                 RadioItem(content = HtmlContent(messages("label.accountType.personal")),
                     value = Some("personal"),
-                    checked = accountTypeForm("accountType").value == Some("personal"))
+                    checked = accountTypeForm("accountType").value.contains("personal"))
             ),
             errorMessage = accountTypeForm.errors.headOption.map(fe => ErrorMessage(content = HtmlContent(messages(fe.message))))
         ))
 
         @button(Button(content = HtmlContent(messages("label.submitLabel")),
             name = Some("continue"),
-            inputType = Some("submit"), attributes = Map("id" → "continue")))
+            inputType = Some("submit"), attributes = Map("id" -> "continue")))
     }
 
     @help(ReportTechnicalIssue(

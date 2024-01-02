@@ -23,7 +23,7 @@ import bankaccountverification.web.Forms._
 import bankaccountverification.web.Implicits.SanitizedString
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OWrites, Reads}
 
 case class BusinessVerificationRequest(companyName: String,
                                        sortCode: String,
@@ -41,8 +41,8 @@ object BusinessVerificationRequest {
   }
 
   object formats {
-    implicit val bankAccountDetailsReads = Json.reads[BusinessVerificationRequest]
-    implicit val bankAccountDetailsWrites = Json.writes[BusinessVerificationRequest]
+    implicit val bankAccountDetailsReads: Reads[BusinessVerificationRequest] = Json.reads[BusinessVerificationRequest]
+    implicit val bankAccountDetailsWrites: OWrites[BusinessVerificationRequest] = Json.writes[BusinessVerificationRequest]
   }
 
   implicit class ValidationFormWrapper(form: Form[BusinessVerificationRequest]) {

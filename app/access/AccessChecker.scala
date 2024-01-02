@@ -43,6 +43,6 @@ class AccessChecker @Inject()(config: Configuration, servicesConfig: ServicesCon
 object AccessChecker {
   val accessControlEnabledKey = "access-control.enabled"
   val accessControlEnabledAbsoluteKey = s"microservice.services.$accessControlEnabledKey"
-  val accessControlAllowListKey = "access-control.allow-list"
+  private val accessControlAllowListKey = "access-control.allow-list"
   val accessControlAllowListAbsoluteKey = s"microservice.services.$accessControlAllowListKey"
 }

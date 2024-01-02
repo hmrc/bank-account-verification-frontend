@@ -23,19 +23,20 @@ import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
 import play.api.data.FormError
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Messages, MessagesApi}
 
 class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
 
-  override lazy val app = {
+  override lazy val app: Application = {
     SharedMetricRegistries.clear()
     fakeApplication()
   }
 
   "BankAccountDetails form" should {
     val messagesApi       = app.injector.instanceOf[MessagesApi]
-    implicit val messages = messagesApi.preferred(Seq())
+    implicit val messages: Messages = messagesApi.preferred(Seq())
 
     "validate sortcode successfully" when {
       "sortcode is hyphenated" in {
@@ -171,7 +172,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "123456", "123FOOO78")
         val formToValidate = PersonalVerificationRequest.form.fill(bankAccountDetails)
         val barsPersonalAssessSuccessResponse = BarsPersonalAssessSuccessResponse(accountNumberIsWellFormatted = Yes, accountExists = No, nameMatches = Yes, sortCodeIsPresentOnEISCD = Yes, sortCodeSupportsDirectDebit = Yes, sortCodeSupportsDirectCredit = Yes, nonStandardAccountDetailsRequiredForBacs = None, sortCodeBankName = Some("BANKNAME"), iban = None, accountName = None)
-        val bankAccountDetailsForm = formToValidate.validateUsingBarsPersonalAssessResponse(barsPersonalAssessSuccessResponse, BACSRequirements(true, true))
+        val bankAccountDetailsForm = formToValidate.validateUsingBarsPersonalAssessResponse(barsPersonalAssessSuccessResponse, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")
@@ -184,7 +185,7 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
         val bankAccountDetails     = PersonalVerificationRequest("Joe Blogs", "123456", "123FOOO78")
         val formToValidate = PersonalVerificationRequest.form.fill(bankAccountDetails)
         val barsPersonalAssessSuccessResponse = BarsPersonalAssessSuccessResponse(accountNumberIsWellFormatted = Yes, accountExists = No, nameMatches = Partial, sortCodeIsPresentOnEISCD = Yes, sortCodeSupportsDirectDebit = Yes, sortCodeSupportsDirectCredit = Yes, nonStandardAccountDetailsRequiredForBacs = None, sortCodeBankName = Some("BANKNAME"), iban = None, accountName = Some("J Bloggs"))
-        val bankAccountDetailsForm = formToValidate.validateUsingBarsPersonalAssessResponse(barsPersonalAssessSuccessResponse, BACSRequirements(true, true))
+        val bankAccountDetailsForm = formToValidate.validateUsingBarsPersonalAssessResponse(barsPersonalAssessSuccessResponse, BACSRequirements(directDebitRequired = true, directCreditRequired = true))
         bankAccountDetailsForm.hasErrors shouldBe true
 
         val error = bankAccountDetailsForm.errors.find(e => e.key == "accountNumber")

@@ -33,7 +33,7 @@
     Some(journeyId), request.journey.timeoutConfig, request.journey.signOutUrl, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
     @if(detailsForm.hasErrors) {
         @errorSummary(ErrorSummary(title = HtmlContent(messages("error.summaryText")),
-            errorList = detailsForm.errors.map { error ⇒
+            errorList = detailsForm.errors.map { error =>
                 ErrorLink(href = Some(s"#${error.key}"),
                     content = HtmlContent(messages(error.message)))
             }))
@@ -46,7 +46,7 @@
             label = Label(content = HtmlContent(businessMessage("label.accountName"))),
             formGroupClasses = "form-field-group",
             name = detailsForm("companyName").name, id = detailsForm("companyName").name,
-            errorMessage = detailsForm("companyName").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
+            errorMessage = detailsForm("companyName").error.map(fe => ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("sortCode").value,
             label = Label(content = HtmlContent(businessMessage("label.sortCode"))),
@@ -54,7 +54,7 @@
             formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(businessMessage("hint.sortCode")))),
             name = detailsForm("sortCode").name, id = detailsForm("sortCode").name, classes = "govuk-input--width-5",
             pattern=Some("[0-9]*"), inputmode=Some("numeric"),
-            errorMessage = detailsForm("sortCode").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
+            errorMessage = detailsForm("sortCode").error.map(fe => ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("accountNumber").value,
             label = Label(content = HtmlContent(businessMessage("label.accountNumber"))),
@@ -62,17 +62,17 @@
             formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(businessMessage("hint.accountNumber")))),
             name = detailsForm("accountNumber").name, id = detailsForm("accountNumber").name, classes = "govuk-input--width-10",
             pattern=Some("[0-9]*"), inputmode=Some("numeric"),
-            errorMessage = detailsForm("accountNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
+            errorMessage = detailsForm("accountNumber").error.map(fe => ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("rollNumber").value,
             label = Label(content = HtmlContent(businessMessage("label.rollNumber.optional"))),
             formGroupClasses = "form-field-group", hint = Some(Hint(content = HtmlContent(businessMessage("hint.rollNumber")))),
             name = detailsForm("rollNumber").name, id = detailsForm("rollNumber").name, classes = "govuk-input--width-20",
-            errorMessage = detailsForm("rollNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
+            errorMessage = detailsForm("rollNumber").error.map(fe => ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @button(Button(content = HtmlContent(messages("label.submitLabel")),
             name = Some("continue"),
-            inputType = Some("submit"), attributes = Map("id" → "continue")))
+            inputType = Some("submit"), attributes = Map("id" -> "continue")))
     }
 
     @help(ReportTechnicalIssue(

@@ -17,7 +17,6 @@
 package bankaccountverification
 
 import play.api.http.HttpConfiguration
-import play.api.i18n.Messages.MessageSource
 import play.api.i18n.{DefaultMessagesApi, DefaultMessagesApiProvider, Langs}
 import play.api.libs.json.JsObject
 import play.api.{Configuration, Environment}
@@ -32,9 +31,9 @@ class RemoteMessagesApiProvider @Inject() (
   httpConfiguration: HttpConfiguration
 ) extends DefaultMessagesApiProvider(environment, config, langs, httpConfiguration) {
 
-  lazy val defaultMessages: Map[String, Map[String, String]] = loadAllMessages
+  private lazy val defaultMessages: Map[String, Map[String, String]] = loadAllMessages
 
-  def getRemoteMessagesApi(remoteMessages: Option[JsObject]) = {
+  def getRemoteMessagesApi(remoteMessages: Option[JsObject]): DefaultMessagesApi = {
     val english = remoteMessages.map(_("en").as[Map[String, String]]).getOrElse(Map())
     val welsh   = remoteMessages.flatMap(js => (js \ "cy").asOpt[Map[String, String]]).getOrElse(Map())
 
@@ -54,8 +53,4 @@ class RemoteMessagesApiProvider @Inject() (
       httpConfiguration = httpConfiguration
     )
   }
-}
-
-case class StringMessageSource(source: String) extends MessageSource {
-  override def read: String = source
 }

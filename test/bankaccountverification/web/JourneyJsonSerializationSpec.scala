@@ -24,11 +24,11 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 
-import java.time.{Instant, LocalDateTime, ZoneId}
+import java.time.{Clock, Instant, LocalDateTime, ZoneId}
 import scala.language.postfixOps
 
 class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
-  val clock = java.time.Clock.tickSeconds(ZoneId.systemDefault())
+  val clock: Clock = java.time.Clock.tickSeconds(ZoneId.systemDefault())
 
   "Journey" when {
     "PersonalAccountDetails" should {

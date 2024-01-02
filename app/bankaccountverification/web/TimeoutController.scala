@@ -21,7 +21,7 @@ import bankaccountverification.api.FrontendApiController
 import bankaccountverification.web.views.html.ErrorTemplate
 import play.api.Logger
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc.{MessagesControllerComponents, Request}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
@@ -43,7 +43,7 @@ class TimeoutController @Inject()(appConfig: AppConfig,
 
   private val logger = Logger(this.getClass.getSimpleName)
 
-  def renewSession(journeyId: String) = withCustomisations.action(journeyId).async { implicit request =>
+  def renewSession(journeyId: String): Action[AnyContent] = withCustomisations.action(journeyId).async { implicit request =>
     journeyRepository.renewExpiryDate(request.journey.id).map(_ =>
       Ok.sendFile(new File("conf/renewSession.jpg")).as("image/jpeg")
     )
@@ -51,12 +51,12 @@ class TimeoutController @Inject()(appConfig: AppConfig,
 
   private val policy = new RelativeOrAbsoluteWithHostnameFromWhitelist(appConfig.allowedHosts)
 
-  def timeoutSession(journeyId: String, timeoutUrl: RedirectUrl) = withCustomisations.action(journeyId).async {
+  def timeoutSession(journeyId: String, timeoutUrl: RedirectUrl): Action[AnyContent] = withCustomisations.action(journeyId).async {
     implicit request =>
     Future.successful {
       Try(policy.url(timeoutUrl)) match {
         case Success(url) => Redirect(url)
-        case Failure(e) =>
+        case Failure(_) =>
           logger.error(s"timeoutUrl '${timeoutUrl.unsafeValue}' is not whitelisted")
           timeoutUrlError(mcc.messagesApi.preferred(request))
       }

@@ -68,12 +68,9 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
       .build()
   }
 
-  private val actionWithCustomisationsProvider = app.injector.instanceOf[ActionWithCustomisationsProvider]
-
   private val controller = app.injector.instanceOf[TimeoutController]
 
   "GET /renewSession" should {
-    val newJourneyId = ObjectId.get()
 
     "return 200" when {
       "when authorised and a valid journey id is provided" in {
