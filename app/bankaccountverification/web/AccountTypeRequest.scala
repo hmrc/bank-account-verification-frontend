@@ -21,7 +21,7 @@ import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError, Mapping}
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads, Writes}
 
 sealed trait AccountTypeRequestEnum
 object AccountTypeRequestEnum extends Enumerable.Implicits {
@@ -40,8 +40,8 @@ object AccountTypeRequest {
   import AccountTypeRequestEnum._
 
   object formats {
-    implicit val accountTypeReads  = Json.reads[AccountTypeRequest]
-    implicit val accountTypeWrites = Json.writes[AccountTypeRequest]
+    implicit val accountTypeReads: Reads[AccountTypeRequest] = Json.reads[AccountTypeRequest]
+    implicit val accountTypeWrites: Writes[AccountTypeRequest] = Json.writes[AccountTypeRequest]
   }
 
   val form: Form[AccountTypeRequest] =
@@ -52,7 +52,7 @@ object AccountTypeRequest {
     )
 
   // Need to do this as if the radio buttons are not selected then we don't get the parameter at all.
-  def accountTypeMapping: Mapping[AccountTypeRequestEnum] = {
+  private def accountTypeMapping: Mapping[AccountTypeRequestEnum] = {
     def permissiveStringFormatter: Formatter[AccountTypeRequestEnum] =
       new Formatter[AccountTypeRequestEnum] {
         def bind(key: String, data: Map[String, String]): Either[Seq[FormError], AccountTypeRequestEnum] =
@@ -60,13 +60,13 @@ object AccountTypeRequest {
             val kv = data.getOrElse(key, "")
             AccountTypeRequestEnum.enumerable.withName(kv).getOrElse(Error)
           }
-        def unbind(key: String, value: AccountTypeRequestEnum) = Map(key -> value.toString)
+        def unbind(key: String, value: AccountTypeRequestEnum): Map[String, String] = Map(key -> value.toString)
       }
 
     of[AccountTypeRequestEnum](permissiveStringFormatter).verifying(accountTypeConstraint())
   }
 
-  def accountTypeConstraint(): Constraint[AccountTypeRequestEnum] =
+  private def accountTypeConstraint(): Constraint[AccountTypeRequestEnum] =
     Constraint[AccountTypeRequestEnum](Some("constraints.accountType"), Seq()) { input =>
       if (input == Error) Invalid(ValidationError("error.accountType.required"))
       else if (AccountTypeRequestEnum.values.contains(input)) Valid

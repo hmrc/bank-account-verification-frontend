@@ -38,7 +38,7 @@ import org.bson.RawBsonDocument
 import org.bson.codecs.RawBsonDocumentCodec
 import org.bson.codecs.configuration.CodecRegistries
 import org.bson.types.ObjectId
-import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
+import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.Updates.{combine, set}
@@ -62,7 +62,7 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
       ),
       replaceIndexes = true
     ) {
-  def rawCollection =
+  private def rawCollection: MongoCollection[RawBsonDocument] =
     mongo.database.getCollection[RawBsonDocument](collectionName)
                           .withCodecRegistry(
                             CodecRegistries.fromRegistries(

@@ -23,7 +23,7 @@ import bankaccountverification.web.Forms._
 import bankaccountverification.web.Implicits.SanitizedString
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.libs.json.{Json, OWrites, Reads, Writes}
+import play.api.libs.json.{Json, Reads, Writes}
 
 case class PersonalVerificationRequest private(accountName: String,
                                                sortCode: String,
@@ -44,7 +44,7 @@ object PersonalVerificationRequest {
   }
 
   def convertNameToASCII(verificationRequest: PersonalVerificationRequest): PersonalVerificationRequest = {
-    verificationRequest.copy(accountName = verificationRequest.accountName.toAscii())
+    verificationRequest.copy(accountName = verificationRequest.accountName.toAscii)
   }
 
   object formats {
@@ -58,7 +58,7 @@ object PersonalVerificationRequest {
       response match {
         case badRequest: BarsPersonalAssessBadRequestResponse if badRequest.code == "SORT_CODE_ON_DENY_LIST" =>
           form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
-        case badRequest: BarsPersonalAssessBadRequestResponse                                                =>
+        case _: BarsPersonalAssessBadRequestResponse                                                =>
           form.fill(form.get).withError("", "error.summaryText")
         case success: BarsPersonalAssessSuccessResponse                                                      =>
           import success._

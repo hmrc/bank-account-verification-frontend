@@ -23,7 +23,7 @@ import org.bson.types.ObjectId
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.Results._
 import play.api.mvc._
-import play.twirl.api.Html
+import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvider
@@ -51,9 +51,9 @@ class ActionWithCustomisationsProvider @Inject()(val messagesApi: MessagesApi,
   def action(journeyId: String)(implicit ec: ExecutionContext): ActionBuilder[RequestWithCustomisations, AnyContent] =
     new ActionBuilder[RequestWithCustomisations, AnyContent] with ActionRefiner[Request, RequestWithCustomisations] {
 
-      def parser = bodyParser
+      def parser: BodyParsers.Default = bodyParser
 
-      def executionContext = ec
+      def executionContext: ExecutionContext = ec
 
       override protected def refine[A](request: Request[A]): Future[Either[Result, RequestWithCustomisations[A]]] = {
         implicit val headerCarrier: HeaderCarrier = hc(request)
@@ -106,12 +106,12 @@ class ActionWithCustomisationsProvider @Inject()(val messagesApi: MessagesApi,
       (headerBlock, beforeContentBlock, footerBlock)
     }
 
-  def journeyIdError(implicit request: Request[_]) = {
+  def journeyIdError(implicit request: Request[_]): HtmlFormat.Appendable = {
     val messages = implicitly[Messages]
     errorTemplate(messages("error.pageTitle"), messages("error.journeyId.heading"), messages("error.journeyId.message"))
   }
 
-  def unauthorisedError(implicit request: Request[_]) = {
+  private def unauthorisedError(implicit request: Request[_]): HtmlFormat.Appendable = {
     val messages = implicitly[Messages]
     errorTemplate(messages("error.pageTitle"), messages("error.unauthorised.heading"), messages("error.unauthorised.message"))
   }

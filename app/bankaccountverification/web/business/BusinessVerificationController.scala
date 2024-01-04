@@ -89,7 +89,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
           "callCount" -> callCount.toString,
           "maxCallCount" -> journey.maxCallCount.map(_.toString).getOrElse(""),
           "journeyId" -> journey.id.toHexString)
-          ++ form.data.filterKeys {
+          ++ form.data.view.filterKeys {
           case "csrfToken" | "continue" => false
           case _ => true
         })

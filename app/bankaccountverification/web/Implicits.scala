@@ -25,7 +25,7 @@ object Implicits {
     def leftPadToLength(length: Int, padChar: Char): String = unwrap.reverse.padTo(length, padChar).reverse
     def stripLeadingSpaces(): String = unwrap.stripPrefix(" ")
     def stripTrailingSpaces(): String = unwrap.stripSuffix(" ")
-    def toAscii(): String = {
+    def toAscii: String = {
       Normalizer.normalize(unwrap, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "")
     }
   }

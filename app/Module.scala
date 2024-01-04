@@ -17,10 +17,9 @@
 import bankaccountverification.connector.BankAccountReputationConnector
 import bankaccountverification.{AppConfig, JourneyRepository, RemoteMessagesApiProvider}
 import com.google.inject.AbstractModule
-import play.api.libs.concurrent.AkkaGuiceSupport
-import play.api.{Configuration, Environment}
+import play.api.libs.concurrent.PekkoGuiceSupport
 
-class Module(environment: Environment, playConfig: Configuration) extends AbstractModule with AkkaGuiceSupport {
+class Module extends AbstractModule with PekkoGuiceSupport {
   override def configure(): Unit = {
     super.configure()
     bind(classOf[AppConfig])

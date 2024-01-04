@@ -27,7 +27,7 @@ case class PersonalAccountExistsIndeterminateViewModel(journeyId: String,
                                                        continueUrl: String,
                                                        welshTranslationsAvailable: Boolean) {
 
-  val changeUrl = bankaccountverification.web.personal.routes.PersonalVerificationController.getAccountDetails(journeyId).url
+  private val changeUrl = bankaccountverification.web.personal.routes.PersonalVerificationController.getAccountDetails(journeyId).url
 
   def fixRows(rows: Seq[SummaryListRow])(implicit messages: Messages): Seq[SummaryListRow] =
     rows.collect {

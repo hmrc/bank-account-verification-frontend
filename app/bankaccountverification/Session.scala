@@ -100,8 +100,8 @@ object PersonalAccountDetails {
       sortCodeBankName,
       sortCodeSupportsDirectDebit,
       sortCodeSupportsDirectCredit,
-      iban,
-      matchedAccountName)),
+      _,
+      _)),
       _
       ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
         Some(
@@ -125,7 +125,7 @@ object PersonalAccountDetails {
     session match {
       case Session(
       _,
-      address,
+      _,
       Some(PersonalAccountDetails(
       Some(accountName),
       Some(sortCode),
@@ -140,7 +140,7 @@ object PersonalAccountDetails {
       sortCodeSupportsDirectDebit,
       sortCodeSupportsDirectCredit,
       iban,
-      matchedAccountName)),
+      _)),
       _
       ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
         Some(
@@ -161,7 +161,7 @@ object PersonalAccountDetails {
     session match {
       case Session(
       _,
-      address,
+      _,
       Some(PersonalAccountDetails(
       Some(accountName),
       Some(sortCode),
@@ -225,8 +225,8 @@ object BusinessAccountDetails {
       sortCodeBankName,
       sortCodeSupportsDirectDebit,
       sortCodeSupportsDirectCredit,
-      iban,
-      matchedAccountName))
+      _,
+      _))
       ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
         Some(
           CompleteResponse(
@@ -250,7 +250,7 @@ object BusinessAccountDetails {
     session match {
       case Session(
       _,
-      address,
+      _,
       _,
       Some(BusinessAccountDetails(
       Some(companyName),
@@ -267,7 +267,7 @@ object BusinessAccountDetails {
       sortCodeSupportsDirectDebit,
       sortCodeSupportsDirectCredit,
       iban,
-      matchedAccountName))
+      _))
       ) if maybeAccountNumberWithSortCodeIsValid.isDefined | maybeAccountNumberIsWellFormatted.isDefined =>
         Some(
           CompleteV2Response(
@@ -287,7 +287,7 @@ object BusinessAccountDetails {
     session match {
       case Session(
       _,
-      address,
+      _,
       _,
       Some(BusinessAccountDetails(
       Some(companyName),

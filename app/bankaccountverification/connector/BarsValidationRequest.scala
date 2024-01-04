@@ -16,15 +16,15 @@
 
 package bankaccountverification.connector
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OWrites, Reads}
 
 case class BarsValidationRequest(account: BarsValidationRequestAccount)
 
 case class BarsValidationRequestAccount(sortCode: String, accountNumber: String)
 object BarsValidationRequestAccount {
-  implicit val bankAccountReputationValidationRequestAccountReads =
+  implicit val bankAccountReputationValidationRequestAccountReads: Reads[BarsValidationRequestAccount] =
     Json.reads[BarsValidationRequestAccount]
-  implicit val bankAccountReputationValidationRequestAccountWrites =
+  implicit val bankAccountReputationValidationRequestAccountWrites: OWrites[BarsValidationRequestAccount] =
     Json.writes[BarsValidationRequestAccount]
 }
 
@@ -34,6 +34,6 @@ object BarsValidationRequest {
   def apply(sortCode: String, accountNumber: String): BarsValidationRequest =
     BarsValidationRequest(BarsValidationRequestAccount(sortCode, accountNumber))
 
-  implicit val bankAccountReputationValidationRequestReads  = Json.reads[BarsValidationRequest]
-  implicit val bankAccountReputationValidationRequestWrites = Json.writes[BarsValidationRequest]
+  implicit val bankAccountReputationValidationRequestReads: Reads[BarsValidationRequest] = Json.reads[BarsValidationRequest]
+  implicit val bankAccountReputationValidationRequestWrites: OWrites[BarsValidationRequest] = Json.writes[BarsValidationRequest]
 }

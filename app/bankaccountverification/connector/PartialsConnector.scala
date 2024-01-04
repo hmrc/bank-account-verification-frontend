@@ -25,7 +25,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class PartialsConnector @Inject() (httpClient: HttpClient) {
 
-  val failedPartial: Future[HtmlPartial] = Future.successful(HtmlPartial.Failure())
+  private val failedPartial: Future[HtmlPartial] = Future.successful(HtmlPartial.Failure())
 
   def header(
     baseUrl: Option[String]

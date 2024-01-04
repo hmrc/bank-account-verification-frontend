@@ -40,7 +40,7 @@ import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.time.LocalDateTime
+import java.time.{Instant, LocalDateTime}
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -68,12 +68,9 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
       .build()
   }
 
-  private val actionWithCustomisationsProvider = app.injector.instanceOf[ActionWithCustomisationsProvider]
-
   private val controller = app.injector.instanceOf[TimeoutController]
 
   "GET /renewSession" should {
-    val newJourneyId = ObjectId.get()
 
     "return 200" when {
       "when authorised and a valid journey id is provided" in {
@@ -85,7 +82,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
         val returnData = Journey(
           journeyId,
           Some("1234"),
-          LocalDateTime.now,
+          Instant.now,
           "serviceIdentifier",
           "continueUrl",
           Session(
@@ -150,7 +147,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
         val returnData = Journey(
           journeyId,
           Some("1234"),
-          LocalDateTime.now,
+          Instant.now,
           "serviceIdentifier",
           "continueUrl",
           Session(
@@ -216,7 +213,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
         val returnData = Journey(
           journeyId,
           Some("1234"),
-          LocalDateTime.now,
+          Instant.now,
           "serviceIdentifier",
           "continueUrl",
           Session(

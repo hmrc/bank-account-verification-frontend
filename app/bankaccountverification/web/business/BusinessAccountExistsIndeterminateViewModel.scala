@@ -27,7 +27,7 @@ case class BusinessAccountExistsIndeterminateViewModel(journeyId: String,
                                                        continueUrl: String,
                                                        welshTranslationsAvailable: Boolean) {
 
-  val changeUrl = bankaccountverification.web.business.routes.BusinessVerificationController.getAccountDetails(journeyId).url
+  private val changeUrl: String = bankaccountverification.web.business.routes.BusinessVerificationController.getAccountDetails(journeyId).url
 
   def fixRows(rows: Seq[SummaryListRow])(implicit messages: Messages): Seq[SummaryListRow] =
     rows.collect {

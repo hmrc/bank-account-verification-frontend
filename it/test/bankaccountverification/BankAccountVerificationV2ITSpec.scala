@@ -44,7 +44,7 @@ import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import scala.concurrent.Future
 import scala.util.Success
 
-class BankAccountVerificationV2ITSpec() extends AnyWordSpec with GuiceOneServerPerSuite with MockitoSugar {
+class BankAccountVerificationV2ITSpec extends AnyWordSpec with GuiceOneServerPerSuite with MockitoSugar {
   private val mockBankAccountReputationConnector = mock[BankAccountReputationConnector]
   private val mockAuthConnector = mock[AuthConnector]
 

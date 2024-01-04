@@ -21,14 +21,14 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
-import scala.collection.JavaConverters.asScalaBufferConverter
+import scala.jdk.CollectionConverters._
 
 @Singleton
 class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig, val environment: Environment) {
   val allowedHosts: Set[String] = config.underlying.getStringList("microservice.hosts.allowList").asScala.toSet
   val footerLinkItems: Seq[String] = config.getOptional[Seq[String]]("footerLinkItems").getOrElse(Seq())
 
-  val barsBaseUrl                = servicesConfig.baseUrl("bank-account-reputation")
+  private val barsBaseUrl: String = servicesConfig.baseUrl("bank-account-reputation")
   val barsPersonalAssessUrl      = s"$barsBaseUrl/verify/personal"
   val barsBusinessAssessUrl      = s"$barsBaseUrl/verify/business"
 

@@ -36,21 +36,21 @@ object Forms {
 
   def rollNumberMapping: Mapping[String] = text.verifying(rollNumberConstraint())
 
-  def nameConstraint(nameTag: String): Constraint[String] =
+  private def nameConstraint(nameTag: String): Constraint[String] =
     Constraint[String](Some(s"constraints.$nameTag"), Seq.empty) { (input: String) =>
       val trimmedInput = input.stripLeadingSpaces().stripTrailingSpaces()
       if (trimmedInput.isEmpty) Invalid(ValidationError(s"error.$nameTag.required"))
-      else if(trimmedInput.toAscii().length != trimmedInput.length)
+      else if(trimmedInput.toAscii.length != trimmedInput.length)
         Invalid(ValidationError(s"error.$nameTag.asciiOnly"))
       else if (trimmedInput.length > 70) Invalid(ValidationError(s"error.$nameTag.maxLength"))
       else Valid
     }
 
-  def accountNumberConstraint(): Constraint[String] =
+  private def accountNumberConstraint(): Constraint[String] =
     Constraint[String](Some("constraints.accountNumber"), Seq.empty) { input =>
       if (input.isEmpty) Invalid(ValidationError("error.accountNumber.required"))
       else {
-        val strippedInput = input.stripSpacesAndDashes
+        val strippedInput = input.stripSpacesAndDashes()
         val errors =
           Seq(
             if (strippedInput.length < 6) Some("error.accountNumber.minLength") else None,
@@ -65,11 +65,11 @@ object Forms {
       }
     }
 
-  def sortcodeConstraint(): Constraint[String] =
+  private def sortcodeConstraint(): Constraint[String] =
     Constraint[String](Some("constraints.sortcode.format"), Seq.empty) { input =>
       if (input.isEmpty) Invalid(ValidationError("error.sortcode.required"))
       else {
-        val strippedInput = input.stripSpacesAndDashes
+        val strippedInput = input.stripSpacesAndDashes()
         val errors =
           Seq(
             if (strippedInput.length != 6) Some("error.sortcode.invalidLengthError") else None,
@@ -83,11 +83,11 @@ object Forms {
       }
     }
 
-  def rollNumberConstraint(): Constraint[String] = {
+  private def rollNumberConstraint(): Constraint[String] = {
     Constraint[String](Some("constraint.rollNumber.format"), Seq.empty) { (input: String) =>
       if (input.isEmpty) Invalid(ValidationError("error.rollNumber.minLength"))
       else {
-        val strippedInput = input.stripSpaces
+        val strippedInput = input.stripSpaces()
         val errors = Seq(
           if (strippedInput.length > 18) Some("error.rollNumber.maxLength") else None,
           if (!"""[A-Z0-9/.\-]+""".r.pattern.matcher(strippedInput).matches()) Some("error.rollNumber.format") else None

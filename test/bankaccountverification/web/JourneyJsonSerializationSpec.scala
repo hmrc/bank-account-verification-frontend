@@ -24,16 +24,16 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 
-import java.time.{Instant, LocalDateTime, ZoneId}
+import java.time.{Clock, Instant, LocalDateTime, ZoneId}
 import scala.language.postfixOps
 
 class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
-  val clock = java.time.Clock.tickSeconds(ZoneId.systemDefault())
+  val clock: Clock = java.time.Clock.tickSeconds(ZoneId.systemDefault())
 
   "Journey" when {
     "PersonalAccountDetails" should {
       val id = ObjectId.get()
-      val theExpiryDate = LocalDateTime.ofInstant(Instant.now(clock), clock.getZone)
+      val theExpiryDate = Instant.now(clock)
       val personalJourney = Journey(
         id = id,
         Some("1234"),
@@ -59,7 +59,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
 
         (personalJourneyJsValue \ "_id").as[ObjectId] shouldBe id
         (personalJourneyJsValue \ "authProviderId").as[String] shouldBe "1234"
-        (personalJourneyJsValue \ "expiryDate").as[LocalDateTime] shouldBe theExpiryDate
+        (personalJourneyJsValue \ "expiryDate").as[Instant] shouldBe theExpiryDate
         (personalJourneyJsValue \ "serviceIdentifier").as[String] shouldBe "some-service"
         (personalJourneyJsValue \ "continueUrl").as[String] shouldBe "some-url"
         (personalJourneyJsValue \ "messages").isEmpty shouldBe true
@@ -101,7 +101,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
 
     "BusinessAccountDetails" should {
       val id = ObjectId.get()
-      val theExpiryDate = LocalDateTime.ofInstant(Instant.now(clock), clock.getZone)
+      val theExpiryDate = Instant.now(clock)
       val businessJourney = Journey(
         id = id,
         Some("1234"),
@@ -127,7 +127,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
 
         (businessJourneyJsValue \ "_id").as[ObjectId] shouldBe id
         (businessJourneyJsValue \ "authProviderId").as[String] shouldBe "1234"
-        (businessJourneyJsValue \ "expiryDate").as[LocalDateTime] shouldBe theExpiryDate
+        (businessJourneyJsValue \ "expiryDate").as[Instant] shouldBe theExpiryDate
         (businessJourneyJsValue \ "serviceIdentifier").as[String] shouldBe "some-service"
         (businessJourneyJsValue \ "continueUrl").as[String] shouldBe "some-url"
         (businessJourneyJsValue \ "messages").isEmpty shouldBe true

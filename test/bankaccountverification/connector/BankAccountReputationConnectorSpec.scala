@@ -21,6 +21,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Results._
 import play.api.routing.sird.{POST => SPOST, _}
@@ -34,7 +35,7 @@ import scala.util.{Failure, Success}
 class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite {
 
   val barsPort = 11222
-  override lazy val app =
+  override lazy val app: Application =
     new GuiceApplicationBuilder()
       .configure(
         "microservice.services.bank-account-reputation.port" -> barsPort
@@ -62,7 +63,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
               |}""".stripMargin).withHeaders("Content-Type" -> "application/json"))
         }
       } { _ =>
-        implicit val hc = HeaderCarrier()
+        implicit val hc: HeaderCarrier = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessPersonal("Mr Joe Bloggs", "20-30-40", "12345678", None, None, "example-service"))
@@ -88,7 +89,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
             )
         }
       } { _ =>
-        implicit val hc = HeaderCarrier()
+        implicit val hc: HeaderCarrier = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", None, None, "example-service"))
@@ -104,7 +105,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
             Action(Ok("NOJSON4U").withHeaders("Content-Type" -> "application/json"))
         }
       } { _ =>
-        implicit val hc = HeaderCarrier()
+        implicit val hc: HeaderCarrier = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", None, None, "example-service"))
@@ -120,7 +121,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
             """{"code": "SORT_CODE_ON_DENY_LIST", "desc": "083200: sort code is in deny list"}"""))
         }
       } { _ =>
-        implicit val hc = HeaderCarrier()
+        implicit val hc: HeaderCarrier = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", None, None, "example-service"))
@@ -135,7 +136,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
           case SPOST(p"/verify/personal") => Action(InternalServerError)
         }
       } { _ =>
-        implicit val hc = HeaderCarrier()
+        implicit val hc: HeaderCarrier = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessPersonal("Joe Bloggs", "203040", "12345678", None, None, "example-service"))
@@ -166,7 +167,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
               |}""".stripMargin).withHeaders("Content-Type" -> "application/json"))
         }
       } { _ =>
-        implicit val hc = HeaderCarrier()
+        implicit val hc: HeaderCarrier = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, None, "example-service"))
@@ -192,7 +193,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
             )
         }
       } { _ =>
-        implicit val hc = HeaderCarrier()
+        implicit val hc: HeaderCarrier = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, None, "example-service"))
@@ -208,7 +209,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
             Action(Ok("NOJSON4U").withHeaders("Content-Type" -> "application/json"))
         }
       } { _ =>
-        implicit val hc = HeaderCarrier()
+        implicit val hc: HeaderCarrier = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, None, "example-service"))
@@ -224,7 +225,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
             """{"code": "SORT_CODE_ON_DENY_LIST", "desc": "083200: sort code is in deny list"}"""))
         }
       } { _ =>
-        implicit val hc = HeaderCarrier()
+        implicit val hc: HeaderCarrier = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, None, "example-service"))
@@ -239,7 +240,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
           case SPOST(p"/verify/business") => Action(InternalServerError)
         }
       } { _ =>
-        implicit val hc = HeaderCarrier()
+        implicit val hc: HeaderCarrier = HeaderCarrier()
         val connector = app.injector.instanceOf[BankAccountReputationConnector]
 
         val response = await(connector.assessBusiness("Some Company", None, "20-30-40", "12345678", None, None, "example-service"))
