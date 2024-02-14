@@ -1,5 +1,3 @@
-.*
-
 !.gitignore
 !.scalafmt.conf
 .cache
@@ -34,3 +32,8 @@ tmp
 .idea_modules
 bin
 /null
+/build.log
+**/graal_diagnostics_*.zip
+/.metals/metals.log
+/.metals/metals.mv.db
+/.bsp/sbt.json
