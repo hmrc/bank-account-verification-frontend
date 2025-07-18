@@ -1,0 +1,9 @@
++ nocsrf
+POST        /init                       bankaccountverification.api.ApiController.init
+GET         /complete/:journeyId        bankaccountverification.api.ApiController.complete(journeyId)
++ nocsrf
+POST        /v2/init                    bankaccountverification.api.ApiV2Controller.init
+GET         /v2/complete/:journeyId     bankaccountverification.api.ApiV2Controller.complete(journeyId)
++ nocsrf
+POST        /v3/init                    bankaccountverification.api.ApiV3Controller.init
+GET         /v3/complete/:journeyId     bankaccountverification.api.ApiV3Controller.complete(journeyId)

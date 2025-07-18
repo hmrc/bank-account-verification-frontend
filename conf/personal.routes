@@ -1,0 +1,5 @@
+# microservice specific routes
+
+GET         /verify/personal/:journeyId        bankaccountverification.web.personal.PersonalVerificationController.getAccountDetails(journeyId)
+POST        /verify/personal/:journeyId        bankaccountverification.web.personal.PersonalVerificationController.postAccountDetails(journeyId)
+GET         /confirm/personal/:journeyId       bankaccountverification.web.personal.PersonalVerificationController.getConfirmDetails(journeyId)

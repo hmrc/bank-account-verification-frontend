@@ -6,13 +6,9 @@ GET         /language/:lang                    bankaccountverification.web.Custo
 GET         /start/:journeyId                  bankaccountverification.web.AccountTypeController.getAccountType(journeyId)
 POST        /start/:journeyId                  bankaccountverification.web.AccountTypeController.postAccountType(journeyId)
 
-GET         /verify/personal/:journeyId        bankaccountverification.web.personal.PersonalVerificationController.getAccountDetails(journeyId)
-POST        /verify/personal/:journeyId        bankaccountverification.web.personal.PersonalVerificationController.postAccountDetails(journeyId)
-GET         /confirm/personal/:journeyId       bankaccountverification.web.personal.PersonalVerificationController.getConfirmDetails(journeyId)
-
-GET         /verify/business/:journeyId        bankaccountverification.web.business.BusinessVerificationController.getAccountDetails(journeyId)
-POST        /verify/business/:journeyId        bankaccountverification.web.business.BusinessVerificationController.postAccountDetails(journeyId)
-GET         /confirm/business/:journeyId       bankaccountverification.web.business.BusinessVerificationController.getConfirmDetails(journeyId)
+#TODO: Long term, the routing here should be flipped so that these can be prefixed with /personal and /business
+->          /                                  personal.Routes
+->          /                                  business.Routes
 
 GET         /renewSession                      bankaccountverification.web.TimeoutController.renewSession(journeyId: String)
 GET         /destroySession                    bankaccountverification.web.TimeoutController.timeoutSession(journeyId: String, timeoutUrl: uk.gov.hmrc.play.bootstrap.binders.RedirectUrl)
