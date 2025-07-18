@@ -8,6 +8,7 @@ val appName = "bank-account-verification-frontend"
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(
+    PlayKeys.playDefaultPort := 9903,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     TwirlKeys.templateImports ++= Seq(
       "bankaccountverification.AppConfig",
