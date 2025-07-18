@@ -16,11 +16,11 @@
 
 package bankaccountverification.api
 
-import org.apache.pekko.stream.Materializer
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Partial, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
-import bankaccountverification.{TimeoutConfig, _}
+import bankaccountverification._
 import com.codahale.metrics.SharedMetricRegistries
+import org.apache.pekko.stream.Materializer
 import org.bson.types.ObjectId
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
@@ -29,54 +29,41 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
 import play.api.http.{HeaderNames, Status}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.time.{Instant, LocalDateTime}
+import java.time.Instant
 import scala.concurrent.Future
-import scala.concurrent.duration._
-import scala.util.Try
 import scala.language.postfixOps
+import scala.util.Try
 
 class ApiV3ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite with OptionValues {
-  implicit private val timeout: FiniteDuration = 1 second
 
-  private val env = Environment.simple()
-  private val configuration = Configuration.load(env)
+  implicit val mat: Materializer = app.injector.instanceOf[Materializer]
 
-  private val serviceConfig = new ServicesConfig(configuration)
-  private val appConfig = new AppConfig(configuration, serviceConfig, env)
   private lazy val sessionStore = mock[JourneyRepository]
   private lazy val mockAuthConnector = mock[AuthConnector]
+  private lazy val controller = app.injector.instanceOf[ApiV3Controller]
 
   override implicit lazy val app: Application = {
     SharedMetricRegistries.clear()
 
     new GuiceApplicationBuilder()
         .configure("microservice.services.access-control.allow-list.1" -> "test-user-agent")
-        .overrides(bind[ServicesConfig].toInstance(serviceConfig))
         .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
         .overrides(bind[JourneyRepository].toInstance(sessionStore))
-        .overrides(bind[AppConfig].toInstance(appConfig))
         .build()
   }
 
-
-  private val controller = app.injector.instanceOf[ApiV3Controller]
-
-  implicit val mat: Materializer = app.injector.instanceOf[Materializer]
-
   "POST /init" should {
-    import InitRequest._
-
+    
     val newJourneyId = ObjectId.get()
 
     "return 200" when {
@@ -117,9 +104,14 @@ class ApiV3ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
         status(result) shouldBe Status.OK
         Try(new ObjectId(initResponse.journeyId)).toOption shouldBe Some(newJourneyId)
 
-        initResponse.startUrl shouldBe s"/bank-account-verification/start/${initResponse.journeyId}"
-        initResponse.completeUrl shouldBe s"/api/v3/complete/${initResponse.journeyId}"
-        initResponse.detailsUrl shouldBe None
+        initResponse.startUrl shouldBe
+          bankaccountverification.web.routes.AccountTypeController.getAccountType(initResponse.journeyId).url
+
+        initResponse.completeUrl shouldBe
+          bankaccountverification.api.routes.ApiV3Controller.complete(initResponse.journeyId).url
+
+        initResponse.detailsUrl shouldBe
+          None
       }
 
       "prepopulated data is provided" in {
@@ -160,9 +152,14 @@ class ApiV3ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
         status(result) shouldBe Status.OK
         Try(new ObjectId(initResponse.journeyId)).toOption shouldBe Some(newJourneyId)
 
-        initResponse.startUrl shouldBe s"/bank-account-verification/start/${initResponse.journeyId}"
-        initResponse.completeUrl shouldBe s"/api/v3/complete/${initResponse.journeyId}"
-        initResponse.detailsUrl shouldBe Some(s"/bank-account-verification/verify/personal/${initResponse.journeyId}")
+        initResponse.startUrl shouldBe
+          bankaccountverification.web.routes.AccountTypeController.getAccountType(initResponse.journeyId).url
+
+        initResponse.completeUrl shouldBe
+          bankaccountverification.api.routes.ApiV3Controller.complete(initResponse.journeyId).url
+
+        initResponse.detailsUrl shouldBe
+          Some(bankaccountverification.web.personal.routes.PersonalVerificationController.getAccountDetails(initResponse.journeyId).url)
       }
     }
 

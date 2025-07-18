@@ -34,7 +34,7 @@
         beforeContentBlock: Option[Html] = None,
         footerBlock: Option[Html] = None,
         headBlock: Option[Html] = None
-)(contentBlock: Html)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages, appConfig: AppConfig)
 
 @defaultHeaderBlock = {
     @hmrcStandardHeader(

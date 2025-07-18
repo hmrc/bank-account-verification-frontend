@@ -148,7 +148,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         val fakeRequest = FakeRequest("GET", s"/verify/business/${id.toHexString}")
         val result = controller.getAccountDetails(id.toHexString).apply(fakeRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/bank-account-verification/start/${id.toHexString}")
+        redirectLocation(result) shouldBe
+          Some(bankaccountverification.web.routes.AccountTypeController.getAccountType(id.toHexString).url)
       }
     }
 
@@ -320,7 +321,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/bank-account-verification/confirm/business/${id.toHexString}")
+        redirectLocation(result) shouldBe
+          Some(bankaccountverification.web.business.routes.BusinessVerificationController.getConfirmDetails(id.toHexString).url)
       }
     }
 
@@ -394,7 +396,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/bank-account-verification/confirm/business/${id.toHexString}")
+        redirectLocation(result) shouldBe
+          Some(bankaccountverification.web.business.routes.BusinessVerificationController.getConfirmDetails(id.toHexString).url)
       }
     }
 
@@ -530,7 +533,8 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         val result = controller.postAccountDetails(id.toHexString).apply(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/bank-account-verification/confirm/business/${id.toHexString}")
+        redirectLocation(result) shouldBe
+          Some(bankaccountverification.web.business.routes.BusinessVerificationController.getConfirmDetails(id.toHexString).url)
       }
 
       "Redirect to the maxCallCountRedirectUrl when the max call count is met and an indeterminate response is received" in {
