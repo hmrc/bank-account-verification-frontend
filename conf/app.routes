@@ -6,7 +6,7 @@ GET         /language/:lang                    bankaccountverification.web.Custo
 GET         /start/:journeyId                  bankaccountverification.web.AccountTypeController.getAccountType(journeyId)
 POST        /start/:journeyId                  bankaccountverification.web.AccountTypeController.postAccountType(journeyId)
 
-#TODO: Long term, the routing here should be flipped so that these can be prefixed with /personal and /business
+#Long term, it might make sense for the routing here to be flipped so that these can be prefixed with /personal and /business
 ->          /                                  personal.Routes
 ->          /                                  business.Routes
 
