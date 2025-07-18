@@ -1,7 +1,7 @@
 $govuk-assets-path: "/bank-account-verification/assets/lib/govuk-frontend/govuk/assets/";
 $hmrc-assets-path: "/bank-account-verification/assets/lib/hmrc-frontend/hmrc/";
 
-@import "lib/govuk-frontend/dist/govuk/all";
+@import "lib/govuk-frontend/dist/govuk/index";
 @import "lib/hmrc-frontend/hmrc/all";
 
 .hmrc-language-select {
