@@ -1,0 +1,5 @@
+# microservice specific routes
+
+GET         /verify/business/:journeyId        bankaccountverification.web.business.BusinessVerificationController.getAccountDetails(journeyId)
+POST        /verify/business/:journeyId        bankaccountverification.web.business.BusinessVerificationController.postAccountDetails(journeyId)
+GET         /confirm/business/:journeyId       bankaccountverification.web.business.BusinessVerificationController.getConfirmDetails(journeyId)

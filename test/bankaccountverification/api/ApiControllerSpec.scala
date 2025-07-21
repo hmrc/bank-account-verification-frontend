@@ -47,35 +47,24 @@ import scala.language.postfixOps
 import scala.util.Try
 
 class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite with OptionValues {
-  implicit private val timeout: FiniteDuration = 1 second
 
-  private val env = Environment.simple()
-  private val configuration = Configuration.load(env)
+  implicit val mat: Materializer = app.injector.instanceOf[Materializer]
 
-  private val serviceConfig = new ServicesConfig(configuration)
-  private val appConfig = new AppConfig(configuration, serviceConfig, env)
   private lazy val sessionStore = mock[JourneyRepository]
   private lazy val mockAuthConnector = mock[AuthConnector]
+  private lazy val controller = app.injector.instanceOf[ApiController]
 
   override implicit lazy val app: Application = {
     SharedMetricRegistries.clear()
 
     new GuiceApplicationBuilder()
       .configure("microservice.services.access-control.allow-list.1" -> "test-user-agent")
-      .overrides(bind[ServicesConfig].toInstance(serviceConfig))
       .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
       .overrides(bind[JourneyRepository].toInstance(sessionStore))
-      .overrides(bind[AppConfig].toInstance(appConfig))
       .build()
   }
 
-
-  private val controller = app.injector.instanceOf[ApiController]
-
-  implicit val mat: Materializer = app.injector.instanceOf[Materializer]
-
   "POST /init" should {
-    import InitRequest._
 
     val newJourneyId = ObjectId.get()
 
@@ -118,8 +107,12 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         status(result) shouldBe Status.OK
         Try(new ObjectId(initResponse.journeyId)).toOption shouldBe Some(newJourneyId)
 
-        initResponse.startUrl shouldBe s"/bank-account-verification/start/${initResponse.journeyId}"
-        initResponse.completeUrl shouldBe s"/api/complete/${initResponse.journeyId}"
+        initResponse.startUrl shouldBe
+          bankaccountverification.web.routes.AccountTypeController.getAccountType(initResponse.journeyId).url
+
+        initResponse.completeUrl shouldBe
+          bankaccountverification.api.routes.ApiController.complete(initResponse.journeyId).url
+
         initResponse.detailsUrl shouldBe None
       }
 
@@ -161,9 +154,14 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         status(result) shouldBe Status.OK
         Try(new ObjectId(initResponse.journeyId)).toOption shouldBe Some(newJourneyId)
 
-        initResponse.startUrl shouldBe s"/bank-account-verification/start/${initResponse.journeyId}"
-        initResponse.completeUrl shouldBe s"/api/complete/${initResponse.journeyId}"
-        initResponse.detailsUrl shouldBe Some(s"/bank-account-verification/verify/personal/${initResponse.journeyId}")
+        initResponse.startUrl shouldBe
+          bankaccountverification.web.routes.AccountTypeController.getAccountType(initResponse.journeyId).url
+
+        initResponse.completeUrl shouldBe
+          bankaccountverification.api.routes.ApiController.complete(initResponse.journeyId).url
+
+        initResponse.detailsUrl shouldBe
+          Some(bankaccountverification.web.personal.routes.PersonalVerificationController.getAccountDetails(initResponse.journeyId).url)
       }
     }
 

@@ -276,7 +276,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
         val result = accountTypeController.postAccountType(id.toHexString).apply(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/bank-account-verification/verify/personal/${id.toHexString}")
+        redirectLocation(result) shouldBe
+          Some(bankaccountverification.web.personal.routes.PersonalVerificationController.getAccountDetails(id.toHexString).url)
       }
     }
 
@@ -305,7 +306,8 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
         val result = accountTypeController.postAccountType(id.toHexString).apply(fakeRequest)
 
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/bank-account-verification/verify/business/${id.toHexString}")
+        redirectLocation(result) shouldBe
+          Some(bankaccountverification.web.business.routes.BusinessVerificationController.getAccountDetails(id.toHexString).url)
       }
     }
   }

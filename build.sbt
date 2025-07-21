@@ -8,6 +8,7 @@ val appName = "bank-account-verification-frontend"
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(
+    PlayKeys.playDefaultPort := 9903,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     TwirlKeys.templateImports ++= Seq(
       "bankaccountverification.AppConfig",
@@ -17,7 +18,6 @@ lazy val microservice = Project(appName, file("."))
     scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s",
     scalacOptions += "-Wconf:cat=unused-imports&src=routes/.*:s",
   )
-  .settings(resolvers += Resolver.jcenterRepo)
 
 lazy val it = project.in(file("it"))
   .enablePlugins(play.sbt.PlayScala)

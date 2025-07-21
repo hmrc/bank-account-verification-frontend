@@ -18,18 +18,19 @@ package bankaccountverification.web
 
 import bankaccountverification.AppConfig
 import bankaccountverification.web.views.html.ErrorTemplate
+
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
-import play.api.mvc.Request
+import play.api.mvc.{Request, RequestHeader}
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
 
+import scala.concurrent.{ExecutionContext, Future}
+
 @Singleton
 class ErrorHandler @Inject() (errorTemplate: ErrorTemplate,
-                              val messagesApi: MessagesApi)(implicit appConfig: AppConfig) extends FrontendErrorHandler {
+                              val messagesApi: MessagesApi)(implicit appConfig: AppConfig, val ec: ExecutionContext) extends FrontendErrorHandler {
 
-  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit
-    request: Request[_]
-  ): Html =
-    errorTemplate(pageTitle, heading, message)
+  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: RequestHeader): Future[Html] =
+    Future.successful(errorTemplate(pageTitle, heading, message))
 }
