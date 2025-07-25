@@ -16,47 +16,41 @@
 
 package bankaccountverification.connector
 
-import javax.inject.Inject
+import play.api.http.HeaderNames
 import play.api.i18n.Messages
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.play.partials.HtmlPartial
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PartialsConnector @Inject() (httpClient: HttpClient) {
+class PartialsConnector @Inject() (httpClient: HttpClientV2) {
 
-  private val failedPartial: Future[HtmlPartial] = Future.successful(HtmlPartial.Failure())
+  def header(baseUrl: Option[String])
+            (implicit ec: ExecutionContext, hc: HeaderCarrier, messages: Messages): Future[HtmlPartial] =
+    getPartial("header", baseUrl)
 
-  def header(
-    baseUrl: Option[String]
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier, messages: Messages): Future[HtmlPartial] =
+  def beforeContent(baseUrl: Option[String])
+                   (implicit ec: ExecutionContext, hc: HeaderCarrier, messages: Messages): Future[HtmlPartial] =
+    getPartial("beforeContent", baseUrl)
+
+  def footer(baseUrl: Option[String])
+            (implicit ec: ExecutionContext, hc: HeaderCarrier, messages: Messages): Future[HtmlPartial] =
+    getPartial("footer", baseUrl)
+
+
+  private def getPartial(path: String, baseUrl: Option[String])
+                        (implicit ec: ExecutionContext, hc: HeaderCarrier, messages: Messages): Future[HtmlPartial] = {
+    val failedPartial: Future[HtmlPartial] = Future.successful(HtmlPartial.Failure())
     baseUrl.fold(failedPartial) { bUrl =>
       httpClient
-        .GET[HtmlPartial](s"$bUrl/header", Seq(), Seq("Cookie" -> s"PLAY_LANG=${messages.lang.code}")) recoverWith {
-        case _ => failedPartial
-      }
+        .get(url"$bUrl/$path")
+        .setHeader(HeaderNames.COOKIE -> s"PLAY_LANG=${messages.lang.code}")
+        .execute[HtmlPartial]
+        .recoverWith {
+          case _ => failedPartial
+        }
     }
-
-  def beforeContent(
-    baseUrl: Option[String]
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier, messages: Messages): Future[HtmlPartial] =
-    baseUrl.fold(failedPartial) { bUrl =>
-      httpClient.GET[HtmlPartial](
-        s"$bUrl/beforeContent",
-        Seq(),
-        Seq("Cookie" -> s"PLAY_LANG=${messages.lang.code}")
-      ) recoverWith {
-        case _ => failedPartial
-      }
-    }
-
-  def footer(
-    baseUrl: Option[String]
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier, messages: Messages): Future[HtmlPartial] =
-    baseUrl.fold(failedPartial) { bUrl =>
-      httpClient
-        .GET[HtmlPartial](s"$bUrl/footer", Seq(), Seq("Cookie" -> s"PLAY_LANG=${messages.lang.code}")) recoverWith {
-        case _ => failedPartial
-      }
-    }
+  }
 }

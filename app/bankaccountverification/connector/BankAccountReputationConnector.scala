@@ -17,15 +17,16 @@
 package bankaccountverification.connector
 
 import bankaccountverification.AppConfig
-import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.client.HttpClientV2
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig: AppConfig) {
+class BankAccountReputationConnector @Inject()(httpClient: HttpClientV2, appConfig: AppConfig) {
 
   def assessPersonal(accountName: String, sortCode: String, accountNumber: String, rollNumber: Option[String], address: Option[BarsAddress], callingClient: String)
                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Try[BarsPersonalAssessResponse]] = {
@@ -38,11 +39,10 @@ class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig
     )
 
     httpClient
-      .POST[BarsPersonalAssessRequest, HttpResponse](
-        url = appConfig.barsPersonalAssessUrl,
-        body = request,
-        headers = Seq("True-Calling-Client" -> callingClient)
-      )
+      .post(url"${appConfig.barsPersonalAssessUrl}")
+      .withBody(Json.toJson(request))
+      .setHeader("True-Calling-Client" -> callingClient)
+      .execute
       .map {
         case httpResponse if httpResponse.status == 200 =>
           Json.fromJson[BarsPersonalAssessSuccessResponse](httpResponse.json) match {
@@ -74,8 +74,10 @@ class BankAccountReputationConnector @Inject()(httpClient: HttpClient, appConfig
       Some(BarsBusiness(companyName = companyName, address)))
 
     httpClient
-      .POST[BarsBusinessAssessRequest, HttpResponse](url = appConfig.barsBusinessAssessUrl, body = request,
-        headers = Seq("True-Calling-Client" -> callingClient))
+      .post(url"${appConfig.barsBusinessAssessUrl}")
+      .withBody(Json.toJson(request))
+      .setHeader("True-Calling-Client" -> callingClient)
+      .execute
       .map {
         case httpResponse if httpResponse.status == 200 =>
           Json.fromJson[BarsBusinessAssessSuccessResponse](httpResponse.json) match {
