@@ -14,14 +14,17 @@
  * limitations under the License.
  *@
 
+@import views.html.helper.CSPNonce
+
 @this()
-@(scriptsBlock: Option[Html] = None)(implicit messages: Messages)
+
+@(scriptsBlock: Option[Html] = None)(implicit messages: Messages, request: RequestHeader)
 
 @scriptsBlock
 
-<script src='@controllers.routes.Assets.versioned("lib/govuk-frontend/dist/govuk/all.bundle.js")'></script>
-<script src='@controllers.routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
-<script>
+<script @{CSPNonce.attr} src='@controllers.routes.Assets.versioned("lib/govuk-frontend/dist/govuk/all.bundle.js")'></script>
+<script @{CSPNonce.attr} src='@controllers.routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
+<script @{CSPNonce.attr}>
         window.GOVUKFrontend.initAll();
         const backLink = document.getElementById("back");
         backLink.classList.remove("govuk-visually-hidden");
