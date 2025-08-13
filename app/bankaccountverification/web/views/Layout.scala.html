@@ -14,11 +14,10 @@
  * limitations under the License.
  *@
 
-@import bankaccountverification.AppConfig
+@import bankaccountverification.{AppConfig, TimeoutConfig}
 @import bankaccountverification.web.views.FooterLinks
-@import bankaccountverification.TimeoutConfig
-@import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardHeader
+@import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 @this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, govukPhaseBanner: GovukPhaseBanner,
         languageSelect: HmrcLanguageSelect, hmrcStandardHeader: HmrcStandardHeader, timeoutDialog: HmrcTimeoutDialog,
@@ -62,8 +61,10 @@
     @govukBackLink(BackLink(
         href="#",
         content = HtmlContent(messages("label.back")),
-        classes = "govuk-visually-hidden",
-        attributes = Map("id" -> "back", "onclick" -> "javascript:history.back()")
+        attributes = Map(
+            "id" -> "back",
+            "data-module" -> "hmrc-back-link"
+        )
     ))
 }
 

@@ -26,12 +26,7 @@
 <script @{CSPNonce.attr} src='@controllers.routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
 <script @{CSPNonce.attr}>
         window.GOVUKFrontend.initAll();
-        const backLink = document.getElementById("back");
-        backLink.classList.remove("govuk-visually-hidden");
-        const timeoutDialog = document.getElementsByName("hmrc-timeout-dialog").item(0);
-        if (timeoutDialog && window.HMRCFrontend.TimeoutDialog) {
-            new window.HMRCFrontend.TimeoutDialog(timeoutDialog).init();
-        }
+        window.HMRCFrontend.initAll();
 </script>
 
     <!-- Google Tag Manager (noscript) ->
