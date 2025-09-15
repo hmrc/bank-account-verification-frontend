@@ -102,3 +102,9 @@ footer.termsConditions.url = /help/terms-and-conditions
 footer.govukHelp.text = Help using GOV.UK
 footer.govukHelp.url = https://www.gov.uk/help
 footer.accessibility.text = Accessibility Statement
+
+test-setup.title=Stub starting a new BAVFE journey for V3
+test-setup.start-new-journey=Start new journey
+
+test-setup.complete.title=Bank Account Verification Result
+test-setup.complete.return=Return to BAVFE test setup
