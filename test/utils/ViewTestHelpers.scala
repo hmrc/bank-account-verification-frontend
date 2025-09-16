@@ -19,9 +19,6 @@ package utils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
-import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -29,11 +26,10 @@ import play.twirl.api.Html
 
 import scala.concurrent.Future
 
-trait ViewTestHelpers { self: BaseSpec with GuiceOneAppPerSuite =>
+trait ViewTestHelpers { self: BaseSpec =>
 
   trait ViewTest {
     implicit lazy val baseFakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    implicit lazy val mcc: Messages = app.injector.instanceOf[MessagesApi].preferred(baseFakeRequest)
     
     val call: Future[Result]
 
@@ -124,7 +120,6 @@ trait ViewTestHelpers { self: BaseSpec with GuiceOneAppPerSuite =>
   
   def checkButton(content: String, href: Option[String] = None, selector: String)(implicit viewTest: ViewTest): Unit = {
     val button = viewTest.select(selector)
-    
     s"have the content $content" in {
       button.text() shouldBe content
     }
@@ -133,6 +128,42 @@ trait ViewTestHelpers { self: BaseSpec with GuiceOneAppPerSuite =>
       s"have the href of $link" in {
         button.attr("href") shouldBe link
       }
+    }
+  }
+  
+  case class DetailsCheck(detailsContent: String, relativeSelector: Option[String] = None)
+  
+  def checkDetails(detailsSummary: String, selector: String, contentChecks: DetailsCheck*)(implicit viewTest: ViewTest): Unit = {
+    val details = viewTest.select(selector)
+
+    val trimmedSummary = detailsSummary.take(20) + (if(detailsSummary.length > 20) "..." else "")
+    
+    s"have the details summary of $trimmedSummary" in {
+      details.select("summary").text() shouldBe detailsSummary
+    }
+    
+    contentChecks.foreach { check =>
+      val trimmedContent = check.detailsContent.take(20) + (if(check.detailsContent.length > 20) "..." else "")
+      s"have the details content of $trimmedContent" in {
+        val selectorToUse = check.relativeSelector.fold(
+          s"$selector > div"
+        )(
+          relative => s"$selector > div > $relative"
+        )
+        
+        details.select(selectorToUse).text() shouldBe check.detailsContent
+      }
+    }
+  }
+  
+  def checkLinkOnPage(linkText: String, linkHref: String, selector: String)(implicit viewTest: ViewTest): Unit = {
+    val link = viewTest.select(selector)
+    s"have the link text of $linkText" in {
+      link.text() shouldBe linkText
+    }
+    
+    s"have the link href of $linkHref" in {
+      link.attr("href") shouldBe linkHref
     }
   }
 }

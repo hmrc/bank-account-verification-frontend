@@ -17,7 +17,9 @@
 package bankaccountverification.testOnly
 
 import bankaccountverification.AppConfig
+import bankaccountverification.api.{InitBACSRequirements, InitRequest, InitRequestAddress, InitRequestMaxCallConfig, InitRequestMessages, InitRequestPrepopulatedData, InitRequestTimeoutConfig}
 import bankaccountverification.testOnly.html.{TestCompleteJsonFeedbackView, TestSetupView}
+import bankaccountverification.web.AccountTypeRequestEnum.Business
 import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -37,9 +39,44 @@ class TestSetupController@Inject()(
   
   private lazy val unAuthRedirect = Future.successful(Redirect(appConfig.authStubUrl + s"/?continue=${appConfig.testOnlyUrl}${bankaccountverification.testOnly.routes.TestSetupController.show().url}")) 
   
+  val fullExampleJson = Json.prettyPrint(Json.toJson(InitRequest(
+    serviceIdentifier = "bank-account-verification-frontend",
+    continueUrl = "bank-account-verification/test-only/complete",
+    prepopulatedData = Some(InitRequestPrepopulatedData(
+      accountType = Business,
+      name = Some("British Airways Ltd"),
+      sortCode = Some("010013"),
+      accountNumber = Some("03766284"),
+      rollNumber = Some("1234567890")
+    )),
+    address = Some(InitRequestAddress(
+      lines = List("Line1", "Line2"),
+      town = Some("Town"),
+      postcode = Some("AA00AA")
+    )),
+    messages = Some(InitRequestMessages(
+      en = Json.obj("key1" -> "value1", "key2" -> "value2"),
+      cy = Some(Json.obj("key1" -> "gwerth1", "key2" -> "gwerth2"))
+    )),
+    customisationsUrl = Some("some-url"),
+    bacsRequirements = Some(InitBACSRequirements(directDebitRequired = true, directCreditRequired = true)),
+    timeoutConfig = Some(InitRequestTimeoutConfig(
+      timeoutUrl = "/time-out",
+      timeoutAmount = 3600,
+      timeoutKeepAliveUrl = Some("/keep-alive")
+    )),
+    signOutUrl = Some("/sign-out"),
+    maxCallConfig = Some(InitRequestMaxCallConfig(count = 3, redirectUrl = "/redirect"))
+  ))) 
+  
   def show(): Action[AnyContent] = Action.async { implicit request =>
     authorised() {
-      Future.successful(Ok(view()))
+      val basicForm = TestSetupForm.form.fill(Json.prettyPrint(Json.obj(
+        "serviceIdentifier" -> "bank-account-verification-frontend",
+        "continueUrl" -> "/bank-account-verification/test-only/test-complete"
+      )))
+      
+      Future.successful(Ok(view(basicForm, fullExampleJson)))
     }.recoverWith { case e: Throwable =>
       logger.error(s"[TestSetupController][show] - Error: ${e.getMessage}")
       unAuthRedirect
@@ -48,16 +85,27 @@ class TestSetupController@Inject()(
   
   def submit(): Action[AnyContent] = Action.async { implicit request =>
     authorised() {
-      val jsonBody = Json.parse(TestSetupForm.form.bindFromRequest().get)
+      TestSetupForm.form.bindFromRequest().fold(
+        formWithErrors => {
+          Future.successful(BadRequest(view(formWithErrors, fullExampleJson)))
+        },
+        jsonString => {
+          val jsonBody = Json.parse(jsonString)
 
-      service.makeInitCall(jsonBody).map {
-        case Right(initModel) => Redirect(initModel.startUrl)
-          .withHeaders(request.headers.headers: _*)
-        case Left(errorModel) =>
-          logger.error(s"[TestSetupController][submit] - Error: ${errorModel.asPrettyJson}")
-          BadRequest
-      }
-    }.recoverWith( _ => unAuthRedirect )
+          service.makeInitCall(jsonBody).map {
+            case Right(initModel) => Redirect(initModel.startUrl)
+              .withHeaders(request.headers.headers: _*)
+            case Left(errorModel) =>
+              logger.error(s"[TestSetupController][submit] - Error: ${errorModel.asPrettyJson}")
+              BadRequest
+          }
+        }
+      )
+    }.recoverWith( e => {
+      println(Console.GREEN + e.getMessage + Console.RESET)
+      logger.error(s"SOMETHING WENT WRONG: ${e.getMessage}")
+      unAuthRedirect
+    })
   }
   
   def complete(journeyId: String): Action[AnyContent] = Action.async { implicit request =>
@@ -71,7 +119,7 @@ class TestSetupController@Inject()(
           logger.error(s"[TestSetupController][complete] - Error: ${errorModel.asPrettyJson}")
           BadRequest
       }
-    }
+    }.recoverWith( _ => unAuthRedirect)
     
   }
   

@@ -18,68 +18,74 @@ package bankaccountverification.testOnly
 
 import bankaccountverification.api.InitResponse
 import bankaccountverification.models.HttpErrorResponse
-import org.scalamock.handlers.{CallHandler2, CallHandler4}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito._
+import org.mockito.stubbing.OngoingStubbing
 import play.api.Application
+import play.api.http.Status.BAD_REQUEST
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
-import uk.gov.hmrc.http.HeaderCarrier
-import utils.{MockFactoryTestSpec, ViewTestHelpers}
+import utils.{MockitoTestSpec, ViewTestHelpers}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class TestSetupControllerSpec extends MockFactoryTestSpec with ViewTestHelpers {
-
+class TestSetupControllerSpec extends MockitoTestSpec with ViewTestHelpers {
   lazy val mockAuthConnector: AuthConnector = mock[AuthConnector]
   lazy val mockService: TestSetupService = mock[TestSetupService]
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockAuthConnector, mockService)
+  }
   
-  override implicit lazy val app: Application = {
+  def mockAuth(isSuccessful: Boolean = true): OngoingStubbing[Future[Unit]] = {
+    val result: Future[Unit] = if (isSuccessful) Future.successful() else Future.failed(AuthorisationException.fromString("MissingBearerToken"))
+    
+    when(mockAuthConnector.authorise[Unit](any(), any())(any(), any()))
+      .thenReturn(result)
+  }
+  
+  def mockInitCall(result: Either[HttpErrorResponse, InitResponse]): OngoingStubbing[Future[Either[HttpErrorResponse, InitResponse]]] = {
+    when(mockService.makeInitCall(any())(any()))
+      .thenReturn(Future.successful(result))
+  }
+  
+  def mockCompleteCall(): OngoingStubbing[Future[Either[HttpErrorResponse, JsValue]]] = {
+    val result = Future.successful(Right(Json.obj(
+      "key1" -> "value1",
+      "key2" -> "value2",
+      "key3" -> "value3",
+      "key4" -> "value4"
+    )))
+    
+    when(mockService.completeCall(any())(any()))
+      .thenReturn(result)
+  }
+
+  lazy val app: Application = {
     new GuiceApplicationBuilder()
-      .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
-      .overrides(bind[TestSetupService].toInstance(mockService))
+      .overrides(bind[AuthConnector].to(mockAuthConnector))
+      .overrides(bind[TestSetupService].to(mockService))
       .build()
   }
-  
+
   lazy val controller: TestSetupController = app.injector.instanceOf[TestSetupController]
   
-  def mockAuth(isSuccessful: Boolean = true): CallHandler4[Predicate, Retrieval[_], HeaderCarrier, ExecutionContext, Future[Any]] = {
-    val result = if (isSuccessful) Future.successful() else Future.failed(AuthorisationException.fromString("MissingBearerToken"))
-    
-    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[_])(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *, *)
-      .returns(result)
-  }
-  
-  def mockInitCall(result: Either[HttpErrorResponse, InitResponse]): CallHandler2[JsValue, HeaderCarrier, Future[Either[HttpErrorResponse, InitResponse]]] = {
-    (mockService.makeInitCall(_: JsValue)(_: HeaderCarrier))
-      .expects(*, *)
-      .returns(Future.successful(result))
-  }
-  
-  def mockCompleteCall(): CallHandler2[String, HeaderCarrier, Future[Either[HttpErrorResponse, JsValue]]] = {
-    (mockService.completeCall(_: String)(_: HeaderCarrier))
-      .expects(*, *)
-      .returns(Future.successful(Right(Json.obj(
-        "key1" -> "value1",
-        "key2" -> "value2",
-        "key3" -> "value3",
-        "key4" -> "value4"
-      ))))
-  }
+  lazy val expectedWarningContent: String = "Warning All fields except for serviceIdentifier and continueURL are optional"
+  lazy val expectedJsonExample: String = controller.fullExampleJson
   
   ".show" should {
     
     "render the page successfully" when {
       
       "the user is authorised" which {
-        mockAuth()
-        
         implicit lazy val viewTest: PageViewTest = new PageViewTest {
+          mockAuth()
+          
           override val call: Future[Result] = controller.show().apply(baseFakeRequest)
           override val title: String = "Stub starting a new BAVFE journey for V3 - GOV.UK"
           override val heading: String = "Stub starting a new BAVFE journey for V3"
@@ -93,6 +99,12 @@ class TestSetupControllerSpec extends MockFactoryTestSpec with ViewTestHelpers {
           ))),
           "#json-setup"
         )
+        checkDetails(
+          "Example of a full json model",
+          "#json-example",
+          DetailsCheck(expectedJsonExample, Some("pre > code"))
+        )
+        checkContentOnPage(expectedWarningContent, ".govuk-warning-text__text")
         checkButton("Start new journey", selector = "#main-content > div > div > form > button")
       }
     }
@@ -100,9 +112,9 @@ class TestSetupControllerSpec extends MockFactoryTestSpec with ViewTestHelpers {
     "redirect the user to the auth login stub" when {
       
       "the user is not authorised" which {
-        mockAuth(isSuccessful = false)
-        
         implicit lazy val viewTest: RedirectTest = new RedirectTest {
+          mockAuth(isSuccessful = false)
+          
           override val call: Future[Result] = controller.show().apply(baseFakeRequest)
           override val redirectUrl: String = "http://localhost:9949/auth-login-stub/gg-sign-in/?continue=http://localhost:9903/bank-account-verification/test-only/test-setup"
         }
@@ -121,20 +133,72 @@ class TestSetupControllerSpec extends MockFactoryTestSpec with ViewTestHelpers {
         ))
       )
     
+    "render the setup page with an error" when {
+      
+      "invalid json is submitted" which {
+        implicit lazy val viewTest: PageViewTest = new PageViewTest {
+          mockAuth()
+          mockInitCall(Right(InitResponse(
+            "journeyId",
+            "startUrl",
+            "completeUrl",
+            None
+          )))
+
+          val requestWithBadJson: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST", "/bank-account-verification/test-only/test-setup")
+            .withFormUrlEncodedBody("json-setup" -> "this is not json")
+          
+          override val call: Future[Result] = controller.submit().apply(requestWithBadJson)
+          override val title: String = "Stub starting a new BAVFE journey for V3 - GOV.UK"
+          override val heading: String = "Stub starting a new BAVFE journey for V3"
+        }
+
+        viewTest.basicChecks(BAD_REQUEST)
+        checkContentOnPage("There is a problem", "#main-content > div > div > div > div > h2")
+        checkLinkOnPage("Must be a valid json structure.", "#json-setup", "#main-content > div > div > div > div > div > ul > li > a")
+      }
+      
+      "valid json is submitted, but it cannot be parsed into the InitRequest model" which {
+        implicit lazy val viewTest: PageViewTest = new PageViewTest {
+          mockAuth()
+          mockInitCall(Right(InitResponse(
+            "journeyId",
+            "startUrl",
+            "completeUrl",
+            None
+          )))
+
+          val requestWithBadJson: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest("POST", "/bank-account-verification/test-only/test-setup")
+            .withFormUrlEncodedBody("json-setup" -> Json.prettyPrint(Json.obj(
+              "someField" -> "not ganna parse"
+            )))
+
+          override val call: Future[Result] = controller.submit().apply(requestWithBadJson)
+          override val title: String = "Stub starting a new BAVFE journey for V3 - GOV.UK"
+          override val heading: String = "Stub starting a new BAVFE journey for V3"
+        }
+
+        viewTest.basicChecks(BAD_REQUEST)
+        checkContentOnPage("There is a problem", "#main-content > div > div > div > div > h2")
+        checkLinkOnPage("Must match the expected json structure of the InitRequest model.", "#json-setup", "#main-content > div > div > div > div > div > ul > li > a")
+      }
+    }
+    
     "make the v3 init call and redirect to the start url it returns" when {
       
       "the user is authorised and the init call is successful" which {
-        mockAuth()
-        mockInitCall(Right(InitResponse(
-          "journeyId",
-          "startUrl",
-          "completeUrl",
-          None
-        )))
-        
         implicit lazy val viewTest: RedirectTest = new RedirectTest {
           override val redirectUrl: String = "startUrl"
-          override val call: Future[Result] = controller.submit().apply(fakeRequest)
+          override val call: Future[Result] = {
+            mockAuth()
+            mockInitCall(Right(InitResponse(
+              "journeyId",
+              "startUrl",
+              "completeUrl",
+              None
+            )))
+            controller.submit().apply(fakeRequest)
+          }
         }
         
         viewTest.basicChecks()
@@ -144,11 +208,12 @@ class TestSetupControllerSpec extends MockFactoryTestSpec with ViewTestHelpers {
     "return a BadRequest" when {
       
       "the init call fails" which {
-        mockAuth()
-        mockInitCall(Left(HttpErrorResponse("Something went wrong")))
-        
         implicit lazy val viewTest: ErrorTest = new ErrorTest {
-          override val call: Future[Result] = controller.submit().apply(fakeRequest)
+          override val call: Future[Result] = {
+            mockAuth()
+            mockInitCall(Left(HttpErrorResponse("Something went wrong")))
+            controller.submit().apply(fakeRequest)
+          }
         }
         
         viewTest.basicChecks()
@@ -158,11 +223,12 @@ class TestSetupControllerSpec extends MockFactoryTestSpec with ViewTestHelpers {
     "redirects to the auth login stub" when {
       
       "the user is not authorised" which {
-        mockAuth(isSuccessful = false)
         
         implicit lazy val viewTest: RedirectTest = new RedirectTest {
-          
-          override val call: Future[Result] = controller.submit().apply(fakeRequest)
+          override val call: Future[Result] = {
+            mockAuth(isSuccessful = false)
+            controller.submit().apply(fakeRequest)
+          }
           override val redirectUrl: String = "http://localhost:9949/auth-login-stub/gg-sign-in/?continue=http://localhost:9903/bank-account-verification/test-only/test-setup"
         }
         
@@ -176,10 +242,11 @@ class TestSetupControllerSpec extends MockFactoryTestSpec with ViewTestHelpers {
     "display the journey complete page" when {
       
       "the user is authorised" which {
-        mockAuth()
-        mockCompleteCall()
         
         implicit lazy val viewTest: PageViewTest = new PageViewTest {
+          mockAuth()
+          mockCompleteCall()
+          
           override val call: Future[Result] = controller.complete("journeyId").apply(baseFakeRequest)
           override val title: String = "Bank Account Verification Result - GOV.UK"
           override val heading: String = "Bank Account Verification Result"

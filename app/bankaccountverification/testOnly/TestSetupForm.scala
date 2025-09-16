@@ -16,13 +16,35 @@
 
 package bankaccountverification.testOnly
 
+import bankaccountverification.api.InitRequest
+import play.api.Logging
 import play.api.data.Form
 import play.api.data.Forms.nonEmptyText
+import play.api.data.validation.{Constraint, Invalid, Valid}
+import play.api.libs.json.Json
 
-object TestSetupForm {
+import scala.util.Try
 
+object TestSetupForm extends Logging {
+  
+  private def canBeParsedAsModelConstraint: Constraint[String] = Constraint[String]("can-be-parsed-as-model") { jsonString =>
+    Try(Json.parse(jsonString)).fold (
+      error => {
+        logger.error(s"Could not parse json: $error")
+        Invalid("test-setup.start-new-journey.error.invalid-json")
+      },
+      _.validate[InitRequest].fold (
+        errors => {
+          logger.error(s"Could not parse json as InitRequest: $errors")
+          Invalid("test-setup.start-new-journey.error.cannot-parse")
+        },
+        _ => Valid
+      )
+    )
+  }
+  
   def form: Form[String] = Form(
-    "json-setup" -> nonEmptyText
+    "json-setup" -> nonEmptyText.verifying(canBeParsedAsModelConstraint)
   )
   
 }

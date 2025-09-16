@@ -16,7 +16,7 @@
 
 package utils
 
-import org.scalamock.scalatest.MockFactory
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.scalatest.BeforeAndAfterEach
+import org.scalatestplus.mockito.MockitoSugar
 
-trait MockFactoryTestSpec extends BaseSpec with MockFactory with GuiceOneAppPerSuite
+trait MockitoTestSpec extends BaseSpec with MockitoSugar with BeforeAndAfterEach

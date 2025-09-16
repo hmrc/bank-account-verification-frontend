@@ -15,24 +15,37 @@
  *@
 
 @import bankaccountverification.web.views.html.Layout
-@import play.api.libs.json.Json
-    
+
 @this(
         layout: Layout,
         textarea: GovukTextarea,
         form: FormWithCSRF,
-        button: GovukButton
+        button: GovukButton,
+        errorSummary: GovukErrorSummary,
+        details: GovukDetails,
+        warning: GovukWarningText
 )
-@()(implicit messages: Messages, appConfig: AppConfig, requestHeader: RequestHeader)
+@(jsonForm: Form[String], exampleModel: String)(implicit messages: Messages, appConfig: AppConfig, requestHeader: RequestHeader)
 
-@defaultJson() = @{
-    Json.prettyPrint(Json.obj(
-        "serviceIdentifier" -> "bank-account-verification-frontend",
-        "continueUrl" -> "/bank-account-verification/test-only/test-complete"
-    ))
+@detailContent = {
+    @warning(WarningText(content = Text(messages("test-setup.start-new-journey.details.notice"))))
+    <pre class="govuk-body govuk-!-font-weight-bold govuk-!-padding-bottom-6"><code>@exampleModel</code></pre>
 }
 
 @layout(Some(messages("test-setup.title")), journeyId = None) {
+    
+    @if(jsonForm.errors.nonEmpty) {
+        @errorSummary(ErrorSummary(
+            title = Text(messages("error.summaryText")),
+            errorList = Seq(
+                ErrorLink(
+                    href = Some("#json-setup"),
+                    content = Text(messages(jsonForm.errors.head.message))
+                )
+            )
+        ))
+    }
+    
     <h1 class="govuk-heading-l">@messages("test-setup.title")</h1>
     
     @form(bankaccountverification.testOnly.routes.TestSetupController.submit) {
@@ -40,7 +53,12 @@
             id = "json-setup",
             name = "json-setup",
             rows = 15,
-            value = Some(defaultJson())
+            value = jsonForm.apply("json-setup").value
+        ))
+        @details(Details(
+            id = Some("json-example"),
+            summary = Text(messages("test-setup.start-new-journey.details.title")),
+            content = HtmlContent(detailContent)
         ))
         
         @button(Button(
