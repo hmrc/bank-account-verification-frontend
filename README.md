@@ -1,4 +1,4 @@
-# bank-account-verification-frontend
+# Bank Account Verification Frontend
 
 `bank-account-verification-frontend` (`BAVFE`) provides a common frontend implementation for client services that need to capture, validate and verify bank account information.
 It provides mechanisms to customise messaging, eg page titles, element labels, etc, to ensure that it _blends_ with the calling service.
@@ -6,6 +6,31 @@ It provides mechanisms to customise messaging, eg page titles, element labels, e
 An example of a client service can be seen in [bank-account-verification-example-frontend](https://github.com/hmrc/bank-account-verification-example-frontend) (`BAVEFE`).
 
 **Please note**, you are viewing documentation for the latest version of the `BAVFE` API (v2). [You can view the readme for the old version of the API here.](https://github.com/hmrc/bank-account-verification-example-frontend/README-v1.md)
+
+## Run this service locally
+There are two steps you must take in order to run this service.
+1. Run the dependencies by running
+    ```bash
+    sm2 --start BANK_ACCOUNT_VERIFICATION
+    ```
+2. Run the stubbed reputation third parties microservice
+    ```bash
+   sm2 --start BANK_ACCOUNT_REPUTATION_THIRD_PARTIES_STUB
+    ```
+3. Stop the front end with
+   ```bash
+   sm2 --stop BANK_ACCOUNT_VERIFICATION_FRONTEND
+   ```
+   (or do step 3 first)
+4. Run the `runLocal.sh` file to start the service.
+
+## Using the test-only setup endpoint
+The service supports a test-only endpoint that allows you to set up a journey with any parameters you want. This comes prefilled with a complete endpoint that is prefilled for you that displays the json you get back from the api.
+
+The endpoint for this is : `/bank-account-verification/test-only/test-setup`
+
+The complete endpoint (which is prefilled for you) is : `/bank-account-verification/test-only/test-complete` (this gets the journey id placed on the end automatically).
+
 
 ## Flow
 There are 3 parts to the usage of `BAVFE`:

@@ -41,4 +41,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     if(checkAllowList && _allowedClients.isEmpty) throw new RuntimeException(s"Could not find config $accessControlAllowListAbsoluteKey")
     else _allowedClients.getOrElse(Seq()).toSet
   }
+  
+  val testOnlyUrl: String = config.get[String]("testOnly.url")
+  val authStubUrl: String = config.get[String]("testOnly.authStub")
 }

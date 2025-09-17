@@ -13,8 +13,8 @@ object AppDependencies {
   )
 
   val test: Seq[ModuleID] = Seq(
-    "uk.gov.hmrc"       %% "bootstrap-test-play-30"   % bootstrapPlayVersion  % Test,
-    "uk.gov.hmrc.mongo" %% "hmrc-mongo-test-play-30"  % hmrcMongoPlayVersion  % Test,
-    "org.jsoup"          % "jsoup"                    % "1.19.1"              % Test
-  )
+    "uk.gov.hmrc"       %% "bootstrap-test-play-30"   % bootstrapPlayVersion,
+    "uk.gov.hmrc.mongo" %% "hmrc-mongo-test-play-30"  % hmrcMongoPlayVersion,
+    "org.jsoup"          % "jsoup"                    % "1.21.2"
+  ).map(_ % Test)
 }

@@ -10,4 +10,8 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 # Add all the application routes to the prod.routes file
-->         /                          prod.Routes
+->          /                                                                    prod.Routes
+
+GET         /bank-account-verification/test-only/test-setup                      bankaccountverification.testOnly.TestSetupController.show()
+POST        /bank-account-verification/test-only/test-setup                      bankaccountverification.testOnly.TestSetupController.submit()
+GET         /bank-account-verification/test-only/test-complete/:journeyId        bankaccountverification.testOnly.TestSetupController.complete(journeyId: String)

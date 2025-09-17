@@ -102,3 +102,13 @@ footer.termsConditions.url = /help/terms-and-conditions
 footer.govukHelp.text = Help using GOV.UK
 footer.govukHelp.url = https://www.gov.uk/help
 footer.accessibility.text = Accessibility Statement
+
+test-setup.title=Stub starting a new BAVFE journey for V3
+test-setup.start-new-journey=Start new journey
+test-setup.start-new-journey.details.title=Example of a full json model
+test-setup.start-new-journey.details.notice=All fields except for serviceIdentifier and continueURL are optional
+test-setup.start-new-journey.error.invalid-json=Must be a valid json structure.
+test-setup.start-new-journey.error.cannot-parse=Must match the expected json structure of the InitRequest model.
+
+test-setup.complete.title=Bank Account Verification Result
+test-setup.complete.return=Return to BAVFE test setup

@@ -1,0 +1,38 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import bankaccountverification.AppConfig
+@import bankaccountverification.web.views.html.Layout
+
+@this(
+    layout: Layout,
+    button: GovukButton
+)
+@(journeyId: String, jsonFeedback: String)(implicit appConfig: AppConfig, messages: Messages, requestHeader: RequestHeader)
+
+@layout(
+    pageTitle = Some(messages("test-setup.complete.title")),
+    journeyId = Some(journeyId)
+) {
+    <h1 class="govuk-heading-l">@messages("test-setup.complete.title")</h1>
+    
+    <pre class="govuk-body govuk-!-font-weight-bold govuk-!-padding-bottom-6"><code>@jsonFeedback</code></pre>
+    
+    @button(Button(
+        content = Text(messages("test-setup.complete.return")),
+        href = Some(bankaccountverification.testOnly.routes.TestSetupController.show().url)
+    ))
+}

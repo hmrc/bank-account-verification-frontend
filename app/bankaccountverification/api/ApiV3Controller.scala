@@ -17,6 +17,7 @@
 package bankaccountverification.api
 
 import access.AccessChecker
+import bankaccountverification.models.HttpErrorResponse
 import bankaccountverification.utils.RelativeOrAbsoluteWithHostnameFromAllowlist
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.{BACSRequirements, _}
@@ -42,7 +43,6 @@ class ApiV3Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
 
   def init: Action[AnyContent] =
     Action.async { implicit request =>
-
       if (!accessChecker.isClientAllowed()) Future.successful(Forbidden)
       else authorised().retrieve(AuthProviderId.retrieval) {
         authProviderId =>
@@ -50,7 +50,7 @@ class ApiV3Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
             case Some(json) =>
               json.validate[InitRequest]
                 .fold(
-                  err => Future.successful(BadRequest(Json.obj("errors" -> err.flatMap { case (_, e) => e.map(_.message) }))),
+                  err => Future.successful(BadRequest(Json.obj("errors" -> err.flatMap { case (path, error) => Seq(s"${path} -> ${error.map(_.message).head}") }))),
                   init => {
                     val signoutPolicyResult = init.signOutUrl.map { url => Try(policy.url(url)) }
                     val maxCallCountRedirectPolicyResult = init.maxCallConfig.map { mc => Try(policy.url(mc.redirectUrl)) }
@@ -65,8 +65,8 @@ class ApiV3Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
             case None =>
               Future.successful(BadRequest(Json.obj("error" -> "No json")))
           }
-      } recoverWith { case _ =>
-        Future.successful(Unauthorized)
+      } recoverWith { case e =>
+        Future.successful(Unauthorized(HttpErrorResponse(e.getMessage).asPrettyJson))
       }
     }
 
@@ -132,8 +132,8 @@ class ApiV3Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
               }
           case Failure(e) => Future.successful(BadRequest)
         }
-    } recoverWith { case _ =>
-      Future.successful(Unauthorized)
+    } recoverWith { case e =>
+      Future.successful(Unauthorized(e.getMessage))
     }
   }
 }
