@@ -13,12 +13,16 @@ There are two steps you must take in order to run this service.
     ```bash
     sm2 --start BANK_ACCOUNT_VERIFICATION
     ```
-2. Stop the front end with
+2. Run the stubbed reputation third parties microservice
+    ```bash
+   sm2 --start BANK_ACCOUNT_REPUTATION_THIRD_PARTIES_STUB
+    ```
+3. Stop the front end with
    ```bash
    sm2 --stop BANK_ACCOUNT_VERIFICATION_FRONTEND
    ```
    (or do step 3 first)
-3. Run the `runLocal.sh` file to start the service.
+4. Run the `runLocal.sh` file to start the service.
 
 ## Using the test-only setup endpoint
 The service supports a test-only endpoint that allows you to set up a journey with any parameters you want. This comes prefilled with a complete endpoint that is prefilled for you that displays the json you get back from the api.
