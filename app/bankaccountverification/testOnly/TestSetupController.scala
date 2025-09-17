@@ -55,8 +55,16 @@ class TestSetupController@Inject()(
       postcode = Some("AA00AA")
     )),
     messages = Some(InitRequestMessages(
-      en = Json.obj("key1" -> "value1", "key2" -> "value2"),
-      cy = Some(Json.obj("key1" -> "gwerth1", "key2" -> "gwerth2"))
+      en = Json.obj(
+        "service.name" -> "My service",
+        "label.accountDetails.heading.business" -> "Business bank or building society account details", 
+        "label.accountDetails.heading.personal" -> "Personal bank or building society account details",
+      ),
+      cy = Some(Json.obj(
+        "service.name" -> "Fy ngwasanaeth",
+        "label.accountDetails.heading.business" -> "Manylion cyfrif banc neu gymdeithas adeiladu busnes",
+        "label.accountDetails.heading.personal" -> "Manylion cyfrif banc neu gymdeithas adeiladu personol",
+      ))
     )),
     customisationsUrl = Some("some-url"),
     bacsRequirements = Some(InitBACSRequirements(directDebitRequired = true, directCreditRequired = true)),
@@ -101,11 +109,7 @@ class TestSetupController@Inject()(
           }
         }
       )
-    }.recoverWith( e => {
-      println(Console.GREEN + e.getMessage + Console.RESET)
-      logger.error(s"SOMETHING WENT WRONG: ${e.getMessage}")
-      unAuthRedirect
-    })
+    }.recoverWith( _ => unAuthRedirect )
   }
   
   def complete(journeyId: String): Action[AnyContent] = Action.async { implicit request =>
