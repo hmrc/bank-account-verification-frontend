@@ -34,7 +34,7 @@ class TestSetupService @Inject()(
                                 )(implicit ec: ExecutionContext) {
 
   def makeInitCall(jsonBody: JsValue)(implicit headerCarrier: HeaderCarrier): Future[Either[HttpErrorResponse, InitResponse]] = {
-    val url = s"${appConfig.testOnlyUrl}${bankaccountverification.api.routes.ApiV3Controller.init.url}"
+    val url = s"${appConfig.bavfeBaseUrl}${bankaccountverification.api.routes.ApiV3Controller.init.url}"
     
     client.post(url"$url")
           .setHeader(HeaderNames.USER_AGENT -> "test-setup")
@@ -60,7 +60,7 @@ class TestSetupService @Inject()(
   }
   
   def completeCall(journeyId: String)(implicit headerCarrier: HeaderCarrier): Future[Either[HttpErrorResponse, JsValue]] = {
-    val url = s"${appConfig.testOnlyUrl}${bankaccountverification.api.routes.ApiV3Controller.complete(journeyId)}"
+    val url = s"${appConfig.bavfeBaseUrl}${bankaccountverification.api.routes.ApiV3Controller.complete(journeyId)}"
     
     client.get(url"$url")
           .setHeader(HeaderNames.USER_AGENT -> "test-setup")

@@ -31,7 +31,7 @@ class TestSetupServiceSpec extends ItTestSpec {
   
   override lazy val app: Application = GuiceApplicationBuilder()
     .configure(
-      "testOnly.url" -> s"http://localhost:$barsPort"
+      "microservice.services.bank-account-verification-frontend.port" -> barsPort
     )
     .build()
 
