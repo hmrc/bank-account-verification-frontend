@@ -49,7 +49,14 @@
         serviceName = if (forceNavigation) None else Some(messages("service.name")),
         phaseBanner = if(messages.isDefinedAt("phaseBanner.tag")) Some(PhaseBanner(
             tag = Some(Tag(content = HtmlContent(messages("phaseBanner.tag")))),
-            content = HtmlContent(messages("phaseBanner.content")))) else None
+            content = HtmlContent(messages("phaseBanner.content")))) else None,
+        serviceNavigation = if (forceNavigation) {
+            Some(
+                ServiceNavigation(serviceName = Some("Service name")).withLanguageToggle
+            )
+        } else {
+            None
+        }
     )
 }
 
