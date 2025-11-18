@@ -39,7 +39,8 @@ case class Journey(id: ObjectId, authProviderId: Option[String], expiryDate: Ins
                    customisationsUrl: Option[String] = None, bacsRequirements: Option[BACSRequirements] = None,
                    timeoutConfig: Option[TimeoutConfig] = None, signOutUrl: Option[String] = None,
                    maxCallCount: Option[Int] = None,
-                   maxCallCountRedirectUrl: Option[String] = None) {
+                   maxCallCountRedirectUrl: Option[String] = None,
+                   useNewGovUkServiceNavigation: Option[Boolean]) {
 
   def getBACSRequirements: BACSRequirements = bacsRequirements.getOrElse(defaultBACSRequirements)
 }
@@ -72,9 +73,10 @@ object Journey {
                      messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
                      address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None,
                      directDebitConstraints: Option[BACSRequirements] = None, timeoutConfig: Option[TimeoutConfig],
-                     signOutUrl: Option[String], maxCallCount: Option[Int], maxCallCountRedirectUrl: Option[String]): Journey =
+                     signOutUrl: Option[String], maxCallCount: Option[Int], maxCallCountRedirectUrl: Option[String],
+                     useNewGovUkServiceNavigation: Option[Boolean]): Journey =
     Journey(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, createSession(address, prepopulatedData),
-      messages, customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl, maxCallCount, maxCallCountRedirectUrl)
+      messages, customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl, maxCallCount, maxCallCountRedirectUrl, useNewGovUkServiceNavigation)
 
   implicit val objectIdFormats: Format[ObjectId] = MongoFormats.objectIdFormat
   implicit val datetimeFormat: Format[Instant] = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
@@ -88,21 +90,22 @@ object Journey {
   implicit val directDebitConstraintsReads: Reads[BACSRequirements] = Json.reads[BACSRequirements]
   implicit val directDebitConstraintsWrites: Writes[BACSRequirements] = Json.writes[BACSRequirements]
 
-  implicit def defaultReads: Reads[Journey] =
-    (__ \ "_id")
-      .read[ObjectId]
-      .and((__ \ "authProviderId").readNullable[String])
-      .and((__ \ "expiryDate").read[Instant])
-      .and((__ \ "serviceIdentifier").read[String])
-      .and((__ \ "continueUrl").read[String])
-      .and((__ \ "data").read[Session])
-      .and((__ \ "messages").readNullable[JsObject])
-      .and((__ \ "customisationsUrl").readNullable[String])
-      .and((__ \ "directDebitConstraints").readNullable[BACSRequirements])
-      .and((__ \ "timeoutConfig").readNullable[TimeoutConfig])
-      .and((__ \ "signOutUrl").readNullable[String])
-      .and((__ \ "maxCallCount").readNullable[Int])
-      .and((__ \ "maxCallCountRedirectUrl").readNullable[String])(
+implicit def defaultReads: Reads[Journey] =
+  (__ \ "_id")
+    .read[ObjectId]
+    .and((__ \ "authProviderId").readNullable[String])
+    .and((__ \ "expiryDate").read[Instant])
+    .and((__ \ "serviceIdentifier").read[String])
+    .and((__ \ "continueUrl").read[String])
+    .and((__ \ "data").read[Session])
+    .and((__ \ "messages").readNullable[JsObject])
+    .and((__ \ "customisationsUrl").readNullable[String])
+    .and((__ \ "directDebitConstraints").readNullable[BACSRequirements])
+    .and((__ \ "timeoutConfig").readNullable[TimeoutConfig])
+    .and((__ \ "signOutUrl").readNullable[String])
+    .and((__ \ "maxCallCount").readNullable[Int])
+    .and((__ \ "maxCallCountRedirectUrl").readNullable[String])
+    .and((__ \ "useNewGovUkServiceNavigation").readNullable[Boolean])(
         (
           id: ObjectId,
           authProviderId: Option[String],
@@ -116,9 +119,11 @@ object Journey {
           timeoutConfig: Option[TimeoutConfig],
           signOutUrl: Option[String],
           maxCallCount: Option[Int],
-          maxCallCountRedirectUrl: Option[String]
+          maxCallCountRedirectUrl: Option[String],
+          useNewGovUkServiceNavigation: Option[Boolean]
         ) => Journey.apply(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, data, messages,
-          customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl, maxCallCount, maxCallCountRedirectUrl)
+          customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl, maxCallCount, maxCallCountRedirectUrl,
+          useNewGovUkServiceNavigation)
       )
 
   implicit def defaultWrites: OWrites[Journey] =
@@ -135,7 +140,9 @@ object Journey {
       .and((__ \ "timeoutConfig").writeNullable[TimeoutConfig])
       .and((__ \ "signOutUrl").writeNullable[String])
       .and((__ \ "maxCallCount").writeNullable[Int])
-      .and((__ \ "maxCallCountRedirectUrl").writeNullable[String]) {
+      .and((__ \ "maxCallCountRedirectUrl").writeNullable[String])
+      .and((__  \ "useNewGovUkServiceNavigation").writeNullable[Boolean])
+  {
         unlift(Journey.unapply)
       }
 

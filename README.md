@@ -53,7 +53,8 @@ case class InitRequest(
     bacsRequirements: Option[InitBACSRequirements] = None,
     timeoutConfig: Option[InitRequestTimeoutConfig], 
     signOutUrl: Option[String] = None,
-    maxCallConfig: Option[InitRequestMaxCallConfig] = None)
+    maxCallConfig: Option[InitRequestMaxCallConfig] = None,
+    useNewGovUkServiceNavigation: Option[Boolean] = None
 )
 ```
 ```scala

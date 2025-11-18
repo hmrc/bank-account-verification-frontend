@@ -42,6 +42,12 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     else _allowedClients.getOrElse(Seq()).toSet
   }
 
+  private lazy val serviceNavigationFeatureEnabled: Boolean =
+    config.getOptional[Boolean]("features.forceServiceNavigation").getOrElse(false)
+
+  def forceServiceNavigation(journey: Journey): Boolean =
+    serviceNavigationFeatureEnabled || journey.useNewGovUkServiceNavigation.getOrElse(false)
+
   val bavfeBaseUrl = servicesConfig.baseUrl("bank-account-verification-frontend")
 
   val testOnlyUrl: String = config.get[String]("testOnly.url")

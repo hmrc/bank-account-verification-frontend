@@ -19,7 +19,7 @@ package bankaccountverification.timeout
 import bankaccountverification._
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.Personal
-import bankaccountverification.web.{ActionWithCustomisationsProvider, TimeoutController}
+import bankaccountverification.web.TimeoutController
 import com.codahale.metrics.SharedMetricRegistries
 import org.bson.types.ObjectId
 import org.mockito.ArgumentMatchers.{eq => meq, _}
@@ -40,7 +40,7 @@ import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.time.{Instant, LocalDateTime}
+import java.time.Instant
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -91,7 +91,8 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
             Some(
               PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = Some("some-iban"), matchedAccountName = None)),
             None),
-          timeoutConfig = None)
+          timeoutConfig = None,
+          useNewGovUkServiceNavigation = Some(false))
 
         when(mockJourneyRepository.findById(meq(journeyId))(any())).thenReturn(Future.successful(Some
         (returnData)))
@@ -157,7 +158,8 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
               PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = Some("some-iban"), matchedAccountName = None)),
             None
           ),
-          timeoutConfig = None)
+          timeoutConfig = None,
+          useNewGovUkServiceNavigation = Some(false))
 
         when(mockJourneyRepository.findById(meq(journeyId))(any())).thenReturn(Future.successful(Some
         (returnData)))
@@ -223,7 +225,8 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
               PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = None, matchedAccountName = None)),
             None
           ),
-          timeoutConfig = None)
+          timeoutConfig = None,
+          useNewGovUkServiceNavigation = Some(false))
 
         when(mockJourneyRepository.findById(meq(journeyId))(any())).thenReturn(Future.successful(Some
         (returnData)))

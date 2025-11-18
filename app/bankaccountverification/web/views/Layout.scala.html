@@ -18,6 +18,8 @@
 @import bankaccountverification.web.views.FooterLinks
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardHeader
 @import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
+@import bankaccountverification.Journey
+@import uk.gov.hmrc.govukfrontend.views.Implicits.RichServiceNavigation
 
 @this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, govukPhaseBanner: GovukPhaseBanner,
         languageSelect: HmrcLanguageSelect, hmrcStandardHeader: HmrcStandardHeader, timeoutDialog: HmrcTimeoutDialog,
@@ -32,14 +34,19 @@
         headerBlock: Option[Html] = None,
         beforeContentBlock: Option[Html] = None,
         footerBlock: Option[Html] = None,
-        headBlock: Option[Html] = None
+        headBlock: Option[Html] = None,
+        journey: Option[Journey] = None
 )(contentBlock: Html)(implicit request: RequestHeader, messages: Messages, appConfig: AppConfig)
+
+@forceNavigation = @{
+    journey.exists(appConfig.forceServiceNavigation)
+}
 
 @defaultHeaderBlock = {
     @hmrcStandardHeader(
         serviceUrl = if (messages.isDefinedAt("service.homePageUrl")) Some(messages("service.homePageUrl")) else None,
         signOutUrl = signOutUrl,
-        serviceName = Some(messages("service.name")),
+        serviceName = if (forceNavigation) None else Some(messages("service.name")),
         phaseBanner = if(messages.isDefinedAt("phaseBanner.tag")) Some(PhaseBanner(
             tag = Some(Tag(content = HtmlContent(messages("phaseBanner.tag")))),
             content = HtmlContent(messages("phaseBanner.content")))) else None
@@ -48,7 +55,7 @@
 
 @defaultBeforeContentBlock = {
     @{
-        if(welshTranslationsAvailable) {
+        if(!forceNavigation && welshTranslationsAvailable) {
             languageSelect(LanguageSelect(messages.lang.code match {
                 case "en" ⇒ En
                 case "cy" ⇒ Cy

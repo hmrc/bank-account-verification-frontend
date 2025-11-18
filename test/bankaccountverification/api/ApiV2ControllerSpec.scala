@@ -85,14 +85,17 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
             meq(Some(TimeoutConfig("url", 100, None))),
             meq(Some("/sign-out")),
             meq(Some(5)),
-            meq(Some("/too-many-requests"))
+            meq(Some("/too-many-requests")),
+            meq(Some(false))
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
         val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
           timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)), signOutUrl = Some("/sign-out"),
-          maxCallConfig = Some(InitRequestMaxCallConfig(count = 5, redirectUrl = "/too-many-requests"))))
+          maxCallConfig = Some(InitRequestMaxCallConfig(count = 5, redirectUrl = "/too-many-requests")),
+          useNewGovUkServiceNavigation = Some(false)
+        ))
 
         val fakeRequest = FakeRequest("POST", "/api/v2/init")
             .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
@@ -131,14 +134,16 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
             meq(Some(TimeoutConfig("url", 100, None))),
             meq(None),
             meq(None),
-            meq(None)
+            meq(None),
+            meq(Some(false))
           )(any())
         ).thenReturn(Future.successful(newJourneyId))
 
         val json = Json.toJson(InitRequest("serviceIdentifier", "continueUrl",
           address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
           prepopulatedData = Some(InitRequestPrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))),
-          timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))
+          timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)),
+          useNewGovUkServiceNavigation = Some(false)
         ))
 
         val fakeRequest = FakeRequest("POST", "/api/v2/init")
@@ -211,7 +216,8 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
           InitRequest("serviceIdentifier", "continueUrl",
             address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
             timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)),
-            signOutUrl = Some("www.google.com")))
+            signOutUrl = Some("www.google.com"),
+            useNewGovUkServiceNavigation = Some(false)))
 
         val fakeRequest = FakeRequest("POST", "/api/init")
           .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
@@ -230,7 +236,8 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
         val json = Json.toJson(
           InitRequest("serviceIdentifier", "continueUrl",
             address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-            timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))))
+            timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)),
+            useNewGovUkServiceNavigation = Some(false)))
           .as[JsObject] + ("maxCallConfig" -> JsObject(Seq("count" -> Json.toJson(5))))
 
         val fakeRequest = FakeRequest("POST", "/api/init")
@@ -250,7 +257,8 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
         val json = Json.toJson(
           InitRequest("serviceIdentifier", "continueUrl",
             address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-            timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None))))
+            timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)),
+            useNewGovUkServiceNavigation = Some(false)))
           .as[JsObject] + ("maxCallConfig" -> JsObject(Seq("redirectUrl" -> Json.toJson("/too-many-requests"))))
 
         val fakeRequest = FakeRequest("POST", "/api/init")
@@ -315,7 +323,8 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
               PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(Yes), Some(Partial), Some(No), Some("sort-code-bank-name-personal"), iban = Some("some-iban"), matchedAccountName = Some("Robert"))),
             None
           ),
-          timeoutConfig = None)
+          timeoutConfig = None,
+          useNewGovUkServiceNavigation = Some(false))
 
         when(sessionStore.findById(meq(journeyId))(any())).thenReturn(Future.successful(Some(returnData)))
 
@@ -357,7 +366,8 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
             None,
             Some(
               BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(No), None, Some(Partial), Some(Yes), Some("sort-code-bank-name-business"), iban = Some("some-iban"), matchedAccountName = Some("Robert Ltd")))),
-          timeoutConfig = None)
+          timeoutConfig = None,
+          useNewGovUkServiceNavigation = Some(false))
 
         when(sessionStore.findById(meq(journeyId))(any()))
             .thenReturn(Future.successful(Some(returnData)))
@@ -414,7 +424,8 @@ class ApiV2ControllerSpec extends AnyWordSpec with Matchers with MockitoSugar wi
             None,
             Some(
               BusinessAccountDetails(Some("Bob Ltd"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(No), Some(Indeterminate), None, None, Some("sort-code-bank-name-business"), iban = Some("some-iban"), matchedAccountName = None))),
-          timeoutConfig = None)
+          timeoutConfig = None,
+          useNewGovUkServiceNavigation = Some(false))
 
         when(sessionStore.findById(meq(journeyId))(any()))
             .thenReturn(Future.successful(Some(returnData)))
