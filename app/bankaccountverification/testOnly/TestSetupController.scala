@@ -75,7 +75,7 @@ class TestSetupController@Inject()(
     )),
     signOutUrl = Some("/sign-out"),
     maxCallConfig = Some(InitRequestMaxCallConfig(count = 3, redirectUrl = "/redirect")),
-    useNewGovUkServiceNavigation = Some(true)
+    useNewGovUkServiceNavigation = Some(false)
   ))) 
   
   def show(): Action[AnyContent] = Action.async { implicit request =>

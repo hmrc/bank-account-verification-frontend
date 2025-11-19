@@ -43,7 +43,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   }
 
   private lazy val serviceNavigationFeatureEnabled: Boolean =
-    config.getOptional[Boolean]("features.forceServiceNavigation").getOrElse(false)
+    config.getOptional[Boolean]("microservice.forceServiceNavigation").getOrElse(false)
 
   def forceServiceNavigation(journey: Journey): Boolean =
     serviceNavigationFeatureEnabled || journey.useNewGovUkServiceNavigation.getOrElse(false)

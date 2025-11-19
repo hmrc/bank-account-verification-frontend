@@ -46,13 +46,12 @@
     @hmrcStandardHeader(
         serviceUrl = if (messages.isDefinedAt("service.homePageUrl")) Some(messages("service.homePageUrl")) else None,
         signOutUrl = signOutUrl,
-        serviceName = if (forceNavigation) None else Some(messages("service.name")),
         phaseBanner = if(messages.isDefinedAt("phaseBanner.tag")) Some(PhaseBanner(
             tag = Some(Tag(content = HtmlContent(messages("phaseBanner.tag")))),
             content = HtmlContent(messages("phaseBanner.content")))) else None,
         serviceNavigation = if (forceNavigation) {
             Some(
-                ServiceNavigation(serviceName = Some("Service name")).withLanguageToggle
+                ServiceNavigation(serviceName = Some(messages("service.name"))).withLanguageToggle
             )
         } else {
             None

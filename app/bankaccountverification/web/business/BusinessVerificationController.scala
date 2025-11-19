@@ -62,7 +62,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
           .getOrElse(BusinessVerificationRequest.form)
 
         Future.successful(Ok(businessAccountDetailsView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable,
-          businessVerificationForm)))
+          businessVerificationForm, Some(journey))))
       }
       else
         Future.successful(Redirect(bankaccountverification.web.routes.AccountTypeController.getAccountType(journeyId)))
@@ -98,7 +98,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
 
       if (form.hasErrors)
         Future.successful(BadRequest(businessAccountDetailsView(
-          journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))
+          journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form, Some(journey))))
       else
         for {
           response <- verificationService.assessBusiness(form.get, journey.data.address, journey.serviceIdentifier)
@@ -112,7 +112,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
                   SeeOther(s"${journey.maxCallCountRedirectUrl.get}/$journeyId")
                 case _ =>
                   BadRequest(businessAccountDetailsView(journeyId, journey.serviceIdentifier,
-                    welshTranslationsAvailable, uform)).withSession(request.session + (Journey.callCountSessionKey -> callCount.toString))
+                    welshTranslationsAvailable, uform, Some(journey))).withSession(request.session + (Journey.callCountSessionKey -> callCount.toString))
               }
             case _ =>
               response match {
@@ -144,7 +144,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
         Future.successful(Ok(
           businessAccountExistsIndeterminate(
             BusinessAccountExistsIndeterminateViewModel(journeyId, journey.data.business.get, journey.serviceIdentifier,
-              s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable))))
+              s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable, Some(false)))))
 
       }
       else Future.successful(NotFound(withCustomisations.journeyIdError(request)))
