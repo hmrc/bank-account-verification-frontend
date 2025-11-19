@@ -40,7 +40,7 @@ case class Journey(id: ObjectId, authProviderId: Option[String], expiryDate: Ins
                    timeoutConfig: Option[TimeoutConfig] = None, signOutUrl: Option[String] = None,
                    maxCallCount: Option[Int] = None,
                    maxCallCountRedirectUrl: Option[String] = None,
-                   useNewGovUkServiceNavigation: Option[Boolean]) {
+                   useNewGovUkServiceNavigation: Option[Boolean] = Some(false)) {
 
   def getBACSRequirements: BACSRequirements = bacsRequirements.getOrElse(defaultBACSRequirements)
 }
