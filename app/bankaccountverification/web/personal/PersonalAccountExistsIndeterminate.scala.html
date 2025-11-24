@@ -17,14 +17,26 @@
 @import bankaccountverification.web.RequestWithCustomisations
 @import bankaccountverification.web.views.html.Layout
 @import bankaccountverification.web.personal.PersonalAccountExistsIndeterminateViewModel
+@import bankaccountverification.Journey
 
 @this(layout: Layout, summary: GovukSummaryList, button: GovukButton, warning: GovukWarningText, help: HmrcReportTechnicalIssue)
-@(viewModel: PersonalAccountExistsIndeterminateViewModel)(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
+@(viewModel: PersonalAccountExistsIndeterminateViewModel, journey: Option[Journey] = None)(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
 @import viewModel._
 
-@layout(pageTitle = Some(messages("pageTitle.accountExistsIndeterminate")), None, welshTranslationsAvailable,
-    Some(request.journey.id.toHexString), request.journey.timeoutConfig, request.journey.signOutUrl, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
+@layout(
+    journey = journey,
+    pageTitle = Some(messages("pageTitle.accountExistsIndeterminate")),
+    form = None,
+    welshTranslationsAvailable = welshTranslationsAvailable,
+    journeyId = Some(request.journey.id.toHexString),
+    timeoutConfig = request.journey.timeoutConfig,
+    signOutUrl = request.journey.signOutUrl,
+    headerBlock = request.headerBlock,
+    beforeContentBlock = request.beforeContentBlock,
+    footerBlock = request.footerBlock
+) {
+
     <h1 class="govuk-heading-xl">@messages("pageTitle.accountExistsIndeterminate")</h1>
 
     <div class="govuk-warning-text">
