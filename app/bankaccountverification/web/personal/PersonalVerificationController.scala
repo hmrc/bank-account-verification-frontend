@@ -144,7 +144,7 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
 
         Future.successful(Ok(accountExistsIndeterminate(
           PersonalAccountExistsIndeterminateViewModel(journeyId, journey.data.personal.get, journey.serviceIdentifier,
-            s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable, Some(false)))))
+            s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable))))
       }
       else Future.successful(NotFound(withCustomisations.journeyIdError(request)))
     }

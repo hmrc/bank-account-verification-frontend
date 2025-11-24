@@ -144,7 +144,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
         Future.successful(Ok(
           businessAccountExistsIndeterminate(
             BusinessAccountExistsIndeterminateViewModel(journeyId, journey.data.business.get, journey.serviceIdentifier,
-              s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable, Some(false)))))
+              s"${journey.continueUrl}/$journeyId", welshTranslationsAvailable))))
 
       }
       else Future.successful(NotFound(withCustomisations.journeyIdError(request)))

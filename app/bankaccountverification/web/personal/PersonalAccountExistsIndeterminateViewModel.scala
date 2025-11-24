@@ -25,8 +25,7 @@ case class PersonalAccountExistsIndeterminateViewModel(journeyId: String,
                                                        session: PersonalAccountDetails,
                                                        serviceIdentifier: String,
                                                        continueUrl: String,
-                                                       welshTranslationsAvailable: Boolean,
-                                                       useNewGovUkServiceNavigation: Option[Boolean]) {
+                                                       welshTranslationsAvailable: Boolean) {
 
   private val changeUrl = bankaccountverification.web.personal.routes.PersonalVerificationController.getAccountDetails(journeyId).url
 
