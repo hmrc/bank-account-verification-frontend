@@ -18,10 +18,11 @@
 @import bankaccountverification.web.personal.PersonalVerificationRequest
 @import bankaccountverification.web.views.html.Layout
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.FormGroup
+@import bankaccountverification.{AppConfig, Journey}
 
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, errorSummary: GovukErrorSummary, help: HmrcReportTechnicalIssue)
 
-@(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, detailsForm: Form[PersonalVerificationRequest])(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
+@(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, detailsForm: Form[PersonalVerificationRequest], journey: Option[Journey] = None)(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
 @personalMessage(key: String) = @{
     if (messages.isDefinedAt(s"$key.personal"))
@@ -30,11 +31,21 @@
         messages(key)
 }
 
-@layout(pageTitle = Some(personalMessage("label.accountDetails.heading")), Some(detailsForm), welshTranslationsAvailable,
-    Some(journeyId), request.journey.timeoutConfig, request.journey.signOutUrl, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
+@layout(
+    journey = journey,
+    pageTitle = Some(personalMessage("label.accountDetails.heading")),
+    form = Some(detailsForm),
+    welshTranslationsAvailable = welshTranslationsAvailable,
+    journeyId = Some(journeyId),
+    timeoutConfig = request.journey.timeoutConfig,
+    signOutUrl = request.journey.signOutUrl,
+    headerBlock = request.headerBlock,
+    beforeContentBlock = request.beforeContentBlock,
+    footerBlock = request.footerBlock
+) {
     @if(detailsForm.hasErrors) {
         @errorSummary(ErrorSummary(title = HtmlContent(messages("error.summaryText")),
-            errorList = detailsForm.errors.map { error ⇒
+            errorList = detailsForm.errors.map { error =>
                 ErrorLink(href = Some(s"#${error.key}"),
                     content = HtmlContent(messages(error.message)))
             }))
@@ -47,7 +58,7 @@
             label = Label(content = HtmlContent(personalMessage("label.accountName"))),
             formGroup = FormGroup(Some("form-field-group")),
             name = detailsForm("accountName").name, id = detailsForm("accountName").name,
-            errorMessage = detailsForm("accountName").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
+            errorMessage = detailsForm("accountName").error.map(fe => ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("sortCode").value,
             label = Label(content = HtmlContent(personalMessage("label.sortCode"))),
@@ -59,7 +70,7 @@
             classes = "govuk-input--width-5",
             pattern = Some("[0-9]*"),
             inputmode = Some("numeric"),
-            errorMessage = detailsForm("sortCode").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
+            errorMessage = detailsForm("sortCode").error.map(fe => ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("accountNumber").value,
             label = Label(content = HtmlContent(personalMessage("label.accountNumber"))),
@@ -71,7 +82,7 @@
             classes = "govuk-input--width-10",
             pattern = Some("[0-9]*"),
             inputmode = Some("numeric"),
-            errorMessage = detailsForm("accountNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
+            errorMessage = detailsForm("accountNumber").error.map(fe => ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @input(Input(value = detailsForm("rollNumber").value,
             label = Label(content = HtmlContent(personalMessage("label.rollNumber.optional"))),
@@ -80,7 +91,7 @@
             name = detailsForm("rollNumber").name,
             id = detailsForm("rollNumber").name,
             classes = "govuk-input--width-20",
-            errorMessage = detailsForm("rollNumber").error.map(fe ⇒ ErrorMessage(content = HtmlContent(messages(fe.message))))))
+            errorMessage = detailsForm("rollNumber").error.map(fe => ErrorMessage(content = HtmlContent(messages(fe.message))))))
 
         @button(Button(content = HtmlContent(messages("label.submitLabel")),
             name = Some("continue"),

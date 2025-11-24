@@ -62,7 +62,7 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
           .getOrElse(PersonalVerificationRequest.form)
 
         Future.successful(Ok(accountDetailsView(
-          journeyId, journey.serviceIdentifier, welshTranslationsAvailable, personalVerificationForm)))
+          journeyId, journey.serviceIdentifier, welshTranslationsAvailable, personalVerificationForm, Some(journey))))
       }
       else
         Future.successful(Redirect(bankaccountverification.web.routes.AccountTypeController.getAccountType(journeyId)))
@@ -98,7 +98,7 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
 
       if (form.hasErrors)
         Future.successful(BadRequest(accountDetailsView(
-          journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))
+          journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form, Some(journey))))
       else {
         val verificationRequestFromForm = PersonalVerificationRequest.convertNameToASCII(form.get)
         for {
@@ -113,7 +113,7 @@ class PersonalVerificationController @Inject()(val appConfig: AppConfig, mcc: Me
                 case Some(max) if callCount == max =>
                   SeeOther(s"${journey.maxCallCountRedirectUrl.get}/$journeyId")
                 case _ =>
-                  BadRequest(accountDetailsView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable, uform))
+                  BadRequest(accountDetailsView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable, uform, Some(journey)))
                     .withSession(request.session + (Journey.callCountSessionKey -> callCount.toString))
               }
             case _ =>

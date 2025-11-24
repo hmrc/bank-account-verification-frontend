@@ -15,12 +15,23 @@
  *@
 
 @import bankaccountverification.web.{AccountTypeRequest, RequestWithCustomisations}
+@import bankaccountverification.Journey
 
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, radios: GovukRadios, errorSummary: GovukErrorSummary, help: HmrcReportTechnicalIssue)
-@(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, accountTypeForm: Form[AccountTypeRequest])(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
+@(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, accountTypeForm: Form[AccountTypeRequest], journey: Option[Journey] = None)(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
-@layout(pageTitle = Some(messages("label.accountType.heading")), Some(accountTypeForm), welshTranslationsAvailable,
-    Some(journeyId), request.journey.timeoutConfig, request.journey.signOutUrl, request.headerBlock, request.beforeContentBlock, request.footerBlock) {
+@layout(
+    journey = journey,
+    pageTitle = Some(messages("label.accountType.heading")),
+    form = Some(accountTypeForm),
+    welshTranslationsAvailable = welshTranslationsAvailable,
+    journeyId = Some(journeyId),
+    timeoutConfig = request.journey.timeoutConfig,
+    signOutUrl = request.journey.signOutUrl,
+    headerBlock = request.headerBlock,
+    beforeContentBlock = request.beforeContentBlock,
+    footerBlock = request.footerBlock
+) {
     @if(accountTypeForm.hasErrors) {
         @errorSummary(ErrorSummary(title = HtmlContent(messages("error.summaryText")),
             errorList = accountTypeForm.errors.map { error ⇒

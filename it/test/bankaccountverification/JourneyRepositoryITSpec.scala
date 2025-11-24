@@ -46,7 +46,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
       val journeyId = await(repository.create(Some("1234"), "serviceIdentifier", "continueUrl", None, None,
         Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("HP1 1HP"))),
         Some(PrepopulatedData(Personal, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))),
-        Some(BACSRequirements(directDebitRequired = true, directCreditRequired = true)), Some(TimeoutConfig("url", 100, None)), Some("/signout"), None, None))
+        Some(BACSRequirements(directDebitRequired = true, directCreditRequired = true)), Some(TimeoutConfig("url", 100, None)), Some("/signout"), None, None, None))
 
       val journey = await(repository.findById(journeyId))
       val timeoutConfig = journey.flatMap(j => j.timeoutConfig)
@@ -64,7 +64,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
       val journeyId = await(repository.create(Some("1234"), "serviceIdentifier", "continueUrl", None, None,
         Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("HP1 1HP"))),
         Some(PrepopulatedData(Business, Some("Bob"), Some("123456"), Some("12345678"), Some("A123"))),
-        Some(BACSRequirements(directDebitRequired = true, directCreditRequired = true)), Some(TimeoutConfig("url", 100, None)), Some("/signout"), None, None))
+        Some(BACSRequirements(directDebitRequired = true, directCreditRequired = true)), Some(TimeoutConfig("url", 100, None)), Some("/signout"), None, None, None))
 
       val journey = await(repository.findById(journeyId))
       val timeoutConfig = journey.flatMap(j => j.timeoutConfig)
@@ -102,7 +102,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
 
       val businessSession = BusinessAccountDetails(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"), iban = Some("some-iban"), matchedAccountName = None)
       val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
-      val journey = Journey(journeyId, Some("1234"), Instant.now.plus(1, ChronoUnit.HOURS), "serviceIdentifier", "continueUrl", session, None, None, None)
+      val journey = Journey(journeyId, Some("1234"), Instant.now.plus(1, ChronoUnit.HOURS), "serviceIdentifier", "continueUrl", session, None, None)
       await(repository.insertRaw(journey))
 
       val accountDetails = BusinessAccountDetails(Some("updated companyName"), Some("updated sortCode"), Some("updated accountNumber"), None, iban = Some("some-iban"), matchedAccountName = None)
