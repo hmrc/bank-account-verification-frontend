@@ -20,12 +20,12 @@
 @import bankaccountverification.Journey
 
 @this(layout: Layout, summary: GovukSummaryList, button: GovukButton, warning: GovukWarningText, help: HmrcReportTechnicalIssue)
-@(viewModel: PersonalAccountExistsIndeterminateViewModel, journey: Option[Journey] = None)(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
+@(viewModel: PersonalAccountExistsIndeterminateViewModel)(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
 @import viewModel._
 
 @layout(
-    journey = journey,
+    journey = Some(request.journey),
     pageTitle = Some(messages("pageTitle.accountExistsIndeterminate")),
     form = None,
     welshTranslationsAvailable = welshTranslationsAvailable,

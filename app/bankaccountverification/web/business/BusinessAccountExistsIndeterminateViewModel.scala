@@ -25,8 +25,7 @@ case class BusinessAccountExistsIndeterminateViewModel(journeyId: String,
                                                        session: BusinessAccountDetails,
                                                        serviceIdentifier: String,
                                                        continueUrl: String,
-                                                       welshTranslationsAvailable: Boolean,
-                                                       journey: Option[Boolean]){
+                                                       welshTranslationsAvailable: Boolean){
 
   private val changeUrl: String = bankaccountverification.web.business.routes.BusinessVerificationController.getAccountDetails(journeyId).url
 
