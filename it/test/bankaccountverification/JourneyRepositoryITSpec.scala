@@ -83,7 +83,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
 
       val personalSession = PersonalAccountDetails(Some("accountName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"), iban = Some("some-iban"), matchedAccountName = None)
       val session = Session(accountType = Some(Personal), address = None, personal = Some(personalSession))
-      val journey = Journey(journeyId, Some("1234"), Instant.now.plus(1, ChronoUnit.HOURS), "serviceIdentifier", "continueUrl", session, None, None, None)
+      val journey = Journey(journeyId, Some("1234"), Instant.now.plus(1, ChronoUnit.HOURS), "serviceIdentifier", "continueUrl", session, None, None, None, None, None, None, None, Some(false))
       await(repository.insertRaw(journey))
 
       val accountDetails = PersonalAccountDetails(Some("updated accountName"), Some("updated sortCode"), Some("updated accountNumber"), None, iban = Some("some-iban"), matchedAccountName = None)
@@ -102,7 +102,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
 
       val businessSession = BusinessAccountDetails(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"), iban = Some("some-iban"), matchedAccountName = None)
       val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
-      val journey = Journey(journeyId, Some("1234"), Instant.now.plus(1, ChronoUnit.HOURS), "serviceIdentifier", "continueUrl", session, None, None)
+      val journey = Journey(journeyId, Some("1234"), Instant.now.plus(1, ChronoUnit.HOURS), "serviceIdentifier", "continueUrl", session, None, None, None, None, None, None, None, Some(false))
       await(repository.insertRaw(journey))
 
       val accountDetails = BusinessAccountDetails(Some("updated companyName"), Some("updated sortCode"), Some("updated accountNumber"), None, iban = Some("some-iban"), matchedAccountName = None)
@@ -122,7 +122,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
 
       val businessSession = BusinessAccountDetails(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"), iban = Some("some-iban"), matchedAccountName = None)
       val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
-      val journey = Journey(journeyId, Some("1234"), Instant.now.plus(1, ChronoUnit.HOURS), "serviceIdentifier", "continueUrl", session, None, None, None)
+      val journey = Journey(journeyId, Some("1234"), Instant.now.plus(1, ChronoUnit.HOURS), "serviceIdentifier", "continueUrl", session, None, None, None, None, None, None, None, Some(false))
       await(repository.insertRaw(journey))
 
       await(repository.updateAccountType(journeyId, Personal))
@@ -156,7 +156,7 @@ class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneSer
 
       val businessSession = BusinessAccountDetails(Some("companyName"), Some("sortCode"), Some("accountNumber"), Some("rollNumber"), iban = Some("some-iban"), matchedAccountName = None)
       val session = Session(accountType = Some(Business), address = None, personal = None, business = Some(businessSession))
-      val journey = Journey(journeyId, Some("1234"), Instant.now.plus(1, ChronoUnit.HOURS), "serviceIdentifier", "continueUrl", session, Some(messages), None, None)
+      val journey = Journey(journeyId, Some("1234"), Instant.now.plus(1, ChronoUnit.HOURS), "serviceIdentifier", "continueUrl", session, Some(messages), None, None, None, None, None, None, Some(false))
       await(repository.insertRaw(journey))
 
       await(repository.updateAccountType(journeyId, Personal))

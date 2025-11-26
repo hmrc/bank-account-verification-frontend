@@ -22,7 +22,7 @@
 
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, errorSummary: GovukErrorSummary, help: HmrcReportTechnicalIssue)
 
-@(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, detailsForm: Form[PersonalVerificationRequest], journey: Option[Journey] = None)(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
+@(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, detailsForm: Form[PersonalVerificationRequest])(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
 @personalMessage(key: String) = @{
     if (messages.isDefinedAt(s"$key.personal"))
@@ -32,7 +32,7 @@
 }
 
 @layout(
-    journey = journey,
+    journey = Some(request.journey),
     pageTitle = Some(personalMessage("label.accountDetails.heading")),
     form = Some(detailsForm),
     welshTranslationsAvailable = welshTranslationsAvailable,

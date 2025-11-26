@@ -54,7 +54,7 @@ class AccountTypeController @Inject()(val appConfig: AppConfig,
         Future.successful(Ok(
           accountTypeView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable,
             accountTypeData.map(accountType =>
-              AccountTypeRequest.form.fill(AccountTypeRequest(accountType))).getOrElse(AccountTypeRequest.form), Some(journey))))
+              AccountTypeRequest.form.fill(AccountTypeRequest(accountType))).getOrElse(AccountTypeRequest.form))))
 
     }
 
@@ -77,6 +77,6 @@ class AccountTypeController @Inject()(val appConfig: AppConfig,
         }
       else
         Future.successful(BadRequest(
-          accountTypeView(journeyId, appConfig.contactFormServiceIdentifier, welshTranslationsAvailable, form, Some(journey))))
+          accountTypeView(journeyId, appConfig.contactFormServiceIdentifier, welshTranslationsAvailable, form)))
     }
 }

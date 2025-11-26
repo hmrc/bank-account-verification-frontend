@@ -18,10 +18,10 @@
 @import bankaccountverification.Journey
 
 @this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, radios: GovukRadios, errorSummary: GovukErrorSummary, help: HmrcReportTechnicalIssue)
-@(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, accountTypeForm: Form[AccountTypeRequest], journey: Option[Journey] = None)(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
+@(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, accountTypeForm: Form[AccountTypeRequest])(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
 @layout(
-    journey = journey,
+    journey = Some(request.journey),
     pageTitle = Some(messages("label.accountType.heading")),
     form = Some(accountTypeForm),
     welshTranslationsAvailable = welshTranslationsAvailable,

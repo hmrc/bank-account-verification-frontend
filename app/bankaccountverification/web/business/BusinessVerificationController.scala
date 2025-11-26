@@ -62,7 +62,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
           .getOrElse(BusinessVerificationRequest.form)
 
         Future.successful(Ok(businessAccountDetailsView(journeyId, journey.serviceIdentifier, welshTranslationsAvailable,
-          businessVerificationForm, Some(journey))))
+          businessVerificationForm)))
       }
       else
         Future.successful(Redirect(bankaccountverification.web.routes.AccountTypeController.getAccountType(journeyId)))
@@ -98,7 +98,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
 
       if (form.hasErrors)
         Future.successful(BadRequest(businessAccountDetailsView(
-          journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form, Some(journey))))
+          journeyId, journey.serviceIdentifier, welshTranslationsAvailable, form)))
       else
         for {
           response <- verificationService.assessBusiness(form.get, journey.data.address, journey.serviceIdentifier)
@@ -112,7 +112,7 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
                   SeeOther(s"${journey.maxCallCountRedirectUrl.get}/$journeyId")
                 case _ =>
                   BadRequest(businessAccountDetailsView(journeyId, journey.serviceIdentifier,
-                    welshTranslationsAvailable, uform, Some(journey))).withSession(request.session + (Journey.callCountSessionKey -> callCount.toString))
+                    welshTranslationsAvailable, uform)).withSession(request.session + (Journey.callCountSessionKey -> callCount.toString))
               }
             case _ =>
               response match {
