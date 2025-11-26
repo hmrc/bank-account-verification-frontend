@@ -44,6 +44,7 @@
 
 @defaultHeaderBlock = {
     @hmrcStandardHeader(
+        serviceName = Option.when(messages.isDefinedAt("service.name") && !forceNavigation)(messages("service.name")),
         serviceUrl = if (messages.isDefinedAt("service.homePageUrl")) Some(messages("service.homePageUrl")) else None,
         signOutUrl = signOutUrl,
         phaseBanner = if(messages.isDefinedAt("phaseBanner.tag")) Some(PhaseBanner(
