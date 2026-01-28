@@ -3,9 +3,7 @@
 `bank-account-verification-frontend` (`BAVFE`) provides a common frontend implementation for client services that need to capture, validate and verify bank account information.
 It provides mechanisms to customise messaging, eg page titles, element labels, etc, to ensure that it _blends_ with the calling service.
 
-An example of a client service can be seen in [bank-account-verification-example-frontend](https://github.com/hmrc/bank-account-verification-example-frontend) (`BAVEFE`).
-
-**Please note**, you are viewing documentation for the latest version of the `BAVFE` API (v2). [You can view the readme for the old version of the API here.](https://github.com/hmrc/bank-account-verification-example-frontend/README-v1.md)
+**Please note**, you are viewing documentation for the latest version of the `BAVFE` API (v2). [You can view the readme for the old version of the API here.](https://github.com/hmrc/bank-account-verification-frontend/blob/main/README-v1.md)
 
 ## Run this service locally
 There are two steps you must take in order to run this service.
@@ -80,7 +78,7 @@ case class InitResponse(
 
 Please note, the `detailsUrl` will only be populated if you provide the `prePopulatedData` block on the init call, and allows you to skip asking for account type for example if you already have this information.
 
-As can be seen, the only mandatory parameters are `serviceIdentifier` - the name of the calling service, and `continueUrl` - the callback url to call the `BAVFE` journey segment is completed. The `customisationsUrl` is used by `BAVFE` to retrieve `HtmlPartials` for customisation of `header`, `beforeContent` and `footer` sections of the pages. See [CustomisationsController](https://github.com/hmrc/bank-account-verification-example-frontend/blob/master/app/uk/gov/hmrc/bankaccountverificationexamplefrontend/bavf/CustomisationsController.scala) for an example implementation.
+As can be seen, the only mandatory parameters are `serviceIdentifier` - the name of the calling service, and `continueUrl` - the callback url to call the `BAVFE` journey segment is completed. The `customisationsUrl` is used by `BAVFE` to retrieve `HtmlPartials` for customisation of `header`, `beforeContent` and `footer` sections of the pages.
 
 #### Pre-populating data
 If you have already captured some of the relevant bank account information in another part of your journey, you can supply this on the init call and BAVFEFE will pre-populate the relevant fields for you. You can also supply prepopulated data to support a 'Check your answers' flow between your service and BAVFEFE.
@@ -191,11 +189,7 @@ In order to allow the user to change the data gathered by BAVFEFE, you should ha
 
 ### Writing acceptance tests for a service that uses `BAVFE` 
 
-We suggest that you mock out `BAVFE` in any acceptance tests that you write.  This will speed up your tests and allow us to make changes to the GUI without affecting your tests.
- 
-`bank-account-verification-acceptance-example` is our recommended solution for creating acceptance tests for a service that integrates with `bank-account-verification-frontend`.  
-
-Check it out on [Github](https://github.com/hmrc/bank-account-verification-acceptance-example).
+We suggest that you stub or mock out `BAVFE` in any acceptance tests that you write. This will speed up your tests and allow us to make changes to the GUI without affecting your tests.
 
 ### License
 
