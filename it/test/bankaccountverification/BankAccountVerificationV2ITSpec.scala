@@ -16,28 +16,30 @@
 
 package bankaccountverification
 
-import bankaccountverification.api._
+import bankaccountverification.api.*
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Partial, Yes}
 import bankaccountverification.connector.{BankAccountReputationConnector, BarsBusinessAssessSuccessResponse, BarsPersonalAssessSuccessResponse}
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
 import com.codahale.metrics.SharedMetricRegistries
-import org.mockito.ArgumentMatchers.{any, eq => meq}
-import org.mockito.Mockito._
-import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
+import org.mockito.ArgumentMatchers.{any, eq as meq}
+import org.mockito.Mockito.*
+import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.mockito._
+import org.scalatestplus.mockito.*
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsSuccess, JsValue, Json}
+import play.api.libs.ws.DefaultBodyWritables.{writeableOf_urlEncodedForm, writeableOf_urlEncodedSimpleForm}
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import play.api.libs.ws.WSClient
+import play.api.test.*
 import play.api.test.CSRFTokenHelper.CSRFRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
-import play.api.test._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 
@@ -119,7 +121,7 @@ class BankAccountVerificationV2ITSpec extends AnyWordSpec with GuiceOneServerPer
     val completeResponse = await(wsClient.url(completeUrl).get())
     completeResponse.status shouldBe 200
 
-    import bankaccountverification.connector.ReputationResponseEnum._
+    import bankaccountverification.connector.ReputationResponseEnum.*
     val sessionDataMaybe = Json.fromJson[CompleteV2Response](completeResponse.json)
 
     sessionDataMaybe shouldBe JsSuccess[CompleteV2Response](
@@ -187,7 +189,7 @@ class BankAccountVerificationV2ITSpec extends AnyWordSpec with GuiceOneServerPer
     val completeResponse =
       await(wsClient.url(completeUrl).get())
     completeResponse.status shouldBe 200
-    import bankaccountverification.connector.ReputationResponseEnum._
+    import bankaccountverification.connector.ReputationResponseEnum.*
     val sessionDataMaybe = Json.fromJson[CompleteV2Response](completeResponse.json)
 
     sessionDataMaybe shouldBe JsSuccess[CompleteV2Response](
@@ -240,7 +242,7 @@ class BankAccountVerificationV2ITSpec extends AnyWordSpec with GuiceOneServerPer
     val completeResponse = await(wsClient.url(completeUrl).get())
     completeResponse.status shouldBe 200
 
-    import bankaccountverification.connector.ReputationResponseEnum._
+    import bankaccountverification.connector.ReputationResponseEnum.*
     val sessionDataMaybe = Json.fromJson[CompleteV2Response](completeResponse.json)
 
     sessionDataMaybe shouldBe JsSuccess[CompleteV2Response](
