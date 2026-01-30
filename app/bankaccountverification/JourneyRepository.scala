@@ -32,6 +32,7 @@ package bankaccountverification
  * limitations under the License.
  */
 
+import bankaccountverification.Journey.journeyFormat
 import bankaccountverification.JourneyRepository.{ExpiryDateIndex, expireAfterSeconds}
 import bankaccountverification.web.AccountTypeRequestEnum
 import org.bson.RawBsonDocument
@@ -43,7 +44,7 @@ import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.Updates.{combine, set}
 import org.mongodb.scala.model.{IndexModel, IndexOptions}
-import play.api.libs.json.{JsObject, Json, OWrites}
+import play.api.libs.json.{JsObject, Json, OFormat, OWrites}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -56,7 +57,7 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
     extends PlayMongoRepository[Journey](
       mongoComponent = mongo,
       collectionName = "bank-account-verification-session-store",
-      domainFormat = Journey.format,
+      domainFormat = summon[OFormat[Journey]],
       indexes = Seq(
         IndexModel(ascending("expiryDate"), IndexOptions().name(ExpiryDateIndex).expireAfter(expireAfterSeconds, TimeUnit.SECONDS))
       ),
@@ -96,8 +97,7 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
       address, prepopulatedData, directDebitConstraints, timeoutConfig, signOutUrl, maxCallCount, maxCallCountRedirectUrl, useNewGovUkServiceNavigation)).map(_ => journeyId)
   }
 
-  def updatePersonalAccountDetails(id: ObjectId, data: PersonalAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {
-    import Journey.personalAccountDetailsWrites
+  def updatePersonalAccountDetails(id: ObjectId, data: PersonalAccountDetails)(implicit ec: ExecutionContext): Future[Boolean] = {
 
     collection.updateOne(
       filter = equal("_id", id),
@@ -105,8 +105,7 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
               .map(_ => true)
   }
 
-  def updateBusinessAccountDetails(id: ObjectId, data: BusinessAccountDetails)(implicit formats: OWrites[Journey], ec: ExecutionContext): Future[Boolean] = {
-    import Journey.businessAccountDetailsWrites
+  def updateBusinessAccountDetails(id: ObjectId, data: BusinessAccountDetails)(implicit ec: ExecutionContext): Future[Boolean] = {
 
     collection.updateOne(
       filter = equal("_id", id),

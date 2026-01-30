@@ -16,24 +16,24 @@
 
 package bankaccountverification.web
 
-import bankaccountverification._
-import bankaccountverification.connector.ReputationResponseEnum._
-import bankaccountverification.connector._
+import bankaccountverification.*
+import bankaccountverification.connector.ReputationResponseEnum.*
+import bankaccountverification.connector.*
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
 import org.bson.types.ObjectId
-import org.mockito.ArgumentMatchers.{eq => meq, _}
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.{eq as meq, *}
+import org.mockito.Mockito.*
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.*
 import scala.util.{Failure, Success}
 import scala.language.postfixOps
 
@@ -225,14 +225,14 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
         Success(BarsPersonalAssessSuccessResponse(Yes, Yes, Partial, Yes, Yes, Yes, Some(No), Some
                 ("sort-code-bank-name-personal"), Some("some-iban"), Some("Robert")))
 
-      when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
+      when(mockRepository.updatePersonalAccountDetails(any(), any())(any[ExecutionContext])).thenReturn(Future.successful(true))
 
       val res = await(service.processPersonalAssessResponse(journeyId, BACSRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form))
 
       "persist the details to mongo" in {
         val expectedAccountDetails = PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), None, None, Some(Yes), Some(Yes), Some(Partial), Some(No), Some("sort-code-bank-name-personal"), Some(Yes), Some(Yes), Some("some-iban"), Some("Robert"))
 
-        verify(mockRepository).updatePersonalAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
+        verify(mockRepository).updatePersonalAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any[ExecutionContext])
       }
 
       "return a valid form" in {
@@ -249,13 +249,13 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val form = PersonalVerificationRequest.form.fillAndValidate(userInput)
 
       val assessResult = Failure(new HttpException("FIRE IN SERVER ROOM", 500))
-      when(mockRepository.updatePersonalAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
+      when(mockRepository.updatePersonalAccountDetails(any(), any())(any[ExecutionContext])).thenReturn(Future.successful(true))
 
       val res = await(service.processPersonalAssessResponse(journeyId, BACSRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form))
 
       "persist the details to mongo" in {
         val expectedAccountDetails = PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), None, None, Some(Error), Some(Error), Some(Error), Some(Error), None, Some(Error), Some(Error), None, None)
-        verify(mockRepository).updatePersonalAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
+        verify(mockRepository).updatePersonalAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any[ExecutionContext])
       }
 
       "return a valid form" in {
@@ -494,13 +494,13 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val assessResult = Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Yes, Partial, Yes, Yes, Some(No), Some("some-iban"), Some("Bob Co.")))
 
       clearInvocations(mockRepository)
-      when(mockRepository.updateBusinessAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
+      when(mockRepository.updateBusinessAccountDetails(any(), any())(any[ExecutionContext])).thenReturn(Future.successful(true))
 
       val updatedForm = await(service.processBusinessAssessResponse(journeyId, BACSRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form))
 
       "persist the details to mongo" in {
         val expectedAccountDetails = BusinessAccountDetails(Some("Bob Company"), Some("203040"), Some("12345678"), None, None, Some(Yes), Some(Yes), None, Some(Partial), Some(No), Some("sort-code-bank-name-business"), Some(Yes), Some(Yes), Some("some-iban"), Some("Bob Co."))
-        verify(mockRepository).updateBusinessAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
+        verify(mockRepository).updateBusinessAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any[ExecutionContext])
       }
 
       "return a valid form" in {
@@ -517,13 +517,13 @@ class VerificationServiceSpec extends AnyWordSpec with Matchers with MockitoSuga
       val form = BusinessVerificationRequest.form.fillAndValidate(userInput)
 
       val assessResult = Failure(new HttpException("FIRE IN SERVER ROOM", 500))
-      when(mockRepository.updateBusinessAccountDetails(any(), any())(any(), any())).thenReturn(Future.successful(true))
+      when(mockRepository.updateBusinessAccountDetails(any(), any())(any[ExecutionContext])).thenReturn(Future.successful(true))
 
       val updatedForm = service.processBusinessAssessResponse(journeyId, BACSRequirements(directDebitRequired = true, directCreditRequired = true), assessResult, form)
 
       "persist the details to mongo" in {
         val expectedAccountDetails = BusinessAccountDetails(Some("Bob Company"), Some("203040"), Some("12345678"), None, None, Some(Error), Some(Error), None, Some(Error), Some(Error), None, Some(Error), Some(Error), None, None)
-        verify(mockRepository).updateBusinessAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any(), any())
+        verify(mockRepository).updateBusinessAccountDetails(meq(journeyId), meq(expectedAccountDetails))(any[ExecutionContext])
       }
 
       "return a valid form" in {

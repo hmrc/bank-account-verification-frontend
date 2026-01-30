@@ -88,5 +88,5 @@ object PersonalVerificationRequest {
         "sortCode" -> sortCodeMapping,
         "accountNumber" -> accountNumberMapping,
         "rollNumber" -> optional(rollNumberMapping)
-      )(PersonalVerificationRequest.apply)(PersonalVerificationRequest.unapply))
+      )(PersonalVerificationRequest.apply)(a => Some(a.accountName, a.sortCode, a.accountNumber, a.rollNumber)))
 }

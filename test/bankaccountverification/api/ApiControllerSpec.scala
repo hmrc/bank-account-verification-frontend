@@ -101,7 +101,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
           .withJsonBody(json)
 
-        val result = controller.init().apply(fakeRequest)
+        val result = controller.init.apply(fakeRequest)
         val initResponse = contentAsJson(result).as[InitResponse]
 
         status(result) shouldBe Status.OK
@@ -150,7 +150,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
           .withJsonBody(json)
 
-        val result = controller.init().apply(fakeRequest)
+        val result = controller.init.apply(fakeRequest)
         val initResponse = contentAsJson(result).as[InitResponse]
 
         status(result) shouldBe Status.OK
@@ -178,7 +178,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
           .withJsonBody(json)
 
-        val result = controller.init().apply(fakeRequest)
+        val result = controller.init.apply(fakeRequest)
 
         status(result) shouldBe Status.BAD_REQUEST
       }
@@ -202,7 +202,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
           .withJsonBody(json)
 
-        val result = controller.init().apply(fakeRequest)
+        val result = controller.init.apply(fakeRequest)
 
         status(result) shouldBe Status.BAD_REQUEST
       }
@@ -223,7 +223,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
           .withJsonBody(json)
 
-        val result = controller.init().apply(fakeRequest)
+        val result = controller.init.apply(fakeRequest)
 
         status(result) shouldBe Status.BAD_REQUEST
       }
@@ -244,7 +244,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
           .withJsonBody(json)
 
-        val result = controller.init().apply(fakeRequest)
+        val result = controller.init.apply(fakeRequest)
 
         status(result) shouldBe Status.BAD_REQUEST
       }
@@ -265,7 +265,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
           .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
           .withJsonBody(json)
 
-        val result = controller.init().apply(fakeRequest)
+        val result = controller.init.apply(fakeRequest)
 
         status(result) shouldBe Status.BAD_REQUEST
       }
@@ -280,7 +280,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         val fakeRequest = FakeRequest("POST", "/api/init")
           .withHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
           .withJsonBody(Json.parse("{}"))
-        val result = controller.init().apply(fakeRequest)
+        val result = controller.init.apply(fakeRequest)
 
         status(result) shouldBe Status.UNAUTHORIZED
       }
@@ -295,7 +295,7 @@ class ApiControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with
         val fakeRequest = FakeRequest("POST", "/api/init")
           .withHeaders(HeaderNames.USER_AGENT -> "non-registered-user-agent")
           .withJsonBody(Json.parse("{}"))
-        val result = controller.init().apply(fakeRequest)
+        val result = controller.init.apply(fakeRequest)
 
         status(result) shouldBe Status.FORBIDDEN
       }

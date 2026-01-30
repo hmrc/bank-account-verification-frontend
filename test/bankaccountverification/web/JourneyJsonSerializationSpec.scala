@@ -58,7 +58,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
 
       "serialize to JSON correctly" in {
 
-        (personalJourneyJsValue \ "_id").as[ObjectId] shouldBe id
+        (personalJourneyJsValue \ "id").as[ObjectId] shouldBe id
         (personalJourneyJsValue \ "authProviderId").as[String] shouldBe "1234"
         (personalJourneyJsValue \ "expiryDate").as[Instant] shouldBe theExpiryDate
         (personalJourneyJsValue \ "serviceIdentifier").as[String] shouldBe "some-service"
@@ -81,8 +81,8 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
 
         (personalJourneyJsValue \ "data" \ "business").isEmpty shouldBe true
 
-        (personalJourneyJsValue \ "directDebitConstraints" \ "directDebitRequired").as[Boolean] shouldBe true
-        (personalJourneyJsValue \ "directDebitConstraints" \ "directCreditRequired").as[Boolean] shouldBe false
+        (personalJourneyJsValue \ "bacsRequirements" \ "directDebitRequired").as[Boolean] shouldBe true
+        (personalJourneyJsValue \ "bacsRequirements" \ "directCreditRequired").as[Boolean] shouldBe false
 
         (personalJourneyJsValue \ "timeoutConfig" \ "timeoutUrl").as[String] shouldBe "url"
         (personalJourneyJsValue \ "timeoutConfig" \ "timeoutAmount").as[Int] shouldBe 100
@@ -127,7 +127,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
 
       "serialize to JSON correctly" in {
 
-        (businessJourneyJsValue \ "_id").as[ObjectId] shouldBe id
+        (businessJourneyJsValue \ "id").as[ObjectId] shouldBe id
         (businessJourneyJsValue \ "authProviderId").as[String] shouldBe "1234"
         (businessJourneyJsValue \ "expiryDate").as[Instant] shouldBe theExpiryDate
         (businessJourneyJsValue \ "serviceIdentifier").as[String] shouldBe "some-service"
@@ -150,8 +150,8 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
 
         (businessJourneyJsValue \ "data" \ "personal").isEmpty shouldBe true
 
-        (businessJourneyJsValue \ "directDebitConstraints" \ "directDebitRequired").as[Boolean] shouldBe false
-        (businessJourneyJsValue \ "directDebitConstraints" \ "directCreditRequired").as[Boolean] shouldBe true
+        (businessJourneyJsValue \ "bacsRequirements" \ "directDebitRequired").as[Boolean] shouldBe false
+        (businessJourneyJsValue \ "bacsRequirements" \ "directCreditRequired").as[Boolean] shouldBe true
 
         (businessJourneyJsValue \ "timeoutConfig" \ "timeoutUrl").as[String] shouldBe "url"
         (businessJourneyJsValue \ "timeoutConfig" \ "timeoutAmount").as[Int] shouldBe 100
