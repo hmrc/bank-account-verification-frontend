@@ -20,12 +20,17 @@ import bankaccountverification.BusinessAccountDetails
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist._
+import play.api.libs.json.{Json, OFormat}
 
 case class BusinessAccountExistsIndeterminateViewModel(journeyId: String,
                                                        session: BusinessAccountDetails,
                                                        serviceIdentifier: String,
                                                        continueUrl: String,
                                                        welshTranslationsAvailable: Boolean){
+
+  object BusinessAccountDetails {
+    implicit val format: OFormat[BusinessAccountDetails] = Json.format[BusinessAccountDetails]
+  }
 
   private val changeUrl: String = bankaccountverification.web.business.routes.BusinessVerificationController.getAccountDetails(journeyId).url
 

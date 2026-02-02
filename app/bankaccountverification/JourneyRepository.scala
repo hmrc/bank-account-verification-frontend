@@ -32,7 +32,6 @@ package bankaccountverification
  * limitations under the License.
  */
 
-import bankaccountverification.Journey.journeyFormat
 import bankaccountverification.JourneyRepository.{ExpiryDateIndex, expireAfterSeconds}
 import bankaccountverification.web.AccountTypeRequestEnum
 import org.bson.RawBsonDocument
@@ -57,7 +56,7 @@ class JourneyRepository @Inject()(mongo: MongoComponent)(implicit ec: ExecutionC
     extends PlayMongoRepository[Journey](
       mongoComponent = mongo,
       collectionName = "bank-account-verification-session-store",
-      domainFormat = summon[OFormat[Journey]],
+      domainFormat = Journey.format,
       indexes = Seq(
         IndexModel(ascending("expiryDate"), IndexOptions().name(ExpiryDateIndex).expireAfter(expireAfterSeconds, TimeUnit.SECONDS))
       ),
