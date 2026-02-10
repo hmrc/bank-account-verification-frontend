@@ -48,7 +48,7 @@
     
     <h1 class="govuk-heading-l">@messages("test-setup.title")</h1>
     
-    @form(bankaccountverification.testOnly.routes.TestSetupController.submit) {
+    @form(bankaccountverification.testOnly.routes.TestSetupController.submit()) {
         @textarea(Textarea(
             id = "json-setup",
             name = "json-setup",

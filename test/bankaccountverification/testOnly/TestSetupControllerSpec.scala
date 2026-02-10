@@ -43,7 +43,7 @@ class TestSetupControllerSpec extends MockitoTestSpec with ViewTestHelpers {
   }
   
   def mockAuth(isSuccessful: Boolean = true): OngoingStubbing[Future[Unit]] = {
-    val result: Future[Unit] = if (isSuccessful) Future.successful() else Future.failed(AuthorisationException.fromString("MissingBearerToken"))
+    val result: Future[Unit] = if (isSuccessful) Future.successful(()) else Future.failed(AuthorisationException.fromString("MissingBearerToken"))
     
     when(mockAuthConnector.authorise[Unit](any(), any())(any(), any()))
       .thenReturn(result)

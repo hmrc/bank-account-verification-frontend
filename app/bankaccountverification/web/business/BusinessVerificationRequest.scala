@@ -79,6 +79,6 @@ object BusinessVerificationRequest {
         "sortCode" -> sortCodeMapping,
         "accountNumber" -> accountNumberMapping,
         "rollNumber" -> optional(rollNumberMapping)
-      )(BusinessVerificationRequest.apply)(BusinessVerificationRequest.unapply)
+      )(BusinessVerificationRequest.apply)(a => Some(a.companyName, a.sortCode, a.accountNumber, a.rollNumber))
     )
 }

@@ -90,22 +90,22 @@ object Journey {
   implicit val directDebitConstraintsReads: Reads[BACSRequirements] = Json.reads[BACSRequirements]
   implicit val directDebitConstraintsWrites: Writes[BACSRequirements] = Json.writes[BACSRequirements]
 
-implicit def defaultReads: Reads[Journey] =
-  (__ \ "_id")
-    .read[ObjectId]
-    .and((__ \ "authProviderId").readNullable[String])
-    .and((__ \ "expiryDate").read[Instant])
-    .and((__ \ "serviceIdentifier").read[String])
-    .and((__ \ "continueUrl").read[String])
-    .and((__ \ "data").read[Session])
-    .and((__ \ "messages").readNullable[JsObject])
-    .and((__ \ "customisationsUrl").readNullable[String])
-    .and((__ \ "directDebitConstraints").readNullable[BACSRequirements])
-    .and((__ \ "timeoutConfig").readNullable[TimeoutConfig])
-    .and((__ \ "signOutUrl").readNullable[String])
-    .and((__ \ "maxCallCount").readNullable[Int])
-    .and((__ \ "maxCallCountRedirectUrl").readNullable[String])
-    .and((__ \ "useNewGovUkServiceNavigation").readNullable[Boolean])(
+  implicit def defaultReads: Reads[Journey] =
+    (__ \ "_id")
+      .read[ObjectId]
+      .and((__ \ "authProviderId").readNullable[String])
+      .and((__ \ "expiryDate").read[Instant])
+      .and((__ \ "serviceIdentifier").read[String])
+      .and((__ \ "continueUrl").read[String])
+      .and((__ \ "data").read[Session])
+      .and((__ \ "messages").readNullable[JsObject])
+      .and((__ \ "customisationsUrl").readNullable[String])
+      .and((__ \ "directDebitConstraints").readNullable[BACSRequirements])
+      .and((__ \ "timeoutConfig").readNullable[TimeoutConfig])
+      .and((__ \ "signOutUrl").readNullable[String])
+      .and((__ \ "maxCallCount").readNullable[Int])
+      .and((__ \ "maxCallCountRedirectUrl").readNullable[String])
+      .and((__ \ "useNewGovUkServiceNavigation").readNullable[Boolean])(
         (
           id: ObjectId,
           authProviderId: Option[String],
@@ -142,9 +142,9 @@ implicit def defaultReads: Reads[Journey] =
       .and((__ \ "maxCallCount").writeNullable[Int])
       .and((__ \ "maxCallCountRedirectUrl").writeNullable[String])
       .and((__  \ "useNewGovUkServiceNavigation").writeNullable[Boolean])
-  {
-        unlift(Journey.unapply)
-      }
+      (a => (a.id, a.authProviderId, a.expiryDate, a.serviceIdentifier, a.continueUrl, a.data, a.messages,
+        a.customisationsUrl, a.bacsRequirements, a.timeoutConfig, a.signOutUrl, a.maxCallCount, a.maxCallCountRedirectUrl,
+        a.useNewGovUkServiceNavigation))
 
   implicit def personalAccountDetailsWrites: OWrites[PersonalAccountDetails] =
     (__ \ "accountName")
@@ -161,9 +161,11 @@ implicit def defaultReads: Reads[Journey] =
       .and((__ \ "sortCodeSupportsDirectDebit").writeOptionWithNull[ReputationResponseEnum])
       .and((__ \ "sortCodeSupportsDirectCredit").writeOptionWithNull[ReputationResponseEnum])
       .and((__ \ "iban").writeOptionWithNull[String])
-      .and((__ \ "matchedAccountName").writeOptionWithNull[String])(
-        unlift(PersonalAccountDetails.unapply)
-      )
+      .and((__ \ "matchedAccountName").writeOptionWithNull[String])
+      (a => (a.accountName, a.sortCode, a.accountNumber, a.rollNumber, a.accountNumberWithSortCodeIsValid,
+        a.accountNumberIsWellFormatted, a.accountExists, a.nameMatches, a.nonStandardAccountDetailsRequiredForBacs,
+        a.sortCodeBankName, a.sortCodeSupportsDirectDebit, a.sortCodeSupportsDirectCredit, a.iban, a.matchedAccountName))
+
 
   implicit def personalAccountDetailsReads: Reads[PersonalAccountDetails] =
     (__ \ "accountName")
@@ -200,8 +202,11 @@ implicit def defaultReads: Reads[Journey] =
       .and((__ \ "sortCodeSupportsDirectDebit").writeOptionWithNull[ReputationResponseEnum])
       .and((__ \ "sortCodeSupportsDirectCredit").writeOptionWithNull[ReputationResponseEnum])
       .and((__ \ "iban").writeOptionWithNull[String])
-      .and((__ \ "matchedAccountName").writeOptionWithNull[String])(
-        unlift(BusinessAccountDetails.unapply)
+      .and((__ \ "matchedAccountName").writeOptionWithNull[String])
+      (a => (a.companyName, a.sortCode, a.accountNumber, a.rollNumber, a.accountNumberWithSortCodeIsValid,
+        a.accountNumberIsWellFormatted, a.accountExists, a.companyNameMatches, a.nameMatches,
+        a.nonStandardAccountDetailsRequiredForBacs, a.sortCodeBankName, a.sortCodeSupportsDirectDebit,
+        a.sortCodeSupportsDirectCredit, a.iban, a.matchedAccountName)
       )
 
   implicit def businessAccountDetailsReads: Reads[BusinessAccountDetails] =

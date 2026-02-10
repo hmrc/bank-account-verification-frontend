@@ -18,7 +18,8 @@ package bankaccountverification.connector
 
 import bankaccountverification.AppConfig
 import play.api.libs.json.{JsError, JsSuccess, Json}
-import uk.gov.hmrc.http._
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
+import uk.gov.hmrc.http.*
 import uk.gov.hmrc.http.client.HttpClientV2
 
 import javax.inject.{Inject, Singleton}
@@ -30,7 +31,7 @@ class BankAccountReputationConnector @Inject()(httpClient: HttpClientV2, appConf
 
   def assessPersonal(accountName: String, sortCode: String, accountNumber: String, rollNumber: Option[String], address: Option[BarsAddress], callingClient: String)
                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Try[BarsPersonalAssessResponse]] = {
-    import BarsPersonalAssessResponse._
+    import BarsPersonalAssessResponse.*
     import HttpReads.Implicits.readRaw
 
     val request = BarsPersonalAssessRequest(
@@ -66,7 +67,7 @@ class BankAccountReputationConnector @Inject()(httpClient: HttpClientV2, appConf
   def assessBusiness(companyName: String, companyRegistrationNumber: Option[String], sortCode: String,
                      accountNumber: String, rollNumber: Option[String], address: Option[BarsAddress], callingClient: String)
                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Try[BarsBusinessAssessResponse]] = {
-    import BarsBusinessAssessResponse._
+    import BarsBusinessAssessResponse.*
     import HttpReads.Implicits.readRaw
 
     val request = BarsBusinessAssessRequest(

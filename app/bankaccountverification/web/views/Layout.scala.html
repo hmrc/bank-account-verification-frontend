@@ -52,7 +52,7 @@
             content = HtmlContent(messages("phaseBanner.content")))) else None,
         serviceNavigation = if (forceNavigation) {
             Some(
-                ServiceNavigation(serviceName = Some(messages("service.name"))).withLanguageToggle
+                ServiceNavigation(serviceName = Some(messages("service.name"))).withLanguageToggle()
             )
         } else {
             None

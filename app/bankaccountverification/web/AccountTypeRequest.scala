@@ -48,7 +48,7 @@ object AccountTypeRequest {
     Form(
       mapping(
         "accountType" -> accountTypeMapping
-      )(AccountTypeRequest.apply)(AccountTypeRequest.unapply)
+      )(AccountTypeRequest.apply)(a => Some(a.accountType))
     )
 
   // Need to do this as if the radio buttons are not selected then we don't get the parameter at all.

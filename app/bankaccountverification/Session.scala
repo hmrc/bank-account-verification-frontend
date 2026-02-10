@@ -32,14 +32,14 @@ package bankaccountverification
  * limitations under the License.
  */
 
-import bankaccountverification.api._
+import bankaccountverification.api.*
 import bankaccountverification.connector.ReputationResponseEnum.{Error, Indeterminate, Partial, Yes}
-import bankaccountverification.connector._
+import bankaccountverification.connector.*
 import bankaccountverification.web.AccountTypeRequestEnum
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
 import bankaccountverification.web.business.BusinessVerificationRequest
 import bankaccountverification.web.personal.PersonalVerificationRequest
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, OFormat}
 
 case class TimeoutConfig(timeoutUrl: String, timeoutAmount: Int, timeoutKeepAliveUrl: Option[String])
 
@@ -74,6 +74,7 @@ object Session {
 case class PersonalAccountDetails(accountName: Option[String], sortCode: Option[String], accountNumber: Option[String], rollNumber: Option[String] = None, accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None, accountNumberIsWellFormatted: Option[ReputationResponseEnum] = None, accountExists: Option[ReputationResponseEnum] = None, nameMatches: Option[ReputationResponseEnum] = None, nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None, sortCodeBankName: Option[String] = None, sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None, sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None, iban: Option[String], matchedAccountName: Option[String])
 
 object PersonalAccountDetails {
+  implicit val format: OFormat[PersonalAccountDetails] = Json.format[PersonalAccountDetails]
   def apply(request: PersonalVerificationRequest, response: BarsPersonalAssessResponse): PersonalAccountDetails =
     response match {
       case success: BarsPersonalAssessSuccessResponse =>
@@ -197,6 +198,7 @@ object PersonalAccountDetails {
 case class BusinessAccountDetails(companyName: Option[String], sortCode: Option[String], accountNumber: Option[String], rollNumber: Option[String] = None, accountNumberWithSortCodeIsValid: Option[ReputationResponseEnum] = None, accountNumberIsWellFormatted: Option[ReputationResponseEnum] = None, accountExists: Option[ReputationResponseEnum] = None, companyNameMatches: Option[ReputationResponseEnum] = None, nameMatches: Option[ReputationResponseEnum] = None, nonStandardAccountDetailsRequiredForBacs: Option[ReputationResponseEnum] = None, sortCodeBankName: Option[String] = None, sortCodeSupportsDirectDebit: Option[ReputationResponseEnum] = None, sortCodeSupportsDirectCredit: Option[ReputationResponseEnum] = None, iban: Option[String], matchedAccountName: Option[String])
 
 object BusinessAccountDetails {
+  implicit val format: OFormat[BusinessAccountDetails] = Json.format[BusinessAccountDetails]
   def apply(request: BusinessVerificationRequest, response: BarsBusinessAssessResponse): BusinessAccountDetails =
     response match {
       case success: BarsBusinessAssessSuccessResponse =>

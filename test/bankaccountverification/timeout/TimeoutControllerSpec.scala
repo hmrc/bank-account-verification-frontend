@@ -45,8 +45,8 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite with
-  OptionValues {
+class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite with OptionValues {
+
   implicit private val timeout: FiniteDuration = 1 second
 
   private val env = Environment.simple()
