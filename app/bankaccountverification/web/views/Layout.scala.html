@@ -69,6 +69,8 @@
             }, En -> s"${bankaccountverification.web.routes.CustomLanguageController.switchToLanguage("english")}",
                 Cy -> s"${bankaccountverification.web.routes.CustomLanguageController.switchToLanguage("cymraeg")}"
             ))
+        } else {
+            Html("")
         }
     }
 
