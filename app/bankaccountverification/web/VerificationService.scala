@@ -64,8 +64,6 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
     updatedForm.fold(
       formWithErrors => Future.successful(formWithErrors),
       verificationRequest => {
-        import bankaccountverification.Journey._
-
         val accountDetails = PersonalAccountDetails(verificationRequest, response)
         repository.updatePersonalAccountDetails(journeyId, accountDetails).map(_ => form)
       }
@@ -99,8 +97,6 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
     updatedForm.fold(
       formWithErrors => Future.successful(formWithErrors),
       verificationRequest => {
-        import bankaccountverification.Journey._
-
         val accountDetails = BusinessAccountDetails(verificationRequest, response)
         repository.updateBusinessAccountDetails(journeyId, accountDetails).map(_ => form)
       }

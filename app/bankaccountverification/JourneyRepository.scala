@@ -43,7 +43,7 @@ import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.Updates.{combine, set}
 import org.mongodb.scala.model.{IndexModel, IndexOptions}
-import play.api.libs.json.{JsObject, Json, OFormat, OWrites}
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
