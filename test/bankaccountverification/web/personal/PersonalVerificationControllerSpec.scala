@@ -16,17 +16,17 @@
 
 package bankaccountverification.web.personal
 
-import org.apache.pekko.stream.Materializer
-import bankaccountverification._
+import bankaccountverification.*
 import bankaccountverification.connector.BarsPersonalAssessSuccessResponse
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.Personal
 import bankaccountverification.web.VerificationService
 import com.codahale.metrics.SharedMetricRegistries
+import org.apache.pekko.stream.Materializer
 import org.bson.types.ObjectId
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers.{eq => meq, _}
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.{eq as meq, *}
+import org.mockito.Mockito.*
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
@@ -36,16 +36,16 @@ import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.http.HttpException
 
-import java.time.{Instant, LocalDateTime}
+import java.time.Instant
 import java.time.temporal.ChronoUnit
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.*
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 

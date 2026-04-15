@@ -16,14 +16,14 @@
 
 package bankaccountverification.timeout
 
-import bankaccountverification._
+import bankaccountverification.*
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.Personal
 import bankaccountverification.web.TimeoutController
 import com.codahale.metrics.SharedMetricRegistries
 import org.bson.types.ObjectId
-import org.mockito.ArgumentMatchers.{eq => meq, _}
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.{eq as meq, *}
+import org.mockito.Mockito.*
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -33,7 +33,7 @@ import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
@@ -42,12 +42,9 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.time.Instant
 import scala.concurrent.Future
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite with OptionValues {
-
-  implicit private val timeout: FiniteDuration = 1 second
 
   private val env = Environment.simple()
   private val configuration = Configuration.load(env)

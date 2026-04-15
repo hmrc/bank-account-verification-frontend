@@ -16,17 +16,17 @@
 
 package bankaccountverification.web.business
 
-import org.apache.pekko.stream.Materializer
-import bankaccountverification._
+import bankaccountverification.*
 import bankaccountverification.connector.BarsBusinessAssessSuccessResponse
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Yes}
 import bankaccountverification.web.AccountTypeRequestEnum.Business
 import bankaccountverification.web.VerificationService
 import com.codahale.metrics.SharedMetricRegistries
+import org.apache.pekko.stream.Materializer
 import org.bson.types.ObjectId
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers.{eq => meq, _}
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.{eq as meq, *}
+import org.mockito.Mockito.*
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
@@ -36,15 +36,15 @@ import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.http.HttpException
 
-import java.time.{Instant, LocalDateTime}
+import java.time.Instant
 import java.time.temporal.ChronoUnit
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
@@ -76,7 +76,6 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
   "GET /verify/business" when {
     "the user is not logged in" should {
       val id = ObjectId.get()
-      val expiry = Instant.now.plus(60, ChronoUnit.MINUTES)
 
       "return 401" in {
         reset(mockAuthConnector)
@@ -361,8 +360,6 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(formWithErrors))
-
-        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
 
@@ -397,8 +394,6 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
-
-        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
 
@@ -434,8 +429,6 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
-
-        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
 
@@ -473,8 +466,6 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
-
-        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
           .withSession(Journey.callCountSessionKey -> "0")
@@ -505,8 +496,6 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
-
-        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
           .withSession(Journey.callCountSessionKey -> "1")
@@ -537,8 +526,6 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
-
-        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
           .withSession(Journey.callCountSessionKey -> "0")
@@ -570,8 +557,6 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
-
-        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
           .withSession(Journey.callCountSessionKey -> "1")
@@ -602,8 +587,6 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
         when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
-
-        import BusinessVerificationRequest.formats.bankAccountDetailsWrites
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
           .withSession(Journey.callCountSessionKey -> "1")

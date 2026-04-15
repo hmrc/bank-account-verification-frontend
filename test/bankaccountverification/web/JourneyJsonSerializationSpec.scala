@@ -16,15 +16,15 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.connector.ReputationResponseEnum._
+import bankaccountverification.*
+import bankaccountverification.connector.ReputationResponseEnum.*
 import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
-import bankaccountverification._
 import org.bson.types.ObjectId
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 
-import java.time.{Clock, Instant, LocalDateTime, ZoneId}
+import java.time.{Clock, Instant, ZoneId}
 import scala.language.postfixOps
 
 class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
@@ -52,7 +52,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         useNewGovUkServiceNavigation = Some(false)
       )
 
-      import Journey._
+      import Journey.*
 
       val personalJourneyJsValue = Json.toJson(personalJourney)
 
@@ -121,7 +121,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
         useNewGovUkServiceNavigation = Some(false)
       )
 
-      import Journey._
+      import Journey.*
 
       val businessJourneyJsValue = Json.toJson(businessJourney)
 

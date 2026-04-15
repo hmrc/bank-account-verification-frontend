@@ -16,16 +16,16 @@
 
 package bankaccountverification.connector
 
-import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Partial, Yes}
+import bankaccountverification.connector.ReputationResponseEnum.{No, Partial, Yes}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.Results._
-import play.api.routing.sird.{POST => SPOST, _}
-import play.api.test.Helpers._
+import play.api.mvc.Results.*
+import play.api.routing.sird.{POST as SPOST, *}
+import play.api.test.Helpers.*
 import play.core.server.{Server, ServerConfig}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -46,7 +46,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
     "handle a 200 response" in {
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
-        import components.{defaultActionBuilder => Action}
+        import components.defaultActionBuilder as Action
         {
           case r @ SPOST(p"/verify/personal") =>
             r.headers.get("True-Calling-Client") shouldBe Some("example-service")
@@ -75,7 +75,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
     "handle a 200 json response that differs from the expected format" in {
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
-        import components.{defaultActionBuilder => Action}
+        import components.defaultActionBuilder as Action
         {
           case SPOST(p"/verify/personal") =>
             Action(
@@ -99,7 +99,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
     "handle a 200 non-json response" in {
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
-        import components.{defaultActionBuilder => Action}
+        import components.defaultActionBuilder as Action
         {
           case SPOST(p"/verify/personal") =>
             Action(Ok("NOJSON4U").withHeaders("Content-Type" -> "application/json"))
@@ -115,7 +115,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
     "handle a 400 response" in {
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
-        import components.{defaultActionBuilder => Action}
+        import components.defaultActionBuilder as Action
         {
           case SPOST(p"/verify/personal") => Action(BadRequest(
             """{"code": "SORT_CODE_ON_DENY_LIST", "desc": "083200: sort code is in deny list"}"""))
@@ -131,7 +131,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
     "handle a 500 response" in {
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
-        import components.{defaultActionBuilder => Action}
+        import components.defaultActionBuilder as Action
         {
           case SPOST(p"/verify/personal") => Action(InternalServerError)
         }
@@ -149,7 +149,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
     "handle a 200 response" in {
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
-        import components.{defaultActionBuilder => Action}
+        import components.defaultActionBuilder as Action
         {
           case r @ SPOST(p"/verify/business") =>
             r.headers.get("True-Calling-Client") shouldBe Some("example-service")
@@ -179,7 +179,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
     "handle a 200 json response that differs from the expected format" in {
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
-        import components.{defaultActionBuilder => Action}
+        import components.defaultActionBuilder as Action
         {
           case SPOST(p"/verify/business") =>
             Action(
@@ -203,7 +203,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
     "handle a 200 non-json response" in {
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
-        import components.{defaultActionBuilder => Action}
+        import components.defaultActionBuilder as Action
         {
           case SPOST(p"/verify/business") =>
             Action(Ok("NOJSON4U").withHeaders("Content-Type" -> "application/json"))
@@ -219,7 +219,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
     "handle a 400 response" in {
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
-        import components.{defaultActionBuilder => Action}
+        import components.defaultActionBuilder as Action
         {
           case SPOST(p"/verify/business") => Action(BadRequest(
             """{"code": "SORT_CODE_ON_DENY_LIST", "desc": "083200: sort code is in deny list"}"""))
@@ -235,7 +235,7 @@ class BankAccountReputationConnectorSpec extends AnyWordSpec with Matchers with 
 
     "handle a 500 response" in {
       Server.withRouterFromComponents(ServerConfig(port = Some(barsPort))) { components =>
-        import components.{defaultActionBuilder => Action}
+        import components.defaultActionBuilder as Action
         {
           case SPOST(p"/verify/business") => Action(InternalServerError)
         }
