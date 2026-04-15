@@ -153,7 +153,7 @@ class BankAccountVerificationITSpec extends AnyWordSpec with GuiceOneServerPerSu
     when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
         .thenReturn(Future.successful("1234"))
 
-    when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
+    when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Partial, Yes, No, Some(No), None, Some("account-name")))))
 
     val wsClient = app.injector.instanceOf[WSClient]

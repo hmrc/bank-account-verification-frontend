@@ -64,7 +64,7 @@ class BankAccountReputationConnector @Inject()(httpClient: HttpClientV2, appConf
       }
   }
 
-  def assessBusiness(companyName: String, companyRegistrationNumber: Option[String], sortCode: String,
+  def assessBusiness(companyName: String, sortCode: String,
                      accountNumber: String, rollNumber: Option[String], address: Option[BarsAddress], callingClient: String)
                     (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Try[BarsBusinessAssessResponse]] = {
     import BarsBusinessAssessResponse.*
