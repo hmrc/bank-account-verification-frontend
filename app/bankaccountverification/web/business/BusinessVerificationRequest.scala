@@ -50,7 +50,7 @@ object BusinessVerificationRequest {
                                                 directDebitConstraints: BACSRequirements)
     : Form[BusinessVerificationRequest] =
       response match {
-        case badRequest: BarsBusinessAssessBadRequestResponse =>
+        case _: BarsBusinessAssessBadRequestResponse =>
           form.fill(form.get).withError("sortCode", "error.sortCode.denyListed")
         case success: BarsBusinessAssessSuccessResponse =>
           import success._
