@@ -34,7 +34,7 @@
 ) {
     @if(accountTypeForm.hasErrors) {
         @errorSummary(ErrorSummary(title = HtmlContent(messages("error.summaryText")),
-            errorList = accountTypeForm.errors.map { error ⇒
+            errorList = accountTypeForm.errors.map { error =>
                 ErrorLink(href = Some(s"#${error.key}"),
                     content = HtmlContent(messages(error.message)))
             }))

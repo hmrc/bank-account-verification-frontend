@@ -64,8 +64,8 @@
     @{
         if(!forceNavigation && welshTranslationsAvailable) {
             languageSelect(LanguageSelect(messages.lang.code match {
-                case "en" ⇒ En
-                case "cy" ⇒ Cy
+                case "en" => En
+                case "cy" => Cy
             }, En -> s"${bankaccountverification.web.routes.CustomLanguageController.switchToLanguage("english")}",
                 Cy -> s"${bankaccountverification.web.routes.CustomLanguageController.switchToLanguage("cymraeg")}"
             ))
