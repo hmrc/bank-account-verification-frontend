@@ -187,6 +187,12 @@ At the end of your journey, you may display information provided by the user in 
 
 In order to allow the user to change the data gathered by BAVFEFE, you should handle the 'change' link by initiating a *new journey* with BAVFEFE and using the `prepopulatedData` block to provide the previous answers. You should also set the `continueUrl` to a seperate landing page in your service that then returns to the 'Check your answers' page at the end of the flow.
 
+### Testing in pre-prod environments
+
+Within test environments, we use the [bank-account-reputation-third-parties-stub](https://github.com/hmrc/bank-account-reputation-third-parties-stub).
+
+Bank Account details that you can test with can be found here: [Test Bank Accounts](https://github.com/hmrc/bank-account-reputation-third-parties-stub/blob/main/conf/data/modulr-data.csv)
+
 ### Writing acceptance tests for a service that uses `BAVFE` 
 
 We suggest that you stub or mock out `BAVFE` in any acceptance tests that you write. This will speed up your tests and allow us to make changes to the GUI without affecting your tests.
