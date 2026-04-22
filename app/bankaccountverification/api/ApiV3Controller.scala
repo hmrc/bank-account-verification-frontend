@@ -131,7 +131,7 @@ class ApiV3Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
                 logger.warn(s"Something bad happened: ${x.getMessage}", x)
                 Future.successful(InternalServerError)
               }
-          case Failure(e) => Future.successful(BadRequest)
+          case Failure(_) => Future.successful(BadRequest)
         }
     } recoverWith { case e =>
       Future.successful(Unauthorized(e.getMessage))

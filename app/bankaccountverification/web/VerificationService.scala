@@ -56,7 +56,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
     val (updatedForm, response) = assessResponse match {
       case Success(response) =>
         (form.validateUsingBarsPersonalAssessResponse(response, directDebitConstraints), response)
-      case Failure(e) =>
+      case Failure(_) =>
         logger.warn("Received error response from bank-account-reputation.assess.personal")
         (form, BarsPersonalAssessErrorResponse())
     }
@@ -64,8 +64,6 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
     updatedForm.fold(
       formWithErrors => Future.successful(formWithErrors),
       verificationRequest => {
-        import bankaccountverification.Journey._
-
         val accountDetails = PersonalAccountDetails(verificationRequest, response)
         repository.updatePersonalAccountDetails(journeyId, accountDetails).map(_ => form)
       }
@@ -76,7 +74,6 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
                     (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Try[BarsBusinessAssessResponse]] =
     connector.assessBusiness(
       request.companyName,
-      None,
       request.sortCode,
       request.accountNumber,
       request.rollNumber,
@@ -91,7 +88,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
 
     val (updatedForm, response) = assessResponse match {
       case Success(response) => (form.validateUsingBarsBusinessAssessResponse(response, directDebitConstraints), response)
-      case Failure(e) =>
+      case Failure(_) =>
         logger.warn("Received error response from bank-account-reputation.assess.business")
         (form, BarsBusinessAssessErrorResponse())
     }
@@ -99,8 +96,6 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
     updatedForm.fold(
       formWithErrors => Future.successful(formWithErrors),
       verificationRequest => {
-        import bankaccountverification.Journey._
-
         val accountDetails = BusinessAccountDetails(verificationRequest, response)
         repository.updateBusinessAccountDetails(journeyId, accountDetails).map(_ => form)
       }

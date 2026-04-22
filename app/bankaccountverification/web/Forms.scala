@@ -103,7 +103,7 @@ object Forms {
 
   private def sortcodeHasInvalidChars(sortcode: String): Boolean =
     Try(sortcode.toInt) match {
-      case Success(sc) => false
+      case Success(_) => false
       case Failure(_) => true
     }
 }

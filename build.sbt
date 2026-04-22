@@ -10,13 +10,15 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     PlayKeys.playDefaultPort := 9903,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
+    // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
+    // suppress warnings in generated routes files
+    scalacOptions += "-Wconf:src=routes/.*:s",
     TwirlKeys.templateImports ++= Seq(
       "bankaccountverification.AppConfig",
       "uk.gov.hmrc.govukfrontend.views.html.components._",
       "uk.gov.hmrc.hmrcfrontend.views.html.components._"
     ),
-    scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s",
-    scalacOptions += "-Wconf:cat=unused-imports&src=routes/.*:s",
+    scalacOptions += "-Wconf:msg=unused import&src=html/.*:s"
   )
 
 lazy val it = project.in(file("it"))

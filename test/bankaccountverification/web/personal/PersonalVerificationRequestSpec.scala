@@ -18,14 +18,13 @@ package bankaccountverification.web.personal
 
 import bankaccountverification.BACSRequirements
 import bankaccountverification.connector.ReputationResponseEnum.{Indeterminate, No, Partial, Yes}
-import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse, BarsValidationResponse, ReputationResponseEnum}
+import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessSuccessResponse, ReputationResponseEnum}
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.data.FormError
-import play.api.i18n.{Messages, MessagesApi}
 
 class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
 
@@ -35,8 +34,6 @@ class PersonalVerificationRequestSpec extends AnyWordSpec with Matchers with Gui
   }
 
   "BankAccountDetails form" should {
-    val messagesApi       = app.injector.instanceOf[MessagesApi]
-    implicit val messages: Messages = messagesApi.preferred(Seq())
 
     "validate sortcode successfully" when {
       "sortcode is hyphenated" in {

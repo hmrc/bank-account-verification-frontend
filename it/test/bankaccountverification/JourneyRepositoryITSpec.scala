@@ -29,7 +29,7 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 
 import java.time.temporal.ChronoUnit
-import java.time.{Instant, LocalDateTime}
+import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class JourneyRepositoryITSpec extends AnyWordSpec with Matchers with GuiceOneServerPerSuite with MockitoSugar {

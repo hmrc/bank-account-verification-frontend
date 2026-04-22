@@ -97,33 +97,32 @@ class BankAccountVerificationITSpec extends AnyWordSpec with GuiceOneServerPerSu
     val atformData = Map("accountType" -> "personal")
     val setAccountTypeUrl = s"$baseUrl${response.startUrl}"
     val atrequest = FakeRequest().withCSRFToken
-    val setAccountTypeResponse =
-      await(
-        wsClient
-            .url(setAccountTypeUrl)
-            .withFollowRedirects(false)
-            .withHttpHeaders(atrequest.headers.toSimpleMap.toSeq: _*)
-            .post(atformData)
-      )
+
+    await(
+      wsClient
+          .url(setAccountTypeUrl)
+          .withFollowRedirects(false)
+          .withHttpHeaders(atrequest.headers.toSimpleMap.toSeq: _*)
+          .post(atformData)
+    )
 
     val bankAccountDetails = PersonalVerificationRequest("some-account-name", "12-12-12", "12349876")
     val formData = getCCParams(bankAccountDetails) ++ Map("rollNumber" -> Seq())
     val verifyUrl = s"$baseUrl/bank-account-verification/verify/personal/${response.journeyId}"
 
     val request = FakeRequest().withCSRFToken
-    val verifyResponse =
-      await(
-        wsClient
-            .url(verifyUrl)
-            .withFollowRedirects(false)
-            .withHttpHeaders(request.headers.toSimpleMap.toSeq: _*)
-            .post(formData))
+
+    await(
+      wsClient
+          .url(verifyUrl)
+          .withFollowRedirects(false)
+          .withHttpHeaders(request.headers.toSimpleMap.toSeq: _*)
+          .post(formData))
 
     val completeUrl = s"$baseUrl${response.completeUrl}"
     val completeResponse = await(wsClient.url(completeUrl).get())
     completeResponse.status shouldBe 200
-
-    import bankaccountverification.connector.ReputationResponseEnum.*
+    
     val sessionDataMaybe = Json.fromJson[CompleteResponse](completeResponse.json)
 
     sessionDataMaybe shouldBe JsSuccess[CompleteResponse](
@@ -154,7 +153,7 @@ class BankAccountVerificationITSpec extends AnyWordSpec with GuiceOneServerPerSu
     when(mockAuthConnector.authorise(meq(EmptyPredicate), meq(AuthProviderId.retrieval))(any(), any()))
         .thenReturn(Future.successful("1234"))
 
-    when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
+    when(mockBankAccountReputationConnector.assessBusiness(any(), any(), any(), any(), any(), any())(any(), any())).thenReturn(
       Future.successful(Success(BarsBusinessAssessSuccessResponse(Yes, Yes, Some("sort-code-bank-name-business"), Indeterminate, Partial, Yes, No, Some(No), None, Some("account-name")))))
 
     val wsClient = app.injector.instanceOf[WSClient]
@@ -181,13 +180,13 @@ class BankAccountVerificationITSpec extends AnyWordSpec with GuiceOneServerPerSu
     val atformData = Map("accountType" -> "business")
     val setAccountTypeUrl = s"$baseUrl${response.startUrl}"
     val atrequest = FakeRequest().withCSRFToken
-    val setAccountTypeResponse =
-      await(
-        wsClient
-            .url(setAccountTypeUrl)
-            .withFollowRedirects(false)
-            .withHttpHeaders(atrequest.headers.toSimpleMap.toSeq: _*)
-            .post(atformData))
+
+    await(
+      wsClient
+          .url(setAccountTypeUrl)
+          .withFollowRedirects(false)
+          .withHttpHeaders(atrequest.headers.toSimpleMap.toSeq: _*)
+          .post(atformData))
 
     val bankAccountDetails =
       BusinessVerificationRequest("some-company-name", "12-12-12", "12349876", None)
@@ -195,19 +194,19 @@ class BankAccountVerificationITSpec extends AnyWordSpec with GuiceOneServerPerSu
     val verifyUrl = s"$baseUrl/bank-account-verification/verify/business/${response.journeyId}"
 
     val request = FakeRequest().withCSRFToken
-    val verifyResponse =
-      await(
-        wsClient
-            .url(verifyUrl)
-            .withFollowRedirects(false)
-            .withHttpHeaders(request.headers.toSimpleMap.toSeq: _*)
-            .post(formData))
+
+    await(
+      wsClient
+          .url(verifyUrl)
+          .withFollowRedirects(false)
+          .withHttpHeaders(request.headers.toSimpleMap.toSeq: _*)
+          .post(formData))
 
     val completeUrl = s"$baseUrl${response.completeUrl}"
     val completeResponse =
       await(wsClient.url(completeUrl).get())
     completeResponse.status shouldBe 200
-    import bankaccountverification.connector.ReputationResponseEnum.*
+
     val sessionDataMaybe = Json.fromJson[CompleteResponse](completeResponse.json)
 
     sessionDataMaybe shouldBe JsSuccess[CompleteResponse](
@@ -264,20 +263,19 @@ class BankAccountVerificationITSpec extends AnyWordSpec with GuiceOneServerPerSu
     val verifyUrl = s"$baseUrl${response.detailsUrl.get}"
 
     val request = FakeRequest().withCSRFToken
-    val verifyResponse =
-      await(
-        wsClient
-            .url(verifyUrl)
-            .withFollowRedirects(false)
-            .withHttpHeaders(request.headers.toSimpleMap.toSeq: _*)
-            .post(formData)
-      )
+
+    await(
+      wsClient
+          .url(verifyUrl)
+          .withFollowRedirects(false)
+          .withHttpHeaders(request.headers.toSimpleMap.toSeq: _*)
+          .post(formData)
+    )
 
     val completeUrl = s"$baseUrl${response.completeUrl}"
     val completeResponse = await(wsClient.url(completeUrl).get())
     completeResponse.status shouldBe 200
 
-    import bankaccountverification.connector.ReputationResponseEnum.*
     val sessionDataMaybe = Json.fromJson[CompleteResponse](completeResponse.json)
 
     sessionDataMaybe shouldBe JsSuccess[CompleteResponse](

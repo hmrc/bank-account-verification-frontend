@@ -16,15 +16,11 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
-import bankaccountverification.connector.{BarsValidationResponse, ReputationResponseEnum}
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
-import play.api.data.FormError
-import play.api.i18n.{Messages, MessagesApi}
 
 class AccountTypeRequestSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
 
@@ -34,8 +30,6 @@ class AccountTypeRequestSpec extends AnyWordSpec with Matchers with GuiceOneAppP
   }
 
   "AccountType form" should {
-    val messagesApi       = app.injector.instanceOf[MessagesApi]
-    implicit val messages: Messages = messagesApi.preferred(Seq())
 
     "validate personal successfully" when {
       "personal account is selected" in {
