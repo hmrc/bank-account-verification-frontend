@@ -316,7 +316,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), any(), meq(serviceIdentifier))(any(), any()))
           .thenReturn(Future.successful(Failure(new HttpException("SERVER ON FIRE", 500))))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any()))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any()))
           .thenReturn(Future.successful(form))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
@@ -356,7 +356,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), any(), meq(serviceIdentifier))(any(), any()))
           .thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any()))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any()))
           .thenReturn(Future.successful(formWithErrors))
 
         val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}")
@@ -392,7 +392,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessPersonal(any(), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
 
         val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
@@ -427,7 +427,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
@@ -468,7 +468,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
@@ -499,7 +499,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
@@ -531,7 +531,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
@@ -564,7 +564,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
@@ -596,7 +596,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)

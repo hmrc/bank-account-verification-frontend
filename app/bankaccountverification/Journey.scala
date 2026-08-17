@@ -20,8 +20,8 @@ import bankaccountverification.BACSRequirements.defaultBACSRequirements
 import bankaccountverification.connector.ReputationResponseEnum
 import bankaccountverification.web.AccountTypeRequestEnum
 import org.bson.types.ObjectId
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.libs.functional.syntax.*
+import play.api.libs.json.*
 import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
 
 import java.time.Instant
@@ -65,6 +65,8 @@ object Journey {
             session.copy(
               accountType = Some(p.accountType),
               business = Some(BusinessAccountDetails(companyName = p.name, sortCode = p.sortCode, accountNumber = p.accountNumber, rollNumber = p.rollNumber, iban = None, matchedAccountName = None)))
+          case AccountTypeRequestEnum.Error =>
+            throw new IllegalArgumentException("Prepopulated data cannot have account type of Error")
         }
     }
   }

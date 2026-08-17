@@ -17,13 +17,11 @@
 package bankaccountverification.web
 
 import javax.inject.Inject
-import play.api.Configuration
 import play.api.i18n.Lang
 import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.language.{LanguageController, LanguageUtils}
 
 class CustomLanguageController @Inject() (
-  configuration: Configuration,
   languageUtils: LanguageUtils,
   messagesControllerComponents: MessagesControllerComponents
 ) extends LanguageController(languageUtils, messagesControllerComponents) {

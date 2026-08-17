@@ -318,7 +318,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessBusiness(any(), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Failure(new HttpException("SERVER ON FIRE", 500))))
-        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any()))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any()))
           .thenReturn(Future.successful(form))
 
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
@@ -358,7 +358,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
         reset(mockService)
         when(mockService.assessBusiness(any(), any(), meq(serviceIdentifier))(any(), any()))
           .thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
-        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any()))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any()))
           .thenReturn(Future.successful(formWithErrors))
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
@@ -393,7 +393,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
-        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
 
@@ -428,7 +428,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
-        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
 
@@ -465,7 +465,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
-        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
           .withSession(Journey.callCountSessionKey -> "0")
@@ -495,7 +495,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
-        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
           .withSession(Journey.callCountSessionKey -> "1")
@@ -525,7 +525,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
-        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
           .withSession(Journey.callCountSessionKey -> "0")
@@ -556,7 +556,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
-        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
           .withSession(Journey.callCountSessionKey -> "1")
@@ -586,7 +586,7 @@ class BusinessVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockService)
         when(mockService.assessBusiness(meq(data), any(), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsBusinessAssessResponse)))
-        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processBusinessAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
         val fakeRequest = FakeRequest("POST", s"/verify/business/${id.toHexString}")
           .withFormUrlEncodedBody(BusinessVerificationRequest.form.fill(data).data.toSeq : _*)
           .withSession(Journey.callCountSessionKey -> "1")

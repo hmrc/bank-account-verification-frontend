@@ -17,7 +17,7 @@
 @import bankaccountverification.web.{AccountTypeRequest, RequestWithCustomisations}
 @import bankaccountverification.Journey
 
-@this(layout: Layout, form: FormWithCSRF, input: GovukInput, button: GovukButton, radios: GovukRadios, errorSummary: GovukErrorSummary, help: HmrcReportTechnicalIssue)
+@this(layout: Layout, form: FormWithCSRF, button: GovukButton, radios: GovukRadios, errorSummary: GovukErrorSummary, help: HmrcReportTechnicalIssue)
 @(journeyId: String, serviceIdentifier: String, welshTranslationsAvailable: Boolean, accountTypeForm: Form[AccountTypeRequest])(implicit request: RequestWithCustomisations[_], messages: Messages, appConfig: AppConfig)
 
 @layout(

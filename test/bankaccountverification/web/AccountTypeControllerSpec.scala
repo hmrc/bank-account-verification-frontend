@@ -266,7 +266,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
             timeoutConfig = None, useNewGovUkServiceNavigation = Some(false)))))
 
         reset(mockService)
-        when(mockService.setAccountType(meq(id), meq(AccountTypeRequestEnum.Personal))(any(), any()))
+        when(mockService.setAccountType(meq(id), meq(AccountTypeRequestEnum.Personal))(any()))
           .thenReturn(Future.successful(true))
 
         val fakeRequest =
@@ -296,7 +296,7 @@ class AccountTypeControllerSpec extends AnyWordSpec with Matchers with MockitoSu
             Session(), timeoutConfig = None, useNewGovUkServiceNavigation = Some(false)))))
 
         reset(mockService)
-        when(mockService.setAccountType(meq(id), meq(AccountTypeRequestEnum.Business))(any(), any()))
+        when(mockService.setAccountType(meq(id), meq(AccountTypeRequestEnum.Business))(any()))
           .thenReturn(Future.successful(true))
 
         val fakeRequest =

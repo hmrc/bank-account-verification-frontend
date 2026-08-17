@@ -18,7 +18,7 @@ package bankaccountverification.web.business
 
 import bankaccountverification.BACSRequirements
 import bankaccountverification.connector.ReputationResponseEnum.{No, Yes}
-import bankaccountverification.connector.{BarsBusinessAssessBadRequestResponse, BarsBusinessAssessResponse, BarsBusinessAssessSuccessResponse}
+import bankaccountverification.connector.*
 import bankaccountverification.web.Forms._
 import bankaccountverification.web.Implicits.SanitizedString
 import play.api.data.Form
@@ -69,6 +69,8 @@ object BusinessVerificationRequest {
           } else {
             form
           }
+        case BarsBusinessAssessErrorResponse() =>
+          throw new RuntimeException("Unexpected error response from BARS business assess endpoint")
       }
   }
 

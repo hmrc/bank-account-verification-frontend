@@ -21,7 +21,6 @@ import bankaccountverification.connector.ReputationResponseEnum.Yes
 import bankaccountverification.web.business.html.{BusinessAccountDetailsView, BusinessAccountExistsIndeterminate}
 import bankaccountverification.web.{ActionWithCustomisationsProvider, VerificationService}
 import bankaccountverification.{AppConfig, BACSRequirements, Journey, RemoteMessagesApiProvider}
-import play.api.Logger
 import play.api.i18n.Messages
 import play.api.mvc._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -42,8 +41,6 @@ class BusinessVerificationController @Inject()(val appConfig: AppConfig,
                                                withCustomisations: ActionWithCustomisationsProvider,
                                                auditConnector: AuditConnector
                                               )(implicit ec: ExecutionContext) extends FrontendController(mcc) {
-  private val logger = Logger(this.getClass)
-
   implicit val config: AppConfig = appConfig
 
   def getAccountDetails(journeyId: String): Action[AnyContent] =

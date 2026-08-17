@@ -18,7 +18,7 @@ package bankaccountverification.web.personal
 
 import bankaccountverification.BACSRequirements
 import bankaccountverification.connector.ReputationResponseEnum.{No, Partial, Yes}
-import bankaccountverification.connector.{BarsPersonalAssessBadRequestResponse, BarsPersonalAssessResponse, BarsPersonalAssessSuccessResponse}
+import bankaccountverification.connector.*
 import bankaccountverification.web.Forms._
 import bankaccountverification.web.Implicits.SanitizedString
 import play.api.data.Form
@@ -78,6 +78,8 @@ object PersonalVerificationRequest {
           else if (nonStandardAccountDetailsRequiredForBacs.getOrElse(No) == Yes && form.get.rollNumber.isEmpty)
             form.fill(form.get).withError("rollNumber", "error.rollNumber.required")
           else form
+        case BarsPersonalAssessErrorResponse() =>
+          throw new RuntimeException("Unexpected error response from BARS personal assess endpoint")
       }
   }
 

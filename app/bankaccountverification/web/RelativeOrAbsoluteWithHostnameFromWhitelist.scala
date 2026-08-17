@@ -34,7 +34,6 @@ class RelativeOrAbsoluteWithHostnameFromWhitelist(private val allowedHosts: Set[
       case (Success(url), _) => url
       case (_, Success(url)) => url
       case (Failure(e), _) => throw e
-      case (_, Failure(e)) => throw e
     }
   }
 }

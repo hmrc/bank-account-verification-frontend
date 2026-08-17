@@ -16,12 +16,11 @@
 
 package bankaccountverification.web
 
-import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
+import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal, Error}
 import bankaccountverification.web.business.{routes => businessRoutes}
 import bankaccountverification.web.personal.{routes => personalRoutes}
 import bankaccountverification.web.views.html.AccountTypeView
 import bankaccountverification.{AppConfig, RemoteMessagesApiProvider}
-import play.api.Logger
 import play.api.i18n.Messages
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -37,8 +36,6 @@ class AccountTypeController @Inject()(val appConfig: AppConfig,
                                       verificationService: VerificationService,
                                       withCustomisations: ActionWithCustomisationsProvider
                                      )(implicit ec: ExecutionContext) extends FrontendController(mcc) {
-
-  private val logger = Logger(this.getClass)
 
   implicit val config: AppConfig = appConfig
 
@@ -73,6 +70,7 @@ class AccountTypeController @Inject()(val appConfig: AppConfig,
             // At this stage the account type has to be here otherwise the rest of the flow will not work!
             case Personal => Redirect(personalRoutes.PersonalVerificationController.getAccountDetails(journeyId))
             case Business => Redirect(businessRoutes.BusinessVerificationController.getAccountDetails(journeyId))
+            case Error    => throw new RuntimeException("Account type is error, cannot continue with journey")
           }
         }
       else
