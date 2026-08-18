@@ -70,7 +70,7 @@ class TestSetupServiceSpec extends ItTestSpec {
           
           val result = await(service.makeInitCall(Json.obj()))
           
-          val returnedError = HttpErrorResponse("""POST of 'http://localhost:11222/api/v3/init' returned 400 (Bad Request). Response body '{"error":"some kind of error"}'""")
+          val returnedError = HttpErrorResponse("some kind of error")
           result shouldBe Left(returnedError)
         }
       }
@@ -109,7 +109,9 @@ class TestSetupServiceSpec extends ItTestSpec {
           implicit val hc: HeaderCarrier = HeaderCarrier()
           
           val result = await(service.completeCall(journeyId))
-          result shouldBe Left(HttpErrorResponse("""GET of 'http://localhost:11222/api/v3/complete/some-journey-id' returned 400 (Bad Request). Response body '{"error":"some kind of error"}'"""))
+
+          val returnedError = HttpErrorResponse("Unexpected status: 400\nError body: {\"error\":\"some kind of error\"}")
+          result shouldBe Left(returnedError)
         }
       }
     }
