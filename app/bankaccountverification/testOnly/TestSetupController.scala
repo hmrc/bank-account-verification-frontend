@@ -17,7 +17,7 @@
 package bankaccountverification.testOnly
 
 import bankaccountverification.AppConfig
-import bankaccountverification.api.{InitBACSRequirements, InitRequest, InitRequestAddress, InitRequestMaxCallConfig, InitRequestMessages, InitRequestPrepopulatedData, InitRequestTimeoutConfig}
+import bankaccountverification.api.*
 import bankaccountverification.testOnly.html.{TestCompleteJsonFeedbackView, TestSetupView}
 import bankaccountverification.web.AccountTypeRequestEnum.Business
 import play.api.Logging
@@ -39,7 +39,7 @@ class TestSetupController@Inject()(
   
   private lazy val unAuthRedirect = Future.successful(Redirect(appConfig.authStubUrl + s"/?continue=${appConfig.testOnlyUrl}${bankaccountverification.testOnly.routes.TestSetupController.show().url}")) 
   
-  val fullExampleJson = Json.prettyPrint(Json.toJson(InitRequest(
+  val fullExampleJson: String = Json.prettyPrint(Json.toJson(InitRequest(
     serviceIdentifier = "bank-account-verification-frontend",
     continueUrl = "bank-account-verification/test-only/complete",
     prepopulatedData = Some(InitRequestPrepopulatedData(
@@ -66,7 +66,7 @@ class TestSetupController@Inject()(
         "label.accountDetails.heading.personal" -> "Manylion cyfrif banc neu gymdeithas adeiladu personol",
       ))
     )),
-    customisationsUrl = Some("some-url"),
+    customisationsUrl = None,
     bacsRequirements = Some(InitBACSRequirements(directDebitRequired = true, directCreditRequired = true)),
     timeoutConfig = Some(InitRequestTimeoutConfig(
       timeoutUrl = "/time-out",
@@ -82,7 +82,20 @@ class TestSetupController@Inject()(
     authorised() {
       val basicForm = TestSetupForm.form.fill(Json.prettyPrint(Json.obj(
         "serviceIdentifier" -> "bank-account-verification-frontend",
-        "continueUrl" -> "/bank-account-verification/test-only/test-complete"
+        "continueUrl" -> "/bank-account-verification/test-only/test-complete",
+        "useNewGovUkServiceNavigation" -> false,
+        "messages"    -> Json.obj(
+          "en" -> Json.obj(
+            "service.name" -> "My service",
+            "label.accountDetails.heading.business" -> "Business bank or building society account details",
+            "label.accountDetails.heading.personal" -> "Personal bank or building society account details"
+          ),
+          "cy" -> Json.obj(
+            "service.name" -> "Fy ngwasanaeth",
+            "label.accountDetails.heading.business" -> "Manylion cyfrif banc neu gymdeithas adeiladu busnes",
+            "label.accountDetails.heading.personal" -> "Manylion cyfrif banc neu gymdeithas adeiladu personol"
+          )
+        )
       )))
       
       Future.successful(Ok(view(basicForm, fullExampleJson)))
