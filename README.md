@@ -14,6 +14,9 @@ This frontend can be run locally by following these steps:
    ``` bash ./runLocal.sh```
 3. In your browser goto http://localhost:9903/bank-account-verification/test-only/test-setup to see the test-only setup endpoint. This allows you to set up a journey with any parameters you want. The endpoint is prefilled with a simple working example but can be customised to test different scenarios.
 
+4. The following sort code and bank account can be used to test a journey:-
+   - Sort code: 301658
+   - Account number: 01551500
 
 ## Using the test-only setup endpoint
 The service supports a test-only endpoint that allows you to set up a journey with any parameters you want. This comes prefilled with a complete endpoint that is prefilled for you that displays the json you get back from the api.
