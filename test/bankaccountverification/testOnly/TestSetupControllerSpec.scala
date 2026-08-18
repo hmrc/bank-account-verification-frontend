@@ -96,7 +96,6 @@ class TestSetupControllerSpec extends MockitoTestSpec with ViewTestHelpers {
           Some(Json.prettyPrint(Json.obj(
             "serviceIdentifier" -> "bank-account-verification-frontend",
             "continueUrl" -> "/bank-account-verification/test-only/test-complete",
-            "useNewGovUkServiceNavigation" -> false,
             "messages"    -> Json.obj(
               "en" -> Json.obj(
                 "service.name" -> "My service",

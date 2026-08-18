@@ -41,13 +41,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     if(checkAllowList && _allowedClients.isEmpty) throw new RuntimeException(s"Could not find config $accessControlAllowListAbsoluteKey")
     else _allowedClients.getOrElse(Seq()).toSet
   }
-
-  private lazy val serviceNavigationFeatureEnabled: Boolean =
-    config.getOptional[Boolean]("microservice.forceServiceNavigation").getOrElse(false)
-
-  def forceServiceNavigation(journey: Journey): Boolean =
-    serviceNavigationFeatureEnabled || journey.useNewGovUkServiceNavigation.getOrElse(false)
-
+  
   val bavfeBaseUrl = servicesConfig.baseUrl("bank-account-verification-frontend")
 
   val testOnlyUrl: String = config.get[String]("testOnly.url")

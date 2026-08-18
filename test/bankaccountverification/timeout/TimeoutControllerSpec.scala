@@ -88,8 +88,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
             Some(
               PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = Some("some-iban"), matchedAccountName = None)),
             None),
-          timeoutConfig = None,
-          useNewGovUkServiceNavigation = Some(false))
+          timeoutConfig = None)
 
         when(mockJourneyRepository.findById(meq(journeyId))(any())).thenReturn(Future.successful(Some
         (returnData)))
@@ -155,8 +154,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
               PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = Some("some-iban"), matchedAccountName = None)),
             None
           ),
-          timeoutConfig = None,
-          useNewGovUkServiceNavigation = Some(false))
+          timeoutConfig = None)
 
         when(mockJourneyRepository.findById(meq(journeyId))(any())).thenReturn(Future.successful(Some
         (returnData)))
@@ -222,8 +220,7 @@ class TimeoutControllerSpec extends AnyWordSpec with Matchers with MockitoSugar 
               PersonalAccountDetails(Some("Bob"), Some("203040"), Some("12345678"), Some("roll1"), None, Some(Yes), Some(Yes), Some(Indeterminate), Some(No), Some("sort-code-bank-name-personal"), iban = None, matchedAccountName = None)),
             None
           ),
-          timeoutConfig = None,
-          useNewGovUkServiceNavigation = Some(false))
+          timeoutConfig = None)
 
         when(mockJourneyRepository.findById(meq(journeyId))(any())).thenReturn(Future.successful(Some
         (returnData)))

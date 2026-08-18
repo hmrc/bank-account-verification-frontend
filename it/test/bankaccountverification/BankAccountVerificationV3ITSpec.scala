@@ -84,8 +84,7 @@ class BankAccountVerificationV3ITSpec extends AnyWordSpec with GuiceOneServerPer
 
     val initRequest = InitRequest("serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)),
-      useNewGovUkServiceNavigation = Some(false))
+      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
     val initResponse = await(wsClient.url(initUrl).withHttpHeaders(HeaderNames.USER_AGENT -> "test-user-agent").post[JsValue](Json.toJson(initRequest)))
 
@@ -150,8 +149,7 @@ class BankAccountVerificationV3ITSpec extends AnyWordSpec with GuiceOneServerPer
       continueUrl = "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
       bacsRequirements = Some(InitBACSRequirements(directDebitRequired = true, directCreditRequired = false)),
-      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)),
-      useNewGovUkServiceNavigation = Some(false))
+      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
     val initResponse =
       await(wsClient.url(initUrl).withHttpHeaders(HeaderNames.USER_AGENT -> "test-user-agent").post[JsValue](Json.toJson(initRequest)))
@@ -215,8 +213,7 @@ class BankAccountVerificationV3ITSpec extends AnyWordSpec with GuiceOneServerPer
     val initRequest = InitRequest("serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
       prepopulatedData = Some(InitRequestPrepopulatedData(Personal)),
-      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)),
-      useNewGovUkServiceNavigation = Some(false))
+      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
     val initResponse = await(wsClient.url(initUrl).withHttpHeaders(HeaderNames.USER_AGENT -> "test-user-agent").post[JsValue](Json.toJson(initRequest)))
 

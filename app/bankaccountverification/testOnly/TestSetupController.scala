@@ -74,8 +74,7 @@ class TestSetupController@Inject()(
       timeoutKeepAliveUrl = Some("/keep-alive")
     )),
     signOutUrl = Some("/sign-out"),
-    maxCallConfig = Some(InitRequestMaxCallConfig(count = 3, redirectUrl = "/redirect")),
-    useNewGovUkServiceNavigation = Some(false)
+    maxCallConfig = Some(InitRequestMaxCallConfig(count = 3, redirectUrl = "/redirect"))
   ))) 
   
   def show(): Action[AnyContent] = Action.async { implicit request =>
@@ -83,7 +82,6 @@ class TestSetupController@Inject()(
       val basicForm = TestSetupForm.form.fill(Json.prettyPrint(Json.obj(
         "serviceIdentifier" -> "bank-account-verification-frontend",
         "continueUrl" -> "/bank-account-verification/test-only/test-complete",
-        "useNewGovUkServiceNavigation" -> false,
         "messages"    -> Json.obj(
           "en" -> Json.obj(
             "service.name" -> "My service",

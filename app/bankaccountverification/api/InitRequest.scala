@@ -34,8 +34,7 @@ case class InitRequest(serviceIdentifier: String,
                        bacsRequirements: Option[InitBACSRequirements] = None,
                        timeoutConfig: Option[InitRequestTimeoutConfig] = None,
                        signOutUrl: Option[String] = None,
-                       maxCallConfig: Option[InitRequestMaxCallConfig] = None,
-                       useNewGovUkServiceNavigation: Option[Boolean])
+                       maxCallConfig: Option[InitRequestMaxCallConfig] = None)
 
 case class InitRequestPrepopulatedData(accountType: AccountTypeRequestEnum,
                                        name: Option[String] = None,

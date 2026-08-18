@@ -21,7 +21,8 @@
 @import bankaccountverification.Journey
 @import uk.gov.hmrc.govukfrontend.views.Implicits.RichServiceNavigation
 
-@this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, languageSelect: HmrcLanguageSelect, hmrcStandardHeader: HmrcStandardHeader, timeoutDialog: HmrcTimeoutDialog,
+
+@this(govukLayout: GovukLayout, govukBackLink: GovukBackLink, hmrcStandardHeader: HmrcStandardHeader, timeoutDialog: HmrcTimeoutDialog,
         head: Head, scripts: Scripts)
 
 @(pageTitle: Option[String] = None,
@@ -37,42 +38,20 @@
         journey: Option[Journey] = None
 )(contentBlock: Html)(implicit request: RequestHeader, messages: Messages, appConfig: AppConfig)
 
-@forceNavigation = @{
-    journey.exists(appConfig.forceServiceNavigation)
-}
-
 @defaultHeaderBlock = {
     @hmrcStandardHeader(
         serviceUrl = if (messages.isDefinedAt("service.homePageUrl")) Some(messages("service.homePageUrl")) else None,
         signOutUrl = signOutUrl,
-        serviceName = if(messages.isDefinedAt("service.name") && !forceNavigation) Some(messages("service.name")) else Some(""),
+        serviceName = if(messages.isDefinedAt("service.name")) Some(messages("service.name")) else Some(""),
         phaseBanner = if(messages.isDefinedAt("phaseBanner.tag")) Some(PhaseBanner(
             tag = Some(Tag(content = HtmlContent(messages("phaseBanner.tag")))),
             content = HtmlContent(messages("phaseBanner.content")))) else None,
-        serviceNavigation = if (forceNavigation) {
-            Some(
-                ServiceNavigation(serviceName = Some(messages("service.name"))).withLanguageToggle()
-            )
-        } else {
-            None
-        }
+        serviceNavigation = Some(ServiceNavigation(serviceName = Some(messages("service.name"))).withLanguageToggle())
+
     )
 }
 
 @defaultBeforeContentBlock = {
-    @{
-        if(!forceNavigation && welshTranslationsAvailable) {
-            languageSelect(LanguageSelect(messages.lang.code match {
-                case "en" => En
-                case "cy" => Cy
-            }, En -> s"${bankaccountverification.web.routes.CustomLanguageController.switchToLanguage("english")}",
-                Cy -> s"${bankaccountverification.web.routes.CustomLanguageController.switchToLanguage("cymraeg")}"
-            ))
-        } else {
-            Html("")
-        }
-    }
-
     @govukBackLink(BackLink(
         href="#",
         content = HtmlContent(messages("label.back")),

@@ -90,8 +90,7 @@ class ApiV2Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
         init.timeoutConfig.map(tc => TimeoutConfig(tc.timeoutUrl, tc.timeoutAmount, tc.timeoutKeepAliveUrl)),
         init.signOutUrl,
         init.maxCallConfig.map(mcc => mcc.count),
-        init.maxCallConfig.map(mcc => mcc.redirectUrl),
-        init.useNewGovUkServiceNavigation
+        init.maxCallConfig.map(mcc => mcc.redirectUrl)
       )
       .map { journeyId =>
         val startUrl = web.routes.AccountTypeController.getAccountType(journeyId.toHexString).url
