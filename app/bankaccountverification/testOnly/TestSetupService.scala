@@ -23,8 +23,9 @@ import play.api.http.HeaderNames
 import play.api.http.Status.OK
 import play.api.libs.json.JsValue
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -40,7 +41,7 @@ class TestSetupService @Inject()(
     client.post(url"$url")
           .setHeader(HeaderNames.USER_AGENT -> "test-setup")
           .withBody(jsonBody)
-          .execute
+          .execute[HttpResponse]
           .map { response =>
             response.status match {
               case OK =>
@@ -65,7 +66,7 @@ class TestSetupService @Inject()(
     
     client.get(url"$url")
           .setHeader(HeaderNames.USER_AGENT -> "test-setup")
-          .execute
+          .execute[HttpResponse]
           .map { response =>
             response.status match {
               case OK => Right(response.json)

@@ -20,6 +20,7 @@ lazy val microservice = Project(appName, file("."))
     ),
     scalacOptions += "-Wconf:msg=unused import&src=html/.*:s"
   )
+  .settings(CodeCoverageSettings.settings: _*)
 
 lazy val it = project.in(file("it"))
   .enablePlugins(play.sbt.PlayScala)

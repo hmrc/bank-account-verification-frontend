@@ -33,7 +33,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
   private val logger = Logger(this.getClass)
 
   def setAccountType(journeyId: ObjectId, accountType: AccountTypeRequestEnum)
-                    (implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Boolean] =
+                    (implicit ec: ExecutionContext): Future[Boolean] =
     repository.updateAccountType(journeyId, accountType)
 
   def assessPersonal(request: PersonalVerificationRequest, address: Option[Address], callingClient: String)
@@ -50,8 +50,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
                                     directDebitConstraints: BACSRequirements,
                                     assessResponse: Try[BarsPersonalAssessResponse],
                                     form: Form[PersonalVerificationRequest]
-                                   )(implicit ec: ExecutionContext,
-                                     hc: HeaderCarrier): Future[Form[PersonalVerificationRequest]] = {
+                                   )(implicit ec: ExecutionContext): Future[Form[PersonalVerificationRequest]] = {
 
     val (updatedForm, response) = assessResponse match {
       case Success(response) =>
@@ -83,8 +82,7 @@ class VerificationService @Inject()(connector: BankAccountReputationConnector, r
                                     directDebitConstraints: BACSRequirements,
                                     assessResponse: Try[BarsBusinessAssessResponse],
                                     form: Form[BusinessVerificationRequest]
-                                   )(implicit ec: ExecutionContext,
-                                     hc: HeaderCarrier): Future[Form[BusinessVerificationRequest]] = {
+                                   )(implicit ec: ExecutionContext): Future[Form[BusinessVerificationRequest]] = {
 
     val (updatedForm, response) = assessResponse match {
       case Success(response) => (form.validateUsingBarsBusinessAssessResponse(response, directDebitConstraints), response)

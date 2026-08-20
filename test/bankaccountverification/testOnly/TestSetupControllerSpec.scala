@@ -95,7 +95,19 @@ class TestSetupControllerSpec extends MockitoTestSpec with ViewTestHelpers {
         checkTextArea(
           Some(Json.prettyPrint(Json.obj(
             "serviceIdentifier" -> "bank-account-verification-frontend",
-            "continueUrl" -> "/bank-account-verification/test-only/test-complete"
+            "continueUrl" -> "/bank-account-verification/test-only/test-complete",
+            "messages"    -> Json.obj(
+              "en" -> Json.obj(
+                "service.name" -> "My service",
+                "label.accountDetails.heading.business" -> "Business bank or building society account details",
+                "label.accountDetails.heading.personal" -> "Personal bank or building society account details"
+              ),
+              "cy" -> Json.obj(
+                "service.name" -> "Fy ngwasanaeth",
+                "label.accountDetails.heading.business" -> "Manylion cyfrif banc neu gymdeithas adeiladu busnes",
+                "label.accountDetails.heading.personal" -> "Manylion cyfrif banc neu gymdeithas adeiladu personol"
+              )
+            )
           ))),
           "#json-setup"
         )

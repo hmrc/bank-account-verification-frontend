@@ -19,7 +19,7 @@ package bankaccountverification.api
 import access.AccessChecker
 import bankaccountverification.utils.RelativeOrAbsoluteWithHostnameFromAllowlist
 import bankaccountverification.{BACSRequirements, _}
-import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
+import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal, Error}
 import org.bson.types.ObjectId
 import play.api.Logger
 import play.api.libs.json.Json
@@ -122,8 +122,7 @@ class ApiController @Inject()(appConfig: AppConfig,
         init.timeoutConfig.map(tc => TimeoutConfig(tc.timeoutUrl, tc.timeoutAmount, tc.timeoutKeepAliveUrl)),
         init.signOutUrl,
         init.maxCallConfig.map(mcc => mcc.count),
-        init.maxCallConfig.map(mcc => mcc.redirectUrl),
-        init.useNewGovUkServiceNavigation
+        init.maxCallConfig.map(mcc => mcc.redirectUrl)
       )
       .map { journeyId =>
         import bankaccountverification._
@@ -136,6 +135,10 @@ class ApiController @Inject()(appConfig: AppConfig,
             web.personal.routes.PersonalVerificationController.getAccountDetails(journeyId.toHexString).url
           case p if p.accountType == Business =>
             web.business.routes.BusinessVerificationController.getAccountDetails(journeyId.toHexString).url
+          case p if p.accountType == Error =>
+            throw new RuntimeException("Account type is error, cannot generate details url")
+          case _ =>
+            throw new RuntimeException("Unexpected prepopulatedData, cannot generate details url")
         }
 
         import InitResponse._

@@ -84,8 +84,7 @@ class BankAccountVerificationITSpec extends AnyWordSpec with GuiceOneServerPerSu
 
     val initRequest = InitRequest("serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)),
-      useNewGovUkServiceNavigation = Some(false))
+      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
     val initResponse = await(wsClient.url(initUrl)
                                      .withHttpHeaders(HeaderNames.USER_AGENT -> "test-user-agent")
@@ -166,8 +165,7 @@ class BankAccountVerificationITSpec extends AnyWordSpec with GuiceOneServerPerSu
       continueUrl = "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
       bacsRequirements = Some(InitBACSRequirements(directDebitRequired = true, directCreditRequired = false)),
-      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)),
-      useNewGovUkServiceNavigation = Some(false))
+      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
     val initResponse =
       await(wsClient.url(initUrl)
@@ -248,8 +246,7 @@ class BankAccountVerificationITSpec extends AnyWordSpec with GuiceOneServerPerSu
     val initRequest = InitRequest("serviceIdentifier", "continueUrl",
       address = Some(InitRequestAddress(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
       prepopulatedData = Some(InitRequestPrepopulatedData(Personal)),
-      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)),
-      useNewGovUkServiceNavigation = Some(false))
+      timeoutConfig = Some(InitRequestTimeoutConfig("url", 100, None)))
 
     val initResponse = await(wsClient.url(initUrl)
                                      .withHttpHeaders(HeaderNames.USER_AGENT -> "test-user-agent")

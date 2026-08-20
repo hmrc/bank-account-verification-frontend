@@ -2,9 +2,9 @@ import sbt.*
 
 object AppDependencies {
 
-  private val bootstrapPlayVersion = "10.7.0"
-  private val playFrontendVersion  = "12.32.0"
-  private val hmrcMongoPlayVersion = "2.12.0"
+  private val bootstrapPlayVersion = "10.8.0"
+  private val playFrontendVersion  = "13.11.0"
+  private val hmrcMongoPlayVersion = "2.13.0"
   private val playSuffix           = "-play-30"
 
   val compile: Seq[ModuleID] = Seq(
@@ -17,6 +17,6 @@ object AppDependencies {
   val test: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"       %% s"bootstrap-test$playSuffix"     % bootstrapPlayVersion,
     "uk.gov.hmrc.mongo" %% s"hmrc-mongo-test$playSuffix"    % hmrcMongoPlayVersion,
-    "org.jsoup"          % "jsoup"                          % "1.21.2"
+    "org.jsoup"          % "jsoup"                          % "1.23.1"
   ).map(_ % Test)
 }

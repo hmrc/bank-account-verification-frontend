@@ -6,21 +6,17 @@ It provides mechanisms to customise messaging, eg page titles, element labels, e
 **Please note**, you are viewing documentation for the latest version of the `BAVFE` API (v2). [You can view the readme for the old version of the API here.](https://github.com/hmrc/bank-account-verification-frontend/blob/main/README-v1.md)
 
 ## Run this service locally
-There are two steps you must take in order to run this service.
-1. Run the dependencies by running
-    ```bash
-    sm2 --start BANK_ACCOUNT_VERIFICATION
-    ```
-2. Run the stubbed reputation third parties microservice
-    ```bash
-   sm2 --start BANK_ACCOUNT_REPUTATION_THIRD_PARTIES_STUB
-    ```
-3. Stop the front end with
-   ```bash
-   sm2 --stop BANK_ACCOUNT_VERIFICATION_FRONTEND
-   ```
-   (or do step 3 first)
-4. Run the `runLocal.sh` file to start the service.
+This frontend can be run locally by following these steps:
+
+1. Run the `startLocalServices.sh` script to start the dependencies
+   ``` bash ./startLocalServices.sh```
+2. Run the `runLocal.sh` file to start the frontend:-
+   ``` bash ./runLocal.sh```
+3. In your browser goto http://localhost:9903/bank-account-verification/test-only/test-setup to see the test-only setup endpoint. This allows you to set up a journey with any parameters you want. The endpoint is prefilled with a simple working example but can be customised to test different scenarios.
+
+4. The following sort code and bank account can be used to test a journey:-
+   - Sort code: 301658
+   - Account number: 01551500
 
 ## Using the test-only setup endpoint
 The service supports a test-only endpoint that allows you to set up a journey with any parameters you want. This comes prefilled with a complete endpoint that is prefilled for you that displays the json you get back from the api.
@@ -51,8 +47,7 @@ case class InitRequest(
     bacsRequirements: Option[InitBACSRequirements] = None,
     timeoutConfig: Option[InitRequestTimeoutConfig], 
     signOutUrl: Option[String] = None,
-    maxCallConfig: Option[InitRequestMaxCallConfig] = None,
-    useNewGovUkServiceNavigation: Option[Boolean] = None
+    maxCallConfig: Option[InitRequestMaxCallConfig] = None
 )
 ```
 ```scala

@@ -19,7 +19,7 @@ package bankaccountverification.api
 import access.AccessChecker
 import bankaccountverification.models.HttpErrorResponse
 import bankaccountverification.utils.RelativeOrAbsoluteWithHostnameFromAllowlist
-import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal}
+import bankaccountverification.web.AccountTypeRequestEnum.{Business, Personal, Error}
 import bankaccountverification.{BACSRequirements, _}
 import org.bson.types.ObjectId
 import play.api.Logger
@@ -90,8 +90,7 @@ class ApiV3Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
         init.timeoutConfig.map(tc => TimeoutConfig(tc.timeoutUrl, tc.timeoutAmount, tc.timeoutKeepAliveUrl)),
         init.signOutUrl,
         init.maxCallConfig.map(mcc => mcc.count),
-        init.maxCallConfig.map(mcc => mcc.redirectUrl),
-        init.useNewGovUkServiceNavigation
+        init.maxCallConfig.map(mcc => mcc.redirectUrl)
       )
       .map { journeyId =>
         val startUrl = web.routes.AccountTypeController.getAccountType(journeyId.toHexString).url
@@ -102,6 +101,10 @@ class ApiV3Controller @Inject()(appConfig: AppConfig, accessChecker: AccessCheck
             web.personal.routes.PersonalVerificationController.getAccountDetails(journeyId.toHexString).url
           case p if p.accountType == Business =>
             web.business.routes.BusinessVerificationController.getAccountDetails(journeyId.toHexString).url
+          case p if p.accountType == Error =>
+            throw new RuntimeException("Account type is error, cannot generate details url")
+          case _ =>
+            throw new RuntimeException("Unexpected prepopulatedData, cannot generate details url")
         }
 
         Ok(Json.toJson(InitResponse(journeyId.toHexString, startUrl, completeUrl, detailsUrl)))

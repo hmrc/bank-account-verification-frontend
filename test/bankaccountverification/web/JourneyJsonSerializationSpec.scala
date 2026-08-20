@@ -48,8 +48,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
           business = None
         ),
         bacsRequirements = Some(BACSRequirements(directDebitRequired = true, directCreditRequired = false)),
-        timeoutConfig = Some(TimeoutConfig("url", 100, Some("keepAlive"))),
-        useNewGovUkServiceNavigation = Some(false)
+        timeoutConfig = Some(TimeoutConfig("url", 100, Some("keepAlive")))
       )
 
       import Journey.*
@@ -117,8 +116,7 @@ class JourneyJsonSerializationSpec extends AnyWordSpec with Matchers {
           personal = None
         ),
         bacsRequirements = Some(BACSRequirements(directDebitRequired = false, directCreditRequired = true)),
-        timeoutConfig = Some(TimeoutConfig("url", 100, Some("keepAlive"))),
-        useNewGovUkServiceNavigation = Some(false)
+        timeoutConfig = Some(TimeoutConfig("url", 100, Some("keepAlive")))
       )
 
       import Journey.*

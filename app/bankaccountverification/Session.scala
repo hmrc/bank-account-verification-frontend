@@ -56,18 +56,24 @@ object Session {
     session.accountType match {
       case Some(AccountTypeRequestEnum.Personal) => PersonalAccountDetails.toCompleteResponse(session).map(Json.toJson(_))
       case Some(AccountTypeRequestEnum.Business) => BusinessAccountDetails.toCompleteResponse(session).map(Json.toJson(_))
+      case Some(AccountTypeRequestEnum.Error)    => throw new IllegalArgumentException("Session cannot have account type of Error")
+      case None                                  => throw new IllegalArgumentException("Session must have an account type")
     }
 
   def toCompleteV2ResponseJson(session: Session): Option[JsValue] =
     session.accountType match {
       case Some(AccountTypeRequestEnum.Personal) => PersonalAccountDetails.toCompleteV2Response(session).map(Json.toJson(_))
       case Some(AccountTypeRequestEnum.Business) => BusinessAccountDetails.toCompleteV2Response(session).map(Json.toJson(_))
+      case Some(AccountTypeRequestEnum.Error)    => throw new IllegalArgumentException("Session cannot have account type of Error")
+      case None                                  => throw new IllegalArgumentException("Session must have an account type")
     }
 
   def toCompleteV3ResponseJson(session: Session): Option[JsValue] =
     session.accountType match {
       case Some(AccountTypeRequestEnum.Personal) => PersonalAccountDetails.toCompleteV3Response(session).map(Json.toJson(_))
       case Some(AccountTypeRequestEnum.Business) => BusinessAccountDetails.toCompleteV3Response(session).map(Json.toJson(_))
+      case Some(AccountTypeRequestEnum.Error)    => throw new IllegalArgumentException("Session cannot have account type of Error")
+      case None                                  => throw new IllegalArgumentException("Session must have an account type")
     }
 }
 

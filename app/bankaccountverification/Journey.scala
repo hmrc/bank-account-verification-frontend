@@ -20,8 +20,8 @@ import bankaccountverification.BACSRequirements.defaultBACSRequirements
 import bankaccountverification.connector.ReputationResponseEnum
 import bankaccountverification.web.AccountTypeRequestEnum
 import org.bson.types.ObjectId
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.libs.functional.syntax.*
+import play.api.libs.json.*
 import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
 
 import java.time.Instant
@@ -39,8 +39,7 @@ case class Journey(id: ObjectId, authProviderId: Option[String], expiryDate: Ins
                    customisationsUrl: Option[String] = None, bacsRequirements: Option[BACSRequirements] = None,
                    timeoutConfig: Option[TimeoutConfig] = None, signOutUrl: Option[String] = None,
                    maxCallCount: Option[Int] = None,
-                   maxCallCountRedirectUrl: Option[String] = None,
-                   useNewGovUkServiceNavigation: Option[Boolean]) {
+                   maxCallCountRedirectUrl: Option[String] = None) {
 
   def getBACSRequirements: BACSRequirements = bacsRequirements.getOrElse(defaultBACSRequirements)
 }
@@ -65,6 +64,8 @@ object Journey {
             session.copy(
               accountType = Some(p.accountType),
               business = Some(BusinessAccountDetails(companyName = p.name, sortCode = p.sortCode, accountNumber = p.accountNumber, rollNumber = p.rollNumber, iban = None, matchedAccountName = None)))
+          case AccountTypeRequestEnum.Error =>
+            throw new IllegalArgumentException("Prepopulated data cannot have account type of Error")
         }
     }
   }
@@ -73,10 +74,9 @@ object Journey {
                      messages: Option[JsObject] = None, customisationsUrl: Option[String] = None,
                      address: Option[Address] = None, prepopulatedData: Option[PrepopulatedData] = None,
                      directDebitConstraints: Option[BACSRequirements] = None, timeoutConfig: Option[TimeoutConfig],
-                     signOutUrl: Option[String], maxCallCount: Option[Int], maxCallCountRedirectUrl: Option[String],
-                     useNewGovUkServiceNavigation: Option[Boolean]): Journey =
+                     signOutUrl: Option[String], maxCallCount: Option[Int], maxCallCountRedirectUrl: Option[String]): Journey =
     Journey(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, createSession(address, prepopulatedData),
-      messages, customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl, maxCallCount, maxCallCountRedirectUrl, useNewGovUkServiceNavigation)
+      messages, customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl, maxCallCount, maxCallCountRedirectUrl)
 
   implicit val objectIdFormats: Format[ObjectId] = MongoFormats.objectIdFormat
   implicit val datetimeFormat: Format[Instant] = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
@@ -104,8 +104,7 @@ object Journey {
       .and((__ \ "timeoutConfig").readNullable[TimeoutConfig])
       .and((__ \ "signOutUrl").readNullable[String])
       .and((__ \ "maxCallCount").readNullable[Int])
-      .and((__ \ "maxCallCountRedirectUrl").readNullable[String])
-      .and((__ \ "useNewGovUkServiceNavigation").readNullable[Boolean])(
+      .and((__ \ "maxCallCountRedirectUrl").readNullable[String])(
         (
           id: ObjectId,
           authProviderId: Option[String],
@@ -119,11 +118,9 @@ object Journey {
           timeoutConfig: Option[TimeoutConfig],
           signOutUrl: Option[String],
           maxCallCount: Option[Int],
-          maxCallCountRedirectUrl: Option[String],
-          useNewGovUkServiceNavigation: Option[Boolean]
+          maxCallCountRedirectUrl: Option[String]
         ) => Journey.apply(id, authProviderId, expiryDate, serviceIdentifier, continueUrl, data, messages,
-          customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl, maxCallCount, maxCallCountRedirectUrl,
-          useNewGovUkServiceNavigation)
+          customisationsUrl, directDebitConstraints, timeoutConfig, signOutUrl, maxCallCount, maxCallCountRedirectUrl)
       )
 
   implicit def defaultWrites: OWrites[Journey] =
@@ -141,10 +138,8 @@ object Journey {
       .and((__ \ "signOutUrl").writeNullable[String])
       .and((__ \ "maxCallCount").writeNullable[Int])
       .and((__ \ "maxCallCountRedirectUrl").writeNullable[String])
-      .and((__  \ "useNewGovUkServiceNavigation").writeNullable[Boolean])
       (a => (a.id, a.authProviderId, a.expiryDate, a.serviceIdentifier, a.continueUrl, a.data, a.messages,
-        a.customisationsUrl, a.bacsRequirements, a.timeoutConfig, a.signOutUrl, a.maxCallCount, a.maxCallCountRedirectUrl,
-        a.useNewGovUkServiceNavigation))
+        a.customisationsUrl, a.bacsRequirements, a.timeoutConfig, a.signOutUrl, a.maxCallCount, a.maxCallCountRedirectUrl))
 
   implicit def personalAccountDetailsWrites: OWrites[PersonalAccountDetails] =
     (__ \ "accountName")

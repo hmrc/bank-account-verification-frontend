@@ -119,7 +119,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(), useNewGovUkServiceNavigation = None))))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
 
         val fakeRequest = FakeRequest("GET", s"/verify/personal/${id.toHexString}")
         val result = controller.getAccountDetails(id.toHexString).apply(fakeRequest)
@@ -138,7 +138,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockRepository)
         when(mockRepository.findById(id))
-          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(), useNewGovUkServiceNavigation = None))))
+          .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session()))))
 
         val fakeRequest = FakeRequest("GET", s"/verify/personal/${id.toHexString}")
         val result = controller.getAccountDetails(id.toHexString).apply(fakeRequest)
@@ -162,8 +162,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-            Some(PersonalAccountDetails(accountName = Some("account_name"), sortCode = Some("112233"), accountNumber = Some("12092398"), iban = Some("some-iban"), matchedAccountName = None))),
-            useNewGovUkServiceNavigation = None))))
+            Some(PersonalAccountDetails(accountName = Some("account_name"), sortCode = Some("112233"), accountNumber = Some("12092398"), iban = Some("some-iban"), matchedAccountName = None))))))
+          )
 
         val fakeRequest = FakeRequest("GET", s"/verify/personal/${id.toHexString}")
         val result = controller.getAccountDetails(id.toHexString).apply(fakeRequest)
@@ -186,8 +186,9 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             None,
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), rollNumber = Some("ROLL.NUMBER"), iban = None, matchedAccountName = None))),
-            useNewGovUkServiceNavigation = None))))
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), rollNumber = Some("ROLL.NUMBER"), iban = None, matchedAccountName = None))))))
+          )
+        
         val fakeRequest = FakeRequest("GET", s"/verify/personal/${id.toHexString}")
         val result = controller.getAccountDetails(id.toHexString).apply(fakeRequest)
 
@@ -254,8 +255,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Session(
               Some(Personal),
               Some(address),
-              Some(bankaccountverification.PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None))),
-              useNewGovUkServiceNavigation = None))))
+              Some(bankaccountverification.PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None))))))
+          )
 
         val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}")
           .withBody(data)
@@ -281,8 +282,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Session(
               Some(Personal),
               Some(address),
-              Some(bankaccountverification.PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None))),
-              useNewGovUkServiceNavigation = None))))
+              Some(bankaccountverification.PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None))))))
+          )
 
         val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}")
           .withBody(data)
@@ -310,13 +311,13 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Session(
               Some(Personal),
               Some(address),
-              Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None))),
-              useNewGovUkServiceNavigation = None))))
+              Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None))))))
+          )
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), any(), meq(serviceIdentifier))(any(), any()))
           .thenReturn(Future.successful(Failure(new HttpException("SERVER ON FIRE", 500))))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any()))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any()))
           .thenReturn(Future.successful(form))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
@@ -350,13 +351,13 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           .thenReturn(Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None))),
-            useNewGovUkServiceNavigation = None))))
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = None, matchedAccountName = None))))))
+          )
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), any(), meq(serviceIdentifier))(any(), any()))
           .thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any()))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any()))
           .thenReturn(Future.successful(formWithErrors))
 
         val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}")
@@ -387,12 +388,12 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
-            useNewGovUkServiceNavigation = None))))
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))))))
+        )
 
         reset(mockService)
         when(mockService.assessPersonal(any(), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
 
         val fakeRequest = FakeRequest("POST", s"/verify/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
@@ -422,12 +423,12 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(address),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
-            useNewGovUkServiceNavigation = None))))
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))))))
+        )
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
@@ -462,13 +463,12 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Some(Personal),
             Some(address),
             Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
-            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests"),
-            useNewGovUkServiceNavigation = None
+            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
@@ -494,12 +494,12 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Some(Personal),
             Some(address),
             Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
-            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests"), useNewGovUkServiceNavigation = None
+            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form.withError("Error", "a.specific.error")))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
@@ -525,13 +525,12 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Some(Personal),
             Some(address),
             Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
-            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests"),
-            useNewGovUkServiceNavigation = None
+            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
@@ -558,13 +557,12 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Some(Personal),
             Some(address),
             Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
-            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests"),
-            useNewGovUkServiceNavigation = None
+            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
@@ -590,13 +588,12 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
             Some(Personal),
             Some(address),
             Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
-            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests"),
-            useNewGovUkServiceNavigation = None
+            maxCallCount = Some(2), maxCallCountRedirectUrl = Some("/too-many-requests")
           ))))
 
         reset(mockService)
         when(mockService.assessPersonal(meq(data), meq(Some(address)), meq(serviceIdentifier))(any(), any())).thenReturn(Future.successful(Success(barsPersonalAssessResponse)))
-        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any(), any())).thenReturn(Future.successful(form))
+        when(mockService.processPersonalAssessResponse(meq(id), any(), any(), any())(any())).thenReturn(Future.successful(form))
 
         val fakeRequest = FakeRequest("POST", s"/verify/personal/${id.toHexString}")
           .withFormUrlEncodedBody(PersonalVerificationRequest.form.fill(data).data.toSeq: _*)
@@ -658,7 +655,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(
-          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(Some(Personal)), useNewGovUkServiceNavigation = None))))
+          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(Some(Personal))))))
 
         val fakeRequest = FakeRequest("GET", s"/confirm/personal/${id.toHexString}")
         val result = controller.getConfirmDetails(id.toHexString).apply(fakeRequest)
@@ -677,7 +674,7 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
 
         reset(mockRepository)
         when(mockRepository.findById(id)).thenReturn(
-          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(Some(Personal)), useNewGovUkServiceNavigation = None))))
+          Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(Some(Personal))))))
 
         val fakeRequest = FakeRequest("GET", s"/confirm/personal/${id.toHexString}")
 
@@ -701,8 +698,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))),
-            useNewGovUkServiceNavigation = None))))
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), iban = Some("some-iban"), matchedAccountName = None))))))
+        )
 
         val fakeRequest = FakeRequest("GET", s"/confirm/personal/${id.toHexString}")
 
@@ -728,8 +725,8 @@ class PersonalVerificationControllerSpec extends AnyWordSpec with Matchers with 
           Future.successful(Some(Journey(id, Some("1234"), expiry, serviceIdentifier, continueUrl, Session(
             Some(Personal),
             Some(Address(List("Line 1", "Line 2"), Some("Town"), Some("Postcode"))),
-            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), sortCodeBankName = Some("sort-code-bank-name-personal"), iban = Some("some-iban"), matchedAccountName = None))),
-            useNewGovUkServiceNavigation = None))))
+            Some(PersonalAccountDetails(accountName = Some("some account name"), sortCode = Some("112233"), accountNumber = Some("12345678"), sortCodeBankName = Some("sort-code-bank-name-personal"), iban = Some("some-iban"), matchedAccountName = None))))))
+        )
 
         val fakeRequest = FakeRequest("GET", s"/confirm/personal/${id.toHexString}")
 
